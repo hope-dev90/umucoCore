@@ -1,5 +1,22 @@
 /* ── KWIBUKA PAGE ── */
-.kwibuka-page { padding-bottom: 80px; }
+.kwibuka-page {
+  position: relative;
+  padding-bottom: 80px;
+  overflow: hidden;
+}
+.kwibuka-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url('/kwibuka.png') center center / contain no-repeat;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+}
+.kwibuka-page > * {
+  position: relative;
+  z-index: 1;
+}
 
 /* ── TODAY'S REFLECTION HERO ── */
 .reflection-hero {

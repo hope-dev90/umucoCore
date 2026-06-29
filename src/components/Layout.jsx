@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Layout.css';
 import UmucoLogo from './UmucoLogo';
+import ChatBot from './ChatBot';
 
 const Icon = ({ d, size = 16, strokeWidth = 1.8 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -109,6 +110,7 @@ export default function Layout({ children, searchPlaceholder = 'Search archive..
       </header>
 
       <main className="main-content">{children}</main>
+      <ChatBot />
     </div>
   );
 }

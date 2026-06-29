@@ -17,11 +17,11 @@ export default function Login() {
       if (view === 'signup') navigate('/signup');
       else if (view === 'home') navigate('/');
       else if (view === 'dashboard') navigate('/dashboard');
-    }, 300);
+    }, 100);
   };
 
   return (
-    <div className={`transition-all duration-300 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+    <div className={`transition-opacity duration-150 ease-out ${visible ? 'opacity-100' : 'opacity-0'}`}>
       <LoginPage onNavigate={handleNavigate} />
     </div>
   );

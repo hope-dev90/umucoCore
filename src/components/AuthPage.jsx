@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Lock, Eye, EyeOff, User, Milestone, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Apple, Mail, Lock, Eye, EyeOff, User, Milestone, ArrowLeft, ShieldCheck } from 'lucide-react';
 import authLeftBg from '../assets/signup/tra.png';
 import authLeftBg2 from '../assets/signup/tra2.png';
 import authLeftBg3 from '../assets/signup/tra3.jpg';
@@ -452,6 +452,37 @@ function SignUpPage({ onNavigate }) {
                     <span>Sign Up</span>
                   )}
                 </button>
+
+                <div className="mt-4">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <span className="grow border-t border-[#EADBC8]/70" />
+                    <span className="text-[10px] uppercase tracking-[0.28em] text-[#8D493A]/70">or continue with</span>
+                    <span className="grow border-t border-[#EADBC8]/70" />
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button type="button" className="flex-1 inline-flex items-center justify-center gap-3 rounded-xl border border-[#EADBC8] bg-white px-4 py-3 text-sm font-semibold text-[#2C1A14] transition hover:border-[#8D493A] hover:bg-[#FCDFD3]/40">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white">
+                        <svg viewBox="0 0 24 24" className="h-5 w-5" xmlns="http://www.w3.org/2000/svg">
+                          <path fill="#4285F4" d="M23.89 12.24c0-.82-.07-1.61-.19-2.38H12v4.51h6.45c-.28 1.5-1.11 2.77-2.36 3.62v3.01h3.82c2.24-2.07 3.53-5.1 3.53-8.76z"/>
+                          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.9l-3.82-3.01c-1.06.71-2.42 1.13-4.11 1.13-3.15 0-5.82-2.12-6.78-4.97H1.28v3.11C3.24 21.6 7.33 24 12 24z"/>
+                          <path fill="#FBBC05" d="M5.22 14.25c-.24-.71-.38-1.47-.38-2.25s.14-1.54.38-2.25V6.64H1.28A11.99 11.99 0 000 12c0 1.93.46 3.75 1.28 5.36l3.94-3.11z"/>
+                          <path fill="#EA4335" d="M12 4.78c1.75 0 3.33.6 4.57 1.77l3.42-3.42C17.94.88 15.24 0 12 0 7.33 0 3.24 2.4 1.28 6.64l3.94 3.11c.96-2.85 3.63-4.97 6.78-4.97z"/>
+                        </svg>
+                      </span>
+                      Google
+                    </button>
+                    <button type="button" className="flex-1 inline-flex items-center justify-center gap-3 rounded-xl border border-[#EADBC8] bg-white px-4 py-3 text-sm font-semibold text-[#2C1A14] transition hover:border-[#8D493A] hover:bg-[#FCDFD3]/40">
+                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white">
+                        <svg viewBox="0 0 24 24" className="h-5 w-5 text-[#2C1A14]" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+                          <path d="M16.365 1.43c0 1.14-.45 2.16-1.21 2.94-.9.92-2.14 1.64-3.4 1.44-.08-.63-.12-1.27.03-1.88 1.14-.1 2.29-.74 2.99-1.6.62-.76.98-1.77.98-2.9 0-.17-.01-.33-.03-.49 1.52.13 3.04.82 4.17 1.89-.84 1.27-1.61 2.59-1.61 4.22z"/>
+                          <path d="M20.57 6.47c-1.17-1.44-2.95-2.41-4.83-2.45-1.62-.04-3.09.92-3.91.92-.84 0-2.12-.9-3.5-.9-1.8 0-3.48 1.06-4.4 2.7-1.88 3.26-.48 8.08 1.34 10.74.9 1.28 1.97 2.73 3.36 2.67 1.32-.06 1.82-.86 3.42-.86 1.6 0 2.03.86 3.42.82 1.53-.05 2.49-1.3 3.41-2.6 1.07-1.61 1.51-3.17 1.53-3.25-.03-.01-2.95-1.13-2.99-4.47-.04-3.81 3.01-4.38 3.13-4.44-.23-.35-1.03-1.33-2.16-1.44z"/>
+                        </svg>
+                      </span>
+                      Apple
+                    </button>
+                  </div>
+                </div>
               </form>
 
               <p className="text-xs text-[#6F5B55] mt-6">
