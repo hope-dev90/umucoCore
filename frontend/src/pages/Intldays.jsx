@@ -4,6 +4,8 @@ import './IntlDays.css';
 import themeImg from '../assets/international/imigongo.jpg';
 import spotlightImg from '../assets/international/nyanza.jpg';
 import harvestImg from '../assets/international/umuganura.jpg';
+import { useLanguage } from '../contexts/LanguageContext';
+import { getLocalizedText } from '../utils/i18n';
 
 const IMG = {
   theme: themeImg,
@@ -13,54 +15,74 @@ const IMG = {
 
 const calendarWeeks = [
   [
-    { n:27,other:true }, { n:28,other:true }, { n:29,other:true }, { n:30,other:true },
-    { n:1, events:[{label:'Rwandan H.',cls:'pill-heritage'}] },
-    { n:2, events:[{label:'Harvest Crit',cls:'pill-national'}] },
+    { n:27, other:true }, 
+    { n:28, other:true }, 
+    { n:29, other:true }, 
+    { n:30, other:true },
+    { n:1, events:[{ label:{ en: 'Rwandan Heritage', rw: 'Umuganura w\'I Rwanda' }, cls:'pill-heritage' }] },
+    { n:2, events:[{ label:{ en: 'Harvest Crit', rw: 'Umusaruro' }, cls:'pill-national' }] },
     { n:3 }
   ],
   [
-    { n:4 }, { n:5 },
-    { n:6, today:true, events:[{label:'National Museum',cls:'pill-national'}] },
-    { n:7 }, { n:8, events:[{label:'Lit. Day',cls:'pill-intl'}] }, { n:9 }, { n:10 }
+    { n:4 }, 
+    { n:5 },
+    { n:6, today:true, events:[{ label:{ en: 'National Museum', rw: 'Ishusho ry\'Umukusanya' }, cls:'pill-national' }] },
+    { n:7 }, 
+    { n:8, events:[{ label:{ en: 'Lit Day', rw: 'Umusi w\'Imyandiko' }, cls:'pill-intl' }] }, 
+    { n:9 }, 
+    { n:10 }
   ],
   [
-    { n:11 }, { n:12 }, { n:13 }, { n:14 }, { n:15 }, { n:16 }, { n:17 }
+    { n:11 }, 
+    { n:12 }, 
+    { n:13 }, 
+    { n:14 }, 
+    { n:15 }, 
+    { n:16 }, 
+    { n:17 }
   ],
 ];
 
 const relatedStories = [
-  { label:'The Huye Archive Vaults', sub:'5 hrs video' },
-  { label:"Echoes of the King's Court", sub:'32 Audio' },
-  { label:'Imigongo: Geometry of Life', sub:'12 Images' },
+  { label:{ en: 'The Huye Archive Vaults', rw: 'Ibitondozo by\'Huye' }, sub:{ en: '5 hrs video', rw: 'Amasaha 5 by\'ishusho' } },
+  { label:{ en: 'Echoes of the King\'s Court', rw: 'Amajwi y\'Ingoro y\'Umwami' }, sub:{ en: '32 Audio', rw: 'Amajwi 32' } },
+  { label:{ en: 'Imigongo: Geometry of Life', rw: 'Imigongo: Ubushobozi bw\'Ubwenge' }, sub:{ en: '12 Images', rw: 'Ishusho 12' } },
 ];
 
-export default function IntlDays() {
+const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+const DAYS_RW = ['CYU', 'GTW', 'GTN', 'GTA', 'GTC', 'GTL', 'GTR'];
+
+export default function Intldays() {
   const [activeFilter, setActiveFilter] = useState('National');
+  const { t, language } = useLanguage();
 
   return (
-    <Layout searchPlaceholder="Search archive...">
+    <Layout searchPlaceholder={t('intl.searchPlaceholder')}>
       <div className="intl-page">
 
         {/* Header + Theme card */}
         <div className="intl-top">
           <div className="intl-header">
-            <h1>National Cultural Calendar</h1>
-            <p>Explore the rich tapestry of Rwandan national days, heritage milestones, and cultural celebrations preserved and presented for every generation.</p>
+            <h1>{t('intl.title')}</h1>
+            <p>{t('intl.subtitle')}</p>
             <div className="intl-filter-chips">
-              {['International','National','Artistic'].map(f => (
-                <button key={f} className={`intl-chip ${f.toLowerCase()} ${activeFilter===f?'active':''}`}
-                  onClick={() => setActiveFilter(f)}
-                  style={activeFilter===f?{outline:'2px solid currentColor',outlineOffset:'2px'}:{}}>
-                  {f}
-                </button>
-              ))}
+              {['International', 'National', 'Artistic'].map((f) => {
+                const labelKey = `intl.filter${f}`;
+                return (
+                  <button key={f} className={`intl-chip ${f.toLowerCase()} ${activeFilter===f ? 'active' : ''}`}
+                    onClick={() => setActiveFilter(f)}
+                    style={activeFilter===f ? {outline:'2px solid currentColor', outlineOffset:'2px'} : {}}>
+                    {t(labelKey)}
+                  </button>
+                );
+              })}
             </div>
           </div>
           <div className="theme-card">
             <img src={IMG.theme} alt="Theme of the Month" onError={e => { e.target.style.display='none'; }} />
             <div className="theme-card-overlay">
-              <span className="theme-card-label">Theme of the Month</span>
-              <span className="theme-card-title">Seeds of Continuity</span>
+              <span className="theme-card-label">{t('intl.themeLabel')}</span>
+              <span className="theme-card-title">{t('intl.themeTitle')}</span>
             </div>
           </div>
         </div>
@@ -74,30 +96,32 @@ export default function IntlDays() {
             {/* Calendar */}
             <div className="calendar-card">
               <div className="calendar-nav">
-                <span className="calendar-month">September 2024</span>
+                <span className="calendar-month">{t('intl.calendarMonth')}</span>
                 <div style={{ display:'flex', alignItems:'center', gap:10 }}>
                   <div className="calendar-nav-btns">
                     <button className="calendar-nav-btn">‹</button>
                     <button className="calendar-nav-btn">›</button>
                   </div>
-                  <button className="today-btn">Today</button>
+                  <button className="today-btn">{t('intl.calendarTodayBtn')}</button>
                 </div>
               </div>
               <div className="calendar-grid">
                 <div className="calendar-days-header">
-                  {['SUN','MON','TUE','WED','THU','FRI','SAT'].map(d => (
+                  {(language === 'rw' ? DAYS_RW : DAYS).map((d) => (
                     <div key={d} className="calendar-day-label">{d}</div>
                   ))}
                 </div>
                 {calendarWeeks.map((week, wi) => (
                   <div key={wi} className="calendar-week">
                     {week.map((cell, ci) => (
-                      <div key={ci} className={`calendar-cell ${cell.today?'today':''} ${cell.other?'other-month':''}`}>
+                      <div key={ci} className={`calendar-cell ${cell.today ? 'today' : ''} ${cell.other ? 'other-month' : ''}`}>
                         <span className="cell-num">{cell.n}</span>
                         {cell.events && (
                           <div className="cell-events">
                             {cell.events.map((ev, ei) => (
-                              <span key={ei} className={`cell-event-pill ${ev.cls}`}>{ev.label}</span>
+                              <span key={ei} className={`cell-event-pill ${ev.cls}`}>
+                                {getLocalizedText(ev.label, language)}
+                              </span>
                             ))}
                           </div>
                         )}
@@ -114,27 +138,27 @@ export default function IntlDays() {
                 onError={e => { e.target.style.opacity='0'; }} />
               <div className="featured-nat-overlay" />
               <div className="featured-nat-content">
-                <span className="featured-nat-badge">Featured National Day</span>
-                <div className="featured-nat-title">Umuganura: The National Harvest Festival</div>
-                <div className="featured-nat-desc">Celebrating the first fruits and the spirit of shared prosperity across the land.</div>
+                <span className="featured-nat-badge">{t('intl.featuredBadge')}</span>
+                <div className="featured-nat-title">{t('intl.featuredTitle')}</div>
+                <div className="featured-nat-desc">{t('intl.featuredDesc')}</div>
                 <div className="featured-nat-footer">
                   <span className="featured-nat-date">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>
                     </svg>
-                    Oct 18, 2024
+                    {t('intl.featuredDate')}
                   </span>
-                  <button className="btn-explore-trad">Explore Traditions</button>
+                  <button className="btn-explore-trad">{t('intl.exploreTradBtn')}</button>
                 </div>
               </div>
             </div>
 
-          </div>{/* end left-col */}
+          </div> {/* end left-col */}
 
           {/* RIGHT COLUMN — spotlight + legend */}
           <div className="right-col">
             <div className="day-spotlight">
-              <div className="spotlight-label">Day Spotlight</div>
+              <div className="spotlight-label">{t('intl.spotlightLabel')}</div>
               <div className="spotlight-img">
                 <img src={IMG.spotlight} alt="Spotlight"
                   onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
@@ -145,39 +169,37 @@ export default function IntlDays() {
                   </div>
                 </div>
               </div>
-              <div className="spotlight-date-title">September 5: National Museum Day</div>
-              <p className="spotlight-desc">
-                A key dedicated to the preservation of our collective memory. This year's focus is on digital repatriation and the "Voices of the Elders" oral archive.
-              </p>
-              <div className="related-stories-label">Related Stories</div>
+              <div className="spotlight-date-title">{t('intl.spotlightTitle')}</div>
+              <p className="spotlight-desc">{t('intl.spotlightDesc')}</p>
+              <div className="related-stories-label">{t('intl.relatedStoriesLabel')}</div>
               {relatedStories.map((s, i) => (
                 <div key={i} className="related-story-item">
                   <div className="story-thumb" />
                   <div className="story-info">
-                    <p>{s.label}</p>
-                    <span>{s.sub}</span>
+                    <p>{getLocalizedText(s.label, language)}</p>
+                    <span>{getLocalizedText(s.sub, language)}</span>
                   </div>
                 </div>
               ))}
-              <button className="view-records-btn">View Detailed Records</button>
+              <button className="view-records-btn">{t('intl.viewRecordsBtn')}</button>
             </div>
 
             <div className="legend-card">
-              <div className="legend-label">⊞ Legend</div>
+              <div className="legend-label">{t('intl.legendLabel')}</div>
               {[
-                { color:'var(--primary)', label:'National Heritage Events' },
-                { color:'var(--primary)', label:'Public / National Days' },
-                { color:'var(--primary)', label:'Artistic & Cultural Fests' },
+                { color: 'var(--primary)', labelKey: 'intl.legendHeritage' },
+                { color: 'var(--primary)', labelKey: 'intl.legendPublic' },
+                { color: 'var(--primary)', labelKey: 'intl.legendArtistic' },
               ].map((l, i) => (
                 <div key={i} className="legend-item">
                   <div className="legend-dot" style={{ background: l.color }} />
-                  <span>{l.label}</span>
+                  <span>{t(l.labelKey)}</span>
                 </div>
               ))}
             </div>
-          </div>{/* end right-col */}
+          </div> {/* end right-col */}
 
-        </div>{/* end calendar-layout */}
+        </div> {/* end calendar-layout */}
 
       </div>
     </Layout>

@@ -1,23 +1,26 @@
 import React from 'react';
 import { ArrowRight, History, Landmark, Music } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function DigitalArchive() {
+  const { t } = useLanguage();
+
   const collections = [
     {
-      title: 'Oral History',
-      desc: "High-fidelity recordings of the elders' stories, preserved forever in our secure cloud.",
-      icon: History
+      title: t('archive.collection1.title'),
+      desc: t('archive.collection1.desc'),
+      icon: History,
     },
     {
-      title: 'Virtual Museum',
-      desc: '3D scans of sacred artifacts, allowing you to examine every detail from your screen.',
-      icon: Landmark
+      title: t('archive.collection2.title'),
+      desc: t('archive.collection2.desc'),
+      icon: Landmark,
     },
     {
-      title: 'Traditional Music',
-      desc: 'The rhythms of the Inanga and Umuduri, remastered for the highest audio quality.',
-      icon: Music
-    }
+      title: t('archive.collection3.title'),
+      desc: t('archive.collection3.desc'),
+      icon: Music,
+    },
   ];
 
   return (
@@ -27,15 +30,15 @@ function DigitalArchive() {
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 md:mb-16 px-2 sm:px-0">
           <div className="text-left max-w-xl">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#8D493A] mb-2 sm:mb-4">
-              The Digital Archive
+              {t('archive.title')}
             </h2>
             <p className="text-xs sm:text-sm md:text-base text-[#6F5B55] leading-relaxed font-normal">
-              A collection that spans centuries of wisdom for all sorts of audience.
+              {t('archive.description')}
             </p>
           </div>
 
           <button className="inline-flex items-center space-x-2 text-[#8D493A] hover:text-[#3E2723] font-semibold text-xs sm:text-sm tracking-wide transition-colors duration-200 group self-start sm:self-auto shrink-0 pt-2 sm:pt-0">
-            <span>View All Collections</span>
+            <span>{t('archive.viewAll')}</span>
             <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transform transition-transform group-hover:translate-x-1" />
           </button>
         </div>
@@ -44,8 +47,8 @@ function DigitalArchive() {
           {collections.map((item, index) => {
             const IconComponent = item.icon;
             return (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className={`bg-[#FCDFD3]/15 border border-[#EADBC8]/30 rounded-2xl p-6 sm:p-8 text-left flex flex-col justify-between min-h-[220px] sm:h-64 shadow-xs hover:shadow-md transition-all duration-300 sm:hover:-translate-y-1 group ${
                   index === 2 ? 'sm:col-span-2 lg:col-span-1' : ''
                 }`}

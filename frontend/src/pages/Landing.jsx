@@ -9,14 +9,9 @@ import Footer from '../components/Footer';
 export default function Landing() {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('Home');
+  const [visible, setVisible] = useState(false);
 
-const [visible, setVisible] = useState(false);
-useEffect(() => { setVisible(true); }, []);
-
-// Wrap the return div:
-<div className={`transition-all duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
-  {/* existing content */}
-</div>
+  useEffect(() => { setVisible(true); }, []);
 
   const handleNavigate = (view) => {
     if (view === 'login') navigate('/login');
@@ -44,7 +39,7 @@ useEffect(() => { setVisible(true); }, []);
   }, []);
 
   return (
-    <div className="w-full min-h-screen bg-[#FDFBF7] antialiased scroll-smooth">
+    <div className={`w-full min-h-screen bg-[#FDFBF7] antialiased scroll-smooth transition-all duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
       <Navbar onNavigate={handleNavigate} activeSection={activeSection} />
       <div id="home-section"><Hero onNavigate={handleNavigate} /></div>
       <div id="archive" className="scroll-mt-20"><DigitalArchive /></div>

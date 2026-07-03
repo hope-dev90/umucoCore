@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
 import { ArrowRight, Globe, Menu, X } from 'lucide-react';
 import UmucoLogo from './UmucoLogo';
+import { useLanguage } from '../contexts/LanguageContext';
 
 function Navbar({ onNavigate, activeSection }) {
-  const [currentLang, setCurrentLang] = useState('EN');
+  const { language, setLanguage, t } = useLanguage();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { label: 'Home', id: '#home-section' },
-    { label: 'About', id: '#archive' },
-    { label: 'Community', id: '#community' }
+    { label: t('nav.home'), id: '#home-section' },
+    { label: t('nav.about'), id: '#archive' },
+    { label: t('nav.community'), id: '#community' }
   ];
 
   const toggleLanguage = (lang) => {
-    setCurrentLang(lang);
+    setLanguage(lang);
     setIsDropdownOpen(false);
   };
 
@@ -34,8 +35,8 @@ function Navbar({ onNavigate, activeSection }) {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         
         <div onClick={() => handleMobileNavClick('home', '#home-section')} className="flex items-center space-x-2 cursor-pointer">
-      <UmucoLogo style={{ width: 36, height: 36, minWidth:36, maxWidth:36, overflow: 'hidden', borderRadius: '50%',  display:'block' }} />
-      <span className="text-[18px] font-bold tracking-wide text-[#8D493A]">UmucoCore</span>
+          <UmucoLogo style={{ width: 36, height: 36, minWidth:36, maxWidth:36, overflow: 'hidden', borderRadius: '50%', display:'block' }} />
+          <span className="text-[18px] font-bold tracking-wide text-[#8D493A]">UmucoCore</span>
         </div>
 
         <nav className="hidden md:flex items-center space-x-8 text-sm font-medium">
@@ -67,21 +68,21 @@ function Navbar({ onNavigate, activeSection }) {
               className="flex items-center space-x-1.5 text-sm font-semibold text-[#8D493A] hover:text-[#6f5b55] transition-colors tracking-wide focus:outline-none"
             >
               <Globe size={18} />
-              <span className="text-xs uppercase font-bold">{currentLang}</span>
+              <span className="text-xs uppercase font-bold">{language === 'en' ? 'EN' : 'KN'}</span>
             </button>
 
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-36 bg-[#FDFBF7] border border-[#EADBC8] rounded-xl shadow-lg py-1 z-50 animate-fadeIn">
-                {currentLang === 'EN' ? (
+                {language === 'en' ? (
                   <button
-                    onClick={() => toggleLanguage('KN')}
+                    onClick={() => toggleLanguage('rw')}
                     className="w-full text-left px-4 py-2 text-xs font-medium text-[#6F5B55] hover:bg-[#FCDFD3]/30 hover:text-[#8D493A] transition-colors"
                   >
                     Kinyarwanda
                   </button>
                 ) : (
                   <button
-                    onClick={() => toggleLanguage('EN')}
+                    onClick={() => toggleLanguage('en')}
                     className="w-full text-left px-4 py-2 text-xs font-medium text-[#6F5B55] hover:bg-[#FCDFD3]/30 hover:text-[#8D493A] transition-colors"
                   >
                     English
@@ -95,14 +96,14 @@ function Navbar({ onNavigate, activeSection }) {
             onClick={() => onNavigate('login')}
             className="text-sm font-medium text-[#8D493A] hover:text-[#6f5b55] transition-colors"
           >
-            Login
+            {t('nav.login')}
           </button>
 
           <button 
             onClick={() => onNavigate('signup')}
             className="flex items-center space-x-2 bg-[#8D493A] hover:bg-[#3E2723] text-[#FDFBF7] px-5 py-2 text-sm font-medium tracking-wide transition-all rounded-[25px] shadow-sm group"
           >
-            <span>Join</span>
+            <span>{t('nav.signup')}</span>
             <ArrowRight className="w-4 h-4 transform transition-transform group-hover:translate-x-1" />
           </button>
         </div>
@@ -139,20 +140,20 @@ function Navbar({ onNavigate, activeSection }) {
           </nav>
 
           <div className="flex items-center justify-between py-2 border-b border-[#EADBC8]/30">
-            <span className="text-sm font-medium text-[#6F5B55]">Language / Ururimi</span>
+            <span className="text-sm font-medium text-[#6F5B55]">{t('landing.language')}</span>
             <div className="flex space-x-2">
               <button
-                onClick={() => toggleLanguage('EN')}
+                onClick={() => toggleLanguage('en')}
                 className={`px-3 py-1 text-xs font-bold rounded-lg ${
-                  currentLang === 'EN' ? 'bg-[#8D493A] text-white' : 'border border-[#EADBC8] text-[#6F5B55]'
+                  language === 'en' ? 'bg-[#8D493A] text-white' : 'border border-[#EADBC8] text-[#6F5B55]'
                 }`}
               >
                 EN
               </button>
               <button
-                onClick={() => toggleLanguage('KN')}
+                onClick={() => toggleLanguage('rw')}
                 className={`px-3 py-1 text-xs font-bold rounded-lg ${
-                  currentLang === 'KN' ? 'bg-[#8D493A] text-white' : 'border border-[#EADBC8] text-[#6F5B55]'
+                  language === 'rw' ? 'bg-[#8D493A] text-white' : 'border border-[#EADBC8] text-[#6F5B55]'
                 }`}
               >
                 KN
@@ -165,16 +166,16 @@ function Navbar({ onNavigate, activeSection }) {
               onClick={() => handleMobileNavClick('login', null)}
               className="w-full text-center border border-[#8D493A] text-[#8D493A] font-semibold py-3 rounded-xl text-sm hover:bg-[#8D493A]/5 transition-colors"
             >
-              Login
+              {t('nav.login')}
             </button>
             <button
               onClick={() => handleMobileNavClick('signup', null)}
               className="w-full text-center bg-[#8D493A] hover:bg-[#3E2723] text-white font-semibold py-3 rounded-xl text-sm flex items-center justify-center space-x-2 shadow-sm"
             >
              <span className="font-bold tracking-wider">
-  <span className="text-xs text-[#FCDFD3]">Umuco</span>
-  <span className="text-[10px] text-[#FDFBF7]/70">Core</span>
-</span>
+              <span className="text-xs text-[#FCDFD3]">Umuco</span>
+              <span className="text-[10px] text-[#FDFBF7]/70">Core</span>
+            </span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

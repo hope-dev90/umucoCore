@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Compass, BookOpen, Users, Milestone } from 'lucide-react';
+import { ArrowRight, Compass, BookOpen, Users } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 import cardImg1 from '../assets/tradi.jpg';
 import cardImg2 from '../assets/book.png';
 import cardImg3 from '../assets/iraba.jpg';
 
-function Hero({onNavigate}) {
+function Hero({ onNavigate }) {
   const [order, setOrder] = useState([0, 1, 2]);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -22,36 +24,36 @@ function Hero({onNavigate}) {
   }, []);
 
   const stats = [
-    { value: '200+', label: 'ORAL STORIES' },
-    { value: '3', label: 'LANGUAGE MODULES' },
-    { value: '24/7', label: 'AI ASSISTANT' }
+    { value: '200+', label: t('hero.stats.oralStories') },
+    { value: '3', label: t('hero.stats.languageModules') },
+    { value: '24/7', label: t('hero.stats.aiAssistant') },
   ];
 
   const features = [
     {
-      title: 'Connect & Share',
-      desc: 'Join a global community dedicated to keeping Rwandan culture.',
+      title: t('hero.feature1.title'),
+      desc: t('hero.feature1.desc'),
       img: cardImg3,
-      icon: Users
+      icon: Users,
     },
     {
-      title: 'Learn Kinyarwanda',
-      desc: 'Master the language of thousand hills with interactive means.',
+      title: t('hero.feature2.title'),
+      desc: t('hero.feature2.desc'),
       img: cardImg2,
-      icon: BookOpen
+      icon: BookOpen,
     },
     {
-      title: 'Explore Traditions',
-      desc: 'Immerse yourself in oral histories, rhythmic drums, and the art.',
+      title: t('hero.feature3.title'),
+      desc: t('hero.feature3.desc'),
       img: cardImg1,
-      icon: Compass
-    }
+      icon: Compass,
+    },
   ];
 
   const positions = [
     'absolute w-72 h-96 top-0 left-0 z-10 transform translate-x-0 translate-y-0 shadow-md scale-90',
     'absolute w-72 h-96 top-0 left-0 z-20 transform translate-x-12 translate-y-12 shadow-lg scale-95',
-    'absolute w-72 h-96 top-0 left-0 z-30 transform translate-x-24 translate-y-24 shadow-2xl scale-100'
+    'absolute w-72 h-96 top-0 left-0 z-30 transform translate-x-24 translate-y-24 shadow-2xl scale-100',
   ];
 
   return (
@@ -61,28 +63,33 @@ function Hero({onNavigate}) {
         <div className="col-span-1 lg:col-span-6 flex flex-col items-start text-left px-2 sm:px-6">
           <div className="inline-flex items-center space-x-2 bg-[#FCDFD3]/40 border border-[#EADBC8] rounded-full px-3 py-1 mb-4 sm:mb-6">
             <span className="text-[9px] sm:text-xs font-semibold tracking-widest text-[#8D493A] uppercase">
-              DIGITALIZING CULTURAL ACCESS.
+              {t('hero.tagline')}
             </span>
           </div>
 
           <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#2C1A14] leading-[1.15] lg:leading-[1.1] mb-4 sm:mb-6">
-            The Sanctuary of <br className="hidden sm:inline" /> Our
-            <span className="text-[#8D493A]"> Heritage.</span>
+            {t('hero.title1')} <br className="hidden sm:inline" />
+            <span className="text-[#8D493A]">{t('hero.title2')}</span>
           </h1>
 
           <p className="text-xs sm:text-sm md:text-base text-[#6F5B55] max-w-xl leading-relaxed mb-6 sm:mb-8 font-normal">
-            Sustaining the nation's pulse by keeping our roots, carrying the <br/>spoken 
-            wisdom of our ancestors, for our shared pact.
+            {t('hero.description')}
           </p>
 
-          <div className="flex flex-row items-center gap-2 sm:gap-4 w-full border-b border-[#EADBC8]/60 pb-8 sm:pb-12">
-            <button  onClick={() => onNavigate('signup')} className="flex items-center justify-center space-x-1 sm:space-x-2 bg-[#8D493A] hover:bg-[#3E2723] text-[#FDFBF7] px-3 sm:px-6 py-2.5 sm:py-3.5 text-[11px] sm:text-sm font-semibold tracking-wide transition-colors duration-200 rounded-lg shadow-sm group flex-1 sm:flex-initial whitespace-nowrap">
-              <span>Get Involved</span>
+          <div className="flex flex-row flex-wrap items-center gap-2 sm:gap-4 w-full border-b border-[#EADBC8]/60 pb-8 sm:pb-12">
+            <button
+              onClick={() => onNavigate('signup')}
+              className="flex items-center justify-center space-x-1 sm:space-x-2 bg-[#8D493A] hover:bg-[#3E2723] text-[#FDFBF7] px-3 sm:px-6 py-2.5 sm:py-3.5 text-[11px] sm:text-sm font-semibold tracking-wide transition-colors duration-200 rounded-lg shadow-sm group flex-1 sm:flex-initial whitespace-nowrap"
+            >
+              <span>{t('hero.getInvolved')}</span>
               <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transform transition-transform group-hover:translate-x-1" />
             </button>
 
-            <button onClick={() => document.getElementById('archive')?.scrollIntoView({ behavior: 'smooth' })} className="border border-[#8D493A]/40 hover:bg-[#8D493A]/5 text-[#8D493A] px-3 sm:px-6 py-2.5 sm:py-3.5 text-[11px] sm:text-sm font-semibold tracking-wide transition-all duration-200 rounded-lg flex-1 sm:flex-initial text-center whitespace-nowrap">
-              Explore More
+            <button
+              onClick={() => document.getElementById('archive')?.scrollIntoView({ behavior: 'smooth' })}
+              className="border border-[#8D493A]/40 hover:bg-[#8D493A]/5 text-[#8D493A] px-3 sm:px-6 py-2.5 sm:py-3.5 text-[11px] sm:text-sm font-semibold tracking-wide transition-all duration-200 rounded-lg flex-1 sm:flex-initial text-center whitespace-nowrap"
+            >
+              {t('hero.exploreMore')}
             </button>
           </div>
           <div className="w-full pt-6 sm:pt-8 grid grid-cols-3 gap-2 sm:gap-4">
@@ -106,13 +113,13 @@ function Hero({onNavigate}) {
               const assignedPositionIndex = order[index];
 
               return (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className={`${positions[assignedPositionIndex]} group rounded-3xl overflow-hidden border border-[#EADBC8]/60 transition-all duration-700 ease-in-out cursor-pointer bg-neutral-900`}
                 >
-                  <img 
-                    src={item.img} 
-                    alt={item.title} 
+                  <img
+                    src={item.img}
+                    alt={item.title}
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   

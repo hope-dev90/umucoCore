@@ -1,8 +1,9 @@
 import React from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import './styles/global.css';
 import { AuthProvider } from './contexts/AuthContext';
+import { LanguageProvider } from './contexts/LanguageContext';
 
 import Landing     from './pages/Landing';
 import Login       from './pages/Login';
@@ -26,29 +27,31 @@ export default function App() {
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <AuthProvider>
-        <HashRouter>
-          <Routes>
-            {/* Public */}
-            <Route path="/"        element={<Landing />} />
-            <Route path="/login"   element={<Login />} />
-            <Route path="/signup"  element={<Signup />} />
+        <LanguageProvider>
+          <MemoryRouter initialEntries={['/']}>
+            <Routes>
+              {/* Public */}
+              <Route path="/"        element={<Landing />} />
+              <Route path="/login"   element={<Login />} />
+              <Route path="/signup"  element={<Signup />} />
 
-            {/* App — dashboard is your Home, not Landing */}
-            <Route path="/dashboard"    element={<Home />} />
-            <Route path="/explore"      element={<Explore />} />
-            <Route path="/listen"       element={<Listen />} />
-            <Route path="/collections"  element={<Collections />} />
-            <Route path="/kwibuka"      element={<Kwibuka />} />
-            <Route path="/intl-days"    element={<IntlDays />} />
-            <Route path="/contribute"   element={<Contribute />} />
-            <Route path="/saved"        element={<Saved />} />
-            <Route path="/history"      element={<History />} />   {/* ← own page */}
-            <Route path="/settings"     element={<Settings />} />
-            <Route path="/profile"      element={<Profile />} />   {/* ← own page */}
+              {/* App — dashboard is your Home, not Landing */}
+              <Route path="/dashboard"    element={<Home />} />
+              <Route path="/explore"      element={<Explore />} />
+              <Route path="/listen"       element={<Listen />} />
+              <Route path="/collections"  element={<Collections />} />
+              <Route path="/kwibuka"      element={<Kwibuka />} />
+              <Route path="/intl-days"    element={<IntlDays />} />
+              <Route path="/contribute"   element={<Contribute />} />
+              <Route path="/saved"        element={<Saved />} />
+              <Route path="/history"      element={<History />} />   {/* ← own page */}
+              <Route path="/settings"     element={<Settings />} />
+              <Route path="/profile"      element={<Profile />} />   {/* ← own page */}
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </HashRouter>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </MemoryRouter>
+        </LanguageProvider>
       </AuthProvider>
     </GoogleOAuthProvider>
   );

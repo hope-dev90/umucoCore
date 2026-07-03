@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import './Layout.css';
 import UmucoLogo from './UmucoLogo';
 
@@ -29,29 +31,31 @@ const Icons = {
   translate: "M5 8l6 6 M4 14s-2-2 0-4 M4 4l16 0 M4 4l4 8 M20 4l-4 8",
 };
 
-const mainNav = [
-  { label: 'Home',              path: '/dashboard',   icon: 'home' },       // ← was '/'
-  { label: 'Explore',           path: '/explore',     icon: 'explore' },
-  { label: 'Listen',            path: '/listen',      icon: 'listen' },
-  { label: 'Collections',       path: '/collections', icon: 'collections' },
-  { label: 'Kwibuka',           path: '/kwibuka',     icon: 'kwibuka' },
-  { label: 'International Days',path: '/intl-days',   icon: 'intldays' },
-];
-
-const personalNav = [
-  { label: 'Contribute', path: '/contribute', icon: 'contribute' },
-  { label: 'Saved',      path: '/saved',      icon: 'saved' },
-  { label: 'History',    path: '/history',    icon: 'history' },
-];
-
-const accountNav = [
-  { label: 'Profile',  path: '/profile',  icon: 'profile' },
-  { label: 'Settings', path: '/settings', icon: 'settings' },
-];
-
-export default function Layout({ children, searchPlaceholder = 'Search archive...' }) {
+export default function Layout({ children, searchPlaceholder = 'search.placeholder' }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
+
+  const mainNav = [
+    { label: t('sidebar.home'),              path: '/dashboard',   icon: 'home' },
+    { label: t('sidebar.explore'),           path: '/explore',     icon: 'explore' },
+    { label: t('sidebar.listen'),            path: '/listen',      icon: 'listen' },
+    { label: t('sidebar.collections'),       path: '/collections', icon: 'collections' },
+    { label: t('sidebar.kwibuka'),           path: '/kwibuka',     icon: 'kwibuka' },
+    { label: t('sidebar.intldays'),          path: '/intl-days',   icon: 'intldays' },
+  ];
+
+  const personalNav = [
+    { label: t('sidebar.contribute'), path: '/contribute', icon: 'contribute' },
+    { label: t('sidebar.saved'),      path: '/saved',      icon: 'saved' },
+    { label: t('sidebar.history'),    path: '/history',    icon: 'history' },
+  ];
+
+  const accountNav = [
+    { label: t('sidebar.profile'),  path: '/profile',  icon: 'profile' },
+    { label: t('sidebar.settings'), path: '/settings', icon: 'settings' },
+  ];
 
   // No longer treats '/' as special — just exact/startsWith matching
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
@@ -66,28 +70,33 @@ export default function Layout({ children, searchPlaceholder = 'Search archive..
     </div>
   );
 
+  const handleSignOut = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <div className="layout">
       <aside className="sidebar">
         <div className="sidebar-logo">
           <UmucoLogo style={{ width: 28, height: 28, borderRadius: '50%' }} />
           <div className="sidebar-logo-text">
-            <span>Umuco Core</span>
-            <span>Rwanda Cultural Archive</span>
+            <span>{t('sidebar.appName')}</span>
+            <span>{t('sidebar.tagline')}</span>
           </div>
         </div>
 
         <nav className="sidebar-nav">
           {mainNav.map(item => <NavLink key={item.path} item={item} />)}
-          <div className="sidebar-section-label">Personal</div>
+          <div className="sidebar-section-label">{t('sidebar.personal')}</div>
           {personalNav.map(item => <NavLink key={item.path} item={item} />)}
-          <div className="sidebar-section-label">Account</div>
+          <div className="sidebar-section-label">{t('sidebar.account')}</div>
           {accountNav.map(item => <NavLink key={item.path} item={item} />)}
         </nav>
 
         <div className="sidebar-footer">
-          <div className="sidebar-signout" onClick={() => navigate('/')}>
-            <Icon d={Icons.signout} size={14} /> Sign Out
+          <div className="sidebar-signout" onClick={handleSignOut}>
+            <Icon d={Icons.signout} size={14} /> {t('sidebar.signout')}
           </div>
         </div>
       </aside>
@@ -95,16 +104,30 @@ export default function Layout({ children, searchPlaceholder = 'Search archive..
       <header className="topbar">
         <div className="topbar-search">
           <span className="topbar-search-icon"><Icon d={Icons.search} size={14} /></span>
-          <input type="text" placeholder={searchPlaceholder} />
+          <input type="text" placeholder={t(searchPlaceholder)} />
         </div>
         <div className="topbar-right">
           <div className="topbar-lang">
-            <span>Kinyarwanda</span>
-            <span className="active">English</span>
+            <span
+              className={language === 'rw' ? 'active' : ''}
+              onClick={() => setLanguage('rw')}
+              style={{ cursor: 'pointer' }}
+            >
+              Kinyarwanda
+            </span>
+            <span
+              className={language === 'en' ? 'active' : ''}
+              onClick={() => setLanguage('en')}
+              style={{ cursor: 'pointer' }}
+            >
+              English
+            </span>
           </div>
           <div className="topbar-icon-btn"><Icon d={Icons.bell} size={14} /></div>
           <div className="topbar-icon-btn"><Icon d={Icons.translate} size={14} /></div>
-          <div className="topbar-avatar">MJ</div>
+          <div className="topbar-avatar">
+            {user?.name ? user.name.charAt(0).toUpperCase() : 'MJ'}
+          </div>
         </div>  
       </header>
 

@@ -1,6 +1,8 @@
 import React from 'react';
 import Layout from '../components/Layout';
 import './History.css';
+import { useLanguage } from '../contexts/LanguageContext';
+import { getLocalizedText } from '../utils/i18n';
 
 const Icon = ({ d, size = 18, strokeWidth = 1.8 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -17,52 +19,96 @@ const TYPE_ICONS = {
   Image:   { d: "M21 15a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v8z M3 15l5-5 4 4 3-3 5 5", color: '#1A7B4B', bg: '#E8FFF3' },
 };
 
+// Dynamic history data with multilingual support
 const historyItems = [
-  { title: 'The Royal Palace – Nyanza',   type: 'Place',   date: 'Viewed 2 hours ago' },
-  { title: 'Intore Traditional Dance',    type: 'Video',   date: 'Viewed Yesterday' },
-  { title: 'Byivugo by Intore',           type: 'Audio',   date: 'Viewed 2 days ago' },
-  { title: 'King Kigeli IV Rwabugiri',    type: 'Article', date: 'Viewed 3 days ago' },
+  { 
+    title: { 
+      en: 'The Royal Palace – Nyanza', 
+      rw: 'Ingoro y\'Umwami – Nyanza' 
+    }, 
+    type: 'Place', 
+    date: { 
+      en: 'Viewed 2 hours ago', 
+      rw: 'Byamenye amahora 2' 
+    } 
+  },
+  { 
+    title: { 
+      en: 'Intore Traditional Dance', 
+      rw: 'Interuro y\'Intore' 
+    }, 
+    type: 'Video', 
+    date: { 
+      en: 'Viewed Yesterday', 
+      rw: 'Byamenye ejo' 
+    } 
+  },
+  { 
+    title: { 
+      en: 'Byivugo by Intore', 
+      rw: 'Byivugo by Intore' 
+    }, 
+    type: 'Audio', 
+    date: { 
+      en: 'Viewed 2 days ago', 
+      rw: 'Byamenye amesi 2' 
+    } 
+  },
+  { 
+    title: { 
+      en: 'King Kigeli IV Rwabugiri', 
+      rw: 'Umwami Kigeli IV Rwabugiri' 
+    }, 
+    type: 'Article', 
+    date: { 
+      en: 'Viewed 3 days ago', 
+      rw: 'Byamenye amesi 3' 
+    } 
+  },
 ];
 
 export default function History() {
+  const { t, language } = useLanguage();
+
   return (
     <Layout>
       <div className="history-page">
         <div className="history-header">
-          <h1>History</h1>
-          <p>Your recently explored cultural content.</p>
+          <h1>{t('history.title')}</h1>
+          <p>{t('history.subtitle')}</p>
         </div>
 
         <div className="history-stats">
           <div className="history-stat-card">
             <h2>24</h2>
-            <span>Items Viewed</span>
+            <span>{t('history.statItemsViewed')}</span>
           </div>
           <div className="history-stat-card">
             <h2>8</h2>
-            <span>Audio Sessions</span>
+            <span>{t('history.statAudioSessions')}</span>
           </div>
           <div className="history-stat-card">
             <h2>12</h2>
-            <span>Articles Read</span>
+            <span>{t('history.statArticlesRead')}</span>
           </div>
         </div>
 
         <div className="history-list">
           {historyItems.map((item, index) => {
             const icon = TYPE_ICONS[item.type] || TYPE_ICONS.Article;
+            const typeKey = `history.type${item.type}`;
             return (
               <div key={index} className="history-item">
                 <div className="history-icon" style={{ background: icon.bg, color: icon.color }}>
                   <Icon d={icon.d} size={20} />
                 </div>
                 <div className="history-content">
-                  <h3>{item.title}</h3>
+                  <h3>{getLocalizedText(item.title, language)}</h3>
                   <span className="history-type-badge" style={{ background: icon.bg, color: icon.color }}>
-                    {item.type}
+                    {t(typeKey)}
                   </span>
                 </div>
-                <span className="history-date">{item.date}</span>
+                <span className="history-date">{getLocalizedText(item.date, language)}</span>
               </div>
             );
           })}

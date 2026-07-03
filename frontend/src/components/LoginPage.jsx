@@ -5,25 +5,30 @@ import authLeftBg from '../assets/login/tra.png';
 import authLeftBg2 from '../assets/login/tra2.png';
 import TribalLogo from './UmucoLogo';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import { getLocalizedText } from '../utils/i18n';
 
-const SLIDES = [
-  {
-    src: authLeftBg,
-    heading: "Heritage is our",
-    accent: "Legacy.",
-    quote: '"Heritage connects ancestral wisdom to the digital future."',
-  },
-  {
-    src: authLeftBg2,
-    heading: "Culture is our",
-    accent: "Identity.",
-    quote: '"Every tradition shapes who we are becoming."',
-  }
-];
+function getSlides(t) {
+  return [
+    {
+      src: authLeftBg,
+      heading: { en: t('auth.slide.heading1'), rw: t('auth.slide.heading1') },
+      accent: { en: t('auth.slide.accent1'), rw: t('auth.slide.accent1') },
+      quote: { en: t('auth.slide.quote1'), rw: t('auth.slide.quote1') },
+    },
+    {
+      src: authLeftBg2,
+      heading: { en: t('auth.slide.heading2'), rw: t('auth.slide.heading2') },
+      accent: { en: t('auth.slide.accent2'), rw: t('auth.slide.accent2') },
+      quote: { en: t('auth.slide.quote2'), rw: t('auth.slide.quote2') },
+    }
+  ];
+}
 
-function LeftSlideshow() {
+function LeftSlideshow({ t, language }) {
   const [current, setCurrent] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
+  const SLIDES = getSlides(t);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -34,7 +39,7 @@ function LeftSlideshow() {
       }, 500);
     }, 3900);
     return () => clearInterval(timer);
-  }, []);
+  }, [SLIDES.length]);
 
   const slide = SLIDES[current];
 
@@ -59,8 +64,8 @@ function LeftSlideshow() {
               idx === current && !transitioning
                 ? 'translateY(0px)'
                 : transitioning && idx === current
-                  ? 'translateY(-16px)'
-                  : 'translateY(24px)',
+                ? 'translateY(-16px)'
+                : 'translateY(24px)',
             zIndex: idx === current ? 1 : 0,
           }}
         />
@@ -83,14 +88,14 @@ function LeftSlideshow() {
           }}
         >
           <h2 className="text-4xl font-bold text-white leading-tight mb-4">
-            {slide.heading}{' '}
-            <span className="text-[#FCDFD3]">{slide.accent}</span>
+            {getLocalizedText(slide.heading, language)}{' '}
+            <span className="text-[#FCDFD3]">{getLocalizedText(slide.accent, language)}</span>
           </h2>
 
           <div className="w-16 h-[2px] bg-[#8D493A] mb-6" />
 
           <p className="text-sm text-gray-200/90 leading-relaxed font-light max-w-sm">
-            {slide.quote}
+            {getLocalizedText(slide.quote, language)}
           </p>
         </div>
 
@@ -118,7 +123,7 @@ function LeftSlideshow() {
         </div>
 
         <div className="mt-6 text-xs font-semibold tracking-widest text-white/40">
-          Preserving Rwandan Roots and Culture.
+          {t('auth.slide.footer')}
         </div>
       </div>
     </div>
@@ -135,6 +140,7 @@ function LoginPage({ onNavigate }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { login, googleLogin } = useAuth();
+  const { t, language } = useLanguage();
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -183,9 +189,8 @@ function LoginPage({ onNavigate }) {
     }
   };
 
-  const handleGoogleFailure = (err) => {
-    console.error('Google login error:', err);
-    setError('Google login failed. Please try again.');
+  const handleGoogleFailure = () => {
+    setError(t('auth.googleError'));
   };
 
   const handleEmailSubmit = (e) => {
@@ -200,7 +205,7 @@ function LoginPage({ onNavigate }) {
 
   return (
     <section className="w-full min-h-screen flex font-sans bg-[#FDFBF7]">
-      <LeftSlideshow />
+      <LeftSlideshow t={t} language={language} />
 
       <div className="w-full lg:w-1/2 flex flex-col p-8 md:p-10 bg-[#FDFBF7]">
         <div className="flex items-center justify-between w-full mb-8">
@@ -209,7 +214,7 @@ function LoginPage({ onNavigate }) {
             className="inline-flex items-center space-x-2 text-xs font-semibold text-[#8D493A] hover:text-[#3E2723] transition-colors focus:outline-none"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span style={{ fontFamily: 'Poppins, sans-serif' }} className="font-semibold">Back to Home</span>
+            <span style={{ fontFamily: 'Poppins, sans-serif' }} className="font-semibold">{t('auth.backToHome')}</span>
           </button>
           <div className="flex items-center space-x-1.5">
             <TribalLogo style={{ width: 50, height: 50, display: 'block', flexShrink: 0, overflow: 'hidden', borderRadius: '50%' }} />
@@ -220,8 +225,8 @@ function LoginPage({ onNavigate }) {
           {!isForgotPassword ? (
             <>
               <div className="text-left mb-8">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">Welcome Back!</h1>
-                <p className="text-xs md:text-sm text-[#6F5B55]">Ready to access your heritage gateway.</p>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">{t('auth.welcomeBack')}</h1>
+                <p className="text-xs md:text-sm text-[#6F5B55]">{t('auth.readyToAccess')}</p>
               </div>
 
               {error && (
@@ -232,10 +237,10 @@ function LoginPage({ onNavigate }) {
 
               <form onSubmit={handleLoginSubmit} className="space-y-5">
                 <div className="relative text-left">
-                  <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">Email Address</label>
+                  <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">{t('auth.labelEmail')}</label>
                   <div className="relative">
                     <input type="email" name="email" value={formData.email} onChange={handleInputChange}
-                      placeholder="name@domain.com"
+                      placeholder={t('auth.placeholder.email')}
                       className="w-full bg-white border border-[#EADBC8] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#2C1A14] placeholder-neutral-400 focus:outline-none focus:border-[#8D493A] transition-colors"
                       required />
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><Mail className="w-4 h-4" /></span>
@@ -244,15 +249,15 @@ function LoginPage({ onNavigate }) {
 
                 <div className="relative text-left">
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase">Password</label>
+                    <label className="text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase">{t('auth.labelPassword')}</label>
                     <button type="button" onClick={() => { setIsForgotPassword(true); setVerificationStep('email'); }}
                       className="text-[10px] font-bold text-[#8D493A] hover:underline focus:outline-none">
-                      Forgot password?
+                      {t('auth.forgotPassword')}
                     </button>
                   </div>
                   <div className="relative">
                     <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password}
-                      onChange={handleInputChange} placeholder="••••••••"
+                      onChange={handleInputChange} placeholder={t('auth.placeholder.password')}
                       className="w-full bg-white border border-[#EADBC8] rounded-xl pl-10 pr-10 py-2.5 text-xs text-[#2C1A14] placeholder-neutral-400 focus:outline-none focus:border-[#8D493A] transition-colors"
                       required />
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><Lock className="w-4 h-4" /></span>
@@ -266,7 +271,7 @@ function LoginPage({ onNavigate }) {
                 <label className="flex items-center space-x-2 cursor-pointer select-none pt-1">
                   <input type="checkbox" name="rememberMe" checked={formData.rememberMe} onChange={handleInputChange}
                     className="accent-[#8D493A] h-4 w-4 rounded border-neutral-300" />
-                  <span className="text-xs text-[#6F5B55]">Remember me for 30 days</span>
+                  <span className="text-xs text-[#6F5B55]">{t('auth.rememberMe')}</span>
                 </label>
 
                 <button
@@ -280,17 +285,17 @@ function LoginPage({ onNavigate }) {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                       </svg>
-                      <span>Signing In...</span>
+                      <span>{t('auth.loading.signingIn')}</span>
                     </>
                   ) : (
-                    <span>Sign In</span>
+                    <span>{t('auth.signIn')}</span>
                   )}
                 </button>
               </form>
 
               <div className="flex items-center my-6">
                 <div className="flex-grow border-t border-[#EADBC8]" />
-                <span className="mx-4 text-xs text-[#6F5B55]">or continue with</span>
+                <span className="mx-4 text-xs text-[#6F5B55]">{t('auth.orContinueWith')}</span>
                 <div className="flex-grow border-t border-[#EADBC8]" />
               </div>
 
@@ -307,9 +312,9 @@ function LoginPage({ onNavigate }) {
               </div>
 
               <p className="text-xs text-[#6F5B55] mt-6">
-                Don't have an account?{' '}
+                {t('auth.noAccount')}{' '}
                 <button onClick={() => onNavigate('signup')} className="font-bold text-[#8D493A] hover:underline bg-transparent border-none p-0 cursor-pointer">
-                  Sign Up
+                  {t('auth.signUp')}
                 </button>
               </p>
             </>
@@ -319,24 +324,24 @@ function LoginPage({ onNavigate }) {
                 <button onClick={() => setIsForgotPassword(false)}
                   className="inline-flex items-center space-x-2 text-xs font-semibold text-[#8D493A] hover:text-[#3E2723] mb-5 transition-colors">
                   <ArrowLeft className="w-4 h-4" />
-                  <span>Back to Sign In</span>
+                  <span>{t('auth.backToSignIn')}</span>
                 </button>
 
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">Reset Password</h1>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">{t('auth.resetPassword')}</h1>
                 <p className="text-xs md:text-sm text-[#6F5B55]">
-                  {verificationStep === 'email' && "Enter your verified account email to receive a verification code."}
-                  {verificationStep === 'code' && `Enter the 6-digit code sent to ${resetEmail}.`}
-                  {verificationStep === 'success' && "Your verification is complete."}
+                  {verificationStep === 'email' && t('auth.reset.emailLabel')}
+                  {verificationStep === 'code' && `${t('auth.enterCode')} ${resetEmail}.`}
+                  {verificationStep === 'success' && t('auth.reset.successLabel')}
                 </p>
               </div>
 
               {verificationStep === 'email' && (
                 <form onSubmit={handleEmailSubmit} className="space-y-5">
                   <div className="relative text-left">
-                    <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">Email Address</label>
+                    <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">{t('auth.labelEmail')}</label>
                     <div className="relative">
                       <input type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)}
-                        placeholder="name@domain.com"
+                        placeholder={t('auth.placeholder.email')}
                         className="w-full bg-white border border-[#EADBC8] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#2C1A14] placeholder-neutral-400 focus:outline-none focus:border-[#8D493A] transition-colors"
                         required />
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><Mail className="w-4 h-4" /></span>
@@ -344,7 +349,7 @@ function LoginPage({ onNavigate }) {
                   </div>
                   <button type="submit"
                     className="w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200">
-                    Send Code
+                    {t('auth.reset.sendCode')}
                   </button>
                 </form>
               )}
@@ -352,7 +357,7 @@ function LoginPage({ onNavigate }) {
               {verificationStep === 'code' && (
                 <form onSubmit={handleCodeSubmit} className="space-y-6">
                   <div>
-                    <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-3 text-center">Verification Code</label>
+                    <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-3 text-center">{t('auth.verificationCode')}</label>
                     <div className="flex justify-between gap-2 max-w-sm mx-auto">
                       {verificationCode.map((data, index) => (
                         <input key={index} type="text" name="code" maxLength="1" value={data}
@@ -366,7 +371,7 @@ function LoginPage({ onNavigate }) {
                   </div>
                   <button type="submit"
                     className="w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200">
-                    Verify Code
+                    {t('auth.reset.verifyCode')}
                   </button>
                 </form>
               )}
@@ -376,13 +381,13 @@ function LoginPage({ onNavigate }) {
                   <div className="w-12 h-12 bg-[var(--primary)]/20 rounded-full flex items-center justify-center mb-3">
                     <span className="text-[#8D493A] text-2xl">✅</span>
                   </div>
-                  <p className="text-sm font-bold text-[#8D493A] mb-1">Identity Verified</p>
+                  <p className="text-sm font-bold text-[#8D493A] mb-1">{t('auth.success.identityVerified')}</p>
                   <p className="text-xs text-[#6F5B55] leading-relaxed max-w-xs">
-                    Security gateway validation complete. You may now continue inside your secure user instance panel.
+                    {t('auth.success.description')}
                   </p>
                   <button onClick={() => setIsForgotPassword(false)}
                     className="mt-5 w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-2.5 px-4 rounded-xl font-semibold text-xs tracking-wide transition-colors">
-                    Return to Log In
+                    {t('auth.reset.backLogin')}
                   </button>
                 </div>
               )}

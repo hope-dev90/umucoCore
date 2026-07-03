@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
+import { useLanguage } from '../contexts/LanguageContext';
 import './Settings.css';
 import voicePhotoOne from '../assets/tra.png';
 import voicePhotoTwo from '../assets/tra2.png';
@@ -41,19 +42,25 @@ export default function Settings() {
   const [fontSize,      setFontSize]      = useState(50);
   const [highContrast,  setHighContrast]  = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [language,      setLanguage]      = useState('English (UK)');
+  const { language: langCtx, setLanguage: setLangCtx, t } = useLanguage();
 
   const voices = [
-    { name: 'Umutoni', sub: '(Female, Soft)', img: IMG.voice1 },
-    { name: 'Kamanzi', sub: '(Male, Deep)',   img: IMG.voice2 },
+    { name: 'Umutoni', sub: t('settings.voice.femaleSoft'), img: IMG.voice1 },
+    { name: 'Kamanzi', sub: t('settings.voice.maleDeep'),   img: IMG.voice2 },
+  ];
+
+  const languageOptions = [
+    { value: 'en', label: t('settings.english') },
+    { value: 'rw', label: t('settings.kinyarwanda') },
+    { value: 'fr', label: t('settings.french') },
   ];
 
   return (
-    <Layout searchPlaceholder="Search archive...">
+    <Layout searchPlaceholder="search.placeholder">
       <div className="settings-page">
         <div className="settings-header">
-          <h1>Settings</h1>
-          <p>Control your experience — notifications, accessibility, audio, language, and account security.</p>
+          <h1>{t('settings.title')}</h1>
+          <p>{t('settings.subtitle')}</p>
         </div>
 
         <div className="settings-only-grid">
@@ -62,11 +69,11 @@ export default function Settings() {
           <div className="settings-col">
 
             <div className="settings-panel">
-              <PanelTitle iconKey="bell" label="Notifications" />
+              <PanelTitle iconKey="bell" label={t('settings.notifications')} />
               {[
-                { label: 'Archive Updates',       sub: 'New artifacts and stories matching your interests.', val: notifArchive, set: setNotifArchive },
-                { label: 'Monthly Newsletter',    sub: 'Cultural highlights digest, delivered monthly.',     val: notifNews,    set: setNotifNews },
-                { label: 'National Day Reminders',sub: 'Alerts before upcoming heritage calendar events.',   val: notifEvents,  set: setNotifEvents },
+                { label: t('settings.archiveUpdates'),       sub: t('settings.archiveUpdates.desc'), val: notifArchive, set: setNotifArchive },
+                { label: t('settings.newsletter'),    sub: t('settings.newsletter.desc'),     val: notifNews,    set: setNotifNews },
+                { label: t('settings.dayReminders'),sub: t('settings.dayReminders.desc'),   val: notifEvents,  set: setNotifEvents },
               ].map(({ label, sub, val, set }) => (
                 <div key={label} className="notif-item">
                   <div><h4>{label}</h4><p>{sub}</p></div>
@@ -78,15 +85,19 @@ export default function Settings() {
             <div className="settings-panel">
               <PanelTitle iconKey="globe" label="Language & Display" />
               <div className="form-group">
-                <label className="form-label">Interface Language</label>
-                <select className="form-select" value={language} onChange={e => setLanguage(e.target.value)}>
-                  <option>English (UK)</option>
-                  <option>Kinyarwanda</option>
-                  <option>French</option>
+                <label className="form-label">{t('settings.language')}</label>
+                <select
+                  className="form-select"
+                  value={langCtx}
+                  onChange={e => setLangCtx(e.target.value)}
+                >
+                  {languageOptions.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
                 </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Date Format</label>
+                <label className="form-label">{t('settings.dateFormat')}</label>
                 <select className="form-select">
                   <option>DD / MM / YYYY</option>
                   <option>MM / DD / YYYY</option>
@@ -94,11 +105,11 @@ export default function Settings() {
                 </select>
               </div>
               <div className="form-group">
-                <label className="form-label">Time Zone</label>
+                <label className="form-label">{t('settings.timezone')}</label>
                 <select className="form-select">
-                  <option>Africa/Kigali (CAT, UTC+2)</option>
-                  <option>UTC</option>
-                  <option>Europe/London</option>
+                  <option>{t('settings.timezone.cat')}</option>
+                  <option>{t('settings.timezone.utc')}</option>
+                  <option>{t('settings.timezone.london')}</option>
                 </select>
               </div>
             </div>
@@ -109,8 +120,8 @@ export default function Settings() {
           <div className="settings-col">
 
             <div className="settings-panel">
-              <PanelTitle iconKey="eye" label="Accessibility" />
-              <div className="access-section-label">Content Font Size</div>
+              <PanelTitle iconKey="eye" label={t('settings.accessibility')} />
+              <div className="access-section-label">{t('settings.fontSize')}</div>
               <div className="font-size-slider">
                 <span style={{ fontSize: 11 }}>A</span>
                 <input type="range" min={0} max={100} value={fontSize}
@@ -118,11 +129,11 @@ export default function Settings() {
                 <span style={{ fontSize: 16 }}>A</span>
               </div>
               <div className="font-preview" style={{ fontSize: `${11 + (fontSize / 100) * 6}px` }}>
-                Preview: "Inzuzi cattle were revered across the hills of Rwanda."
+                {t('settings.fontPreview')}
               </div>
               {[
-                { label: 'High Contrast Mode',  sub: 'Increases color contrast for readability.', val: highContrast,  set: setHighContrast },
-                { label: 'Reduce Motion',        sub: 'Disables animations and transitions.',      val: reducedMotion, set: setReducedMotion },
+                { label: t('settings.highContrast'),  sub: t('settings.highContrast.desc'), val: highContrast,  set: setHighContrast },
+                { label: t('settings.reducedMotion'),        sub: t('settings.reducedMotion.desc'),      val: reducedMotion, set: setReducedMotion },
               ].map(({ label, sub, val, set }) => (
                 <div key={label} className="access-toggle-row">
                   <div>
@@ -132,12 +143,12 @@ export default function Settings() {
                   <button className={`toggle-switch ${val ? 'on' : 'off'}`} onClick={() => set(v => !v)} />
                 </div>
               ))}
-              <button className="save-access-btn">Save Accessibility Profile</button>
+              <button className="save-access-btn">{t('settings.saveAccessibility')}</button>
             </div>
 
             <div className="settings-panel">
-              <PanelTitle iconKey="mic" label="Tega Amatwi — Voice Selection" />
-              <p className="panel-sub">Choose the text-to-speech voice for the archive reader.</p>
+              <PanelTitle iconKey="mic" label={t('settings.voiceSelection')} />
+              <p className="panel-sub">{t('settings.voiceSelection.desc')}</p>
               {voices.map((v, i) => (
                 <div key={i} className={`voice-option ${selectedVoice === i ? 'selected' : ''}`}
                   onClick={() => setSelectedVoice(i)}>
@@ -158,12 +169,12 @@ export default function Settings() {
           <div className="settings-col">
 
             <div className="settings-panel">
-              <PanelTitle iconKey="lock" label="Account Security" />
+              <PanelTitle iconKey="lock" label={t('settings.accountSecurity')} />
               {[
-                { label: 'Change Password',           sub: 'Last changed 4 months ago',     action: <button className="chevron-btn">›</button> },
-                { label: 'Two-Factor Authentication', sub: 'Active — SMS verification',     action: <span className="manage-link">Manage</span> },
-                { label: 'Active Sessions',           sub: '2 devices logged in',           action: <span className="manage-link">View</span> },
-                { label: 'Login History',             sub: 'Last login: Today, 07:42 AM',   action: <button className="chevron-btn">›</button> },
+                { label: t('settings.changePassword'),           sub: t('settings.changePassword.desc'),     action: <button className="chevron-btn">›</button> },
+                { label: t('settings.twoFactor'), sub: t('settings.twoFactor.active'),     action: <span className="manage-link">{t('settings.manage')}</span> },
+                { label: t('settings.activeSessions'),           sub: t('settings.activeSessions.desc'),           action: <span className="manage-link">{t('settings.view')}</span> },
+                { label: t('settings.loginHistory'),             sub: t('settings.loginHistory.desc'),   action: <button className="chevron-btn">›</button> },
               ].map(({ label, sub, action }) => (
                 <div key={label} className="security-item">
                   <div className="security-item-left"><h4>{label}</h4><p>{sub}</p></div>
@@ -173,10 +184,10 @@ export default function Settings() {
             </div>
 
             <div className="settings-panel">
-              <PanelTitle iconKey="shield" label="Privacy" />
+              <PanelTitle iconKey="shield" label={t('settings.privacy')} />
               {[
-                { label: 'Data & Download',    sub: 'Export a copy of your archive data.',    action: <button className="chevron-btn">›</button> },
-                { label: 'Cookie Preferences', sub: 'Manage what data we store locally.',     action: <span className="manage-link">Manage</span> },
+                { label: t('settings.dataDownload'),    sub: t('settings.dataDownload.desc'),    action: <button className="chevron-btn">›</button> },
+                { label: t('settings.cookiePrefs'), sub: t('settings.cookiePrefs.desc'),     action: <span className="manage-link">{t('settings.manage')}</span> },
               ].map(({ label, sub, action }) => (
                 <div key={label} className="security-item">
                   <div className="security-item-left"><h4>{label}</h4><p>{sub}</p></div>
@@ -187,14 +198,14 @@ export default function Settings() {
 
             <div className="danger-panel">
               <div className="danger-header">
-                <Icon d={Icons.warning} size={14} /> Account Management
+                <Icon d={Icons.warning} size={14} /> {t('settings.dangerZone')}
               </div>
               <p className="danger-text">
-                Deleting your account will permanently remove your saved collections, contributions, and history. This action cannot be undone.
+                {t('settings.dangerZone.desc')}
               </p>
               <div style={{ display: 'flex', gap: 10 }}>
-                <button className="btn-deactivate">Deactivate</button>
-                <button className="btn-delete">Delete Account</button>
+                <button className="btn-deactivate">{t('settings.deactivate')}</button>
+                <button className="btn-delete">{t('settings.delete')}</button>
               </div>
             </div>
 
