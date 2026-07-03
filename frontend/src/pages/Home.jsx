@@ -1,5 +1,6 @@
 import React from 'react';
 import Layout from '../components/Layout';
+import { useAuth } from '../contexts/AuthContext';
 import './Home.css';
 import nyanzeImage from '../assets/home/nyanza.jpg';
 import intoreImage from '../assets/home/intore.jpg';
@@ -67,10 +68,11 @@ const quickActions = [
 const topics = ['Ubwiru', 'Amateka y\'u Rwanda', 'Ingoma', 'Abami b\'u Rwanda', 'Indangagaciro', 'Uburego'];
 
 export default function Home() {
+  const { user } = useAuth();
   return (
     <Layout>
       <div className="home-header">
-        <h1>Murakaza neza, Manzi John</h1>
+        <h1>Murakaza neza, {user?.name || 'Guest'}</h1>
         <p>Explore, learn and preserve Rwanda's heritage.</p>
       </div>
 

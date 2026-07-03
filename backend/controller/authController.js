@@ -2,9 +2,8 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import axios from "axios";
 import { OAuth2Client } from "google-auth-library";
-import pool from "../config/db.js";
 import config from "../config/env.js";
-import { db } from "../config/nedb.js";
+import pool from "../config/db.js";
 import { sendOtpEmail } from "../utils/email.js";
 import { successResponse, errorResponse } from "../utils/response.js";
 import {
@@ -18,18 +17,17 @@ import {
   verifyOtp,
   clearOtp,
   markEmailVerified,
-  updatePassword
+  updatePassword,
+  updateUserProfile,
 } from "../models/userModels.js";
 
 const googleClient = new OAuth2Client(config.google.clientId, null, {
-  // Increase clock skew tolerance to handle server time sync issues
-  // Server time is ~2 hours behind real time based on error logs
-  clock_tolerance: 7200, // 2 hours in seconds (passed as part of verifyIdToken config)
+  clock_tolerance: 7200,
 });
 
 const generateToken = (id) => {
   return jwt.sign({ id }, config.jwt.secret, {
-    expiresIn: config.jwt.expiresIn
+    expiresIn: config.jwt.expiresIn,
   });
 };
 
@@ -37,53 +35,51 @@ const generateOtp = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
-const getDatabaseErrorMessage = (error) => {
-  if (error.code === "42P01") {
-    return "Database tables are missing.";
-  }
-  if (error.code === "42703") {
-    return "Database schema mismatch.";
-  }
-  if (error.code === "23505") {
-    return "Email already exists";
-  }
-  return null;
-};
-
 export const register = async (req, res) => {
-  const { name, email, password, role = 'user' } = req.body;
+  const { name, email, password, role = "user" } = req.body;
 
   try {
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Name, email, and password are required"
+        message: "Name, email, and password are required",
       });
     }
 
-    if (name.length < 2) {
+    if (name.length < 4) {
       return res.status(400).json({
         success: false,
-        message: "Name must be at least 2 characters"
+        message: "Name must be at least 4 characters",
       });
     }
 
     if (password.length < 8) {
       return res.status(400).json({
         success: false,
-        message: "Password must be at least 8 characters"
+        message: "Password must be at least 8 characters",
       });
     }
 
     if (!["user", "government"].includes(role)) {
-  return res.status(400).json({
-    success: false,
-    message: "Invalid role"
-  });
-}
+      return res.status(400).json({
+        success: false,
+        message: "Invalid role",
+      });
+    }
+
+    console.log("Checking for existing user with email:", email);
     const existingUser = await findUserByEmail(email);
+    console.log(
+      "Existing user found?",
+      existingUser ? "Yes" : "No",
+      existingUser,
+    );
     if (existingUser) {
-      return errorResponse(res, "This email is already registered. Please sign in or reset your password.", 400);
+      return errorResponse(
+        res,
+        "This email is already registered. Please sign in or reset your password.",
+        400,
+      );
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -92,7 +88,7 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role
+      role,
     });
 
     const otp = generateOtp();
@@ -100,28 +96,37 @@ export const register = async (req, res) => {
 
     await saveOtp(email, otp, expiresAt);
 
-    await sendOtpEmail({
-      to: email,
-      otp,
-      purpose: "verify your email",
-     name: name
-    });
+    // Try to send email, but don't fail registration if email fails
+    try {
+      await sendOtpEmail({
+        to: email,
+        otp,
+        purpose: "verify your email",
+        name: name,
+      });
+    } catch (emailError) {
+      console.warn(
+        "Email sending failed, but registration succeeded:",
+        emailError.message,
+      );
+    }
 
-    return successResponse(res, {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
-    }, "Registration successful. Check your email to verify your account.", 201);
+    return successResponse(
+      res,
+      {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      },
+      "Registration successful. Check your email to verify your account.",
+      201,
+    );
   } catch (error) {
     console.error("Register error:", error);
-    if (error.code === "23505") {
-      return errorResponse(res, "This email is already registered. Please sign in or reset your password.", 400);
-    }
-    const databaseMessage = getDatabaseErrorMessage(error);
-    return errorResponse(res, databaseMessage || "Internal server error", databaseMessage ? (error.code === "23505" ? 400 : 500) : 500);
+    return errorResponse(res, "Internal server error", 500);
   }
 };
 
@@ -132,7 +137,7 @@ export const verifyEmail = async (req, res) => {
     if (!email || !otp) {
       return res.status(400).json({
         success: false,
-        message: "Email and OTP are required"
+        message: "Email and OTP are required",
       });
     }
 
@@ -140,7 +145,7 @@ export const verifyEmail = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired OTP"
+        message: "Invalid or expired OTP",
       });
     }
 
@@ -149,13 +154,13 @@ export const verifyEmail = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Email verified"
+      message: "Email verified",
     });
   } catch (error) {
     console.error("Verify email error:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -167,7 +172,7 @@ export const login = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required"
+        message: "Email and password are required",
       });
     }
 
@@ -175,34 +180,28 @@ export const login = async (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials"
+        message: "Invalid credentials",
       });
     }
 
     if (!user.is_verified) {
       return res.status(403).json({
         success: false,
-        message: "Email not verified"
+        message: "Email not verified",
       });
     }
 
-    const isMatch = user.password ? await bcrypt.compare(password, user.password) : false;
+    const isMatch = user.password
+      ? await bcrypt.compare(password, user.password)
+      : false;
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials"
+        message: "Invalid credentials",
       });
     }
 
     const token = generateToken(user.id);
-
-    // Create session in NeDB
-    await db.sessions.insert({
-      userId: String(user.id),
-      token,
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-    });
 
     return res.status(200).json({
       success: true,
@@ -212,15 +211,14 @@ export const login = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error("Login error:", error);
-    const databaseMessage = getDatabaseErrorMessage(error);
     return res.status(500).json({
       success: false,
-      message: databaseMessage || "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -229,13 +227,13 @@ export const getProfile = async (req, res) => {
   try {
     return res.status(200).json({
       success: true,
-      user: req.user
+      user: req.user,
     });
   } catch (error) {
     console.error("Get profile error:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -247,7 +245,7 @@ export const forgotPassword = async (req, res) => {
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: "Email is required"
+        message: "Email is required",
       });
     }
 
@@ -255,7 +253,7 @@ export const forgotPassword = async (req, res) => {
     if (!user) {
       return res.status(200).json({
         success: true,
-        message: "If the email exists, OTP has been sent"
+        message: "If the email exists, OTP has been sent",
       });
     }
 
@@ -264,21 +262,25 @@ export const forgotPassword = async (req, res) => {
 
     await saveOtp(email, otp, expiresAt);
 
-    await sendOtpEmail({
-      to: email,
-      otp,
-      purpose: "reset your password"
-    });
+    try {
+      await sendOtpEmail({
+        to: email,
+        otp,
+        purpose: "reset your password",
+      });
+    } catch (emailError) {
+      console.warn("Email sending failed:", emailError.message);
+    }
 
     return res.status(200).json({
       success: true,
-      message: "If the email exists, OTP has been sent"
+      message: "If the email exists, OTP has been sent",
     });
   } catch (error) {
     console.error("Forgot password error:", error);
     return res.status(200).json({
       success: true,
-      message: "If the email exists, OTP has been sent"
+      message: "If the email exists, OTP has been sent",
     });
   }
 };
@@ -290,14 +292,14 @@ export const resetPassword = async (req, res) => {
     if (!email || !otp || !newPassword) {
       return res.status(400).json({
         success: false,
-        message: "All fields are required"
+        message: "All fields are required",
       });
     }
 
     if (newPassword.length < 8) {
       return res.status(400).json({
         success: false,
-        message: "Password must be at least 8 characters"
+        message: "Password must be at least 8 characters",
       });
     }
 
@@ -305,7 +307,7 @@ export const resetPassword = async (req, res) => {
     if (!user) {
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired OTP"
+        message: "Invalid or expired OTP",
       });
     }
 
@@ -315,13 +317,13 @@ export const resetPassword = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "Password reset successful"
+      message: "Password reset successful",
     });
   } catch (error) {
     console.error("Reset password error:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -331,13 +333,13 @@ export const getAllUsersController = async (req, res) => {
     const users = await getAllUsers();
     return res.status(200).json({
       success: true,
-      users
+      users,
     });
   } catch (error) {
     console.error("Get all users error:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 };
@@ -353,26 +355,25 @@ export const googleLogin = async (req, res) => {
     if (!config.google.clientId || !config.google.clientSecret) {
       return res.status(501).json({
         success: false,
-        message: "Google login not configured"
+        message: "Google login not configured",
       });
     }
 
     if (!idToken) {
       return res.status(400).json({
         success: false,
-        message: "Google ID token is required"
+        message: "Google ID token is required",
       });
     }
 
     if (role && !["user", "government"].includes(role)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid role"
+        message: "Invalid role",
       });
     }
 
-    // Verify the Google credential. Some clients send an ID token, while others
-    // send an access token from the OAuth token client flow.
+    // Verify the Google credential
     let payload;
     try {
       const ticket = await googleClient.verifyIdToken({
@@ -382,10 +383,14 @@ export const googleLogin = async (req, res) => {
       payload = ticket.getPayload();
     } catch (verifyError) {
       try {
-        const tokenParts = idToken.split('.');
+        const tokenParts = idToken.split(".");
         if (tokenParts.length === 3) {
-          const encodedPayload = tokenParts[1].replace(/-/g, '+').replace(/_/g, '/');
-          const decoded = JSON.parse(Buffer.from(encodedPayload, 'base64').toString('utf8'));
+          const encodedPayload = tokenParts[1]
+            .replace(/-/g, "+")
+            .replace(/_/g, "/");
+          const decoded = JSON.parse(
+            Buffer.from(encodedPayload, "base64").toString("utf8"),
+          );
           if (decoded.email && decoded.sub) {
             payload = decoded;
           } else {
@@ -396,11 +401,14 @@ export const googleLogin = async (req, res) => {
         }
       } catch (decodeError) {
         try {
-          const userInfoResponse = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-            headers: {
-              Authorization: `Bearer ${idToken}`,
+          const userInfoResponse = await axios.get(
+            "https://www.googleapis.com/oauth2/v3/userinfo",
+            {
+              headers: {
+                Authorization: `Bearer ${idToken}`,
+              },
             },
-          });
+          );
 
           const { sub, email, name, picture } = userInfoResponse.data;
           if (sub && email) {
@@ -423,29 +431,30 @@ export const googleLogin = async (req, res) => {
     if (!payload || !payload.email || !payload.sub || !payload.email_verified) {
       return res.status(400).json({
         success: false,
-        message: "Invalid Google credentials"
+        message: "Invalid Google credentials",
       });
     }
 
-    // 3) Find or create user
+    // Find or create user
     const googleId = payload.sub;
     let user = await findUserByGoogleId(googleId);
 
     if (!user) {
       user = await findUserByEmail(payload.email);
       if (user) {
-        const result = await pool.query(
-          `UPDATE users SET google_id = $1 WHERE email = $2 RETURNING *`,
-          [googleId, payload.email]
-        );
-        user = result.rows[0];
+        // Link existing user with Google
+        await updateUserProfile(user.id, {
+          google_id: googleId,
+          is_verified: true,
+        });
+        user = await findUserByEmail(payload.email);
       } else {
         const defaultRole = role || "user";
         user = await createGoogleUser({
           googleId,
           name: payload.name || "User",
           email: payload.email,
-          role: defaultRole
+          role: defaultRole,
         });
       }
     }
@@ -453,31 +462,11 @@ export const googleLogin = async (req, res) => {
     if (!user.is_verified) {
       await markEmailVerified(user.email);
     }
-  if (
-    [
-      "ENOTFOUND",
-      "ECONNRESET",
-      "ECONNREFUSED",
-      "ETIMEDOUT",
-      "EAI_AGAIN",
-      "ECONNABORTED",
-    ].includes(error.code)
-  ) {
-    return res.status(503).json({
-      success: false,
-      message:
-        "Unable to connect to Google. Please check your internet connection and try again.",
-    });
-  }
+
     const token = generateToken(user.id);
 
-    // Create session in NeDB
-    await db.sessions.insert({
-      userId: String(user.id),
-      token,
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-    });
+    // Session management: For now, we'll just return the token since we haven't set up a sessions table in PostgreSQL
+    // (We can create a sessions table later if needed)
 
     return res.status(200).json({
       success: true,
@@ -487,8 +476,8 @@ export const googleLogin = async (req, res) => {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error("Google login error:", error);
@@ -501,12 +490,28 @@ export const googleLogin = async (req, res) => {
     if (error.message && error.message.includes("Token used too late")) {
       return res.status(400).json({
         success: false,
-        message: "Google token expired"
+        message: "Google token expired",
+      });
+    }
+    if (
+      [
+        "ENOTFOUND",
+        "ECONNRESET",
+        "ECONNREFUSED",
+        "ETIMEDOUT",
+        "EAI_AGAIN",
+        "ECONNABORTED",
+      ].includes(error.code)
+    ) {
+      return res.status(503).json({
+        success: false,
+        message:
+          "Unable to connect to Google. Please check your internet connection and try again.",
       });
     }
     return res.status(500).json({
       success: false,
-      message: "Google login failed"
+      message: "Google login failed",
     });
   }
 };

@@ -31,7 +31,14 @@ const ensureAuthSchema = async (client) => {
       otp VARCHAR(6),
       otp_expires TIMESTAMPTZ,
       google_id VARCHAR(255),
-      created_at TIMESTAMPTZ DEFAULT NOW()
+      bio TEXT,
+      interests TEXT[] DEFAULT '{}',
+      language VARCHAR(100) DEFAULT 'English (UK)',
+      avatar VARCHAR(255),
+      notifications JSONB DEFAULT '{"archiveUpdates": true, "newsletter": true, "eventReminders": true}'::jsonb,
+      accessibility JSONB DEFAULT '{"fontSize": "medium", "highContrast": false, "reduceMotion": false}'::jsonb,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
     );
 
     ALTER TABLE users ADD COLUMN IF NOT EXISTS password VARCHAR(255);
@@ -40,7 +47,14 @@ const ensureAuthSchema = async (client) => {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS otp VARCHAR(6);
     ALTER TABLE users ADD COLUMN IF NOT EXISTS otp_expires TIMESTAMPTZ;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id VARCHAR(255);
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS interests TEXT[] DEFAULT '{}';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS language VARCHAR(100) DEFAULT 'English (UK)';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar VARCHAR(255);
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS notifications JSONB DEFAULT '{"archiveUpdates": true, "newsletter": true, "eventReminders": true}'::jsonb;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS accessibility JSONB DEFAULT '{"fontSize": "medium", "highContrast": false, "reduceMotion": false}'::jsonb;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);

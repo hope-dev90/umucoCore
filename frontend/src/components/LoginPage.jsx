@@ -1,33 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Lock, Eye, EyeOff, Milestone, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 import authLeftBg from '../assets/login/tra.png';
-import authLeftBg2 from '../assets/login/tra2.png'; // ← add your 2nd image
-import authLeftBg3 from '../assets/login/tra3.jpg'; // ← add your 3rd image
+import authLeftBg2 from '../assets/login/tra2.png';
 import TribalLogo from './UmucoLogo';
-
+import { useAuth } from '../contexts/AuthContext';
 
 const SLIDES = [
   {
     src: authLeftBg,
-    heading: 'Heritage is our',
-    accent: 'Legacy.',
+    heading: "Heritage is our",
+    accent: "Legacy.",
     quote: '"Heritage connects ancestral wisdom to the digital future."',
   },
   {
     src: authLeftBg2,
-    heading: 'Culture is our',
-    accent: 'Identity.',
+    heading: "Culture is our",
+    accent: "Identity.",
     quote: '"Every tradition shapes who we are becoming."',
-  },
-  {
-    src: authLeftBg3,
-    heading: 'Memory is our',
-    accent: 'Foundation.',
-    quote: '"Roots run deep in language, song, and story."',
-  },
+  }
 ];
 
-// ── Slideshow component (self-contained) ─────────────────────────────────────
 function LeftSlideshow() {
   const [current, setCurrent] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
@@ -38,7 +31,7 @@ function LeftSlideshow() {
       setTimeout(() => {
         setCurrent(prev => (prev + 1) % SLIDES.length);
         setTransitioning(false);
-      }, 500); // halfway through the CSS transition
+      }, 500);
     }, 3900);
     return () => clearInterval(timer);
   }, []);
@@ -47,8 +40,6 @@ function LeftSlideshow() {
 
   return (
     <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
-
-      {/* Images — stack all, show only active */}
       {SLIDES.map((s, idx) => (
         <img
           key={idx}
@@ -68,14 +59,13 @@ function LeftSlideshow() {
               idx === current && !transitioning
                 ? 'translateY(0px)'
                 : transitioning && idx === current
-                ? 'translateY(-16px)'   // exit: slide up
-                : 'translateY(24px)',   // waiting: sit below
+                  ? 'translateY(-16px)'
+                  : 'translateY(24px)',
             zIndex: idx === current ? 1 : 0,
           }}
         />
       ))}
 
-      {/* Gradient overlay */}
       <div
         className="absolute inset-0"
         style={{
@@ -84,11 +74,7 @@ function LeftSlideshow() {
         }}
       />
 
-      {/* Text content — fades with each slide */}
-      <div
-        className="absolute inset-0 flex flex-col justify-end p-12"
-        style={{ zIndex: 3 }}
-      >
+      <div className="absolute inset-0 flex flex-col justify-end p-12" style={{ zIndex: 3 }}>
         <div
           style={{
             transition: 'opacity 0.6s ease, transform 0.6s ease',
@@ -96,8 +82,6 @@ function LeftSlideshow() {
             transform: transitioning ? 'translateY(10px)' : 'translateY(0px)',
           }}
         >
-         
-
           <h2 className="text-4xl font-bold text-white leading-tight mb-4">
             {slide.heading}{' '}
             <span className="text-[#FCDFD3]">{slide.accent}</span>
@@ -110,7 +94,6 @@ function LeftSlideshow() {
           </p>
         </div>
 
-        {/* Dot indicators */}
         <div className="flex items-center gap-2 mt-10">
           {SLIDES.map((_, idx) => (
             <button
@@ -142,7 +125,6 @@ function LeftSlideshow() {
   );
 }
 
-// ── Main LoginPage ────────────────────────────────────────────────────────────
 function LoginPage({ onNavigate }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
@@ -151,6 +133,8 @@ function LoginPage({ onNavigate }) {
   const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
   const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false });
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const { login, googleLogin } = useAuth();
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -159,7 +143,9 @@ function LoginPage({ onNavigate }) {
 
   const handleCodeChange = (element, index) => {
     if (isNaN(element.value)) return false;
-    setVerificationCode([...verificationCode.map((d, idx) => (idx === index ? element.value : d))]);
+    const newCode = [...verificationCode];
+    newCode[index] = element.value;
+    setVerificationCode(newCode);
     if (element.nextSibling && element.value) element.nextSibling.focus();
   };
 
@@ -168,13 +154,45 @@ function LoginPage({ onNavigate }) {
       e.target.previousSibling.focus();
   };
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => { onNavigate('dashboard'); }, 800);
+    setError('');
+
+    try {
+      await login(formData.email, formData.password);
+      onNavigate('dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleEmailSubmit = (e) => { e.preventDefault(); if (resetEmail) setVerificationStep('code'); };
+  const handleGoogleSuccess = async (response) => {
+    setIsLoading(true);
+    setError('');
+
+    try {
+      await googleLogin(response.credential);
+      onNavigate('dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleFailure = (err) => {
+    console.error('Google login error:', err);
+    setError('Google login failed. Please try again.');
+  };
+
+  const handleEmailSubmit = (e) => {
+    e.preventDefault();
+    if (resetEmail) setVerificationStep('code');
+  };
+
   const handleCodeSubmit = (e) => {
     e.preventDefault();
     if (verificationCode.join('').length === 6) setVerificationStep('success');
@@ -182,14 +200,9 @@ function LoginPage({ onNavigate }) {
 
   return (
     <section className="w-full min-h-screen flex font-sans bg-[#FDFBF7]">
-
-      {/* LEFT — slideshow */}
       <LeftSlideshow />
 
-      {/* RIGHT — form */}
       <div className="w-full lg:w-1/2 flex flex-col p-8 md:p-10 bg-[#FDFBF7]">
-
-        {/* Top bar */}
         <div className="flex items-center justify-between w-full mb-8">
           <button
             onClick={() => onNavigate('home')}
@@ -203,7 +216,6 @@ function LoginPage({ onNavigate }) {
           </div>
         </div>
 
-        {/* Form content */}
         <div className="w-full max-w-sm mx-auto my-auto">
           {!isForgotPassword ? (
             <>
@@ -211,6 +223,12 @@ function LoginPage({ onNavigate }) {
                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">Welcome Back!</h1>
                 <p className="text-xs md:text-sm text-[#6F5B55]">Ready to access your heritage gateway.</p>
               </div>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600">
+                  {error}
+                </div>
+              )}
 
               <form onSubmit={handleLoginSubmit} className="space-y-5">
                 <div className="relative text-left">
@@ -259,8 +277,8 @@ function LoginPage({ onNavigate }) {
                   {isLoading ? (
                     <>
                       <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
                       </svg>
                       <span>Signing In...</span>
                     </>
@@ -269,6 +287,24 @@ function LoginPage({ onNavigate }) {
                   )}
                 </button>
               </form>
+
+              <div className="flex items-center my-6">
+                <div className="flex-grow border-t border-[#EADBC8]" />
+                <span className="mx-4 text-xs text-[#6F5B55]">or continue with</span>
+                <div className="flex-grow border-t border-[#EADBC8]" />
+              </div>
+
+              <div className="w-full">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={handleGoogleFailure}
+                  useOneTap
+                  theme="outline"
+                  shape="pill"
+                  size="large"
+                  width="100%"
+                />
+              </div>
 
               <p className="text-xs text-[#6F5B55] mt-6">
                 Don't have an account?{' '}
@@ -281,9 +317,11 @@ function LoginPage({ onNavigate }) {
             <>
               <div className="text-left mb-8">
                 <button onClick={() => setIsForgotPassword(false)}
-                  className="inline-flex items-center space-x-2 text-xs font-semibold text-[#8D493A] hover:text-[#3E2723] mb-4 transition-colors">
-                  <ArrowLeft className="w-4 h-4" /><span>Back to Sign In</span>
+                  className="inline-flex items-center space-x-2 text-xs font-semibold text-[#8D493A] hover:text-[#3E2723] mb-5 transition-colors">
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back to Sign In</span>
                 </button>
+
                 <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">Reset Password</h1>
                 <p className="text-xs md:text-sm text-[#6F5B55]">
                   {verificationStep === 'email' && "Enter your verified account email to receive a verification code."}
@@ -313,7 +351,7 @@ function LoginPage({ onNavigate }) {
 
               {verificationStep === 'code' && (
                 <form onSubmit={handleCodeSubmit} className="space-y-6">
-                  <div className="text-left">
+                  <div>
                     <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-3 text-center">Verification Code</label>
                     <div className="flex justify-between gap-2 max-w-sm mx-auto">
                       {verificationCode.map((data, index) => (
@@ -321,7 +359,8 @@ function LoginPage({ onNavigate }) {
                           onChange={(e) => handleCodeChange(e.target, index)}
                           onKeyDown={(e) => handleKeyDown(e, index)}
                           onFocus={(e) => e.target.select()}
-                          className="w-12 h-12 bg-white border border-[#EADBC8] rounded-xl text-center text-sm font-bold text-[#2C1A14] focus:outline-none focus:border-[#8D493A] focus:ring-1 focus:ring-[#8D493A] transition-all" />
+                          className="w-12 h-12 bg-white border border-[#EADBC8] rounded-xl text-center text-sm font-bold text-[#2C1A14] focus:outline-none focus:border-[#8D493A] focus:ring-1 focus:ring-[#8D493A] transition-all"
+                        />
                       ))}
                     </div>
                   </div>
@@ -335,7 +374,7 @@ function LoginPage({ onNavigate }) {
               {verificationStep === 'success' && (
                 <div className="bg-[#FCDFD3]/15 border border-[#EADBC8]/30 rounded-xl p-5 flex flex-col items-center text-center">
                   <div className="w-12 h-12 bg-[var(--primary)]/20 rounded-full flex items-center justify-center mb-3">
-                    <ShieldCheck className="w-6 h-6 text-[var(--primary)]" />
+                    <span className="text-[#8D493A] text-2xl">✅</span>
                   </div>
                   <p className="text-sm font-bold text-[#8D493A] mb-1">Identity Verified</p>
                   <p className="text-xs text-[#6F5B55] leading-relaxed max-w-xs">

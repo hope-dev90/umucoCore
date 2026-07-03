@@ -4,16 +4,7 @@ dotenv.config();
 
 const requiredEnvVars = [
   'PORT',
-  'DB_HOST',
-  'DB_PORT',
-  'DB_NAME',
-  'DB_USER',
-  'DB_PASSWORD',
   'JWT_SECRET',
-  'EMAIL_HOST',
-  'EMAIL_PORT',
-  'EMAIL_USER',
-  'EMAIL_PASS'
 ];
 
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
@@ -31,26 +22,26 @@ if (process.env.JWT_SECRET.length < 32) {
 const config = {
   port: parseInt(process.env.PORT, 10) || 5000,
   db: {
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT, 10),
-    database: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT, 10) || 5432,
+    database: process.env.DB_NAME || 'umuco_core',
+    user: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD || 'password',
   },
   jwt: {
     secret: process.env.JWT_SECRET,
     expiresIn: '7d'
   },
   email: {
-    host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT, 10),
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    host: process.env.EMAIL_HOST || 'smtp.example.com',
+    port: parseInt(process.env.EMAIL_PORT, 10) || 587,
+    user: process.env.EMAIL_USER || 'test@example.com',
+    pass: process.env.EMAIL_PASS || 'password',
     from: process.env.EMAIL_FROM || process.env.EMAIL_USER
   },
   google: {
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET
+    clientId: process.env.GOOGLE_CLIENT_ID || '',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || ''
   }
 };
 

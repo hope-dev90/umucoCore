@@ -12,15 +12,11 @@ import helmet from "helmet";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import { initDB } from "./config/nedb.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-
-// Initialize NeDB database (seeds heritage, calendar, audio data)
-initDB();
 
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
