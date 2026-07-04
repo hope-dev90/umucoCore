@@ -5,11 +5,11 @@ import { useLanguage } from '../contexts/LanguageContext';
 import './Settings.css';
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { t } = useLanguage();
   const [editMode, setEditMode] = useState(false);
   const [name, setName] = useState(user?.name || '');
-  const [profileImage, setProfileImage] = useState(null);
+  const [profileImage, setProfileImage] = useState(user?.profileImage || null);
   const fileInputRef = useRef(null);
 
   const handleImageUpload = (e) => {
@@ -17,7 +17,9 @@ export default function Profile() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result);
+        const img = reader.result;
+        setProfileImage(img);
+        updateUser({ profileImage: img });
       };
       reader.readAsDataURL(file);
     }

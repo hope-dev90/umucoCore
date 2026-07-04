@@ -15,6 +15,12 @@ export function AuthProvider({ children }) {
     setLoading(false);
   }, []);
 
+  const updateUser = (newUser) => {
+    const updatedUser = { ...user, ...newUser };
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  };
+
   const login = async (email, password) => {
     const response = await fetch('http://localhost:5000/auth/login', {
       method: 'POST',
@@ -79,7 +85,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, googleLogin, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, googleLogin, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

@@ -128,7 +128,15 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
           <div className="topbar-icon-btn"><Icon d={Icons.bell} size={14} /></div>
           <div className="topbar-icon-btn"><Icon d={Icons.translate} size={14} /></div>
           <div className="topbar-avatar">
-            {user?.name ? user.name.charAt(0).toUpperCase() : 'MJ'}
+            {user?.profileImage ? (
+              <img 
+                src={user.profileImage} 
+                alt="Profile" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+              />
+            ) : (
+              user?.name ? user.name.charAt(0).toUpperCase() : 'MJ'
+            )}
           </div>
         </div>  
       </header>

@@ -274,6 +274,7 @@
   color: white;
   font-size: 12px;
   font-weight: 700;
+  overflow: hidden;
 }
 
 /* ── MAIN CONTENT ── */
