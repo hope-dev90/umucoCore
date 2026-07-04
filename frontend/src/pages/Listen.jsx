@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import './Listen.css';
@@ -6,26 +6,77 @@ import CraneStory from '../assets/listen/crane-story.jpg';
 import MoonStory from '../assets/listen/moon-story.jpg';
 import RuganzuImg from '../assets/listen/ruganzu.png';
 
+const fallbackImages = [CraneStory, MoonStory];
+
 export default function Listen() {
   const { t } = useLanguage();
   const [isPlaying, setIsPlaying] = useState(true);
+  const [fables, setFables] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const fables = [
-    {
-      genre: t('listen.migani'),
-      title: t('listen.craneStory'),
-      narrator: t('listen.narratedBy') + ' Jean d\'Amour',
-      duration: '12:40',
-      image: CraneStory,
-    },
-    {
-      genre: t('listen.migani'),
-      title: t('listen.moonStory'),
-      narrator: t('listen.narratedBy') + ' Beatrice U.',
-      duration: '15:15',
-      image: MoonStory,
-    },
-  ];
+  useEffect(() => {
+    const fetchAudio = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/audio");
+        const data = await res.json();
+        if (data.audio && data.audio.length > 0) {
+          setFables(
+            data.audio.map((item, i) => ({
+              id: item.id,
+              genre: item.category,
+              title: item.title,
+              narrator: item.description,
+              duration: item.duration
+                ? `${Math.floor(item.duration / 60)}:${String(
+                    item.duration % 60
+                  ).padStart(2, "0")}`
+                : "0:00",
+              image: fallbackImages[i % fallbackImages.length],
+            }))
+          );
+        } else {
+          setFables([
+            {
+              genre: t("listen.migani"),
+              title: t("listen.craneStory"),
+              narrator: t("listen.narratedBy") + " Jean d'Amour",
+              duration: "12:40",
+              image: CraneStory,
+            },
+            {
+              genre: t("listen.migani"),
+              title: t("listen.moonStory"),
+              narrator: t("listen.narratedBy") + " Beatrice U.",
+              duration: "15:15",
+              image: MoonStory,
+            },
+          ]);
+        }
+      } catch (err) {
+        console.error("Error fetching audio data:", err);
+        setFables([
+          {
+            genre: t("listen.migani"),
+            title: t("listen.craneStory"),
+            narrator: t("listen.narratedBy") + " Jean d'Amour",
+            duration: "12:40",
+            image: CraneStory,
+          },
+          {
+            genre: t("listen.migani"),
+            title: t("listen.moonStory"),
+            narrator: t("listen.narratedBy") + " Beatrice U.",
+            duration: "15:15",
+            image: MoonStory,
+          },
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAudio();
+  }, [t]);
 
   const proverbs = [
     {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -9,6 +9,23 @@ export default function Profile() {
   const { t } = useLanguage();
   const [editMode, setEditMode] = useState(false);
   const [name, setName] = useState(user?.name || '');
+  const [profileImage, setProfileImage] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
     <Layout searchPlaceholder="search.placeholder">
@@ -22,11 +39,35 @@ export default function Profile() {
           <div>
             <div className="profile-card">
               <div className="profile-avatar-wrap">
-                <div className="profile-avatar">
-                  <div className="profile-avatar-placeholder">
-                    {user?.name ? user.name.charAt(0).toUpperCase() : '👤'}
-                  </div>
+                <div 
+                  className="profile-avatar" 
+                  onClick={handleAvatarClick}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {profileImage ? (
+                    <img 
+                      src={profileImage} 
+                      alt="Profile" 
+                      style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        objectFit: 'cover',
+                        borderRadius: '50%'
+                      }}
+                    />
+                  ) : (
+                    <div className="profile-avatar-placeholder">
+                      {user?.name ? user.name.charAt(0).toUpperCase() : '👤'}
+                    </div>
+                  )}
                 </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                />
                 <div className="profile-name">{user?.name || 'Guest'}</div>
                 <div className="profile-role">{t('profile.role')}</div>
               </div>

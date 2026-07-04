@@ -13,11 +13,12 @@ const Icon = ({ d, size = 16, strokeWidth = 1.8 }) => (
 );
 
 const Icons = {
-  home:      "M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10",
-  explore:   "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z M12 7a3 3 0 100 6 3 3 0 000-6z",
-  listen:    "M9 18V5l12-2v13 M6 21a3 3 0 100-6 3 3 0 000 6z M18 19a3 3 0 100-6 3 3 0 000 6z",
-  collections:"M3 7h7v7H3z M14 7h7v7h-7z M3 17h7v4H3z M14 17h7v4h-7z",
-  kwibuka:   "M4 19.5A2.5 2.5 0 016.5 17H20 M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z",
+    home:      "M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10",
+    explore:   "M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z M12 7a3 3 0 100 6 3 3 0 000-6z",
+    listen:    "M9 18V5l12-2v13 M6 21a3 3 0 100-6 3 3 0 000 6z M18 19a3 3 0 100-6 3 3 0 000 6z",
+    videos:    "M23 7c0-1.1045695-.8954305-2-2-2H3c-1.1045695 0-2 .8954305-2 2v10c0 1.1045695.8954305 2 2 2h18c1.1045695 0 2-.8954305 2-2V7z M10 9l8 3-8 3V9z",
+    collections:"M3 7h7v7H3z M14 7h7v7h-7z M3 17h7v4H3z M14 17h7v4h-7z",
+    kwibuka:   "M4 19.5A2.5 2.5 0 016.5 17H20 M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z",
   intldays:  "M8 2v4 M16 2v4 M3 10h18 M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z",
   contribute:"M12 5v14 M5 12h14",
   saved:     "M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z",
@@ -38,12 +39,13 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
   const { language, setLanguage, t } = useLanguage();
 
   const mainNav = [
-    { label: t('sidebar.home'),              path: '/dashboard',   icon: 'home' },
-    { label: t('sidebar.explore'),           path: '/explore',     icon: 'explore' },
-    { label: t('sidebar.listen'),            path: '/listen',      icon: 'listen' },
-    { label: t('sidebar.collections'),       path: '/collections', icon: 'collections' },
-    { label: t('sidebar.kwibuka'),           path: '/kwibuka',     icon: 'kwibuka' },
-    { label: t('sidebar.intldays'),          path: '/intl-days',   icon: 'intldays' },
+    { label: t('sidebar.home'),          path: '/dashboard', icon: 'home' },
+    { label: t('sidebar.explore'),       path: '/explore',   icon: 'explore' },
+    { label: t('sidebar.listen'),        path: '/listen',    icon: 'listen' },
+    { label: t('sidebar.videos'),        path: '/videos',    icon: 'videos' },
+    { label: t('sidebar.collections'),   path: '/collections', icon: 'collections' },
+    { label: t('sidebar.kwibuka'),       path: '/kwibuka', icon: 'kwibuka' },
+    { label: t('sidebar.intldays'),      path: '/intl-days', icon: 'intldays' },
   ];
 
   const personalNav = [

@@ -1,32 +1,35 @@
 import { Router } from 'express';
+import {
+  getAllEvents,
+  getUpcomingEvents,
+  getTodayEvents,
+  getEventById,
+  createEvent,
+  updateEvent,
+  deleteEvent
+} from '../controller/calendarController.js';
 
 const router = Router();
 
-// ─── GET /api/calendar ───────────────────────────────────────────────────────
-router.get('/', async (req, res) => {
-  try {
-    res.json({ events: [], total: 0 });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch calendar events' });
-  }
-});
+// GET /api/calendar
+router.get('/', getAllEvents);
 
-// ─── GET /api/calendar/upcoming ──────────────────────────────────────────────
-router.get('/upcoming', async (req, res) => {
-  try {
-    res.json({ events: [] });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch upcoming events' });
-  }
-});
+// GET /api/calendar/upcoming
+router.get('/upcoming', getUpcomingEvents);
 
-// ─── GET /api/calendar/today ──────────────────────────────────────────────────
-router.get('/today', async (req, res) => {
-  try {
-    res.json({ events: [], hasEvents: false });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to check today's events" });
-  }
-});
+// GET /api/calendar/today
+router.get('/today', getTodayEvents);
+
+// GET /api/calendar/:id
+router.get('/:id', getEventById);
+
+// POST /api/calendar
+router.post('/', createEvent);
+
+// PUT /api/calendar/:id
+router.put('/:id', updateEvent);
+
+// DELETE /api/calendar/:id
+router.delete('/:id', deleteEvent);
 
 export default router;

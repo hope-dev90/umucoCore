@@ -11,6 +11,7 @@ import Signup      from './pages/Signup';
 import Home        from './pages/Home';
 import Explore     from './pages/Explore';
 import Listen      from './pages/Listen';
+import Videos      from './pages/Videos';
 import Collections from './pages/Collections';
 import Kwibuka     from './pages/Kwibuka';
 import IntlDays    from './pages/Intldays';
@@ -39,6 +40,7 @@ export default function App() {
               <Route path="/dashboard"    element={<Home />} />
               <Route path="/explore"      element={<Explore />} />
               <Route path="/listen"       element={<Listen />} />
+              <Route path="/videos"       element={<Videos />} />
               <Route path="/collections"  element={<Collections />} />
               <Route path="/kwibuka"      element={<Kwibuka />} />
               <Route path="/intl-days"    element={<IntlDays />} />

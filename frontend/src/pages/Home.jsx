@@ -74,6 +74,27 @@ export default function Home() {
     navigate('/explore');
   };
 
+  const handleExploreKwibuka = () => {
+    navigate('/kwibuka');
+  };
+
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: t('home.highlight.title'),
+          text: t('home.highlight.desc'),
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
+
   return (
     <Layout searchPlaceholder="search.placeholder">
       <div className="home-header">
@@ -101,7 +122,7 @@ export default function Home() {
                 <button className="btn-primary" onClick={handleExploreNow}>
                   {t('home.exploreNow')}
                 </button>
-                <button className="btn-outline">
+                <button className="btn-outline" onClick={handleShare}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <circle cx="18" cy="5" r="3" />
                     <circle cx="6" cy="12" r="3" />
@@ -157,7 +178,7 @@ export default function Home() {
                   <span className="days-num">31</span>
                   <span className="days-label">{t('home.daysToGo')}</span>
                 </div>
-                <button className="kwibuka-btn">{t('home.exploreKwibuka')}</button>
+                <button className="kwibuka-btn" onClick={handleExploreKwibuka}>{t('home.exploreKwibuka')}</button>
               </div>
             </div>
 

@@ -61,11 +61,105 @@ const ensureAuthSchema = async (client) => {
   `);
 };
 
+const ensureHeritageSchema = async (client) => {
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS heritage_items (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      category VARCHAR(100) NOT NULL,
+      location VARCHAR(255),
+      lat NUMERIC(10,6),
+      lng NUMERIC(10,6),
+      description TEXT,
+      image_url VARCHAR(255),
+      era VARCHAR(100),
+      region VARCHAR(100),
+      created_by INTEGER REFERENCES users(id),
+      is_active BOOLEAN DEFAULT true,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS calendar_events (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      description TEXT,
+      event_date DATE NOT NULL,
+      event_type VARCHAR(100) NOT NULL,
+      location VARCHAR(255),
+      is_featured BOOLEAN DEFAULT false,
+      created_by INTEGER REFERENCES users(id),
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS collections (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      description TEXT,
+      category VARCHAR(100),
+      image_url VARCHAR(255),
+      curated_by VARCHAR(255),
+      is_active BOOLEAN DEFAULT true,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS kwibuka_content (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      type VARCHAR(100) NOT NULL,
+      content TEXT,
+      media_url VARCHAR(255),
+      date DATE,
+      is_featured BOOLEAN DEFAULT false,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS audio_content (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      description TEXT,
+      audio_url VARCHAR(255) NOT NULL,
+      thumbnail_url VARCHAR(255),
+      duration INTEGER,
+      category VARCHAR(100),
+      is_featured BOOLEAN DEFAULT false,
+      created_by INTEGER REFERENCES users(id),
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS video_content (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      description TEXT,
+      video_url VARCHAR(255) NOT NULL,
+      thumbnail_url VARCHAR(255),
+      duration INTEGER,
+      category VARCHAR(100),
+      is_featured BOOLEAN DEFAULT false,
+      created_by INTEGER REFERENCES users(id),
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_heritage_category ON heritage_items(category);
+    CREATE INDEX IF NOT EXISTS idx_heritage_location ON heritage_items(location);
+    CREATE INDEX IF NOT EXISTS idx_calendar_date ON calendar_events(event_date);
+    CREATE INDEX IF NOT EXISTS idx_collections_category ON collections(category);
+    CREATE INDEX IF NOT EXISTS idx_audio_category ON audio_content(category);
+    CREATE INDEX IF NOT EXISTS idx_video_category ON video_content(category);
+  `);
+};
+
 export const connectDB = async () => {
   try {
     const client = await pool.connect();
     console.log(`Connected to PostgreSQL database: ${config.db.database}`);
     await ensureAuthSchema(client);
+    await ensureHeritageSchema(client);
     client.release();
   } catch (error) {
     console.error("Failed to connect to database:", error.message);

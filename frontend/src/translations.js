@@ -121,6 +121,7 @@ export const translations = {
     "sidebar.home": "Home",
     "sidebar.explore": "Explore",
     "sidebar.listen": "Listen",
+    "sidebar.videos": "Videos",
     "sidebar.collections": "Collections",
     "sidebar.kwibuka": "Kwibuka",
     "sidebar.intldays": "International Days",
@@ -324,6 +325,14 @@ export const translations = {
     "explore.preColonial": "Pre-colonial",
     "explore.colonial": "Colonial",
     "explore.post1994": "Post-1994",
+    "explore.places": "Places",
+    "explore.allPlaces": "All Places",
+    "explore.nyanza": "Nyanza",
+    "explore.musanze": "Musanze",
+    "explore.kibungo": "Kibungo",
+    "explore.gitarama": "Gitarama",
+    "explore.rubavu": "Rubavu",
+    "explore.map": "Heritage Map",
     "explore.discoverMore": "Discover More Heritage",
 
     // Collections page
@@ -365,11 +374,41 @@ export const translations = {
     "listen.craneStory": "Why the Crane has a Crown",
     "listen.moonStory": "The Man on the Moon",
     "listen.narratedBy": "Narrated by",
+
+    // Videos page
+    "videos.featured": "Inkuru Yagaragajwe ya Video",
+    "videos.intoreTitle": "Kwerekana intore",
+    "videos.intoreDesc":
+      "Kwerekana intore nk'bya gakondo by'u Rwanda byerekana imigenzo y'abakumyame.",
+    "videos.pause": "Hagarika",
+    "videos.watchNow": "Reba Nonaha",
+    "videos.addToLibrary": "Ongera mu Bubiko",
+    "videos.traditionalPerformances": "Imigambi y'ubutwari",
+    "videos.viewAll": "Reba Byose +",
+    "videos.performance": "Kwerekana",
+    "videos.crafts": "Ubuhanzi bw'Umwuga",
+    "videos.art": "Ubuhanzi",
+    "videos.narratedBy": "Yerekana na",
     "listen.dailyProverbs": "Daily Proverbs (Imigani Migufi)",
     "listen.transcriptHighlighting": "Transcript Highlighting",
     "listen.transcriptTag1": "Oral Tradition",
     "listen.transcriptTag2": "Poetry",
     "listen.transcriptTag3": "Historical Context",
+
+    // Videos page
+    "videos.featured": "Featured Video",
+    "videos.intoreTitle": "Intore Dance Performance",
+    "videos.intoreDesc":
+      "Traditional Rwandan Intore dance performance showcasing warrior traditions.",
+    "videos.pause": "Pause",
+    "videos.watchNow": "Watch Now",
+    "videos.addToLibrary": "Add to Library",
+    "videos.traditionalPerformances": "Traditional Performances",
+    "videos.viewAll": "View All +",
+    "videos.performance": "Performance",
+    "videos.crafts": "Crafts",
+    "videos.art": "Art",
+    "videos.narratedBy": "Presented by",
 
     // Saved Page
     "saved.title": "Saved Stories",
@@ -608,6 +647,7 @@ export const translations = {
     "sidebar.home": "Ahabanza",
     "sidebar.explore": "Sura",
     "sidebar.listen": "Umva",
+    "sidebar.videos": "Video",
     "sidebar.collections": "Amakusanyirizo",
     "sidebar.kwibuka": "Kwibuka",
     "sidebar.intldays": "Iminsi Mpuzamahanga",
@@ -813,6 +853,14 @@ export const translations = {
     "explore.preColonial": "Mbere y'Ubukoloni",
     "explore.colonial": "Igihe cy'Ubukoloni",
     "explore.post1994": "Nyuma ya 1994",
+    "explore.places": "Aho",
+    "explore.allPlaces": "Aho Hose",
+    "explore.nyanza": "Nyanza",
+    "explore.musanze": "Musanze",
+    "explore.kibungo": "Kibungo",
+    "explore.gitarama": "Gitarama",
+    "explore.rubavu": "Rubavu",
+    "explore.map": "Ibara ry'Umurage",
     "explore.discoverMore": "Sura Umuco Wongeye",
 
     // Collections page
