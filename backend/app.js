@@ -9,6 +9,7 @@ import collectionsRouter from "./routes/collectionsRoutes.js";
 import kwibukaRouter from "./routes/kwibukaRoutes.js";
 import audioRouter from "./routes/audioRoutes.js";
 import videoRouter from "./routes/videoRoutes.js";
+import gamificationRouter from "./routes/gamificationRoutes.js";
 import searchRouter from "./routes/searchRoutes.js";
 import express from "express";
 import helmet from "helmet";
@@ -24,6 +25,7 @@ const app = express();
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
     contentSecurityPolicy: false,
   }),
 );
@@ -58,6 +60,7 @@ app.use("/api/collections", collectionsRouter);
 app.use("/api/kwibuka", kwibukaRouter);
 app.use("/api/audio", audioRouter);
 app.use("/api/video", videoRouter);
+app.use("/api/gamification", gamificationRouter);
 app.use("/api/search", searchRouter);
 app.use("/api", searchRouter); // For /api/dashboard
 

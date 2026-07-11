@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useGamificationContext } from '../contexts/GamificationContext';
 import './Listen.css';
 import CraneStory from '../assets/listen/crane-story.jpg';
 import MoonStory from '../assets/listen/moon-story.jpg';
@@ -10,6 +11,7 @@ const fallbackImages = [CraneStory, MoonStory];
 
 export default function Listen() {
   const { t } = useLanguage();
+  const { awardXP } = useGamificationContext();
   const [isPlaying, setIsPlaying] = useState(true);
   const [fables, setFables] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +19,7 @@ export default function Listen() {
   useEffect(() => {
     const fetchAudio = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/audio");
+        const res = await fetch("http://localhost:5000/api/audio");
         const data = await res.json();
         if (data.audio && data.audio.length > 0) {
           setFables(
@@ -78,6 +80,22 @@ export default function Listen() {
     fetchAudio();
   }, [t]);
 
+  const [awardedItems, setAwardedItems] = useState(new Set());
+
+  const handleFableClick = useCallback((fable) => {
+    if (!awardedItems.has(fable.title)) {
+      awardXP(15, `Listened to story: ${fable.title}`);
+      setAwardedItems(prev => new Set([...prev, fable.title]));
+    }
+  }, [awardedItems, awardXP]);
+
+  const handleRuganzuClick = useCallback(() => {
+    if (!awardedItems.has('Ruganzu Epic')) {
+      awardXP(30, 'Listened to Ruganzu Epic');
+      setAwardedItems(prev => new Set([...prev, 'Ruganzu Epic']));
+    }
+  }, [awardedItems, awardXP]);
+
   const proverbs = [
     {
       text: '"Urukwavu rurinda rukuze rukonshwa n\'imbwa."',
@@ -109,7 +127,7 @@ export default function Listen() {
             <h1>{t('listen.ruganzuTitle')}</h1>
             <p>{t('listen.ruganzuDesc')}</p>
             <div className="featured-actions">
-              <button className="play-btn" onClick={() => setIsPlaying(p => !p)}>
+              <button className="play-btn" onClick={() => { setIsPlaying(p => !p); handleRuganzuClick(); }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   {isPlaying
                     ? <>
@@ -132,7 +150,7 @@ export default function Listen() {
             </div>
             <div className="fable-cards">
               {fables.map((fable, i) => (
-                <div key={i} className="fable-card">
+                <div key={i} className="fable-card" onClick={() => handleFableClick(fable)} style={{ cursor: 'pointer' }}>
                   <div className="fable-thumb">
                     <img src={fable.image} alt={fable.title} />
                   </div>

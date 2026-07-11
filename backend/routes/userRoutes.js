@@ -40,6 +40,21 @@ const uploadAvatar = multer({
   },
 });
 
+// ─── PUT /api/users/explorer-type ────────────────────────────────────────────
+router.put("/explorer-type", authMiddleware, async (req, res) => {
+  try {
+    const { explorerType } = req.body;
+    const valid = ['warrior', 'nature-lover', 'royal-historian', 'folktale-hunter', 'music-explorer'];
+    if (!valid.includes(explorerType))
+      return res.status(400).json({ error: "Invalid explorer type" });
+
+    await updateUserProfile(req.user.id, { explorer_type: explorerType });
+    res.json({ message: "Explorer type saved", explorerType });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to save explorer type" });
+  }
+});
+
 // ─── GET /api/users/profile ──────────────────────────────────────────────────
 router.get("/profile", authMiddleware, async (req, res) => {
   const { password, otp, otp_expires, ...safeUser } = req.user;

@@ -3,7 +3,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import authLeftBg from '../assets/login/tra.png';
 import authLeftBg2 from '../assets/login/tra2.png';
-import TribalLogo from './UmucoLogo';
+import UmucoLogo from './UmucoLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getLocalizedText } from '../utils/i18n';
@@ -204,198 +204,205 @@ function LoginPage({ onNavigate }) {
   };
 
   return (
-    <section className="w-full min-h-screen flex font-sans bg-[#FDFBF7]">
-      <LeftSlideshow t={t} language={language} />
+    <>
+      <section className="w-full min-h-screen flex font-sans bg-[#FDFBF7]">
+        <LeftSlideshow t={t} language={language} />
 
-      <div className="w-full lg:w-1/2 flex flex-col p-8 md:p-10 bg-[#FDFBF7]">
-        <div className="flex items-center justify-between w-full mb-8">
-          <button
-            onClick={() => onNavigate('home')}
-            className="inline-flex items-center space-x-2 text-xs font-semibold text-[#8D493A] hover:text-[#3E2723] transition-colors focus:outline-none"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span style={{ fontFamily: 'Poppins, sans-serif' }} className="font-semibold">{t('auth.backToHome')}</span>
-          </button>
-          <div className="flex items-center space-x-1.5">
-            <TribalLogo style={{ width: 50, height: 50, display: 'block', flexShrink: 0, overflow: 'hidden', borderRadius: '50%' }} />
+        <div className="w-full lg:w-1/2 flex flex-col p-8 md:p-10 bg-[#FDFBF7]">
+          <div className="flex items-center justify-between w-full mb-8">
+            <button
+              onClick={() => onNavigate('home')}
+              className="inline-flex items-center space-x-2 text-xs font-semibold text-[#8D493A] hover:text-[#3E2723] transition-colors focus:outline-none"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span style={{ fontFamily: 'Poppins, sans-serif' }} className="font-semibold">{t('auth.backToHome')}</span>
+            </button>
+            <div className="flex items-center space-x-1.5">
+              <UmucoLogo style={{ width: 50, height: 50, display: 'block', flexShrink: 0, overflow: 'hidden', borderRadius: '50%' }} />
+            </div>
           </div>
-        </div>
 
-        <div className="w-full max-w-sm mx-auto my-auto">
-          {!isForgotPassword ? (
-            <>
-              <div className="text-left mb-8">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">{t('auth.welcomeBack')}</h1>
-                <p className="text-xs md:text-sm text-[#6F5B55]">{t('auth.readyToAccess')}</p>
-              </div>
-
-              {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600">
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handleLoginSubmit} className="space-y-5">
-                <div className="relative text-left">
-                  <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">{t('auth.labelEmail')}</label>
-                  <div className="relative">
-                    <input type="email" name="email" value={formData.email} onChange={handleInputChange}
-                      placeholder={t('auth.placeholder.email')}
-                      className="w-full bg-white border border-[#EADBC8] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#2C1A14] placeholder-neutral-400 focus:outline-none focus:border-[#8D493A] transition-colors"
-                      required />
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><Mail className="w-4 h-4" /></span>
-                  </div>
+          <div className="w-full max-w-sm mx-auto my-auto">
+            {!isForgotPassword ? (
+              <>
+                <div className="text-left mb-8">
+                  <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">{t('auth.welcomeBack')}</h1>
+                  <p className="text-xs md:text-sm text-[#6F5B55]">{t('auth.readyToAccess')}</p>
                 </div>
 
-                <div className="relative text-left">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase">{t('auth.labelPassword')}</label>
-                    <button type="button" onClick={() => { setIsForgotPassword(true); setVerificationStep('email'); }}
-                      className="text-[10px] font-bold text-[#8D493A] hover:underline focus:outline-none">
-                      {t('auth.forgotPassword')}
-                    </button>
+                {error && (
+                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600">
+                    {error}
                   </div>
-                  <div className="relative">
-                    <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password}
-                      onChange={handleInputChange} placeholder={t('auth.placeholder.password')}
-                      className="w-full bg-white border border-[#EADBC8] rounded-xl pl-10 pr-10 py-2.5 text-xs text-[#2C1A14] placeholder-neutral-400 focus:outline-none focus:border-[#8D493A] transition-colors"
-                      required />
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><Lock className="w-4 h-4" /></span>
-                    <button type="button" onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none">
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
+                )}
 
-                <label className="flex items-center space-x-2 cursor-pointer select-none pt-1">
-                  <input type="checkbox" name="rememberMe" checked={formData.rememberMe} onChange={handleInputChange}
-                    className="accent-[#8D493A] h-4 w-4 rounded border-neutral-300" />
-                  <span className="text-xs text-[#6F5B55]">{t('auth.rememberMe')}</span>
-                </label>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-[#8D493A] hover:bg-[#3E2723] disabled:opacity-70 text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200 mt-2 flex items-center justify-center space-x-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                      </svg>
-                      <span>{t('auth.loading.signingIn')}</span>
-                    </>
-                  ) : (
-                    <span>{t('auth.signIn')}</span>
-                  )}
-                </button>
-              </form>
-
-              <div className="flex items-center my-6">
-                <div className="flex-grow border-t border-[#EADBC8]" />
-                <span className="mx-4 text-xs text-[#6F5B55]">{t('auth.orContinueWith')}</span>
-                <div className="flex-grow border-t border-[#EADBC8]" />
-              </div>
-
-              <div className="w-full">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleFailure}
-                  useOneTap
-                  theme="outline"
-                  shape="pill"
-                  size="large"
-                  width="100%"
-                />
-              </div>
-
-              <p className="text-xs text-[#6F5B55] mt-6">
-                {t('auth.noAccount')}{' '}
-                <button onClick={() => onNavigate('signup')} className="font-bold text-[#8D493A] hover:underline bg-transparent border-none p-0 cursor-pointer">
-                  {t('auth.signUp')}
-                </button>
-              </p>
-            </>
-          ) : (
-            <>
-              <div className="text-left mb-8">
-                <button onClick={() => setIsForgotPassword(false)}
-                  className="inline-flex items-center space-x-2 text-xs font-semibold text-[#8D493A] hover:text-[#3E2723] mb-5 transition-colors">
-                  <ArrowLeft className="w-4 h-4" />
-                  <span>{t('auth.backToSignIn')}</span>
-                </button>
-
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">{t('auth.resetPassword')}</h1>
-                <p className="text-xs md:text-sm text-[#6F5B55]">
-                  {verificationStep === 'email' && t('auth.reset.emailLabel')}
-                  {verificationStep === 'code' && `${t('auth.enterCode')} ${resetEmail}.`}
-                  {verificationStep === 'success' && t('auth.reset.successLabel')}
-                </p>
-              </div>
-
-              {verificationStep === 'email' && (
-                <form onSubmit={handleEmailSubmit} className="space-y-5">
+                <form onSubmit={handleLoginSubmit} className="space-y-5">
                   <div className="relative text-left">
                     <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">{t('auth.labelEmail')}</label>
                     <div className="relative">
-                      <input type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)}
+                      <input type="email" name="email" value={formData.email} onChange={handleInputChange}
                         placeholder={t('auth.placeholder.email')}
                         className="w-full bg-white border border-[#EADBC8] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#2C1A14] placeholder-neutral-400 focus:outline-none focus:border-[#8D493A] transition-colors"
                         required />
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><Mail className="w-4 h-4" /></span>
                     </div>
                   </div>
-                  <button type="submit"
-                    className="w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200">
-                    {t('auth.reset.sendCode')}
-                  </button>
-                </form>
-              )}
 
-              {verificationStep === 'code' && (
-                <form onSubmit={handleCodeSubmit} className="space-y-6">
-                  <div>
-                    <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-3 text-center">{t('auth.verificationCode')}</label>
-                    <div className="flex justify-between gap-2 max-w-sm mx-auto">
-                      {verificationCode.map((data, index) => (
-                        <input key={index} type="text" name="code" maxLength="1" value={data}
-                          onChange={(e) => handleCodeChange(e.target, index)}
-                          onKeyDown={(e) => handleKeyDown(e, index)}
-                          onFocus={(e) => e.target.select()}
-                          className="w-12 h-12 bg-white border border-[#EADBC8] rounded-xl text-center text-sm font-bold text-[#2C1A14] focus:outline-none focus:border-[#8D493A] focus:ring-1 focus:ring-[#8D493A] transition-all"
-                        />
-                      ))}
+                  <div className="relative text-left">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase">{t('auth.labelPassword')}</label>
+                      <button type="button" onClick={() => { setIsForgotPassword(true); setVerificationStep('email'); }}
+                        className="text-[10px] font-bold text-[#8D493A] hover:underline focus:outline-none">
+                        {t('auth.forgotPassword')}
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password}
+                        onChange={handleInputChange} placeholder={t('auth.placeholder.password')}
+                        className="w-full bg-white border border-[#EADBC8] rounded-xl pl-10 pr-10 py-2.5 text-xs text-[#2C1A14] placeholder-neutral-400 focus:outline-none focus:border-[#8D493A] transition-colors"
+                        required />
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><Lock className="w-4 h-4" /></span>
+                      <button type="button" onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none">
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
-                  <button type="submit"
-                    className="w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200">
-                    {t('auth.reset.verifyCode')}
+
+                  <label className="flex items-center space-x-2 cursor-pointer select-none pt-1">
+                    <input type="checkbox" name="rememberMe" checked={formData.rememberMe} onChange={handleInputChange}
+                      className="accent-[#8D493A] h-4 w-4 rounded border-neutral-300" />
+                    <span className="text-xs text-[#6F5B55]">{t('auth.rememberMe')}</span>
+                  </label>
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full bg-[#8D493A] hover:bg-[#3E2723] disabled:opacity-70 text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200 mt-2 flex items-center justify-center space-x-2"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }}>
+                          <UmucoLogo />
+                        </div>
+                        <span>{t('auth.loading.signingIn')}</span>
+                      </>
+                    ) : (
+                      <span>{t('auth.signIn')}</span>
+                    )}
                   </button>
                 </form>
-              )}
 
-              {verificationStep === 'success' && (
-                <div className="bg-[#FCDFD3]/15 border border-[#EADBC8]/30 rounded-xl p-5 flex flex-col items-center text-center">
-                  <div className="w-12 h-12 bg-[var(--primary)]/20 rounded-full flex items-center justify-center mb-3">
-                    <span className="text-[#8D493A] text-2xl">✅</span>
-                  </div>
-                  <p className="text-sm font-bold text-[#8D493A] mb-1">{t('auth.success.identityVerified')}</p>
-                  <p className="text-xs text-[#6F5B55] leading-relaxed max-w-xs">
-                    {t('auth.success.description')}
-                  </p>
-                  <button onClick={() => setIsForgotPassword(false)}
-                    className="mt-5 w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-2.5 px-4 rounded-xl font-semibold text-xs tracking-wide transition-colors">
-                    {t('auth.reset.backLogin')}
-                  </button>
+                <div className="flex items-center my-6">
+                  <div className="flex-grow border-t border-[#EADBC8]" />
+                  <span className="mx-4 text-xs text-[#6F5B55]">{t('auth.orContinueWith')}</span>
+                  <div className="flex-grow border-t border-[#EADBC8]" />
                 </div>
-              )}
-            </>
-          )}
+
+                <div className="w-full">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleFailure}
+                    useOneTap
+                    theme="outline"
+                    shape="pill"
+                    size="large"
+                    width="100%"
+                  />
+                </div>
+
+                <p className="text-xs text-[#6F5B55] mt-6">
+                  {t('auth.noAccount')}{' '}
+                  <button onClick={() => onNavigate('signup')} className="font-bold text-[#8D493A] hover:underline bg-transparent border-none p-0 cursor-pointer">
+                    {t('auth.signUp')}
+                  </button>
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-left mb-8">
+                  <button onClick={() => setIsForgotPassword(false)}
+                    className="inline-flex items-center space-x-2 text-xs font-semibold text-[#8D493A] hover:text-[#3E2723] mb-5 transition-colors">
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>{t('auth.backToSignIn')}</span>
+                  </button>
+
+                  <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">{t('auth.resetPassword')}</h1>
+                  <p className="text-xs md:text-sm text-[#6F5B55]">
+                    {verificationStep === 'email' && t('auth.reset.emailLabel')}
+                    {verificationStep === 'code' && `${t('auth.enterCode')} ${resetEmail}.`}
+                    {verificationStep === 'success' && t('auth.reset.successLabel')}
+                  </p>
+                </div>
+
+                {verificationStep === 'email' && (
+                  <form onSubmit={handleEmailSubmit} className="space-y-5">
+                    <div className="relative text-left">
+                      <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">{t('auth.labelEmail')}</label>
+                      <div className="relative">
+                        <input type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)}
+                          placeholder={t('auth.placeholder.email')}
+                          className="w-full bg-white border border-[#EADBC8] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#2C1A14] placeholder-neutral-400 focus:outline-none focus:border-[#8D493A] transition-colors"
+                          required />
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><Mail className="w-4 h-4" /></span>
+                      </div>
+                    </div>
+                    <button type="submit"
+                      className="w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200">
+                      {t('auth.reset.sendCode')}
+                    </button>
+                  </form>
+                )}
+
+                {verificationStep === 'code' && (
+                  <form onSubmit={handleCodeSubmit} className="space-y-6">
+                    <div>
+                      <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-3 text-center">{t('auth.verificationCode')}</label>
+                      <div className="flex justify-between gap-2 max-w-sm mx-auto">
+                        {verificationCode.map((data, index) => (
+                          <input key={index} type="text" name="code" maxLength="1" value={data}
+                            onChange={(e) => handleCodeChange(e.target, index)}
+                            onKeyDown={(e) => handleKeyDown(e, index)}
+                            onFocus={(e) => e.target.select()}
+                            className="w-12 h-12 bg-white border border-[#EADBC8] rounded-xl text-center text-sm font-bold text-[#2C1A14] focus:outline-none focus:border-[#8D493A] focus:ring-1 focus:ring-[#8D493A] transition-all"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <button type="submit"
+                      className="w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200">
+                      {t('auth.reset.verifyCode')}
+                    </button>
+                  </form>
+                )}
+
+                {verificationStep === 'success' && (
+                  <div className="bg-[#FCDFD3]/15 border border-[#EADBC8]/30 rounded-xl p-5 flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-[var(--primary)]/20 rounded-full flex items-center justify-center mb-3">
+                      <span className="text-[#8D493A] text-2xl">✅</span>
+                    </div>
+                    <p className="text-sm font-bold text-[#8D493A] mb-1">{t('auth.success.identityVerified')}</p>
+                    <p className="text-xs text-[#6F5B55] leading-relaxed max-w-xs">
+                      {t('auth.success.description')}
+                    </p>
+                    <button onClick={() => setIsForgotPassword(false)}
+                      className="mt-5 w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-2.5 px-4 rounded-xl font-semibold text-xs tracking-wide transition-colors">
+                      {t('auth.reset.backLogin')}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </>
   );
 }
 

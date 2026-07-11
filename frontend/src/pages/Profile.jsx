@@ -2,14 +2,79 @@ import React, { useState, useRef } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useGamification } from '../hooks/useGamification';
+import { XPBar } from '../components/Gamification/XPBar';
+import { BadgeCard } from '../components/Gamification/BadgeCard';
+import { CollectibleCard } from '../components/Gamification/CollectibleCard';
 import './Settings.css';
+import './Profile.css';
+
+// Per-explorer-type identity: icon, label, and an accent color that
+// tints the ID card band, role pill, and stat icons.
+const EXPLORER_PROFILES = {
+  warrior: {
+    icon: '🦁',
+    label: 'Warrior Explorer',
+    accent: '#8D493A',
+    accentDark: '#3E2723',
+    accentTint: 'rgba(141, 73, 58, 0.10)',
+  },
+  'nature-lover': {
+    icon: '🌿',
+    label: 'Nature Lover',
+    accent: '#4C7A50',
+    accentDark: '#2F4E32',
+    accentTint: 'rgba(76, 122, 80, 0.10)',
+  },
+  'royal-historian': {
+    icon: '👑',
+    label: 'Royal Historian',
+    accent: '#A9821F',
+    accentDark: '#6B5313',
+    accentTint: 'rgba(169, 130, 31, 0.10)',
+  },
+  'folktale-hunter': {
+    icon: '🎭',
+    label: 'Folktale Hunter',
+    accent: '#6B4A8D',
+    accentDark: '#412C56',
+    accentTint: 'rgba(107, 74, 141, 0.10)',
+  },
+  'music-explorer': {
+    icon: '🥁',
+    label: 'Music Explorer',
+    accent: '#1F7A8C',
+    accentDark: '#134A56',
+    accentTint: 'rgba(31, 122, 140, 0.10)',
+  },
+};
+
+const DEFAULT_PROFILE = {
+  icon: '🧭',
+  label: 'Explorer',
+  accent: '#8D493A',
+  accentDark: '#3E2723',
+  accentTint: 'rgba(141, 73, 58, 0.10)',
+};
 
 export default function Profile() {
   const { user, updateUser } = useAuth();
   const { t } = useLanguage();
+  const {
+    badges,
+    userBadges,
+    collectibles,
+    userCollectibles,
+    loading,
+    getNextLevelData,
+  } = useGamification();
+
   const [editMode, setEditMode] = useState(false);
   const [name, setName] = useState(user?.name || '');
-  const [profileImage, setProfileImage] = useState(user?.profileImage || null);
+  const [explorerType, setExplorerType] = useState(user?.explorerType || user?.explorer_type || null);
+  const [profileImage, setProfileImage] = useState(user?.profileImage || user?.avatar || null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const fileInputRef = useRef(null);
 
   const handleImageUpload = (e) => {
@@ -19,7 +84,7 @@ export default function Profile() {
       reader.onloadend = () => {
         const img = reader.result;
         setProfileImage(img);
-        updateUser({ profileImage: img });
+        updateUser({ profileImage: img, avatar: img });
       };
       reader.readAsDataURL(file);
     }
@@ -27,6 +92,68 @@ export default function Profile() {
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError('');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    try {
+      const token = localStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+
+      const profileResponse = await fetch('http://localhost:5000/api/users/profile', {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ fullName: name }),
+        signal: controller.signal,
+      });
+      if (!profileResponse.ok) {
+        const data = await profileResponse.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to save profile');
+      }
+
+      const explorerResponse = await fetch('http://localhost:5000/api/users/explorer-type', {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ explorerType }),
+        signal: controller.signal,
+      });
+      if (!explorerResponse.ok) {
+        const data = await explorerResponse.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to save explorer type');
+      }
+
+      updateUser({ name, explorerType, explorer_type: explorerType });
+      setEditMode(false);
+    } catch (err) {
+      setSaveError(err.name === 'AbortError'
+        ? 'Saving took too long. Please check the backend and try again.'
+        : err.message || 'Failed to save changes');
+    } finally {
+      clearTimeout(timeoutId);
+      setSaving(false);
+    }
+  };
+
+  const nextLevel = getNextLevelData();
+  const currentXP = user?.xp || 0;
+  const requiredXP = nextLevel?.requiredXP || 0;
+
+  const currentExplorerType = user?.explorerType || user?.explorer_type;
+  const explorer = EXPLORER_PROFILES[currentExplorerType] || DEFAULT_PROFILE;
+  const explorerLabel = (key) => t(`profile.explorer.${key}`) || EXPLORER_PROFILES[key]?.label || DEFAULT_PROFILE.label;
+
+  const unlockedBadgeCount = userBadges.filter((b) => b.unlockedAt).length;
+  const obtainedCollectibleCount = userCollectibles.filter((c) => c.obtainedAt).length;
+
+  // CSS custom properties feed the accent color into Profile.css without
+  // needing a stylesheet per explorer type.
+  const accentVars = {
+    '--accent': explorer.accent,
+    '--accent-dark': explorer.accentDark,
+    '--accent-tint': explorer.accentTint,
   };
 
   return (
@@ -37,28 +164,17 @@ export default function Profile() {
           <p>{t('profile.subtitle')}</p>
         </div>
 
-        <div className="settings-grid">
+        <div className="pf-grid">
+          {/* Left column: identity card + editable details */}
           <div>
-            <div className="profile-card">
-              <div className="profile-avatar-wrap">
-                <div 
-                  className="profile-avatar" 
-                  onClick={handleAvatarClick}
-                  style={{ cursor: 'pointer' }}
-                >
+            <div className="pf-id-card" style={accentVars}>
+              <div className="pf-id-card__band" />
+              <div className="pf-id-card__body">
+                <div className="pf-avatar" onClick={handleAvatarClick}>
                   {profileImage ? (
-                    <img 
-                      src={profileImage} 
-                      alt="Profile" 
-                      style={{ 
-                        width: '100%', 
-                        height: '100%', 
-                        objectFit: 'cover',
-                        borderRadius: '50%'
-                      }}
-                    />
+                    <img src={profileImage} alt="Profile" />
                   ) : (
-                    <div className="profile-avatar-placeholder">
+                    <div className="pf-avatar-placeholder">
                       {user?.name ? user.name.charAt(0).toUpperCase() : '👤'}
                     </div>
                   )}
@@ -70,10 +186,44 @@ export default function Profile() {
                   accept="image/*"
                   onChange={handleImageUpload}
                 />
-                <div className="profile-name">{user?.name || 'Guest'}</div>
-                <div className="profile-role">{t('profile.role')}</div>
-              </div>
+                <div className="pf-avatar-hint">{t('profile.tapToChangePhoto')}</div>
 
+                <div className="pf-name">{user?.name || 'Guest'}</div>
+                <div className="pf-role">
+                  <span aria-hidden="true">{explorer.icon}</span>
+                  {currentExplorerType ? explorerLabel(currentExplorerType) : t('gamification.explorer')}
+                </div>
+
+                <div className="pf-xp-wrap">
+                  <XPBar
+                    currentXP={currentXP}
+                    requiredXP={requiredXP}
+                    level={user?.level || 1}
+                  />
+                </div>
+
+                <div className="pf-stats">
+                  <div className="pf-stat">
+                    <div className="pf-stat__icon">🔥</div>
+                    <div className="pf-stat__value">{user?.currentStreak || 0}</div>
+                    <div className="pf-stat__label">{t('profile.streak')}</div>
+                  </div>
+                  <div className="pf-stat">
+                    <div className="pf-stat__icon">⭐</div>
+                    <div className="pf-stat__value">{user?.bestStreak || 0}</div>
+                    <div className="pf-stat__label">{t('profile.best')}</div>
+                  </div>
+                  <div className="pf-stat">
+                    <div className="pf-stat__icon">📅</div>
+                    <div className="pf-stat__value">{user?.totalDays || 0}</div>
+                    <div className="pf-stat__label">{t('profile.days')}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pf-details-card">
+              <div className="pf-details-title">{t('profile.accountDetails')}</div>
               <div className="form-group">
                 <label className="form-label">{t('profile.fullName')}</label>
                 <input
@@ -84,19 +234,87 @@ export default function Profile() {
                 />
               </div>
               <div className="form-group">
-                <label className="form-label">{t('profile.email')}</label>
-                <input
-                  className="form-input"
-                  value={user?.email || ''}
-                  disabled
-                />
+                <label className="form-label">{t('profile.explorerType')}</label>
+                {editMode ? (
+                  <select
+                    className="form-select"
+                    value={explorerType || ''}
+                    onChange={(e) => setExplorerType(e.target.value)}
+                  >
+                    <option value="" disabled>{t('profile.selectExplorerType')}</option>
+                    {Object.entries(EXPLORER_PROFILES).map(([key, profile]) => (
+                      <option key={key} value={key}>{explorerLabel(key)}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    className="form-input"
+                    value={currentExplorerType ? explorerLabel(currentExplorerType) : t('gamification.explorer')}
+                    disabled
+                  />
+                )}
               </div>
-              <button
-                className="btn-update"
-                onClick={() => setEditMode(!editMode)}
-              >
-                {editMode ? t('profile.save') : t('profile.edit')}
+              <div className="form-group">
+                <label className="form-label">{t('profile.email')}</label>
+                <input className="form-input" value={user?.email || ''} disabled />
+              </div>
+              {saveError && <div className="pf-empty" style={{ color: '#991B1B' }}>{saveError}</div>}
+              <button className="btn-update" disabled={saving} onClick={editMode ? handleSave : () => setEditMode(true)}>
+                {saving ? 'Saving...' : editMode ? t('profile.save') : t('profile.edit')}
               </button>
+            </div>
+          </div>
+
+          {/* Right column: badges + collectibles */}
+          <div className="pf-right-col">
+            <div className="pf-section">
+              <div className="pf-section__header">
+                <span className="pf-section__title">{t('profile.badges')}</span>
+                <span className="pf-section__count">
+                  {unlockedBadgeCount}/{badges.length}
+                </span>
+              </div>
+              {loading ? (
+                <div className="pf-empty">{t('profile.loadingBadges')}</div>
+              ) : badges.length === 0 ? (
+                <div className="pf-empty">{t('profile.noBadges')}</div>
+              ) : (
+                <div className="pf-section__grid">
+                  {badges.map((badge) => (
+                    <BadgeCard
+                      key={badge.id}
+                      badge={badge}
+                      unlocked={!!userBadges.find((ub) => ub.id === badge.id && ub.unlockedAt)}
+                      unlockedAt={userBadges.find((ub) => ub.id === badge.id)?.unlockedAt}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="pf-section">
+              <div className="pf-section__header">
+                <span className="pf-section__title">{t('profile.collectibles')}</span>
+                <span className="pf-section__count">
+                  {obtainedCollectibleCount}/{collectibles.length}
+                </span>
+              </div>
+              {loading ? (
+                <div className="pf-empty">{t('profile.loadingCollectibles')}</div>
+              ) : collectibles.length === 0 ? (
+                <div className="pf-empty">{t('profile.noCollectibles')}</div>
+              ) : (
+                <div className="pf-section__grid">
+                  {collectibles.map((collectible) => (
+                    <CollectibleCard
+                      key={collectible.id}
+                      collectible={collectible}
+                      collected={!!userCollectibles.find((uc) => uc.id === collectible.id && uc.obtainedAt)}
+                      obtainedAt={userCollectibles.find((uc) => uc.id === collectible.id)?.obtainedAt}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

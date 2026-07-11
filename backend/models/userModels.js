@@ -1,11 +1,11 @@
 import pool from "../config/db.js";
 
-export const createUser = async ({ name, email, password, role }) => {
+export const createUser = async ({ name, email, password, role, explorerType }) => {
   const result = await pool.query(
-    `INSERT INTO users (name, email, password, role) 
-     VALUES ($1, $2, $3, $4) 
+    `INSERT INTO users (name, email, password, role, explorer_type) 
+     VALUES ($1, $2, $3, $4, $5) 
      RETURNING *`,
-    [name, email, password, role || "user"],
+    [name, email, password, role || "user", explorerType || null],
   );
   return result.rows[0];
 };
@@ -21,14 +21,7 @@ export const createGoogleUser = async ({ googleId, name, email, role }) => {
 };
 
 export const findUserByEmail = async (email) => {
-  console.log("findUserByEmail called with email:", email);
-  const result = await pool.query("SELECT * FROM users WHERE email = $1", [
-    email,
-  ]);
-  console.log("findUserByEmail result row count:", result.rows.length);
-  if (result.rows.length > 0) {
-    console.log("findUserByEmail found user:", result.rows[0]);
-  }
+  const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
   return result.rows[0];
 };
 
@@ -38,9 +31,7 @@ export const findUserById = async (id) => {
 };
 
 export const findUserByGoogleId = async (googleId) => {
-  const result = await pool.query("SELECT * FROM users WHERE google_id = $1", [
-    googleId,
-  ]);
+  const result = await pool.query("SELECT * FROM users WHERE google_id = $1", [googleId]);
   return result.rows[0];
 };
 
@@ -49,22 +40,24 @@ export const getAllUsers = async () => {
   return result.rows;
 };
 
-export const saveOtp = async (email, otp, expiresAt) => {
+export const saveOtp = async (email, otp) => {
   await pool.query(
     `UPDATE users 
-     SET otp = $1, otp_expires = $2, updated_at = NOW() 
-     WHERE email = $3`,
-    [otp, expiresAt, email],
+     SET otp = $1, otp_expires = NOW() + interval '10 minutes', updated_at = NOW() 
+     WHERE email = $2`,
+    [otp, email],
   );
 };
 
 export const verifyOtp = async (email, otp) => {
-  const result = await pool.query(
-    `SELECT * FROM users 
-     WHERE email = $1 AND otp = $2 AND otp_expires > NOW()`,
+  const anyMatch = await pool.query(
+    `SELECT *, otp_expires > NOW() as is_valid FROM users 
+     WHERE email = $1 AND otp = $2`,
     [email, otp],
   );
-  return result.rows[0];
+  if (anyMatch.rows.length === 0) return { error: "invalid" };
+  if (!anyMatch.rows[0].is_valid) return { error: "expired" };
+  return anyMatch.rows[0];
 };
 
 export const clearOtp = async (email) => {
@@ -94,25 +87,21 @@ export const updatePassword = async (email, hashedPassword) => {
   );
 };
 
+/**
+ * Dynamically builds a parameterised UPDATE query.
+ * Fix: each SET clause must use $N placeholders, not raw interpolation.
+ */
 export const updateUserProfile = async (id, updates) => {
-  const setClauses = [];
-  const values = [];
-  let paramIndex = 1;
+  const entries = Object.entries(updates);
+  if (entries.length === 0) return null;
 
-  for (const [key, value] of Object.entries(updates)) {
-    setClauses.push(`${key} = $${paramIndex}`);
-    values.push(value);
-    paramIndex++;
-  }
-
-  setClauses.push(`updated_at = NOW()`);
+  const setClauses = entries.map(([key], i) => key + " = $" + (i + 1));
+  const values = entries.map(([, v]) => v);
+  const idParam = "$" + (entries.length + 1);
   values.push(id);
 
   const result = await pool.query(
-    `UPDATE users 
-     SET ${setClauses.join(", ")} 
-     WHERE id = $${paramIndex} 
-     RETURNING *`,
+    "UPDATE users SET " + setClauses.join(", ") + ", updated_at = NOW() WHERE id = " + idParam + " RETURNING *",
     values,
   );
   return result.rows[0];

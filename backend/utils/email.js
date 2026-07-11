@@ -2,16 +2,25 @@
 import nodemailer from "nodemailer";
 import config from "../config/env.js";
 
+let transporter;
+
 const createTransporter = () => {
-  return nodemailer.createTransport({
+  if (transporter) return transporter;
+
+  transporter = nodemailer.createTransport({
     host: config.email.host,
     port: config.email.port,
     secure: config.email.port === 465,
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 10000,
     auth: {
       user: config.email.user,
       pass: config.email.pass,
     },
   });
+
+  return transporter;
 };
 
 // GENERIC EMAIL SENDER

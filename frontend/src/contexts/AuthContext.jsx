@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useMemo, useCallback } from 'react';
 
 const AuthContext = createContext();
 
@@ -7,21 +7,74 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setLoading(false); // Ensure loading ends after 1 second max
+    }, 1000);
+
     const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    if (token && userData) {
-      setUser(JSON.parse(userData));
+    if (!token) {
+      clearTimeout(timeoutId); // Clear timeout if no token, we don't need to wait
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+    // Always fetch fresh user from server — never trust stale localStorage user object
+    fetch('http://localhost:5000/auth/profile', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => {
+        if (r.status === 401) return Promise.reject('unauthorized');
+        return r.ok ? r.json() : Promise.reject('server_error');
+      })
+      .then(data => {
+        if (data.user) {
+          // Restore locally-stored profileImage since it's not persisted to the backend
+          const cached = localStorage.getItem('user');
+          let localProfileImage = null;
+          if (cached) {
+            try { localProfileImage = JSON.parse(cached)?.profileImage || null; } catch (_) {}
+          }
+          const merged = { ...data.user, profileImage: localProfileImage || data.user.avatar || null };
+          setUser(merged);
+          localStorage.setItem('user', JSON.stringify(merged));
+        } else {
+          localStorage.removeItem('token');
+        }
+      })
+      .catch((reason) => {
+        // Only clear the token if the server explicitly rejected it (401)
+        // Network errors / server down → keep the token and use cached user
+        if (reason === 'unauthorized') {
+          localStorage.removeItem('token');
+        } else {
+          // Server unreachable — restore from cached user so the page doesn't disappear
+          const cached = localStorage.getItem('user');
+          if (cached) {
+            try { setUser(JSON.parse(cached)); } catch (_) { localStorage.removeItem('token'); }
+          } else {
+            localStorage.removeItem('token');
+          }
+        }
+      })
+      .finally(() => {
+        clearTimeout(timeoutId); // Clear timeout if fetch finishes before 1 sec
+        setLoading(false);
+      });
   }, []);
 
-  const updateUser = (newUser) => {
-    const updatedUser = { ...user, ...newUser };
-    setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-  };
+  const updateUser = useCallback((newUser) => {
+    setUser(prevUser => {
+      const updatedUser = { ...prevUser, ...newUser };
+      // Check if anything actually changed
+      const hasChanges = JSON.stringify(prevUser) !== JSON.stringify(updatedUser);
+      if (hasChanges) {
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return updatedUser;
+      }
+      return prevUser; // No changes, return previous to avoid re-render
+    });
+  }, []);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     const response = await fetch('http://localhost:5000/auth/login', {
       method: 'POST',
       headers: {
@@ -39,15 +92,15 @@ export function AuthProvider({ children }) {
     localStorage.setItem('user', JSON.stringify(data.user));
     setUser(data.user);
     return data;
-  };
+  }, []);
 
-  const register = async (name, email, password) => {
+  const register = useCallback(async (name, email, password, explorerType) => {
     const response = await fetch('http://localhost:5000/auth/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, explorerType }),
     });
     const data = await response.json();
 
@@ -56,9 +109,9 @@ export function AuthProvider({ children }) {
     }
 
     return data;
-  };
+  }, []);
 
-  const googleLogin = async (idToken) => {
+  const googleLogin = useCallback(async (idToken) => {
     const response = await fetch('http://localhost:5000/auth/google', {
       method: 'POST',
       headers: {
@@ -76,16 +129,26 @@ export function AuthProvider({ children }) {
     localStorage.setItem('user', JSON.stringify(data.user));
     setUser(data.user);
     return data;
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    user,
+    loading,
+    login,
+    register,
+    googleLogin,
+    logout,
+    updateUser,
+  }), [user, loading, login, register, googleLogin, logout, updateUser]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, googleLogin, logout, updateUser }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

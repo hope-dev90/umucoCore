@@ -1,10 +1,189 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Lock, Eye, EyeOff, User, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mail, Lock, Eye, EyeOff, User, ArrowLeft, Check, ArrowRight } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import authLeftBg from '../assets/signup/tra.png';
 import authLeftBg2 from '../assets/signup/tra2.png';
-import TribalLogo from './UmucoLogo';
+import authLeftBg3 from '../assets/signup/tra3.jpg';
+import UmucoLogo from './UmucoLogo';
 import { useAuth } from '../contexts/AuthContext';
+import ExplorerTypeImage from './ExplorerTypeImage';
+
+const EXPLORER_TYPES = [
+  {
+    id: 'warrior',
+    label: 'Warrior',
+    tagline: 'Battles, legends & brave deeds',
+    adventureTitle: 'Ready your shield, Warrior',
+    adventureSubtitle: 'Your saga begins the moment you sign up. Stories of courage, battle and honor await.',
+    cta: 'Begin the Battle',
+  },
+  {
+    id: 'nature-lover',
+    label: 'Nature Lover',
+    tagline: 'Forests, hills & wild places',
+    adventureTitle: 'Step into the wild, Nature Lover',
+    adventureSubtitle: "Rwanda's hills, forests and rivers are waiting to share their stories with you.",
+    cta: 'Start the Trail',
+  },
+  {
+    id: 'royal-historian',
+    label: 'Royal Historian',
+    tagline: 'Kings, courts & old dynasties',
+    adventureTitle: 'Enter the royal court, Historian',
+    adventureSubtitle: 'Centuries of kings, courts and dynasties are ready to be uncovered.',
+    cta: 'Claim the Throne',
+  },
+  {
+    id: 'folktale-hunter',
+    label: 'Folktale Hunter',
+    tagline: 'Myths, proverbs & fireside tales',
+    adventureTitle: 'Follow the tale, Folktale Hunter',
+    adventureSubtitle: 'Myths, proverbs and fireside stories are hidden throughout the archive, waiting to be found.',
+    cta: 'Chase the Legend',
+  },
+  {
+    id: 'music-explorer',
+    label: 'Music Explorer',
+    tagline: 'Rhythms, songs & instruments',
+    adventureTitle: 'Follow the rhythm, Music Explorer',
+    adventureSubtitle: 'Songs, instruments and rhythms passed down for generations are ready to be heard.',
+    cta: 'Strike the First Note',
+  },
+];
+
+/**
+ * Single-choice onboarding modal: "What kind of explorer are you?"
+ * Calls onContinue(explorerTypeId) once the person picks a card and taps Continue.
+ */
+function ExplorerTypeModal({ onContinue }) {
+  const [selected, setSelected] = useState(null);
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      style={{ backdropFilter: 'blur(10px)', backgroundColor: 'rgba(44,26,20,0.35)' }}
+    >
+      <div
+        className="w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        style={{
+          background: 'rgba(253,251,247,0.72)',
+          backdropFilter: 'blur(18px)',
+          border: '1px solid rgba(234,219,200,0.6)',
+          fontFamily: 'Poppins, sans-serif',
+        }}
+      >
+        {/* Header */}
+        <div className="px-8 pt-10 pb-2 text-center">
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2" style={{ color: '#8D493A' }}>
+            Choose your adventure
+          </p>
+          <h1 className="text-2xl font-bold mb-2" style={{ color: '#2C1A14' }}>
+            What kind of explorer are you?
+          </h1>
+          <p className="text-xs" style={{ color: '#6F5B55' }}>
+            We'll recommend stories that match your spirit.
+          </p>
+        </div>
+
+        {/* Options */}
+        <div className="px-6 py-6 space-y-3">
+          {EXPLORER_TYPES.map((type) => {
+            const isSelected = selected === type.id;
+            return (
+              <button
+                key={type.id}
+                type="button"
+                onClick={() => setSelected(type.id)}
+                className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-left transition-all"
+                style={{
+                  background: isSelected ? 'rgba(141,73,58,0.10)' : 'rgba(255,255,255,0.5)',
+                  border: isSelected ? '2px solid #8D493A' : '1px solid rgba(234,219,200,0.8)',
+                }}
+              >
+                <ExplorerTypeImage type={type.id} label={type.label} selected={isSelected} size={42} />
+                <span className="flex-1">
+                  <span className="block text-sm font-bold" style={{ color: '#2C1A14' }}>
+                    {type.label}
+                  </span>
+                  <span className="block text-xs" style={{ color: '#6F5B55' }}>
+                    {type.tagline}
+                  </span>
+                </span>
+                <span
+                  className="w-4 h-4 rounded-full flex-shrink-0"
+                  style={{
+                    border: `2px solid ${isSelected ? '#8D493A' : '#D9C6BC'}`,
+                    background: isSelected ? '#8D493A' : 'transparent',
+                  }}
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        <div className="px-8 pb-8 pt-2">
+          <button
+            type="button"
+            disabled={!selected}
+            onClick={() => onContinue(selected)}
+            className="w-full py-3.5 rounded-xl font-semibold text-xs tracking-widest uppercase transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+            style={{ background: '#8D493A', color: '#FFFFFF' }}
+          >
+            Continue
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VerificationNotice({ email }) {
+  return (
+    <div
+      className="fixed inset-0 z-[90] flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(44,26,20,0.28)', backdropFilter: 'blur(8px)' }}
+      role="status"
+      aria-live="polite"
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl p-6 text-center shadow-2xl"
+        style={{
+          background: '#FDFBF7',
+          border: '1px solid rgba(234,219,200,0.9)',
+          fontFamily: 'Poppins, sans-serif',
+        }}
+      >
+        <div
+          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
+          style={{ background: 'rgba(141,73,58,0.10)', color: '#8D493A' }}
+        >
+          <Mail className="h-5 w-5" />
+        </div>
+        <h2 className="mb-2 text-base font-bold" style={{ color: '#2C1A14' }}>
+          Check your email
+        </h2>
+        <p className="text-xs leading-relaxed" style={{ color: '#6F5B55' }}>
+          You're going to receive a verification code
+          {email ? (
+            <>
+              {' '}at <span className="font-semibold" style={{ color: '#2C1A14' }}>{email}</span>
+            </>
+          ) : null}
+          .
+        </p>
+        <div className="mt-5 flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-widest" style={{ color: '#8D493A' }}>
+          <span
+            className="h-3 w-3 rounded-full border-2 border-current border-t-transparent"
+            style={{ animation: 'spin 0.8s linear infinite' }}
+          />
+          Sending code
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const SLIDES = [
   {
@@ -18,6 +197,12 @@ const SLIDES = [
     heading: "Enter the",
     accent: "Archive.",
     quote: '"Be part of Rwanda\'s living treasury of culture and tradition."',
+  },
+    {
+    src: authLeftBg3,
+    heading: "Enter the",
+    accent: "Archive.",
+    quote: '"Be explore every part of Rwanda\'s culture."',
   }
 ];
 
@@ -126,14 +311,31 @@ function LeftSlideshow() {
 }
 
 function SignUpPage({ onNavigate }) {
+  const [showExplorerModal, setShowExplorerModal] = useState(false);
+  const [explorerType, setExplorerType] = useState(null);
+
+  // Show the modal after a short delay so the signup page is visible first
+  useEffect(() => {
+    const timer = setTimeout(() => setShowExplorerModal(true), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
   const [showPassword, setShowPassword] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
   const [isSuccess, setIsSuccess] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '', termsAccepted: false });
   const [isLoading, setIsLoading] = useState(false);
+  const [showVerificationNotice, setShowVerificationNotice] = useState(false);
   const [error, setError] = useState('');
-  const { register, googleLogin } = useAuth();
+  const { register, googleLogin, updateUser } = useAuth();
+
+  const selectedExplorer = EXPLORER_TYPES.find((t) => t.id === explorerType) || null;
+
+  const handleExplorerContinue = (typeId) => {
+    setExplorerType(typeId);
+    setShowExplorerModal(false);
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -153,18 +355,33 @@ function SignUpPage({ onNavigate }) {
       e.target.previousSibling.focus();
   };
 
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (!pasted) return;
+    const newCode = [...verificationCode];
+    pasted.split('').forEach((char, i) => { newCode[i] = char; });
+    setVerificationCode(newCode);
+    // Focus the next empty box or the last one
+    const nextIndex = Math.min(pasted.length, 5);
+    const inputs = e.target.closest('.flex').querySelectorAll('input');
+    if (inputs[nextIndex]) inputs[nextIndex].focus();
+  };
+
   const handleSignUpSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setShowVerificationNotice(true);
     setError('');
 
     try {
-      await register(formData.name, formData.email, formData.password);
+      await register(formData.name, formData.email, formData.password, explorerType);
       setIsVerifying(true);
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
+      setShowVerificationNotice(false);
     }
   };
 
@@ -188,11 +405,47 @@ function SignUpPage({ onNavigate }) {
         throw new Error(data.message || 'Verification failed');
       }
 
+      // Store the token and user in localStorage and AuthContext
+      if (data.token && data.user) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        const userToSet = { ...data.user, explorerType: data.user.explorerType || explorerType };
+        updateUser(userToSet);
+      }
+
       setIsSuccess(true);
     } catch (err) {
       setError(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendLoading, setResendLoading] = useState(false);
+
+  const handleResendOtp = async () => {
+    setResendLoading(true);
+    setError('');
+    try {
+      const response = await fetch('http://localhost:5000/auth/resend-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to resend OTP');
+      setResendCooldown(30);
+      const interval = setInterval(() => {
+        setResendCooldown(prev => {
+          if (prev <= 1) { clearInterval(interval); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -216,45 +469,49 @@ function SignUpPage({ onNavigate }) {
   };
 
   if (isSuccess) {
+    const explorerInfo = EXPLORER_TYPES.find(t => t.id === explorerType);
     return (
       <div className="fixed inset-0 w-full min-h-screen flex items-center justify-center bg-[#FDFBF7]" style={{ fontFamily: 'Poppins, sans-serif' }}>
         <div className="flex flex-col items-center text-center px-8 max-w-md mx-auto">
-          <div className="relative mb-8">
-            <div
-              style={{
-                position: 'absolute',
-                inset: '-12px',
-                borderRadius: '50%',
-                background: 'radial-gradient(circle, rgba(255,215,0,0.35) 0%, rgba(255,140,0,0.12) 60%, transparent 80%)',
-                animation: 'pulse-glow 1.5s ease-in-out infinite',
-              }}
-            />
-            <TribalLogo style={{ width: 100, height: 100, display: 'block', overflow: 'hidden', borderRadius: '50%', position: 'relative', zIndex: 1 }} />
+
+          {/* Glowing logo */}
+          <div className="relative mb-6">
+            <div style={{ position: 'absolute', inset: '-12px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,215,0,0.35) 0%, rgba(255,140,0,0.12) 60%, transparent 80%)', animation: 'pulse-glow 1.5s ease-in-out infinite' }} />
+            <UmucoLogo style={{ width: 90, height: 90, display: 'block', overflow: 'hidden', borderRadius: '50%', position: 'relative', zIndex: 1 }} />
           </div>
 
-          <h1 className="text-3xl font-bold text-[#2C1A14] mb-3 leading-tight">
-            You're in! 🎉
+          {/* Explorer badge */}
+          {explorerInfo && (
+            <div className="flex items-center gap-2 mb-4 px-4 py-2 rounded-full" style={{ background: 'rgba(141,73,58,0.10)', border: '1px solid rgba(141,73,58,0.2)' }}>
+              <ExplorerTypeImage type={explorerInfo.id} label={explorerInfo.label} size={24} />
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#8D493A' }}>{explorerInfo.label}</span>
+            </div>
+          )}
+
+          <h1 className="text-3xl font-bold text-[#2C1A14] mb-2 leading-tight">
+            {explorerInfo ? explorerInfo.adventureTitle : "You're in! 🎉"}
           </h1>
           <p className="text-sm text-[#6F5B55] leading-relaxed mb-1">
-            Welcome to UmucoCore,{' '}
-            <span className="font-semibold text-[#2C1A14]">{formData.name}</span>.
+            Welcome to UmucoCore, <span className="font-semibold text-[#2C1A14]">{formData.name}</span>.
           </p>
-          <p className="text-xs text-[#8D493A]/70 mb-10 tracking-wide">
-            Your cultural gateway is ready.
+          <p className="text-xs text-[#8D493A]/70 mb-3 tracking-wide">
+            {explorerInfo ? explorerInfo.adventureSubtitle : 'Your cultural gateway is ready.'}
           </p>
 
-          <div className="w-12 h-[2px] bg-[#8D493A]/30 rounded-full mb-10" />
+          {/* XP badge */}
+          <div className="flex items-center gap-2 mb-8 px-4 py-2 rounded-full" style={{ background: 'linear-gradient(135deg, #8D493A, #C4724A)', color: '#fff' }}>
+            <span className="text-lg">⚡</span>
+            <span className="text-xs font-bold tracking-wide">+50 XP — Explorer Unlocked!</span>
+          </div>
 
-          <button
-            onClick={() => onNavigate('dashboard')}
-            className="w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-3.5 px-6 rounded-xl font-semibold text-sm tracking-wide transition-colors duration-200 mb-3"
-          >
-            Enter the Archive →
+          <div className="w-12 h-[2px] bg-[#8D493A]/30 rounded-full mb-8" />
+
+          <button onClick={() => onNavigate('dashboard')}
+            className="w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-3.5 px-6 rounded-xl font-semibold text-sm tracking-wide transition-colors duration-200 mb-3">
+            {explorerInfo ? explorerInfo.cta + ' →' : 'Enter the Archive →'}
           </button>
-          <button
-            onClick={() => onNavigate('home')}
-            className="w-full border border-[#EADBC8] text-[#6F5B55] hover:bg-[#FCDFD3]/20 py-3 px-6 rounded-xl text-xs font-medium transition-colors duration-200"
-          >
+          <button onClick={() => onNavigate('home')}
+            className="w-full border border-[#EADBC8] text-[#6F5B55] hover:bg-[#FCDFD3]/20 py-3 px-6 rounded-xl text-xs font-medium transition-colors duration-200">
             Back to Home
           </button>
 
@@ -268,6 +525,10 @@ function SignUpPage({ onNavigate }) {
             0%, 100% { opacity: 0.7; transform: scale(1); }
             50% { opacity: 1; transform: scale(1.08); }
           }
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
         `}</style>
       </div>
     );
@@ -275,6 +536,10 @@ function SignUpPage({ onNavigate }) {
 
   return (
     <section className="w-full min-h-screen flex font-sans bg-[#FDFBF7]">
+      {showVerificationNotice && !isVerifying && (
+        <VerificationNotice email={formData.email} />
+      )}
+
       <LeftSlideshow />
 
       <div className="w-full lg:w-1/2 flex flex-col p-8 md:p-10 bg-[#FDFBF7]">
@@ -287,7 +552,7 @@ function SignUpPage({ onNavigate }) {
             <span style={{ fontFamily: 'Poppins, sans-serif' }} className="font-semibold">Back to Home</span>
           </button>
           <div className="flex items-center space-x-1.5">
-            <TribalLogo style={{ width: 50, height: 50, display: 'block', flexShrink: 0, overflow: 'hidden', borderRadius: '50%' }} />
+            <UmucoLogo style={{ width: 50, height: 50, display: 'block', flexShrink: 0, overflow: 'hidden', borderRadius: '50%' }} />
           </div>
         </div>
 
@@ -295,8 +560,26 @@ function SignUpPage({ onNavigate }) {
           {!isVerifying ? (
             <>
               <div className="text-left mb-8">
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">Create Account</h1>
-                <p className="text-xs md:text-sm text-[#6F5B55]">Set up your profile to the heritage gateway.</p>
+                {selectedExplorer && (
+                  <div
+                    className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full"
+                    style={{ background: 'rgba(141,73,58,0.10)' }}
+                  >
+                    <ExplorerTypeImage type={selectedExplorer.id} label={selectedExplorer.label} size={22} />
+                    <span
+                      className="text-[10px] font-bold uppercase tracking-widest"
+                      style={{ color: '#8D493A' }}
+                    >
+                      {selectedExplorer.label}
+                    </span>
+                  </div>
+                )}
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">
+                  {selectedExplorer ? selectedExplorer.adventureTitle : 'Create Account'}
+                </h1>
+                <p className="text-xs md:text-sm text-[#6F5B55]">
+                  {selectedExplorer ? selectedExplorer.adventureSubtitle : 'Set up your profile to the heritage gateway.'}
+                </p>
               </div>
 
               {error && (
@@ -359,14 +642,13 @@ function SignUpPage({ onNavigate }) {
                 >
                   {isLoading ? (
                     <>
-                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                      </svg>
+                      <div style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }}>
+                        <UmucoLogo />
+                      </div>
                       <span>Creating Account...</span>
                     </>
                   ) : (
-                    <span>Sign Up</span>
+                    <span>{selectedExplorer ? selectedExplorer.cta : 'Sign Up'}</span>
                   )}
                 </button>
               </form>
@@ -381,7 +663,6 @@ function SignUpPage({ onNavigate }) {
                 <GoogleLogin
                   onSuccess={handleGoogleSuccess}
                   onError={handleGoogleFailure}
-                  useOneTap
                   theme="outline"
                   shape="pill"
                   size="large"
@@ -434,6 +715,7 @@ function SignUpPage({ onNavigate }) {
                         value={data}
                         onChange={(e) => handleCodeChange(e.target, index)}
                         onKeyDown={(e) => handleKeyDown(e, index)}
+                        onPaste={handlePaste}
                         onFocus={(e) => e.target.select()}
                         className="w-12 h-12 bg-white border border-[#EADBC8] rounded-xl text-center text-sm font-bold text-[#2C1A14] focus:outline-none focus:border-[#8D493A] focus:ring-1 focus:ring-[#8D493A] transition-all"
                       />
@@ -448,10 +730,9 @@ function SignUpPage({ onNavigate }) {
                 >
                   {isLoading ? (
                     <>
-                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                      </svg>
+                      <div style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }}>
+                        <UmucoLogo />
+                      </div>
                       <span>Verifying...</span>
                     </>
                   ) : (
@@ -459,6 +740,18 @@ function SignUpPage({ onNavigate }) {
                   )}
                 </button>
               </form>
+
+              <p className="text-xs text-[#6F5B55] mt-5 text-center">
+                Didn't receive it?{' '}
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={resendCooldown > 0 || resendLoading}
+                  className="font-bold text-[#8D493A] hover:underline bg-transparent border-none p-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {resendLoading ? 'Sending...' : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
+                </button>
+              </p>
             </>
           )}
         </div>

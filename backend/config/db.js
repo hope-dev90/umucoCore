@@ -55,9 +55,183 @@ const ensureAuthSchema = async (client) => {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS accessibility JSONB DEFAULT '{"fontSize": "medium", "highContrast": false, "reduceMotion": false}'::jsonb;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
     ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+    -- New columns for gamification and explorer type
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS explorer_type VARCHAR(50);
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS xp INTEGER DEFAULT 0;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS level INTEGER DEFAULT 1;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS current_streak INTEGER DEFAULT 0;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS best_streak INTEGER DEFAULT 0;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS total_days INTEGER DEFAULT 0;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_date DATE;
 
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);
+  `);
+};
+
+const ensureGamificationSchema = async (client) => {
+  await client.query(`
+    -- Levels configuration
+    CREATE TABLE IF NOT EXISTS levels (
+      id SERIAL PRIMARY KEY,
+      level INTEGER UNIQUE NOT NULL,
+      name VARCHAR(100) NOT NULL,
+      required_xp INTEGER NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Badges
+    CREATE TABLE IF NOT EXISTS badges (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      description TEXT,
+      icon VARCHAR(255),
+      rarity VARCHAR(50) DEFAULT 'common',
+      xp_reward INTEGER DEFAULT 0,
+      trigger_type VARCHAR(50),
+      trigger_value INTEGER,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    ALTER TABLE badges ADD COLUMN IF NOT EXISTS trigger_type VARCHAR(50);
+    ALTER TABLE badges ADD COLUMN IF NOT EXISTS trigger_value INTEGER;
+
+    -- User badges
+    CREATE TABLE IF NOT EXISTS user_badges (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      badge_id INTEGER REFERENCES badges(id) ON DELETE CASCADE,
+      unlocked_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(user_id, badge_id)
+    );
+
+    -- Achievements
+    CREATE TABLE IF NOT EXISTS achievements (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      description TEXT,
+      type VARCHAR(50) DEFAULT 'progress',
+      target_value INTEGER,
+      xp_reward INTEGER DEFAULT 0,
+      is_hidden BOOLEAN DEFAULT false,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- User achievements
+    CREATE TABLE IF NOT EXISTS user_achievements (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      achievement_id INTEGER REFERENCES achievements(id) ON DELETE CASCADE,
+      current_progress INTEGER DEFAULT 0,
+      unlocked_at TIMESTAMPTZ,
+      UNIQUE(user_id, achievement_id)
+    );
+
+    -- Collectibles
+    CREATE TABLE IF NOT EXISTS collectibles (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      description TEXT,
+      icon VARCHAR(255),
+      rarity VARCHAR(50) DEFAULT 'common',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- User collectibles
+    CREATE TABLE IF NOT EXISTS user_collectibles (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      collectible_id INTEGER REFERENCES collectibles(id) ON DELETE CASCADE,
+      obtained_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(user_id, collectible_id)
+    );
+
+    -- XP Logs
+    CREATE TABLE IF NOT EXISTS xp_logs (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      amount INTEGER NOT NULL,
+      reason VARCHAR(255) NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Daily Streaks
+    CREATE TABLE IF NOT EXISTS daily_streaks (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      login_date DATE NOT NULL,
+      UNIQUE(user_id, login_date)
+    );
+
+    -- Notifications
+    CREATE TABLE IF NOT EXISTS notifications (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      type VARCHAR(50) NOT NULL,
+      title VARCHAR(255) NOT NULL,
+      message TEXT,
+      is_read BOOLEAN DEFAULT false,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Reward history
+    CREATE TABLE IF NOT EXISTS reward_history (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      reward_type VARCHAR(50) NOT NULL,
+      reward_data JSONB,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Bookmarks
+    CREATE TABLE IF NOT EXISTS bookmarks (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      item_type VARCHAR(50) NOT NULL,
+      item_id INTEGER NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(user_id, item_type, item_id)
+    );
+
+    -- Reading history
+    CREATE TABLE IF NOT EXISTS reading_history (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      item_type VARCHAR(50) NOT NULL,
+      item_id INTEGER NOT NULL,
+      xp_earned INTEGER DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Insert default levels
+    INSERT INTO levels (level, name, required_xp) VALUES 
+      (1, 'Village Child', 0),
+      (2, 'Story Seeker', 500),
+      (3, 'Tradition Keeper', 1500),
+      (4, 'Culture Guardian', 3500),
+      (5, 'Master Griot', 7000),
+      (6, 'Legend of Rwanda', 15000)
+    ON CONFLICT (level) DO NOTHING;
+
+    -- Insert default badges
+    INSERT INTO badges (name, description, icon, rarity, xp_reward) VALUES
+      ('First Story', 'Read your first story', '📖', 'common', 50),
+      ('7 Day Streak', 'Log in 7 days in a row', '🔥', 'rare', 100),
+      ('Royal Reader', 'Reach level 4', '👑', 'epic', 200),
+      ('Wildlife Expert', 'Collect 5 nature-related collectibles', '🦍', 'rare', 150),
+      ('Culture Legend', 'Reach level 6', '🏆', 'legendary', 500)
+    ON CONFLICT DO NOTHING;
+
+    -- Insert default collectibles
+    INSERT INTO collectibles (name, description, icon, rarity) VALUES
+      ('Inanga Harp', 'The traditional Rwandan harp', '🎵', 'common'),
+      ('Agaseke Peace Basket', 'Symbol of peace and prosperity', '🧺', 'common'),
+      ('Royal Crown', 'Worn by Rwandan kings', '👑', 'rare'),
+      ('Drum', 'Traditional Rwandan drum', '🥁', 'common'),
+      ('Cow Bell', 'Used in traditional ceremonies', '🔔', 'common'),
+      ('Clay Pot', 'Traditional pottery', '🏺', 'uncommon'),
+      ('Spear', 'Symbol of warrior heritage', '⚔️', 'rare')
+    ON CONFLICT DO NOTHING;
   `);
 };
 
@@ -158,8 +332,10 @@ export const connectDB = async () => {
   try {
     const client = await pool.connect();
     console.log(`Connected to PostgreSQL database: ${config.db.database}`);
+    // Run schema setups in parallel — they touch different tables
     await ensureAuthSchema(client);
     await ensureHeritageSchema(client);
+    await ensureGamificationSchema(client);
     client.release();
   } catch (error) {
     console.error("Failed to connect to database:", error.message);

@@ -20,6 +20,7 @@ import {
   updatePassword,
   updateUserProfile,
 } from "../models/userModels.js";
+import { recordDailyLogin } from "../models/gamificationModel.js";
 
 const googleClient = new OAuth2Client(config.google.clientId, null, {
   clock_tolerance: 7200,
@@ -36,7 +37,7 @@ const generateOtp = () => {
 };
 
 export const register = async (req, res) => {
-  const { name, email, password, role = "user" } = req.body;
+  const { name, email, password, role = "user", explorerType } = req.body;
 
   try {
     if (!name || !email || !password) {
@@ -67,13 +68,22 @@ export const register = async (req, res) => {
       });
     }
 
-    console.log("Checking for existing user with email:", email);
+    // Validate explorer type
+    const validExplorerTypes = [
+      "warrior",
+      "nature-lover",
+      "royal-historian",
+      "folktale-hunter",
+      "music-explorer",
+    ];
+    if (explorerType && !validExplorerTypes.includes(explorerType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid explorer type",
+      });
+    }
+
     const existingUser = await findUserByEmail(email);
-    console.log(
-      "Existing user found?",
-      existingUser ? "Yes" : "No",
-      existingUser,
-    );
     if (existingUser) {
       return errorResponse(
         res,
@@ -82,19 +92,19 @@ export const register = async (req, res) => {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await createUser({
       name,
       email,
       password: hashedPassword,
       role,
+      explorerType,
     });
 
     const otp = generateOtp();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    await saveOtp(email, otp, expiresAt);
+    await saveOtp(email, otp);
 
     // Try to send email, but don't fail registration if email fails
     try {
@@ -130,6 +140,39 @@ export const register = async (req, res) => {
   }
 };
 
+export const resendOtp = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
+
+    const user = await findUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "No account found with this email" });
+    }
+
+    if (user.is_verified) {
+      return res.status(400).json({ success: false, message: "Email already verified" });
+    }
+
+    const otp = generateOtp();
+    await saveOtp(email, otp);
+
+    try {
+      await sendOtpEmail({ to: email, otp, purpose: "verify your email", name: user.name });
+    } catch (emailError) {
+      console.warn("Resend OTP email failed:", emailError.message);
+    }
+
+    return res.status(200).json({ success: true, message: "A new verification code has been sent to your email." });
+  } catch (error) {
+    console.error("Resend OTP error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
 export const verifyEmail = async (req, res) => {
   const { email, otp } = req.body;
 
@@ -142,19 +185,49 @@ export const verifyEmail = async (req, res) => {
     }
 
     const user = await verifyOtp(email, otp);
-    if (!user) {
+    if (!user || user.error) {
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired OTP",
+        message: user?.error === 'expired'
+          ? 'OTP has expired. Please request a new one.'
+          : 'Invalid OTP. Please check the code and try again.',
       });
     }
 
     await markEmailVerified(email);
     await clearOtp(email);
 
+    const verifiedUser = await findUserByEmail(email);
+    
+    // Record daily login for gamification
+    let dailyLoginResult;
+    try {
+      dailyLoginResult = await recordDailyLogin(verifiedUser.id);
+    } catch (loginError) {
+      console.error("Daily login error:", loginError);
+      dailyLoginResult = null;
+    }
+
+    const token = generateToken(verifiedUser.id);
+
     return res.status(200).json({
       success: true,
       message: "Email verified",
+      token,
+      user: {
+        id: verifiedUser.id,
+        name: verifiedUser.name,
+        email: verifiedUser.email,
+        role: verifiedUser.role,
+        explorerType: verifiedUser.explorer_type,
+        xp: verifiedUser.xp,
+        level: verifiedUser.level,
+        currentStreak: verifiedUser.current_streak,
+        bestStreak: verifiedUser.best_streak,
+        totalDays: verifiedUser.total_days,
+        avatar: verifiedUser.avatar,
+      },
+      dailyLogin: dailyLoginResult,
     });
   } catch (error) {
     console.error("Verify email error:", error);
@@ -203,6 +276,15 @@ export const login = async (req, res) => {
 
     const token = generateToken(user.id);
 
+    // Record daily login for gamification
+    let dailyLoginResult;
+    try {
+      dailyLoginResult = await recordDailyLogin(user.id);
+    } catch (loginError) {
+      console.error("Daily login error:", loginError);
+      dailyLoginResult = null;
+    }
+
     return res.status(200).json({
       success: true,
       message: "Login successful",
@@ -212,7 +294,15 @@ export const login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        explorerType: user.explorer_type,
+        xp: user.xp,
+        level: user.level,
+        currentStreak: user.current_streak,
+        bestStreak: user.best_streak,
+        totalDays: user.total_days,
+        avatar: user.avatar,
       },
+      dailyLogin: dailyLoginResult,
     });
   } catch (error) {
     console.error("Login error:", error);
@@ -225,9 +315,27 @@ export const login = async (req, res) => {
 
 export const getProfile = async (req, res) => {
   try {
+    // Fetch full user including gamification data
+    const user = await findUserById(req.user.id);
     return res.status(200).json({
       success: true,
-      user: req.user,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        explorerType: user.explorer_type,
+        xp: user.xp,
+        level: user.level,
+        currentStreak: user.current_streak,
+        bestStreak: user.best_streak,
+        totalDays: user.total_days,
+        avatar: user.avatar,
+        bio: user.bio,
+        language: user.language,
+        notifications: user.notifications,
+        accessibility: user.accessibility,
+      },
     });
   } catch (error) {
     console.error("Get profile error:", error);
@@ -258,9 +366,8 @@ export const forgotPassword = async (req, res) => {
     }
 
     const otp = generateOtp();
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-    await saveOtp(email, otp, expiresAt);
+    await saveOtp(email, otp);
 
     try {
       await sendOtpEmail({
@@ -304,10 +411,12 @@ export const resetPassword = async (req, res) => {
     }
 
     const user = await verifyOtp(email, otp);
-    if (!user) {
+    if (!user || user.error) {
       return res.status(400).json({
         success: false,
-        message: "Invalid or expired OTP",
+        message: user?.error === "expired"
+          ? "OTP has expired. Please request a new one."
+          : "Invalid OTP. Please check the code and try again.",
       });
     }
 

@@ -1,9 +1,12 @@
 import React from 'react';
-import { MemoryRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { MemoryRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import './styles/global.css';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
+import { GamificationProvider } from './contexts/GamificationContext';
+import { RewardToastContainer } from './components/Gamification/RewardToastContainer';
+import UmucoLogo from './components/UmucoLogo';
 
 import Landing     from './pages/Landing';
 import Login       from './pages/Login';
@@ -18,42 +21,80 @@ import IntlDays    from './pages/Intldays';
 import Contribute  from './pages/Contribute';
 import Saved       from './pages/Saved';
 import Settings    from './pages/Settings';
-import Profile     from './pages/Profile';    // ← separate component
-import History     from './pages/History';    // ← separate component
+import Profile     from './pages/Profile';
+import History     from './pages/History';
+
+// Redirect logged-in users away from public-only routes - NO LOADING SCREEN
+function PublicRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return children; // Show landing page immediately instead of loading
+  return user ? <Navigate to="/dashboard" replace /> : children;
+}
+
+// Redirect logged-out users away from protected routes
+function PrivateRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return (
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      height: '100vh', 
+      background: '#FDFBF7' 
+    }}>
+      <div style={{
+        animation: 'spin 1s linear infinite',
+        width: '80px',
+        height: '80px'
+      }}>
+        <UmucoLogo />
+      </div>
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+  return user ? children : <Navigate to="/login" replace />;
+}
 
 export default function App() {
-  // Replace with your actual Google Client ID from Google Cloud Console
   const googleClientId = "829742825170-qu62f7f662o16iv6hcpgcep8g80fotb9.apps.googleusercontent.com";
-  
+
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <AuthProvider>
-        <LanguageProvider>
-          <MemoryRouter initialEntries={['/']}>
-            <Routes>
-              {/* Public */}
-              <Route path="/"        element={<Landing />} />
-              <Route path="/login"   element={<Login />} />
-              <Route path="/signup"  element={<Signup />} />
+        <GamificationProvider>
+          <LanguageProvider>
+            <Router>
+              <Routes>
+                {/* Public — redirect to dashboard if already logged in */}
+                <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+                <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+                <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
 
-              {/* App — dashboard is your Home, not Landing */}
-              <Route path="/dashboard"    element={<Home />} />
-              <Route path="/explore"      element={<Explore />} />
-              <Route path="/listen"       element={<Listen />} />
-              <Route path="/videos"       element={<Videos />} />
-              <Route path="/collections"  element={<Collections />} />
-              <Route path="/kwibuka"      element={<Kwibuka />} />
-              <Route path="/intl-days"    element={<IntlDays />} />
-              <Route path="/contribute"   element={<Contribute />} />
-              <Route path="/saved"        element={<Saved />} />
-              <Route path="/history"      element={<History />} />   {/* ← own page */}
-              <Route path="/settings"     element={<Settings />} />
-              <Route path="/profile"      element={<Profile />} />   {/* ← own page */}
+                {/* Protected */}
+                <Route path="/dashboard"   element={<PrivateRoute><Home /></PrivateRoute>} />
+                <Route path="/explore"     element={<PrivateRoute><Explore /></PrivateRoute>} />
+                <Route path="/listen"      element={<PrivateRoute><Listen /></PrivateRoute>} />
+                <Route path="/videos"      element={<PrivateRoute><Videos /></PrivateRoute>} />
+                <Route path="/collections" element={<PrivateRoute><Collections /></PrivateRoute>} />
+                <Route path="/kwibuka"     element={<PrivateRoute><Kwibuka /></PrivateRoute>} />
+                <Route path="/intl-days"   element={<PrivateRoute><IntlDays /></PrivateRoute>} />
+                <Route path="/contribute"  element={<PrivateRoute><Contribute /></PrivateRoute>} />
+                <Route path="/saved"       element={<PrivateRoute><Saved /></PrivateRoute>} />
+                <Route path="/history"     element={<PrivateRoute><History /></PrivateRoute>} />
+                <Route path="/settings"    element={<PrivateRoute><Settings /></PrivateRoute>} />
+                <Route path="/profile"     element={<PrivateRoute><Profile /></PrivateRoute>} />
 
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </MemoryRouter>
-        </LanguageProvider>
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+              <RewardToastContainer />
+            </Router>
+          </LanguageProvider>
+        </GamificationProvider>
       </AuthProvider>
     </GoogleOAuthProvider>
   );

@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useGamificationContext } from '../contexts/GamificationContext';
 import './Videos.css';
 import IntoreImg from '../assets/listen/ruganzu.png';
 import AgasekeImg from '../assets/listen/crane-story.jpg';
@@ -8,6 +9,7 @@ import ImigongoImg from '../assets/listen/moon-story.jpg';
 
 export default function Videos() {
   const { t } = useLanguage();
+  const { awardXP } = useGamificationContext();
   const [isPlaying, setIsPlaying] = useState(false);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +45,7 @@ export default function Videos() {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/video/featured');
+        const res = await fetch('http://localhost:5000/api/video/featured');
         const data = await res.json();
         if (data.video && data.video.length > 0) {
           setVideos(data.video.map((v, i) => ({
@@ -68,6 +70,15 @@ export default function Videos() {
     fetchVideos();
   }, [t]);
 
+  const [awardedItems, setAwardedItems] = useState(new Set());
+
+  const handleVideoClick = useCallback((video) => {
+    if (!awardedItems.has(video.title)) {
+      awardXP(25, `Watched video: ${video.title}`);
+      setAwardedItems(prev => new Set([...prev, video.title]));
+    }
+  }, [awardedItems, awardXP]);
+
   return (
     <Layout searchPlaceholder={t('search.placeholder')}>
       <div className="videos-page">
@@ -86,7 +97,7 @@ export default function Videos() {
             <h1>{t('videos.intoreTitle')}</h1>
             <p>{t('videos.intoreDesc')}</p>
             <div className="featured-actions">
-              <button className="play-btn" onClick={() => setIsPlaying(p => !p)}>
+              <button className="play-btn" onClick={() => { setIsPlaying(p => !p); handleVideoClick({ title: t('videos.intoreTitle') }); }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   {isPlaying
                     ? <>
@@ -115,7 +126,7 @@ export default function Videos() {
                   <div key={i} className="video-card">
                     <div className="video-thumb">
                       <img src={video.image} alt={video.title} />
-                      <div className="video-play-overlay" onClick={() => setIsPlaying(p => !p)}>
+                      <div className="video-play-overlay" onClick={() => { setIsPlaying(p => !p); handleVideoClick(video); }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                           <polygon points="5 3 19 12 5 21 5 3" />
                         </svg>

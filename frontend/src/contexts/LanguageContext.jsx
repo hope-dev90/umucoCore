@@ -13,7 +13,7 @@ export function LanguageProvider({ children }) {
   }, [language]);
 
   const t = (key) => {
-    return translations[language][key] || key;
+    return translations[language]?.[key] || translations.en?.[key] || key;
   };
 
   return (
