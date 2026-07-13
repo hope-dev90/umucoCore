@@ -2,29 +2,27 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { AnimatePresence } from 'framer-motion';
 import { gamificationEvents, GE } from '../../utils/gamificationEvents';
-import { RewardToast } from './RewardToast';
-import { BadgePopup } from './BadgePopup';
+import { pushRewardFeedItem } from '../../utils/rewardFeed';
+import { AchievementNoticeCard } from './AchievementNoticeCard';
 
 let _id = 0;
 const nextId = () => `toast-${++_id}`;
 
 export function RewardToastContainer() {
-  const [queue, setQueue] = useState([]);
-  const [badgeQueue, setBadgeQueue] = useState([]);
-  const activeBadge = badgeQueue[0]?.badge || null;
+  const [pendingQueue, setPendingQueue] = useState([]);
+  const [activeNotice, setActiveNotice] = useState(null);
 
   const push = (type, payload) => {
-    const id = nextId();
-    setQueue(q => [...q, { id, type, payload, createdAt: Date.now() }]);
-    setTimeout(() => {
-      setQueue(q => q.filter(t => t.id !== id));
-    }, 3000);
+    const now = Date.now();
+    const notice = { id: nextId(), type, payload, createdAt: now, readyAt: now + 5000 };
+    pushRewardFeedItem(notice);
+    setPendingQueue((current) => [...current, notice]);
   };
 
   useEffect(() => {
     const onXP          = p => push(GE.XP, p);
     const onLevelUp     = p => push(GE.LEVEL_UP, p);
-    const onBadge       = p => setBadgeQueue(q => [...q, { id: nextId(), badge: p.badge }]);
+    const onBadge       = p => push(GE.BADGE, p);
     const onCollectible = p => push(GE.COLLECTIBLE, p);
     const onStreak      = p => { if (p.isNew) push(GE.STREAK, p); };
 
@@ -43,34 +41,47 @@ export function RewardToastContainer() {
     };
   }, []);
 
-  const remove = (id) => setQueue(q => q.filter(t => t.id !== id));
-  const dismissBadge = () => setBadgeQueue(q => q.slice(1));
+  useEffect(() => {
+    if (activeNotice || pendingQueue.length === 0) return undefined;
+
+    const waitMs = Math.max(0, pendingQueue[0].readyAt - Date.now());
+    const delayTimer = setTimeout(() => {
+      setActiveNotice(pendingQueue[0]);
+      setPendingQueue((current) => current.slice(1));
+    }, waitMs);
+
+    return () => clearTimeout(delayTimer);
+  }, [activeNotice, pendingQueue]);
+
+  useEffect(() => {
+    if (!activeNotice) return undefined;
+
+    const hideTimer = setTimeout(() => {
+      setActiveNotice(null);
+    }, 4500);
+
+    return () => clearTimeout(hideTimer);
+  }, [activeNotice]);
 
   return ReactDOM.createPortal(
-    <>
-      <div style={{
-        position: 'fixed', bottom: 24, right: 24,
-        display: 'flex', flexDirection: 'column', gap: 8,
-        zIndex: 200, pointerEvents: 'none',
-      }}>
-        <AnimatePresence>
-          {queue.map(toast => (
-            <div key={toast.id} style={{ pointerEvents: 'auto' }}>
-              <RewardToast toast={toast} onRemove={() => remove(toast.id)} />
-            </div>
-          ))}
-        </AnimatePresence>
-      </div>
-      <AnimatePresence>
-        {activeBadge && (
-          <BadgePopup
-            key={badgeQueue[0].id}
-            badge={activeBadge}
-            onDismiss={dismissBadge}
-          />
+    <div style={{
+      position: 'fixed',
+      right: 20,
+      bottom: 20,
+      zIndex: 220,
+      pointerEvents: 'none',
+    }}>
+      <AnimatePresence mode="wait">
+        {activeNotice && (
+          <div key={activeNotice.id} style={{ pointerEvents: 'auto' }}>
+            <AchievementNoticeCard
+              notice={activeNotice}
+              onDismiss={() => setActiveNotice(null)}
+            />
+          </div>
         )}
       </AnimatePresence>
-    </>,
+    </div>,
     document.body,
   );
 }

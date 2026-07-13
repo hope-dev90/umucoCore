@@ -19,8 +19,14 @@ if (process.env.JWT_SECRET.length < 32) {
   process.exit(1);
 }
 
+if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+  console.warn('Warning: EMAIL_USER / EMAIL_PASS not set. OTP emails will not send until configured.');
+}
+
 const config = {
   port: parseInt(process.env.PORT, 10) || 5000,
+  nodeEnv: process.env.NODE_ENV || 'development',
+  isProduction: process.env.NODE_ENV === 'production',
   db: {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT, 10) || 5432,
@@ -33,11 +39,11 @@ const config = {
     expiresIn: '7d'
   },
   email: {
-    host: process.env.EMAIL_HOST || 'smtp.example.com',
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.EMAIL_PORT, 10) || 587,
-    user: process.env.EMAIL_USER || 'test@example.com',
-    pass: process.env.EMAIL_PASS || 'password',
-    from: process.env.EMAIL_FROM || process.env.EMAIL_USER
+    user: (process.env.EMAIL_USER || '').replace(/\s/g, ''),
+    pass: (process.env.EMAIL_PASS || '').replace(/\s/g, ''),
+    from: process.env.EMAIL_FROM || process.env.EMAIL_USER || '',
   },
   google: {
     clientId: process.env.GOOGLE_CLIENT_ID || '',

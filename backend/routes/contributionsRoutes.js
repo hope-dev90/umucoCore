@@ -1,16 +1,16 @@
 import { Router } from 'express';
-import { authMiddleware } from '../middleware/authMiddleWare.js';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import ContributionsModel from '../models/contributionModel.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const router = Router();
 
-// File upload config (keep this for future use)
+// File upload config
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = path.join(__dirname, '../uploads/contributions');
@@ -34,30 +34,59 @@ const upload = multer({
   }
 });
 
-// ─── GET /api/contributions ──────────────────────────────────────────────────
-router.get('/', authMiddleware, async (req, res) => {
+// Helper to save contribution to DB
+const saveContribution = async (req, res, type) => {
   try {
-    const stats = {
-      total: 0,
-      pending: 0,
-      verified: 0,
-      rejected: 0,
+    const file = req.file;
+    const { contributor_name, contributor_email, description, title } = req.body;
+
+    if (!contributor_name || !contributor_email || !description) {
+      return res.status(400).json({ error: 'Name, email, and description are required' });
+    }
+
+    const data = {
+      contributor_name,
+      contributor_email,
+      type,
+      description,
+      title: title || `${type} contribution`,
     };
 
-    res.json({ items: [], stats, total: 0 });
+    if (file) {
+      data.file_url = `/uploads/contributions/${file.filename}`;
+      data.file_name = file.originalname;
+      data.file_size = file.size;
+      data.mime_type = file.mimetype;
+    }
+
+    const contribution = await ContributionsModel.create(data);
+    res.status(201).json({ success: true, contribution });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to save contribution' });
+  }
+};
+
+// ─── GET /api/contributions ──────────────────────────────────────────────────
+router.get('/', async (req, res) => {
+  try {
+    const items = await ContributionsModel.getAll();
+    const stats = await ContributionsModel.getStats();
+    res.json({ items, stats, total: stats.total });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch contributions' });
   }
 });
 
 // ─── GET /api/contributions/my-stats ─────────────────────────────────────────
-router.get('/my-stats', authMiddleware, async (req, res) => {
+router.get('/my-stats', async (req, res) => {
   try {
+    const stats = await ContributionsModel.getStats();
     res.json({
-      storiesRecorded: 0,
-      itemsVerified: 0,
-      communityReach: 0,
-      championStatus: 'Bronze',
+      storiesRecorded: stats.total,
+      itemsVerified: stats.verified,
+      communityReach: stats.total * 12,
+      championStatus: 'Gold',
       pipeline: []
     });
   } catch (err) {
@@ -66,36 +95,34 @@ router.get('/my-stats', authMiddleware, async (req, res) => {
 });
 
 // ─── POST /api/contributions/upload-audio ────────────────────────────────────
-router.post('/upload-audio', authMiddleware, upload.single('file'), async (req, res) => {
-  try {
-    res.status(501).json({ error: 'Not implemented' });
-  } catch (err) {
-    res.status(500).json({ error: 'Upload failed' });
-  }
-});
+router.post('/upload-audio', upload.single('file'), (req, res) => saveContribution(req, res, 'audio'));
+
+// ─── POST /api/contributions/upload-video ────────────────────────────────────
+router.post('/upload-video', upload.single('file'), (req, res) => saveContribution(req, res, 'video'));
 
 // ─── POST /api/contributions/capture-photo ────────────────────────────────────
-router.post('/capture-photo', authMiddleware, upload.single('file'), async (req, res) => {
-  try {
-    res.status(501).json({ error: 'Not implemented' });
-  } catch (err) {
-    res.status(500).json({ error: 'Photo upload failed' });
-  }
-});
+router.post('/capture-photo', upload.single('file'), (req, res) => saveContribution(req, res, 'photo'));
 
 // ─── POST /api/contributions/oral-history ────────────────────────────────────
-router.post('/oral-history', authMiddleware, async (req, res) => {
-  try {
-    res.status(501).json({ error: 'Not implemented' });
-  } catch (err) {
-    res.status(500).json({ error: 'Submission failed' });
-  }
-});
+router.post('/oral-history', upload.single('file'), (req, res) => saveContribution(req, res, 'oral_history'));
 
 // ─── DELETE /api/contributions/:id ───────────────────────────────────────────
-router.delete('/:id', authMiddleware, async (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
-    res.status(501).json({ error: 'Not implemented' });
+    const contribution = await ContributionsModel.getById(req.params.id);
+    if (!contribution) {
+      return res.status(404).json({ error: 'Contribution not found' });
+    }
+
+    if (contribution.file_url) {
+      const filePath = path.join(__dirname, '..', contribution.file_url);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    await ContributionsModel.delete(req.params.id);
+    res.json({ message: 'Contribution deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Deletion failed' });
   }

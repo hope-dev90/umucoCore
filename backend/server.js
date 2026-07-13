@@ -9,6 +9,7 @@ const HOST = "0.0.0.0";
 const startServer = async () => {
   try {
     await connectDB();
+
     app.listen(PORT, HOST, () => {
       const ip = getLocalIp();
       console.log(`\n  ✅ Umuco Core Backend running!`);

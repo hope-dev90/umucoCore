@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import './Settings.css';
 import voicePhotoOne from '../assets/tra.png';
 import voicePhotoTwo from '../assets/tra2.png';
@@ -35,14 +36,117 @@ const PanelTitle = ({ iconKey, label }) => (
 );
 
 export default function Settings() {
-  const [notifArchive,  setNotifArchive]  = useState(true);
-  const [notifNews,     setNotifNews]     = useState(false);
-  const [notifEvents,   setNotifEvents]   = useState(true);
+  const { user } = useAuth();
+  const [notifArchive,  setNotifArchive]  = useState(user?.notifications?.archiveUpdates ?? true);
+  const [notifNews,     setNotifNews]     = useState(user?.notifications?.newsletter ?? false);
+  const [notifEvents,   setNotifEvents]   = useState(user?.notifications?.eventReminders ?? true);
   const [selectedVoice, setSelectedVoice] = useState(0);
-  const [fontSize,      setFontSize]      = useState(50);
-  const [highContrast,  setHighContrast]  = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
+  const [fontSize,      setFontSize]      = useState(user?.accessibility?.fontSize ?? 50);
+  const [highContrast,  setHighContrast]  = useState(user?.accessibility?.highContrast ?? false);
+  const [reducedMotion, setReducedMotion] = useState(user?.accessibility?.reduceMotion ?? false);
+  const [dateFormat,    setDateFormat]    = useState(user?.accessibility?.dateFormat ?? "DD / MM / YYYY");
+  const [timezone,      setTimezone]      = useState(user?.accessibility?.timezone ?? "CAT");
+  const [message,       setMessage]       = useState("");
+  const [saving,        setSaving]        = useState(false);
   const { language: langCtx, setLanguage: setLangCtx, t } = useLanguage();
+
+  const showMessage = (msg) => {
+    setMessage(msg);
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  const handleSaveNotifications = async () => {
+    setSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/users/notifications", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          archiveUpdates: notifArchive,
+          newsletter: notifNews,
+          eventReminders: notifEvents
+        })
+      });
+      if (!response.ok) throw new Error("Failed to save notifications");
+      showMessage("Notification preferences saved!");
+    } catch (err) {
+      console.error("Save notifications error:", err);
+      showMessage("Failed to save preferences");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveAccessibility = async () => {
+    setSaving(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/users/accessibility", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          fontSize,
+          highContrast,
+          reduceMotion: reducedMotion,
+          voice: selectedVoice,
+          dateFormat,
+          timezone
+        })
+      });
+      if (!response.ok) throw new Error("Failed to save accessibility settings");
+      showMessage("Accessibility settings saved!");
+    } catch (err) {
+      console.error("Save accessibility error:", err);
+      showMessage("Failed to save settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeactivate = async () => {
+    if (!window.confirm("Are you sure you want to deactivate your account?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/users/deactivate", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error("Failed to deactivate account");
+      showMessage("Account deactivated");
+    } catch (err) {
+      console.error("Deactivate error:", err);
+      showMessage("Failed to deactivate account");
+    }
+  };
+
+  const handleDelete = async () => {
+    const password = window.prompt("Please enter your password to delete your account:");
+    if (!password) return;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:5000/api/users/account", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ password })
+      });
+      if (!response.ok) throw new Error("Failed to delete account");
+      showMessage("Account deleted successfully");
+      // TODO: Redirect to login and clear auth state
+    } catch (err) {
+      console.error("Delete error:", err);
+      showMessage("Failed to delete account");
+    }
+  };
 
   const voices = [
     { name: 'Umutoni', sub: t('settings.voice.femaleSoft'), img: IMG.voice1 },
@@ -80,6 +184,25 @@ export default function Settings() {
                   <button className={`toggle-switch ${val ? 'on' : 'off'}`} onClick={() => set(v => !v)} />
                 </div>
               ))}
+              <button 
+                className="btn-save-notifs" 
+                onClick={handleSaveNotifications} 
+                disabled={saving}
+                style={{
+                  marginTop: '12px',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  background: '#8D493A',
+                  color: 'white',
+                  border: 'none',
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  opacity: saving ? 0.7 : 1,
+                  fontSize: '0.875rem',
+                  fontWeight: 600
+                }}
+              >
+                {saving ? "Saving..." : "Save Preferences"}
+              </button>
             </div>
 
             <div className="settings-panel">
@@ -98,18 +221,18 @@ export default function Settings() {
               </div>
               <div className="form-group">
                 <label className="form-label">{t('settings.dateFormat')}</label>
-                <select className="form-select">
-                  <option>DD / MM / YYYY</option>
-                  <option>MM / DD / YYYY</option>
-                  <option>YYYY-MM-DD</option>
+                <select className="form-select" value={dateFormat} onChange={(e) => setDateFormat(e.target.value)}>
+                  <option value="DD / MM / YYYY">DD / MM / YYYY</option>
+                  <option value="MM / DD / YYYY">MM / DD / YYYY</option>
+                  <option value="YYYY-MM-DD">YYYY-MM-DD</option>
                 </select>
               </div>
               <div className="form-group">
                 <label className="form-label">{t('settings.timezone')}</label>
-                <select className="form-select">
-                  <option>{t('settings.timezone.cat')}</option>
-                  <option>{t('settings.timezone.utc')}</option>
-                  <option>{t('settings.timezone.london')}</option>
+                <select className="form-select" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
+                  <option value="CAT">{t('settings.timezone.cat')}</option>
+                  <option value="UTC">{t('settings.timezone.utc')}</option>
+                  <option value="Europe/London">{t('settings.timezone.london')}</option>
                 </select>
               </div>
             </div>
@@ -143,7 +266,13 @@ export default function Settings() {
                   <button className={`toggle-switch ${val ? 'on' : 'off'}`} onClick={() => set(v => !v)} />
                 </div>
               ))}
-              <button className="save-access-btn">{t('settings.saveAccessibility')}</button>
+              <button 
+                className="save-access-btn" 
+                onClick={handleSaveAccessibility}
+                disabled={saving}
+              >
+                {saving ? "Saving..." : t('settings.saveAccessibility')}
+              </button>
             </div>
 
             <div className="settings-panel">
@@ -204,13 +333,28 @@ export default function Settings() {
                 {t('settings.dangerZone.desc')}
               </p>
               <div style={{ display: 'flex', gap: 10 }}>
-                <button className="btn-deactivate">{t('settings.deactivate')}</button>
-                <button className="btn-delete">{t('settings.delete')}</button>
+                <button className="btn-deactivate" onClick={handleDeactivate}>{t('settings.deactivate')}</button>
+                <button className="btn-delete" onClick={handleDelete}>{t('settings.delete')}</button>
               </div>
             </div>
 
           </div>
         </div>
+        {message && (
+          <div style={{
+            position: 'fixed',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#8D493A',
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+          }}>
+            {message}
+          </div>
+        )}
       </div>
     </Layout>
   );

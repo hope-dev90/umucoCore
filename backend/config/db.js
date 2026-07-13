@@ -325,6 +325,55 @@ const ensureHeritageSchema = async (client) => {
     CREATE INDEX IF NOT EXISTS idx_collections_category ON collections(category);
     CREATE INDEX IF NOT EXISTS idx_audio_category ON audio_content(category);
     CREATE INDEX IF NOT EXISTS idx_video_category ON video_content(category);
+
+    CREATE TABLE IF NOT EXISTS saved_items (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      item_type VARCHAR(50) NOT NULL,
+      item_id INTEGER NOT NULL,
+      item_title VARCHAR(255),
+      item_subtitle VARCHAR(255),
+      item_image VARCHAR(255),
+      item_meta JSONB,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(user_id, item_type, item_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS proverbs (
+      id SERIAL PRIMARY KEY,
+      text TEXT NOT NULL,
+      translation TEXT,
+      language VARCHAR(50) DEFAULT 'Kinyarwanda',
+      category VARCHAR(100),
+      source VARCHAR(255),
+      is_featured BOOLEAN DEFAULT false,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_proverbs_language ON proverbs(language);
+    CREATE INDEX IF NOT EXISTS idx_proverbs_category ON proverbs(category);
+
+    CREATE TABLE IF NOT EXISTS contributions (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id),
+      contributor_name VARCHAR(255) NOT NULL,
+      contributor_email VARCHAR(255) NOT NULL,
+      type VARCHAR(50) NOT NULL,
+      title VARCHAR(255),
+      file_url VARCHAR(255),
+      file_name VARCHAR(255),
+      file_size INTEGER,
+      mime_type VARCHAR(100),
+      description TEXT,
+      status VARCHAR(50) DEFAULT 'pending',
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_contributions_type ON contributions(type);
+    CREATE INDEX IF NOT EXISTS idx_contributions_status ON contributions(status);
+    CREATE INDEX IF NOT EXISTS idx_contributions_user ON contributions(user_id);
   `);
 };
 

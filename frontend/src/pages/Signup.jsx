@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SignUpPage from '../components/AuthPage';
+import SignupWelcomeModal from '../components/SignupWelcomeModal';
 
 export default function Signup() {
   const navigate = useNavigate();
   const [leaving, setLeaving] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(true);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -21,6 +23,15 @@ export default function Signup() {
 
   return (
     <div className={`transition-all duration-250 ${leaving ? 'opacity-0 translate-y-2' : 'opacity-100 translate-y-0'}`}>
+      {/* Welcome modal shows immediately */}
+      {showWelcomeModal && (
+        <SignupWelcomeModal
+          onMaybeLater={() => setShowWelcomeModal(false)}
+          onCreateAccount={() => setShowWelcomeModal(false)}
+          onSecondaryAction={() => handleNavigate('login')}
+        />
+      )}
+
       <SignUpPage onNavigate={handleNavigate} />
     </div>
   );

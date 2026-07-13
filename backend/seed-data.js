@@ -183,34 +183,34 @@ const seedData = async () => {
     const checkAudio = await pool.query("SELECT COUNT(*) FROM audio_content");
     if (parseInt(checkAudio.rows[0].count) === 0) {
       await AudioModel.create({
-        title: "The Song of Ruganzu II: The King's Return",
+        title: "Royal Drum Rhythms of Rwanda",
         description:
-          "A legendary oral recitation by Mzee Silas, depicting the mythical homecoming of the great King Ruganzu Ndoli.",
-        audio_url: "",
-        thumbnail_url: "",
-        duration: 360,
-        category: "Oral Tradition",
-        is_featured: true,
-      });
-      await AudioModel.create({
-        title: "Why the Crane has a Crown",
-        description:
-          "A traditional Rwandan fable narrated with musical accompaniment.",
-        audio_url: "",
+          "Historic drumming performance by the Royal Drummers of Mwami, recorded in Nyanza, 1952. A foundational sound of Rwandan kingship.",
+        audio_url: "https://samap.ukzn.ac.za/sites/default/files/audio/ILAM/AC1236-F3T4.mp3",
         thumbnail_url: "",
         duration: 180,
-        category: "Fables & Myths",
+        category: "Traditional Music",
         is_featured: true,
       });
       await AudioModel.create({
-        title: "The Man on the Moon",
+        title: "Lama — Love Song from the Court",
         description:
-          "A classic Rwandan folk tale about the man who lives on the moon.",
-        audio_url: "",
+          "A traditional Tutsi love song performed by Tutsi singers, composed by Leonard Ndengabaganizi. Recorded in Rwanda, 1952.",
+        audio_url: "https://samap.ukzn.ac.za/sites/default/files/audio/ILAM/AC1228-F3U9.mp3",
+        thumbnail_url: "",
+        duration: 210,
+        category: "Traditional Music",
+        is_featured: true,
+      });
+      await AudioModel.create({
+        title: "Nimuze tugweragwere — Chief's Honor Song",
+        description:
+          "A Watutsi song composed in honour of Omwami, performed by Ladies of the Omwami's Court with Leonard Ndengabaganizi and Michel Rwagasana. Recorded in Rwanda, 1952.",
+        audio_url: "https://samap.ukzn.ac.za/sites/default/files/audio/ILAM/AC1228-F3U3.mp3",
         thumbnail_url: "",
         duration: 240,
-        category: "Fables & Myths",
-        is_featured: false,
+        category: "Traditional Music",
+        is_featured: true,
       });
       console.log("Audio content seeded successfully!");
     } else {
@@ -221,38 +221,86 @@ const seedData = async () => {
     const checkVideo = await pool.query("SELECT COUNT(*) FROM video_content");
     if (parseInt(checkVideo.rows[0].count) === 0) {
       await VideoModel.create({
-        title: "Intore Dance Performance",
+        title: "Jamafest Rwanda & Uganda Traditional Dances",
         description:
-          "Traditional Rwandan Intore dance performance showcasing warrior traditions.",
-        video_url: "",
+          "Traditional Rwandan and Ugandan dance performances from the Jamafest cultural festival, showcasing Intore and other heritage dances.",
+        video_url: "https://archive.org/download/FOCUSONAFRICA-CULTURALMUSICANDDANCEDVLV2018/JamafestRwandaUgandaTraditionalDances.mp4",
         thumbnail_url: "",
-        duration: 480,
+        duration: 840,
         category: "Performance",
         is_featured: true,
-      });
-      await VideoModel.create({
-        title: "Agaseke Weaving Tutorial",
-        description:
-          "Learn how to weave the iconic Rwandan peace basket step by step.",
-        video_url: "",
-        thumbnail_url: "",
-        duration: 720,
-        category: "Crafts",
-        is_featured: true,
-      });
-      await VideoModel.create({
-        title: "Imigongo Art Creation",
-        description:
-          "Watch master artists create beautiful imigongo geometric patterns.",
-        video_url: "",
-        thumbnail_url: "",
-        duration: 600,
-        category: "Art",
-        is_featured: false,
       });
       console.log("Video content seeded successfully!");
     } else {
       console.log("Video content already exists, skipping...");
+    }
+
+    const checkProverbs = await pool.query("SELECT COUNT(*) FROM proverbs");
+    if (parseInt(checkProverbs.rows[0].count) === 0) {
+      await pool.query(
+        `INSERT INTO proverbs (text, translation, language, category, source, is_featured) VALUES
+        ($1, $2, $3, $4, $5, $6),
+        ($7, $8, $9, $10, $11, $12),
+        ($13, $14, $15, $16, $17, $18),
+        ($19, $20, $21, $22, $23, $24),
+        ($25, $26, $27, $28, $29, $30),
+        ($31, $32, $33, $34, $35, $36),
+        ($37, $38, $39, $40, $41, $42),
+        ($43, $44, $45, $46, $47, $48)`,
+        [
+          "Urukwavu rurinda rukuze rukonshwa n'imbwa.",
+          "The hyena guards the old cow only to be beaten by a dog.",
+          "Kinyarwanda",
+          "Wisdom",
+          "Rwandan oral tradition",
+          true,
+          "Abari bose ntabwo ari abagabo.",
+          "Not all who carry spears are men.",
+          "Kinyarwanda",
+          "Wisdom",
+          "Rwandan oral tradition",
+          true,
+          "Inzara y'umuntu ni uko abandi bitwa.",
+          "A person's hunger is determined by how others behave.",
+          "Kinyarwanda",
+          "Social",
+          "Rwandan oral tradition",
+          true,
+          "Gusaba ntibura, gutanga ntigushira.",
+          "To ask never ends; to give never finishes.",
+          "Kinyarwanda",
+          "Generosity",
+          "Rwandan oral tradition",
+          true,
+          "Umutwe ni wo utuma umuntu atera amabuye.",
+          "It is the mind that makes a person throw stones.",
+          "Kinyarwanda",
+          "Wisdom",
+          "Rwandan oral tradition",
+          true,
+          "Igituba cy'umugabo ni inka.",
+          "A man's wealth is measured in cattle.",
+          "Kinyarwanda",
+          "Prosperity",
+          "Rwandan oral tradition",
+          true,
+          "Nta mugabo ujya gushaka inka y'umukwe.",
+          "No man goes to look for his son-in-law's cattle.",
+          "Kinyarwanda",
+          "Social",
+          "Rwandan oral tradition",
+          true,
+          "Uwemera agenda, uwanga kuremwa.",
+          "He who accepts advice moves forward; he who rejects it is left behind.",
+          "Kinyarwanda",
+          "Wisdom",
+          "Rwandan oral tradition",
+          true,
+        ]
+      );
+      console.log("Proverbs seeded successfully!");
+    } else {
+      console.log("Proverbs already exist, skipping...");
     }
 
     console.log("All data seeded successfully!");

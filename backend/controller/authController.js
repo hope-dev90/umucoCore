@@ -106,34 +106,22 @@ export const register = async (req, res) => {
 
     await saveOtp(email, otp);
 
-    // Try to send email, but don't fail registration if email fails
     try {
-      await sendOtpEmail({
-        to: email,
-        otp,
-        purpose: "verify your email",
-        name: name,
-      });
+      await sendOtpEmail({ to: email, otp, name, purpose: "verify your email" });
     } catch (emailError) {
-      console.warn(
-        "Email sending failed, but registration succeeded:",
-        emailError.message,
-      );
+      return errorResponse(res, emailError.message || "Unable to send verification email.", 503);
     }
 
-    return successResponse(
-      res,
-      {
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-        },
+    const responseData = {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
       },
-      "Registration successful. Check your email to verify your account.",
-      201,
-    );
+    };
+
+    return successResponse(res, responseData, "Registration successful. Check your email to verify your account.", 201);
   } catch (error) {
     console.error("Register error:", error);
     return errorResponse(res, "Internal server error", 500);
@@ -161,12 +149,15 @@ export const resendOtp = async (req, res) => {
     await saveOtp(email, otp);
 
     try {
-      await sendOtpEmail({ to: email, otp, purpose: "verify your email", name: user.name });
+      await sendOtpEmail({ to: email, otp, name: user.name, purpose: "verify your email" });
     } catch (emailError) {
-      console.warn("Resend OTP email failed:", emailError.message);
+      return res.status(503).json({ success: false, message: emailError.message || "Unable to send verification email." });
     }
 
-    return res.status(200).json({ success: true, message: "A new verification code has been sent to your email." });
+    return res.status(200).json({
+      success: true,
+      message: "A new verification code has been sent to your email.",
+    });
   } catch (error) {
     console.error("Resend OTP error:", error);
     return res.status(500).json({ success: false, message: "Internal server error" });
@@ -198,19 +189,10 @@ export const verifyEmail = async (req, res) => {
     await clearOtp(email);
 
     const verifiedUser = await findUserByEmail(email);
-    
-    // Record daily login for gamification
-    let dailyLoginResult;
-    try {
-      dailyLoginResult = await recordDailyLogin(verifiedUser.id);
-    } catch (loginError) {
-      console.error("Daily login error:", loginError);
-      dailyLoginResult = null;
-    }
-
     const token = generateToken(verifiedUser.id);
 
-    return res.status(200).json({
+    // Respond immediately, then record daily login in background
+    res.status(200).json({
       success: true,
       message: "Email verified",
       token,
@@ -227,8 +209,14 @@ export const verifyEmail = async (req, res) => {
         totalDays: verifiedUser.total_days,
         avatar: verifiedUser.avatar,
       },
-      dailyLogin: dailyLoginResult,
     });
+
+    // Fire-and-forget — don't block the response
+    recordDailyLogin(verifiedUser.id).catch((loginError) => {
+      console.error("Daily login error:", loginError);
+    });
+
+    return;
   } catch (error) {
     console.error("Verify email error:", error);
     return res.status(500).json({
@@ -370,13 +358,9 @@ export const forgotPassword = async (req, res) => {
     await saveOtp(email, otp);
 
     try {
-      await sendOtpEmail({
-        to: email,
-        otp,
-        purpose: "reset your password",
-      });
+      await sendOtpEmail({ to: email, otp, name: user.name, purpose: "reset your password" });
     } catch (emailError) {
-      console.warn("Email sending failed:", emailError.message);
+      console.warn("Forgot password OTP email failed:", emailError.message);
     }
 
     return res.status(200).json({

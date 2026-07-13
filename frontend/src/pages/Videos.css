@@ -7,6 +7,37 @@
   padding-bottom: 80px;
 }
 
+@media (max-width: 900px) {
+  .videos-page {
+    grid-template-columns: 1fr;
+  }
+  .video-panel {
+    position: static;
+  }
+  .featured-video h1 {
+    font-size: 22px;
+  }
+  .video-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .featured-video {
+    padding: 20px;
+  }
+  .featured-video h1 {
+    font-size: 18px;
+  }
+  .featured-actions {
+    flex-direction: column;
+  }
+  .play-btn, .library-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* ── FEATURED VIDEO ── */
 .featured-video {
   background: linear-gradient(160deg, var(--primary-dark) 0%, var(--text-primary) 40%, var(--primary-dark) 100%);

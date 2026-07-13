@@ -6,6 +6,20 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Helper functions to store/retrieve profile image per user (keyed by email)
+  const getStoredProfileImageKey = (email) => `profile_image_${email?.toLowerCase()}`;
+
+  const storeProfileImage = (email, imageData) => {
+    if (email && imageData) {
+      localStorage.setItem(getStoredProfileImageKey(email), imageData);
+    }
+  };
+
+  const getStoredProfileImage = (email) => {
+    if (!email) return null;
+    return localStorage.getItem(getStoredProfileImageKey(email)) || null;
+  };
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setLoading(false); // Ensure loading ends after 1 second max
@@ -27,13 +41,16 @@ export function AuthProvider({ children }) {
       })
       .then(data => {
         if (data.user) {
-          // Restore locally-stored profileImage since it's not persisted to the backend
-          const cached = localStorage.getItem('user');
-          let localProfileImage = null;
-          if (cached) {
-            try { localProfileImage = JSON.parse(cached)?.profileImage || null; } catch (_) {}
-          }
-          const merged = { ...data.user, profileImage: localProfileImage || data.user.avatar || null };
+          // Restore locally-stored profileImage (per user email)
+          const localProfileImage = getStoredProfileImage(data.user.email);
+          // Prepend backend URL to avatar path if it's a relative path
+          const avatarUrl = data.user.avatar && !data.user.avatar.startsWith('http') 
+            ? `http://localhost:5000${data.user.avatar}` 
+            : data.user.avatar;
+          const merged = { 
+            ...data.user, 
+            profileImage: localProfileImage || avatarUrl || null 
+          };
           setUser(merged);
           localStorage.setItem('user', JSON.stringify(merged));
         } else {
@@ -67,6 +84,10 @@ export function AuthProvider({ children }) {
       // Check if anything actually changed
       const hasChanges = JSON.stringify(prevUser) !== JSON.stringify(updatedUser);
       if (hasChanges) {
+        // If profileImage changed and we have an email, store it separately
+        if (updatedUser.email && updatedUser.profileImage) {
+          storeProfileImage(updatedUser.email, updatedUser.profileImage);
+        }
         localStorage.setItem('user', JSON.stringify(updatedUser));
         return updatedUser;
       }
@@ -88,9 +109,20 @@ export function AuthProvider({ children }) {
       throw new Error(data.message || 'Login failed');
     }
 
+    // Restore stored profile image for this user email
+    const localProfileImage = getStoredProfileImage(data.user.email);
+    // Prepend backend URL to avatar path if it's a relative path
+    const avatarUrl = data.user.avatar && !data.user.avatar.startsWith('http') 
+      ? `http://localhost:5000${data.user.avatar}` 
+      : data.user.avatar;
+    const mergedUser = {
+      ...data.user,
+      profileImage: localProfileImage || avatarUrl || null
+    };
+
     localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    setUser(data.user);
+    localStorage.setItem('user', JSON.stringify(mergedUser));
+    setUser(mergedUser);
     return data;
   }, []);
 
@@ -108,6 +140,7 @@ export function AuthProvider({ children }) {
       throw new Error(data.message || 'Registration failed');
     }
 
+    // For new registrations, no existing profile image yet, but future updates will store it
     return data;
   }, []);
 
@@ -125,15 +158,27 @@ export function AuthProvider({ children }) {
       throw new Error(data.message || 'Google login failed');
     }
 
+    // Restore stored profile image for this user email
+    const localProfileImage = getStoredProfileImage(data.user.email);
+    // Prepend backend URL to avatar path if it's a relative path
+    const avatarUrl = data.user.avatar && !data.user.avatar.startsWith('http') 
+      ? `http://localhost:5000${data.user.avatar}` 
+      : data.user.avatar;
+    const mergedUser = {
+      ...data.user,
+      profileImage: localProfileImage || avatarUrl || null
+    };
+
     localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    setUser(data.user);
+    localStorage.setItem('user', JSON.stringify(mergedUser));
+    setUser(mergedUser);
     return data;
   }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    // DO NOT remove profile_image_* keys! They stay so they survive logout/login
     setUser(null);
   }, []);
 

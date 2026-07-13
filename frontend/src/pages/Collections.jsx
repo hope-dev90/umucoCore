@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import './Collections.css';
 import inanga from '../assets/collections/inanga (2).jpg';
 import royalCourt from '../assets/collections/royal-court.jpg';
@@ -20,6 +21,22 @@ const IMG = {
 
 export default function Collections() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const [message, setMessage] = useState("");
+
+  const handleOpenArchive = () => {
+    navigate("/explore"); // Navigate to explore for now
+  };
+
+  const handleSubscribe = () => {
+    setMessage("Thank you for subscribing!");
+    setTimeout(() => setMessage(""), 3000);
+  };
+
+  const handleContact = () => {
+    setMessage("Opening contact form...");
+    setTimeout(() => setMessage(""), 3000);
+  };
 
   const smallCollections = [
     {
@@ -80,7 +97,7 @@ export default function Collections() {
                   </div>
                   <span className="curator-name">{t('collections.curatedBy')}</span>
                 </div>
-                <span className="open-archive-link">{t('collections.openArchive')}</span>
+                <span className="open-archive-link" onClick={handleOpenArchive} style={{ cursor: 'pointer' }}>{t('collections.openArchive')}</span>
               </div>
             </div>
           </div>
@@ -126,9 +143,24 @@ export default function Collections() {
             <p>{t('collections.cantFindDesc')}</p>
           </div>
           <div className="cant-find-actions">
-            <button className="btn-subscribe">{t('collections.subscribe')}</button>
-            <button className="btn-contact">{t('collections.contactArchive')}</button>
+            <button className="btn-subscribe" onClick={handleSubscribe}>{t('collections.subscribe')}</button>
+            <button className="btn-contact" onClick={handleContact}>{t('collections.contactArchive')}</button>
           </div>
+          {message && (
+            <div style={{
+              position: 'fixed',
+              bottom: '20px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: '#8D493A',
+              color: 'white',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+            }}>
+              {message}
+            </div>
+          )}
         </div>
       </div>
     </Layout>

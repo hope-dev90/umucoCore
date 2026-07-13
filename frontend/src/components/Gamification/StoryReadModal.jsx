@@ -51,7 +51,7 @@ export function StoryReadModal({ story, onClose, onComplete }) {
       setSessionXP(prev => prev + xpReward);
       refresh().catch(() => {});
     }
-    setShowCompletion(true);
+    setTimeout(() => setShowCompletion(true), 1000);
   }, [awardXP, onComplete, refresh, story, xpReward]);
 
   // Called by ReadingProgress when scroll hits 100%

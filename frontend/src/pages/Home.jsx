@@ -19,9 +19,7 @@ import {
   Music,
   Video
 } from 'lucide-react';
-import { DailyStreakWidget } from '../components/Gamification/DailyStreakWidget';
-import { LeaderboardWidget } from '../components/Gamification/LeaderboardWidget';
-import { XPBar } from '../components/Gamification/XPBar';
+// Removed: these widgets are now in the persistent Layout panel
 import ExplorerTypeImage from '../components/ExplorerTypeImage';
 
 const EXPLORER_TYPES = [
@@ -42,7 +40,7 @@ const ADVENTURE_POPUPS = {
     title: 'Are you ready to discover more about warriors in ancient Rwanda?',
     description: 'Uncover their stories, bravery, and the legacy they left behind.',
     confirmText: "Yes, let's go!",
-    route: '/explore',
+    route: '/home',
   },
   'nature-lover': {
     label: 'nature',
@@ -53,7 +51,7 @@ const ADVENTURE_POPUPS = {
     title: "Are you ready to follow Rwanda's living landscapes?",
     description: 'Walk through forests, hills, rivers, and the traditions shaped by the natural world.',
     confirmText: 'Start the trail',
-    route: '/explore',
+    route: '/home',
   },
   'royal-historian': {
     label: 'royal heritage',
@@ -64,7 +62,7 @@ const ADVENTURE_POPUPS = {
     title: "Are you ready to enter Rwanda's royal court?",
     description: 'Explore kings, dynasties, ceremonies, and the histories preserved around the palace.',
     confirmText: 'Enter the court',
-    route: '/explore',
+    route: '/home',
   },
   'folktale-hunter': {
     label: 'folktales',
@@ -75,7 +73,7 @@ const ADVENTURE_POPUPS = {
     title: 'Are you ready to chase the old stories?',
     description: 'Discover proverbs, myths, fireside lessons, and the imagination carried by oral tradition.',
     confirmText: 'Chase the legend',
-    route: '/explore',
+    route: '/home',
   },
   'music-explorer': {
     label: 'music',
@@ -86,7 +84,7 @@ const ADVENTURE_POPUPS = {
     title: "Are you ready to hear Rwanda's heritage?",
     description: 'Listen for drums, inanga, praise poetry, and rhythms that keep memory alive.',
     confirmText: 'Follow the rhythm',
-    route: '/explore',
+    route: '/home',
   },
 };
 
@@ -316,10 +314,10 @@ export default function Home() {
   // ── All original hardcoded content below ──────────────────
 
   const exploreItems = [
-    { label: 'Intore Culture',      meta: 'History • 12 mins left',    image: intoreImage  },
-    { label: 'Kigeli IV Rwabugiri', meta: 'Linkage • New Activity',    image: kigeliImage  },
-    { label: 'Traditional Music',   meta: 'Audio • 4 Stories',         image: inangaImage  },
-    { label: 'Ubudehe',             meta: 'Values • Updated',          image: ubudeheImage },
+    { title: 'Intore Culture', category: 'Royal', xp: 25, meta: 'History • 12 mins left', image: intoreImage },
+    { title: 'Kigeli IV Rwabugiri', category: 'Legends', xp: 30, meta: 'Linkage • New Activity', image: kigeliImage },
+    { title: 'Traditional Music', category: 'Audio', xp: 20, meta: 'Audio • 4 Stories', image: inangaImage },
+    { title: 'Ubudehe', category: 'Values', xp: 15, meta: 'Values • Updated', image: ubudeheImage },
   ];
 
   const recentItems = [
@@ -447,8 +445,7 @@ export default function Home() {
         <p>{welcomeSub}</p>
       </div>
 
-      <div className="home-grid">
-        <div>
+      <div style={{ width: '100%' }}>
           <div className="highlight-card">
             <span className="highlight-badge">{t('home.todayHighlight')}</span>
             <div className="highlight-image">
@@ -462,7 +459,7 @@ export default function Home() {
             <div className="highlight-content">
               <div>
                 <h2>{highlightTitle}</h2>
-                <p>{highlightDesc}</p>
+                <p style={{ color: 'var(--text-secondary)' }}>{highlightDesc}</p>
               </div>
               <div className="highlight-actions">
                 <button className="btn-primary" onClick={handleExploreNow}>
@@ -493,9 +490,13 @@ export default function Home() {
                 onClick={() => openDashboardStory({ ...item, route: routeForExploreItem(i) }, 'continue')}
                 onKeyDown={(e) => { if (e.key === 'Enter') openDashboardStory({ ...item, route: routeForExploreItem(i) }, 'continue'); }}>
                 <div className="explore-thumb-img">
-                  <img src={item.image} alt={item.label} />
+                  <img src={item.image} alt={item.title} />
                 </div>
-                <div className="explore-thumb-label">{item.label}</div>
+                <div className="explore-thumb-top">
+                  <span className="explore-thumb-category">{item.category}</span>
+                  <span className="explore-thumb-xp">+{item.xp} XP</span>
+                </div>
+                <div className="explore-thumb-label">{item.title}</div>
                 <div className="explore-thumb-meta">{item.meta}</div>
               </div>
             ))}
@@ -562,89 +563,13 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="home-sidebar">
-          <div style={{ marginBottom: '1rem' }}>
-            <XPBar
-              currentXP={xp || 0}
-              requiredXP={getNextLevelData()?.required_xp || 100}
-              level={level || 1}
-            />
-          </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <DailyStreakWidget streak={streak} bestStreak={bestStreak} />
-          </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <LeaderboardWidget
-              entries={leaderboard}
-              currentUserId={user?.id}
-              limit={5}
-            />
-          </div>
-
-          <div className="date-card">
-            <div className="date-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-            </div>
-            <div className="date-info">
-              <span>{t('home.todayDateLabel')}</span>
-              <span>{t('home.todayDate')}</span>
-            </div>
-          </div>
-
-          <div className="quote-card">
-            <div className="quote-label">{t('home.quoteOfDay')}</div>
-            <div className="quote-text">{t('home.quoteText')}</div>
-            <div className="quote-sub">{t('home.quoteSub')}</div>
-          </div>
-
-          <div className="quick-actions">
-            <div className="quick-action-title">{t('home.quickActions')}</div>
-            {quickActions.map((qa, i) => (
-              <div key={i} className="quick-action-item" role="button" tabIndex={0}
-                onClick={() => navigate(routeForQuickAction(i))}
-                onKeyDown={(e) => { if (e.key === 'Enter') navigate(routeForQuickAction(i)); }}>
-                <div className="quick-action-left">
-                  <div className="quick-action-icon">{qa.icon}</div>
-                  <span className="quick-action-label">{qa.label}</span>
-                </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </div>
-            ))}
-          </div>
-
-          <div className="upcoming-card">
-            <div className="section-header" style={{ marginTop: 0 }}>
-              <span className="section-title">{t('home.upcomingDays')}</span>
-              <button type="button" className="section-link link-button" onClick={handleViewAllCalendar}>{t('home.viewAll')}</button>
-            </div>
-            {upcomingDays.map((day, i) => (
-              <div key={i} className="upcoming-item">
-                <div className="upcoming-date">
-                  <span className="day">{day.day}</span>
-                  <span className="month">{day.month}</span>
-                </div>
-                <div className="upcoming-info">
-                  <h4>{day.title}</h4>
-                  <p>{day.sub}</p>
-                  <button type="button" className="read-more-btn" onClick={() => openDashboardStory({ ...day, route: '/intl-days' }, 'calendar')}>
-                    Read More
-                  </button>
-                </div>
-              </div>
-            ))}
-            <button className="see-calendar-btn" onClick={handleViewAllCalendar}>{t('home.seeFullCalendar')}</button>
+        <div className="home-footer">
+          <div className="home-footer-quote">
+            <p className="home-footer-quote-text">{t('home.quoteText')}</p>
+            <p className="home-footer-quote-sub">{t('home.quoteSub')}</p>
           </div>
         </div>
-      </div>
+
     </Layout>
     {activeStory && (
       <div className="story-reader-backdrop" onClick={() => setActiveStory(null)}>

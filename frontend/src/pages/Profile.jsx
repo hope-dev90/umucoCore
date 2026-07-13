@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -6,6 +6,7 @@ import { useGamification } from '../hooks/useGamification';
 import { XPBar } from '../components/Gamification/XPBar';
 import { BadgeCard } from '../components/Gamification/BadgeCard';
 import { CollectibleCard } from '../components/Gamification/CollectibleCard';
+import { getRewardFeed, subscribeRewardFeed } from '../utils/rewardFeed';
 import './Settings.css';
 import './Profile.css';
 
@@ -57,6 +58,49 @@ const DEFAULT_PROFILE = {
   accentTint: 'rgba(141, 73, 58, 0.10)',
 };
 
+const RECENT_MARKS_META = {
+  xp: '✨',
+  levelUp: '⬆️',
+  badge: '🏅',
+  collectible: '💎',
+  streak: '🔥',
+};
+
+function getRecentMarkCopy(item) {
+  switch (item.type) {
+    case 'xp':
+      return {
+        title: `+${item.payload?.amount || 0} XP`,
+        subtitle: 'New marks added to your progress.',
+      };
+    case 'levelUp':
+      return {
+        title: `Level ${item.payload?.level || 1} reached`,
+        subtitle: 'You moved up to a new rank.',
+      };
+    case 'badge':
+      return {
+        title: item.payload?.badge?.name || 'New badge unlocked',
+        subtitle: 'This mark now shows on your profile.',
+      };
+    case 'collectible':
+      return {
+        title: item.payload?.collectible?.name || 'New collectible found',
+        subtitle: 'A new reward was added to your collection.',
+      };
+    case 'streak':
+      return {
+        title: `${item.payload?.streak || 0}-day streak`,
+        subtitle: 'You kept your streak alive.',
+      };
+    default:
+      return {
+        title: 'New achievement',
+        subtitle: 'A fresh mark was added to your profile.',
+      };
+  }
+}
+
 export default function Profile() {
   const { user, updateUser } = useAuth();
   const { t } = useLanguage();
@@ -75,18 +119,44 @@ export default function Profile() {
   const [profileImage, setProfileImage] = useState(user?.profileImage || user?.avatar || null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [recentMarks, setRecentMarks] = useState(() => getRewardFeed().slice(0, 3));
   const fileInputRef = useRef(null);
 
-  const handleImageUpload = (e) => {
+  useEffect(() => {
+    return subscribeRewardFeed((items) => {
+      setRecentMarks(items.slice(0, 3));
+    });
+  }, []);
+
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const img = reader.result;
-        setProfileImage(img);
-        updateUser({ profileImage: img, avatar: img });
-      };
-      reader.readAsDataURL(file);
+      try {
+        setSaving(true);
+        const formData = new FormData();
+        formData.append("avatar", file);
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:5000/api/users/avatar", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        });
+        if (!response.ok) throw new Error("Failed to upload avatar");
+      const data = await response.json();
+      // Prepend backend URL to avatar path if it's a relative path
+      const fullAvatarUrl = data.avatar && !data.avatar.startsWith('http') 
+        ? `http://localhost:5000${data.avatar}` 
+        : data.avatar;
+      setProfileImage(fullAvatarUrl);
+      updateUser({ profileImage: fullAvatarUrl, avatar: fullAvatarUrl });
+      } catch (err) {
+        console.error("Avatar upload error:", err);
+        setSaveError("Failed to upload avatar");
+      } finally {
+        setSaving(false);
+      }
     }
   };
 
@@ -267,6 +337,31 @@ export default function Profile() {
 
           {/* Right column: badges + collectibles */}
           <div className="pf-right-col">
+            <div className="pf-section">
+              <div className="pf-section__header">
+                <span className="pf-section__title">Recent Marks</span>
+                <span className="pf-section__count">{recentMarks.length}</span>
+              </div>
+              {recentMarks.length === 0 ? (
+                <div className="pf-empty">Your latest rewards will show here.</div>
+              ) : (
+                <div className="pf-marks-list">
+                  {recentMarks.map((item) => {
+                    const copy = getRecentMarkCopy(item);
+                    return (
+                      <div key={item.id} className="pf-mark-item">
+                        <div className="pf-mark-item__icon">{RECENT_MARKS_META[item.type] || '⭐'}</div>
+                        <div className="pf-mark-item__body">
+                          <div className="pf-mark-item__title">{copy.title}</div>
+                          <div className="pf-mark-item__subtitle">{copy.subtitle}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             <div className="pf-section">
               <div className="pf-section__header">
                 <span className="pf-section__title">{t('profile.badges')}</span>

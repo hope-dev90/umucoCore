@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useGamificationContext } from '../contexts/GamificationContext';
+import { XPBar } from './Gamification/XPBar';
+import { DailyStreakWidget } from './Gamification/DailyStreakWidget';
+import { LeaderboardWidget } from './Gamification/LeaderboardWidget';
 import './Layout.css';
 import UmucoLogo from './UmucoLogo';
 
@@ -24,12 +28,13 @@ const Icons = {
   saved:     "M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z",
   history:   "M12 2a10 10 0 100 20A10 10 0 0012 2z M12 6v6l4 2",
   profile:   "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 3a4 4 0 100 8 4 4 0 000-8z",
-  settings:  "M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z",
+  settings:  "M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06.06a2 2 0 012.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z",
   search:    "M11 17a6 6 0 100-12 6 6 0 000 12z M21 21l-4.35-4.35",
   bell:      "M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 01-3.46 0",
   moon:      "M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z",
   signout:   "M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4 M16 17l5-5-5-5 M21 12H9",
   translate: "M5 8l6 6 M4 14s-2-2 0-4 M4 4l16 0 M4 4l4 8 M20 4l-4 8",
+  menu:      "M3 12h18 M3 6h18 M3 18h18",
 };
 
 export default function Layout({ children, searchPlaceholder = 'search.placeholder' }) {
@@ -37,8 +42,13 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
   const location = useLocation();
   const { user, logout } = useAuth();
   const { language, setLanguage, t } = useLanguage();
+  const { xp, level, streak, bestStreak, leaderboard, getNextLevelData } = useGamificationContext();
+  const nextLevel = getNextLevelData();
+  const requiredXP = nextLevel?.requiredXP || 100;
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  const mainNav = [
+  // Group 1: Discover (unlabeled)
+  const discoverNav = [
     { label: t('sidebar.home'),          path: '/dashboard', icon: 'home' },
     { label: t('sidebar.explore'),       path: '/explore',   icon: 'explore' },
     { label: t('sidebar.listen'),        path: '/listen',    icon: 'listen' },
@@ -48,14 +58,19 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
     { label: t('sidebar.intldays'),      path: '/intl-days', icon: 'intldays' },
   ];
 
-  const personalNav = [
+  // Group 3: Contribute
+  const contributeNav = [
     { label: t('sidebar.contribute'), path: '/contribute', icon: 'contribute' },
+  ];
+
+  // Group 4: Personal
+  const personalNav = [
     { label: t('sidebar.saved'),      path: '/saved',      icon: 'saved' },
     { label: t('sidebar.history'),    path: '/history',    icon: 'history' },
   ];
 
+  // Group 5: Account
   const accountNav = [
-    { label: t('sidebar.profile'),  path: '/profile',  icon: 'profile' },
     { label: t('sidebar.settings'), path: '/settings', icon: 'settings' },
   ];
 
@@ -79,7 +94,16 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
 
   return (
     <div className="layout">
-      <aside className="sidebar">
+      {/* Mobile nav drawer backdrop */}
+      {mobileNavOpen && (
+        <div
+          className="mobile-nav-backdrop"
+          onClick={() => setMobileNavOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside className={`sidebar ${mobileNavOpen ? 'sidebar-open' : ''}`} aria-hidden={!mobileNavOpen}>
         <div className="sidebar-logo">
           <UmucoLogo style={{ width: 28, height: 28, borderRadius: '50%' }} />
           <div className="sidebar-logo-text">
@@ -89,10 +113,22 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
         </div>
 
         <nav className="sidebar-nav">
-          {mainNav.map(item => <NavLink key={item.path} item={item} />)}
-          <div className="sidebar-section-label">{t('sidebar.personal')}</div>
+          {/* Group 1: Discover (unlabeled) */}
+          {discoverNav.map(item => <NavLink key={item.path} item={item} />)}
+
+          {/* Group 3: Contribute */}
+          <div className="sidebar-divider" />
+          <div className="sidebar-section-label">CONTRIBUTE</div>
+          {contributeNav.map(item => <NavLink key={item.path} item={item} />)}
+
+          {/* Group 4: Personal */}
+          <div className="sidebar-divider" />
+          <div className="sidebar-section-label">PERSONAL</div>
           {personalNav.map(item => <NavLink key={item.path} item={item} />)}
-          <div className="sidebar-section-label">{t('sidebar.account')}</div>
+
+          {/* Group 5: Account */}
+          <div className="sidebar-divider" />
+          <div className="sidebar-section-label">ACCOUNT</div>
           {accountNav.map(item => <NavLink key={item.path} item={item} />)}
         </nav>
 
@@ -103,45 +139,121 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
         </div>
       </aside>
 
-      <header className="topbar">
-        <div className="topbar-search">
-          <span className="topbar-search-icon"><Icon d={Icons.search} size={14} /></span>
-          <input type="text" placeholder={t(searchPlaceholder)} />
-        </div>
-        <div className="topbar-right">
-          <div className="topbar-lang">
-            <span
-              className={language === 'rw' ? 'active' : ''}
-              onClick={() => setLanguage('rw')}
-              style={{ cursor: 'pointer' }}
-            >
-              Kinyarwanda
-            </span>
-            <span
-              className={language === 'en' ? 'active' : ''}
-              onClick={() => setLanguage('en')}
-              style={{ cursor: 'pointer' }}
-            >
-              English
-            </span>
+      {/* Main Content */}
+      <div className="layout-main-right">
+        <header className="topbar">
+          <button
+            type="button"
+            className="topbar-hamburger"
+            onClick={() => setMobileNavOpen(prev => !prev)}
+            aria-expanded={mobileNavOpen}
+            aria-label="Toggle navigation"
+          >
+            <Icon d={Icons.menu} size={18} />
+          </button>
+          <div className="topbar-search">
+            <span className="topbar-search-icon"><Icon d={Icons.search} size={14} /></span>
+            <input type="text" placeholder={t(searchPlaceholder)} />
           </div>
-          <div className="topbar-icon-btn"><Icon d={Icons.bell} size={14} /></div>
-          <div className="topbar-icon-btn"><Icon d={Icons.translate} size={14} /></div>
-          <div className="topbar-avatar">
-            {user?.profileImage ? (
-              <img 
-                src={user.profileImage} 
-                alt="Profile" 
-                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
-              />
-            ) : (
-              user?.name ? user.name.charAt(0).toUpperCase() : 'MJ'
-            )}
+          <div className="topbar-right">
+            <div className="topbar-lang">
+              <span
+                className={language === 'rw' ? 'active' : ''}
+                onClick={() => setLanguage('rw')}
+                style={{ cursor: 'pointer' }}
+              >
+                Kinyarwanda
+              </span>
+              <span
+                className={language === 'en' ? 'active' : ''}
+                onClick={() => setLanguage('en')}
+                style={{ cursor: 'pointer' }}
+              >
+                English
+              </span>
+            </div>
+            <div className="topbar-icon-btn"><Icon d={Icons.bell} size={14} /></div>
+            <div className="topbar-icon-btn"><Icon d={Icons.translate} size={14} /></div>
+            <div
+              className="topbar-user"
+              onClick={() => navigate('/profile')}
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.75rem' }}
+            >
+              <div className="topbar-avatar" style={{ position: 'relative' }}>
+                {user?.profileImage ? (
+                  <img
+                    src={user.profileImage}
+                    alt="Profile"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                  />
+                ) : (
+                  user?.name ? user.name.charAt(0).toUpperCase() : 'MJ'
+                )}
+                <div
+                  className="level-indicator"
+                  style={{
+                    position: 'absolute',
+                    bottom: -4,
+                    right: -4,
+                    width: 20,
+                    height: 20,
+                    background: 'linear-gradient(135deg, #8D493A, #C4724A)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontSize: '0.65rem',
+                    fontWeight: 800,
+                    border: '2px solid #FDFBF7',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  }}
+                >
+                  {level}
+                </div>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  color: '#2C1A14',
+                  lineHeight: 1.2
+                }}>
+                  {user?.name || 'Explorer'}
+                </span>
+                <span style={{
+                  fontSize: '0.7rem',
+                  color: '#8D493A',
+                  fontWeight: 500
+                }}>
+                  {t('gamification.level')} {level}
+                </span>
+              </div>
+            </div>
           </div>
-        </div>  
-      </header>
+        </header>
 
-      <main className="main-content">{children}</main>
+        <div className="layout-content-wrapper">
+          <main className="main-content">{children}</main>
+          {(location.pathname === '/dashboard' || location.pathname === '/profile') && (
+            <aside className="right-rail">
+              <div className="right-rail-widget">
+                <XPBar currentXP={xp} requiredXP={requiredXP} level={level} />
+              </div>
+              <div className="right-rail-widget">
+                <DailyStreakWidget streak={streak} bestStreak={bestStreak} />
+              </div>
+              <div className="right-rail-widget">
+                <LeaderboardWidget
+                  entries={leaderboard}
+                  currentUserId={user?.id}
+                  limit={5}
+                />
+              </div>
+            </aside>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
