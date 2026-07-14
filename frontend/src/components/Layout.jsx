@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useGamificationContext } from '../contexts/GamificationContext';
 import './Layout.css';
 import UmucoLogo from './UmucoLogo';
 
@@ -37,6 +38,7 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
   const location = useLocation();
   const { user, logout } = useAuth();
   const { language, setLanguage, t } = useLanguage();
+  const { xp, level, streak } = useGamificationContext();
 
   const mainNav = [
     { label: t('sidebar.home'),          path: '/dashboard', icon: 'home' },
@@ -58,6 +60,8 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
     { label: t('sidebar.profile'),  path: '/profile',  icon: 'profile' },
     { label: t('sidebar.settings'), path: '/settings', icon: 'settings' },
   ];
+  const allNav = [...mainNav, ...personalNav, ...accountNav];
+  const activeSection = allNav.find(item => location.pathname === item.path || location.pathname.startsWith(item.path + '/')) || mainNav[0];
 
   // No longer treats '/' as special — just exact/startsWith matching
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
@@ -104,11 +108,25 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
       </aside>
 
       <header className="topbar">
+        <div className="topbar-adventure">
+          <div className="topbar-orbit" aria-hidden="true">
+            <span />
+          </div>
+          <div className="topbar-adventure-copy">
+            <span>{activeSection.label}</span>
+            <strong>Level {level || 1} journey</strong>
+          </div>
+        </div>
         <div className="topbar-search">
           <span className="topbar-search-icon"><Icon d={Icons.search} size={14} /></span>
           <input type="text" placeholder={t(searchPlaceholder)} />
+          <span className="topbar-search-spark" aria-hidden="true">Search heritage</span>
         </div>
         <div className="topbar-right">
+          <div className="topbar-xp-pill" title="Your adventure progress">
+            <span>{xp || 0} XP</span>
+            <strong>{streak || 0} day streak</strong>
+          </div>
           <div className="topbar-lang">
             <span
               className={language === 'rw' ? 'active' : ''}

@@ -18,6 +18,7 @@ export const gihangaStory = {
   id: 'gihanga-ngomijana',
   title: 'Gihanga Ngomijana',
   category: 'Founding history',
+  explorerCategory: 'royal', // matches EXPLORER_CATEGORY['royal-historian'] in Home.jsx
   location: 'Buhanga Sacred Forest',
   image: GihangaImg,
   xpReward: 60,
@@ -39,6 +40,26 @@ export const gihangaStory = {
 
     `Gihanga's story does not end tidily with a single victory or a single throne. It survives instead in fragments carried by different families, different clans, different court poets — some claiming descent from a son who inherited his kingdom, others from a daughter said to have brought the first cattle to Rwanda after a family dispute of her own. That every version disagrees on some detail and agrees on the shape of the whole is, in its own way, exactly how a founding story should survive: not as one fixed account, but as something every generation retells a little differently, because it still belongs to all of them.`,
   ].join('\n\n'),
+  quiz: [
+    {
+      question: "What does the name 'Gihanga' mean?",
+      options: ["The one who descended", "To create", "The blacksmith", "The warrior"],
+      correctIndex: 1,
+      explanation: "Gihanga comes from the word 'guhanga', which means 'to create'."
+    },
+    {
+      question: "Which of the following crafts is Gihanga said to have brought to his people?",
+      options: ["Weaving and farming", "Forging iron and shaping wood", "Building stone walls", "Writing"],
+      correctIndex: 1,
+      explanation: "He brought the knowledge of forging iron, shaping wood, working clay, keeping fire, and raising cattle."
+    },
+    {
+      question: "What was the significance of the fire Gihanga lit at his court?",
+      options: ["It was used to forge weapons", "It was meant to never go out", "It warned enemies", "It was only lit during festivals"],
+      correctIndex: 1,
+      explanation: "The fire was meant to never go out, representing an unbroken line between the people and their beginning."
+    }
+  ]
 };
 
 export default gihangaStory;

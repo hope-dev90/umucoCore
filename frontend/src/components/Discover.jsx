@@ -122,7 +122,7 @@ function Discover({ onNavigate }) {
           {/* Continue reading CTA */}
           <div className="flex flex-col items-center pb-8 sm:pb-10 pt-1 relative z-10">
             <button
-              onClick={() => onNavigate('signup')}
+              onClick={() => onNavigate('signup', story.id)}
               className="inline-flex items-center space-x-2 bg-[#8D493A] hover:bg-[#3E2723] text-[#FDFBF7] px-5 sm:px-7 py-3 text-xs sm:text-sm font-semibold tracking-wide rounded-xl transition-all duration-200 shadow-sm group"
             >
               <Lock className="w-3.5 h-3.5" />

@@ -15,6 +15,7 @@ export const nyirarucyabaStory = {
   id: 'nyirarucyaba',
   title: 'Nyirarucyaba',
   category: 'Founding history',
+  explorerCategory: 'folklore', // matches EXPLORER_CATEGORY['folktale-hunter'] in Home.jsx
   location: 'Mount Kabuye',
   image: NyirarucyabaImg,
   xpReward: 45,
@@ -32,6 +33,26 @@ export const nyirarucyabaStory = {
 
     `It's worth pausing on why this particular story has lasted as long as it has. Cattle in Rwanda were never simply livestock — they became wealth, status, poetry, and ceremony, celebrated in songs and central to marriage customs and royal ritual alike for centuries afterward. That such a foundational part of Rwandan life is credited not to a conquest or a divine descent, but to one woman's curiosity and generosity toward her father, says something the grander stories of kings and battles rarely do: that some of the most enduring gifts a culture carries began as something quietly noticed, and freely given.`,
   ].join('\n\n'),
+  quiz: [
+    {
+      question: "Who was Nyirarucyaba?",
+      options: ["A famous warrior", "The daughter of Gihanga", "A powerful queen from a neighboring kingdom", "The founder of Rwanda"],
+      correctIndex: 1,
+      explanation: "Nyirarucyaba was the daughter of the founder-king Gihanga."
+    },
+    {
+      question: "What is Nyirarucyaba credited with bringing to the Kingdom of Rwanda?",
+      options: ["Iron forging", "The first cattle and milk", "The sacred drum", "New farming techniques"],
+      correctIndex: 1,
+      explanation: "She is credited with bringing the first cattle and milk to her father's court, starting the cattle-keeping tradition in Rwanda."
+    },
+    {
+      question: "Why did Nyirarucyaba leave her childhood home?",
+      options: ["To conquer new lands", "Because of a dispute between her mother and stepmother", "To get married", "She was exiled by her father"],
+      correctIndex: 1,
+      explanation: "She fled due to a fierce dispute between her mother and stepmother, fearing punishment for defending her mother."
+    }
+  ]
 };
 
 export default nyirarucyabaStory;

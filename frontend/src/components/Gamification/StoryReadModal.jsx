@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ReadingProgress } from './ReadingProgress';
 import { useGamificationContext } from '../../contexts/GamificationContext';
 import { ReadingCompletePopup } from './ReadingCompletePopup';
+import { StoryQuiz } from './StoryQuiz';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -12,7 +13,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
  * Tracks reading progress and fires gamification events as the user reads.
  *
  * Props:
- *  - story   : { id, title, desc|description, image, image_url, category, location, content }
+ *  - story   : { id, title, desc|description, image, image_url, category, location, content, quiz }
  *  - onClose : () => void
  *  - onComplete : (story) => void
  */
@@ -22,6 +23,7 @@ export function StoryReadModal({ story, onClose, onComplete }) {
   const { user } = useAuth();
   const { t } = useLanguage();
   const [showCompletion, setShowCompletion] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false);
   const [sessionXP, setSessionXP] = useState(0);
   const awardedRef = useRef(false); // prevent double XP award
   const completionNotifiedRef = useRef(false);
@@ -38,21 +40,38 @@ export function StoryReadModal({ story, onClose, onComplete }) {
     setSessionXP(prev => prev + amount);
   }, [awardXP]);
 
-  // Shared logic — awards XP once then shows popup
   const triggerCompletion = useCallback(() => {
-    if (!completionNotifiedRef.current) {
-      completionNotifiedRef.current = true;
-      onComplete?.(story);
-    }
-
     if (!awardedRef.current) {
       awardedRef.current = true;
       awardXP(xpReward, 'story_completed').catch(() => {});
       setSessionXP(prev => prev + xpReward);
       refresh().catch(() => {});
     }
-    setShowCompletion(true);
+
+    if (story?.quiz && story.quiz.length > 0) {
+      setShowQuiz(true);
+    } else {
+      if (!completionNotifiedRef.current) {
+        completionNotifiedRef.current = true;
+        onComplete?.(story);
+      }
+      setShowCompletion(true);
+    }
   }, [awardXP, onComplete, refresh, story, xpReward]);
+
+  const handleQuizComplete = useCallback((bonusXP) => {
+    if (bonusXP > 0) {
+      awardXP(bonusXP, 'quiz_completed').catch(() => {});
+      setSessionXP(prev => prev + bonusXP);
+      refresh().catch(() => {});
+    }
+    setShowQuiz(false);
+    if (!completionNotifiedRef.current) {
+      completionNotifiedRef.current = true;
+      onComplete?.(story);
+    }
+    setShowCompletion(true);
+  }, [awardXP, onComplete, refresh, story]);
 
   // Called by ReadingProgress when scroll hits 100%
   const handleComplete = useCallback(() => triggerCompletion(), [triggerCompletion]);
@@ -110,100 +129,106 @@ export function StoryReadModal({ story, onClose, onComplete }) {
           }}
           onClick={e => e.stopPropagation()}
         >
-          {/* Reading progress bar — sticky at top */}
-          <ReadingProgress
-            totalWords={wordCount}
-            scrollContainerRef={scrollRef}
-            xpReward={xpReward}
-            onMilestone={handleMilestone}
-            onComplete={handleComplete}
-          />
+          {showQuiz ? (
+            <StoryQuiz quizData={story.quiz} onComplete={handleQuizComplete} />
+          ) : (
+            <>
+              {/* Reading progress bar — sticky at top */}
+              <ReadingProgress
+                totalWords={wordCount}
+                scrollContainerRef={scrollRef}
+                xpReward={xpReward}
+                onMilestone={handleMilestone}
+                onComplete={handleComplete}
+              />
 
-          {/* Scrollable body */}
-          <div
-            ref={scrollRef}
-            style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain' }}
-          >
-            {/* Hero image */}
-            {image && (
-              <div style={{ height: 260, overflow: 'hidden', margin: '0.75rem 1.25rem 0', borderRadius: 12 }}>
-                <img
-                  src={image} alt={title}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              </div>
-            )}
-
-            {/* Header */}
-            <div style={{ padding: '1.25rem 1.5rem 0' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                {category && (
-                  <span style={{
-                    background: 'rgba(44,26,20,0.08)', color: '#8D493A',
-                    fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase',
-                    letterSpacing: '0.06em', padding: '3px 10px', borderRadius: 999,
-                  }}>
-                    {category}
-                  </span>
+              {/* Scrollable body */}
+              <div
+                ref={scrollRef}
+                style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain' }}
+              >
+                {/* Hero image */}
+                {image && (
+                  <div style={{ height: 260, overflow: 'hidden', margin: '0.75rem 1.25rem 0', borderRadius: 12 }}>
+                    <img
+                      src={image} alt={title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  </div>
                 )}
-                {location && (
-                  <span style={{ fontSize: '0.72rem', color: '#6F5B55' }}>📍 {location}</span>
-                )}
-                <span style={{
-                  marginLeft: 'auto', background: '#FEF3C7', color: '#92400E',
-                  fontSize: '0.7rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999,
-                }}>
-                  +{xpReward} XP
-                </span>
+
+                {/* Header */}
+                <div style={{ padding: '1.25rem 1.5rem 0' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    {category && (
+                      <span style={{
+                        background: 'rgba(44,26,20,0.08)', color: '#8D493A',
+                        fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase',
+                        letterSpacing: '0.06em', padding: '3px 10px', borderRadius: 999,
+                      }}>
+                        {category}
+                      </span>
+                    )}
+                    {location && (
+                      <span style={{ fontSize: '0.72rem', color: '#6F5B55' }}>📍 {location}</span>
+                    )}
+                    <span style={{
+                      marginLeft: 'auto', background: '#FEF3C7', color: '#92400E',
+                      fontSize: '0.7rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+                    }}>
+                      +{xpReward} XP
+                    </span>
+                  </div>
+
+                  <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, color: '#2C1A14', lineHeight: 1.3 }}>
+                    {title}
+                  </h2>
+                </div>
+
+                {/* Body text */}
+                <div style={{ padding: '1rem 1.5rem 2rem' }}>
+                  {readableContent.split('\n\n').map((paragraph, i) => (
+                    <p key={i} style={{
+                      margin: '0 0 1rem', fontSize: '0.95rem', lineHeight: 1.75,
+                      color: '#3B2A24',
+                    }}>
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
               </div>
 
-              <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 800, color: '#2C1A14', lineHeight: 1.3 }}>
-                {title}
-              </h2>
-            </div>
-
-            {/* Body text */}
-            <div style={{ padding: '1rem 1.5rem 2rem' }}>
-              {readableContent.split('\n\n').map((paragraph, i) => (
-                <p key={i} style={{
-                  margin: '0 0 1rem', fontSize: '0.95rem', lineHeight: 1.75,
-                  color: '#3B2A24',
-                }}>
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          </div>
-
-          {/* Sticky footer — Back + Finish Reading always visible */}
-          <div style={{
-            padding: '0.75rem 1.25rem 1rem',
-            borderTop: '1px solid #EADBC8',
-            background: '#FDFBF7',
-            display: 'flex', alignItems: 'center', gap: '0.75rem',
-          }}>
-            <button
-              onClick={onClose}
-              style={{
-                background: 'none', border: '1px solid #D9C6BC', cursor: 'pointer',
-                color: '#6F5B55', fontWeight: 600, fontSize: '0.82rem',
-                padding: '0.6rem 1rem', borderRadius: 10, flexShrink: 0,
-              }}
-            >
-              {t('gamification.back')}
-            </button>
-            <button
-              onClick={handleFinishReading}
-              style={{
-                flex: 1, background: '#8D493A', color: '#fff',
-                border: 'none', borderRadius: 10, padding: '0.7rem',
-                fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer',
-                letterSpacing: '0.02em',
-              }}
-            >
-              {t('gamification.finishReading')}
-            </button>
-          </div>
+              {/* Sticky footer — Back + Finish Reading always visible */}
+              <div style={{
+                padding: '0.75rem 1.25rem 1rem',
+                borderTop: '1px solid #EADBC8',
+                background: '#FDFBF7',
+                display: 'flex', alignItems: 'center', gap: '0.75rem',
+              }}>
+                <button
+                  onClick={onClose}
+                  style={{
+                    background: 'none', border: '1px solid #D9C6BC', cursor: 'pointer',
+                    color: '#6F5B55', fontWeight: 600, fontSize: '0.82rem',
+                    padding: '0.6rem 1rem', borderRadius: 10, flexShrink: 0,
+                  }}
+                >
+                  {t('gamification.back')}
+                </button>
+                <button
+                  onClick={handleFinishReading}
+                  style={{
+                    flex: 1, background: '#8D493A', color: '#fff',
+                    border: 'none', borderRadius: 10, padding: '0.7rem',
+                    fontWeight: 800, fontSize: '0.9rem', cursor: 'pointer',
+                    letterSpacing: '0.02em',
+                  }}
+                >
+                  {t('gamification.finishReading')}
+                </button>
+              </div>
+            </>
+          )}
         </motion.div>
       </AnimatePresence>
 

@@ -18,6 +18,7 @@ export const kigeliStory = {
   id: 'kigeli-iv-rwabugiri',
   title: 'Kigeli IV Rwabugiri',
   category: 'Royal history',
+  explorerCategory: 'warrior', // matches EXPLORER_CATEGORY['warrior'] in Home.jsx — his reign was defined by conquest
   location: 'Lake Kivu',
   image: KigeliImg,
   xpReward: 55,
@@ -37,6 +38,26 @@ export const kigeliStory = {
 
     `Rwabugiri died in 1895, on campaign as he had lived, and is remembered by many as the last true king of the old Nyiginya line — his death followed swiftly by a palace coup that installed a very different kind of rule. What survived him wasn't only territory. It was a reputation carried in songs composed in his own lifetime, praising his relentlessness, and a kingdom whose shape — for better and for worse — still marks the outline of Rwanda today.`,
   ].join('\n\n'),
+  quiz: [
+    {
+      question: "Which of the following kings was Kigeli IV Rwabugiri's father?",
+      options: ["Gihanga Ngomijana", "Ruganzu II Ndoli", "Mutara II Rwogera", "Musinga"],
+      correctIndex: 2,
+      explanation: "He was born Sezisoni Rwabugiri, son of Mutara II Rwogera."
+    },
+    {
+      question: "What does 'Inkotanyi cyane' mean?",
+      options: ["The truly relentless", "The great king", "The conqueror", "The first warrior"],
+      correctIndex: 0,
+      explanation: "He earned the title 'Inkotanyi cyane' meaning 'the truly relentless' due to his constant campaigns."
+    },
+    {
+      question: "How did Kigeli IV Rwabugiri reform the military?",
+      options: ["He disbanded the military", "He reorganized the army into standing units like the Intore", "He relied solely on mercenaries", "He created a navy on Lake Kivu"],
+      correctIndex: 1,
+      explanation: "He reorganized the army into standing units—the elite Intore among them—replacing loose levies with a professional fighting force."
+    }
+  ]
 };
 
 export default kigeliStory;

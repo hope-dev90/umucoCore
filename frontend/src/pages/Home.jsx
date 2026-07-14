@@ -10,7 +10,7 @@ import intoreImage from '../assets/home/intore.jpg';
 import kigeliImage from '../assets/home/kigeli.jpg';
 import inangaImage from '../assets/home/inanga.jpg';
 import ubudeheImage from '../assets/home/ubudehe.jpg';
-import { ArrowRight, X, Swords, Leaf, Crown, Drama, Drum } from 'lucide-react';
+import { ArrowRight, X, Swords, Leaf, Crown, Drama, Drum, BookOpen, Flame, Trophy, Share2 } from 'lucide-react';
 import {
   Headphones,
   Plus,
@@ -23,6 +23,9 @@ import { DailyStreakWidget } from '../components/Gamification/DailyStreakWidget'
 import { LeaderboardWidget } from '../components/Gamification/LeaderboardWidget';
 import { XPBar } from '../components/Gamification/XPBar';
 import ExplorerTypeImage from '../components/ExplorerTypeImage';
+import { getHighlightForCategory, ALL_STORIES } from '../data/stories';
+import { DashboardStoryView } from '../components/Gamification/DashboardStoryView';
+import { useLocation } from 'react-router-dom';
 
 const EXPLORER_TYPES = [
   { id: 'warrior',         label: 'Warrior',          tagline: 'Battles, legends & brave deeds'   },
@@ -257,6 +260,21 @@ export default function Home() {
   const [showAdventurePopup, setShowAdventurePopup] = useState(false);
   const [activeStory, setActiveStory] = useState(null);
   const [awardedDashboardItems, setAwardedDashboardItems] = useState(new Set());
+  const location = useLocation();
+
+  useEffect(() => {
+    // Handle Continue Reading
+    if (location.state?.continueStoryId) {
+      const targetStory = ALL_STORIES.find(s => s.id === location.state.continueStoryId);
+      if (targetStory) {
+        // Clear the state so it doesn't reopen on refresh
+        window.history.replaceState({}, document.title);
+        setTimeout(() => {
+          openDashboardStory(targetStory, 'continue-reading');
+        }, 800);
+      }
+    }
+  }, [location.state]);
 
   // Show picker after 500ms if user has no explorer type
   useEffect(() => {
@@ -300,17 +318,37 @@ export default function Home() {
     navigate(route);
   };
 
-  // Fetch the highlight card for this user's adventure type
+  // Fetch the highlight card for this user's adventure type.
+  // Backend endpoint (/api/heritage) doesn't exist yet, so this falls back to
+  // one of our locally-written stories matched to the same category — the
+  // dashboard stays personalized today, and will switch over to real backend
+  // data automatically the moment that endpoint is live, since a successful
+  // fetch with real items always takes priority below.
   const [highlight, setHighlight] = useState(null);
 
   useEffect(() => {
+    const localFallback = getHighlightForCategory(category);
+    const localHighlight = {
+      title: localFallback.title,
+      description: localFallback.desc,
+      image_url: localFallback.image,
+      storyId: localFallback.id,
+    };
+    // Show the local story immediately so the dashboard is never blank
+    // while the (currently nonexistent) backend request resolves.
+    setHighlight(localHighlight);
+
     fetch(`http://localhost:5000/api/heritage?category=${category}`)
       .then(r => r.json())
       .then(data => {
         const items = Array.isArray(data) ? data : data.items || [];
         if (items.length > 0) setHighlight(items[0]);
+        // If the backend responds but has nothing for this category yet,
+        // the local fallback set above stays in place.
       })
-      .catch(() => {});
+      .catch(() => {
+        // Backend not running / not built yet — local fallback already set above.
+      });
   }, [category]);
 
   // ── All original hardcoded content below ──────────────────
@@ -346,6 +384,12 @@ export default function Home() {
     { icon: <Search     size={16} />, label: t('home.advancedSearch') },
   ];
 
+  const dashboardStats = [
+    { icon: <Trophy size={18} />, label: 'Level', value: level || 1, detail: `${xp || 0} XP earned` },
+    { icon: <Flame size={18} />, label: 'Daily streak', value: `${streak || 0} days`, detail: `Best: ${bestStreak || 0}` },
+    { icon: <BookOpen size={18} />, label: 'Story quest', value: `${ALL_STORIES.length} tales`, detail: 'Read, quiz, collect XP' },
+  ];
+
   const explorerGreetings = {
     'warrior':         { prefix: 'Ready for battle,' },
     'nature-lover':    { prefix: 'Welcome back to the wild,' },
@@ -366,7 +410,16 @@ export default function Home() {
     ? `Your ${activeExplorerType.replace(/-/g, ' ')} journey awaits.`
     : t('home.subtitle');
 
-  const handleExploreNow    = () => navigate('/explore');
+  const handleExploreNow = () => {
+    if (highlight?.storyId) {
+      const fullStory = ALL_STORIES.find((s) => s.id === highlight.storyId);
+      if (fullStory) {
+        openDashboardStory(fullStory, 'highlight');
+        return;
+      }
+    }
+    navigate('/explore');
+  };
   const handleExploreKwibuka = () => navigate('/kwibuka');
   const handleViewAllStories = () => navigate('/explore');
   const handleViewAllRecent = () => navigate('/history');
@@ -385,13 +438,15 @@ export default function Home() {
   const routeForExploreItem = (index) => ['/explore', '/collections', '/listen', '/collections'][index] || '/explore';
   const routeForRecentItem = (type) => ({ audio: '/listen', video: '/videos', doc: '/history' }[type] || '/history');
   const routeForQuickAction = (index) => ['/listen', '/contribute', '/explore'][index] || '/explore';
+  const topicStoryForIndex = (index) => ALL_STORIES[index % ALL_STORIES.length];
 
   const openDashboardStory = async (item, reason = 'dashboard-story') => {
     const title = item.title || item.label;
     setActiveStory({
       ...item,
       title,
-      body: storyBodies[title] || item.body || 'This heritage note is ready to explore in the archive.',
+      content: item.content || storyBodies[title] || item.body || 'This heritage note is ready to explore in the archive.',
+      category: item.category || 'Discovery',
     });
     const key = `${reason}:${title}`;
     if (!awardedDashboardItems.has(key)) {
@@ -447,8 +502,29 @@ export default function Home() {
         <p>{welcomeSub}</p>
       </div>
 
+      <div className="dashboard-overview" aria-label="Dashboard progress summary">
+        {dashboardStats.map((stat) => (
+          <div className="dashboard-stat-card" key={stat.label}>
+            <div className="dashboard-stat-icon">{stat.icon}</div>
+            <div>
+              <span>{stat.label}</span>
+              <strong>{stat.value}</strong>
+              <p>{stat.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <div className="home-grid">
         <div>
+          {activeStory ? (
+            <DashboardStoryView
+              story={activeStory}
+              onClose={() => setActiveStory(null)}
+              onComplete={() => console.log('Story completed')}
+            />
+          ) : (
+            <>
           <div className="highlight-card">
             <span className="highlight-badge">{t('home.todayHighlight')}</span>
             <div className="highlight-image">
@@ -469,13 +545,7 @@ export default function Home() {
                   {t('home.exploreNow')}
                 </button>
                 <button className="btn-outline" onClick={handleShare}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <circle cx="18" cy="5" r="3" />
-                    <circle cx="6" cy="12" r="3" />
-                    <circle cx="18" cy="19" r="3" />
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                  </svg>
+                  <Share2 size={14} />
                   {t('home.share')}
                 </button>
               </div>
@@ -508,7 +578,14 @@ export default function Home() {
           </div>
           <div className="topics-wrap">
             {["Ubwiru", "Amateka y'u Rwanda", "Ingoma", "Abami b'u Rwanda", "Indangagaciro", "Uburego"].map((topic, i) => (
-              <span key={i} className="topic-chip">{topic}</span>
+              <button
+                type="button"
+                key={topic}
+                className="topic-chip"
+                onClick={() => openDashboardStory({ ...topicStoryForIndex(i), title: topicStoryForIndex(i).title }, `topic:${topic}`)}
+              >
+                {topic}
+              </button>
             ))}
           </div>
 
@@ -550,16 +627,23 @@ export default function Home() {
                 <span className="section-title">{t('home.yourActivity')}</span>
               </div>
               {activityItems.map((item, i) => (
-                <div key={i} className="activity-item">
+                <button
+                  type="button"
+                  key={i}
+                  className="activity-item"
+                  onClick={() => openDashboardStory({ ...item, title: item.label, category: 'Activity' }, 'activity')}
+                >
                   <div className="activity-dot" />
                   <div className="activity-info">
                     <h4>{item.label}</h4>
                     <p>{item.time}</p>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
+            </>
+          )}
         </div>
 
         <div className="home-sidebar">
@@ -646,23 +730,6 @@ export default function Home() {
         </div>
       </div>
     </Layout>
-    {activeStory && (
-      <div className="story-reader-backdrop" onClick={() => setActiveStory(null)}>
-        <div className="story-reader" onClick={(e) => e.stopPropagation()}>
-          <button type="button" className="story-reader-close" onClick={() => setActiveStory(null)}>×</button>
-          {activeStory.image && <img src={activeStory.image} alt={activeStory.title} className="story-reader-img" />}
-          <div className="story-reader-body">
-            <span className="story-reader-meta">{activeStory.meta || activeStory.date || activeStory.sub}</span>
-            <h2>{activeStory.title}</h2>
-            <p>{activeStory.body}</p>
-            <div className="story-reader-actions">
-              <button type="button" className="btn-primary" onClick={() => setActiveStory(null)}>Done Reading</button>
-              <button type="button" className="btn-outline" onClick={() => navigate(activeStory.route || '/explore')}>Open Full Page</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    )}
     </>
   );
 }

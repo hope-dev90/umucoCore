@@ -14,9 +14,9 @@ export default function Landing() {
 
   useEffect(() => { setVisible(true); }, []);
 
-  const handleNavigate = (view) => {
+  const handleNavigate = (view, storyId) => {
     if (view === 'login') navigate('/login');
-    else if (view === 'signup') navigate('/signup');
+    else if (view === 'signup') navigate('/signup', { state: { continueStoryId: storyId } });
     else if (view === 'home') navigate('/');
   };
 

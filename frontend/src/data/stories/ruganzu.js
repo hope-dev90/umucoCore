@@ -14,6 +14,7 @@ export const ruganzuStory = {
   id: 'ruganzu-ii-ndoli',
   title: 'King Ruganzu II Ndoli',
   category: 'Royal history',
+  explorerCategory: 'warrior', // matches EXPLORER_CATEGORY['warrior'] in Home.jsx
   location: 'Nyabarongo River',
   image: RuganzuImg,
   xpReward: 50,
@@ -35,6 +36,26 @@ export const ruganzuStory = {
 
     `The story of Ruganzu II Ndoli belongs to no single version — griots, grandparents, and now digital archives like this one all carry it a little differently, each shaped by the voice that passed it on. That is, in its own way, the truest thing about it: a story this old survives not by staying exactly the same, but by being told again, and again, by whoever needs to hear it next.`,
   ].join('\n\n'),
+  quiz: [
+    {
+      question: "What river did Ruganzu II Ndoli have to cross to return to his kingdom?",
+      options: ["Akagera", "Nyabarongo", "Rusizi", "Sebeya"],
+      correctIndex: 1,
+      explanation: "He crossed the Nyabarongo river, which was seen as a boundary between what a person was and what they were about to become."
+    },
+    {
+      question: "How did Ruganzu answer the tests and challenges from his rivals at court?",
+      options: ["With declarations of war", "By fleeing again", "With presence and by listening", "By replacing them all"],
+      correctIndex: 2,
+      explanation: "He stayed, listened, and did not flinch, proving his steadiness to the court."
+    },
+    {
+      question: "What is a main lesson of Ruganzu's story according to oral tradition?",
+      options: ["Doubt is the same as defeat", "The home you were taken from can still be reached", "Exile always erases a person", "Never trust rivals"],
+      correctIndex: 1,
+      explanation: "The story is told as a lesson about return: that the home you were taken from can still be reached, and you shouldn't turn back at the water's edge."
+    }
+  ]
 };
 
 export default ruganzuStory;

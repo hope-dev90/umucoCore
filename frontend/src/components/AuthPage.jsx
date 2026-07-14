@@ -6,6 +6,7 @@ import authLeftBg2 from '../assets/signup/tra2.png';
 import authLeftBg3 from '../assets/signup/tra3.jpg';
 import UmucoLogo from './UmucoLogo';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import ExplorerTypeImage from './ExplorerTypeImage';
 
 const EXPLORER_TYPES = [

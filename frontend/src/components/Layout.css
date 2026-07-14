@@ -145,33 +145,91 @@
   left: var(--sidebar-width);
   right: 0;
   height: var(--topbar-height);
-  background: var(--bg-sidebar);
-  border-bottom: 1px solid var(--border);
+  background: rgba(253, 251, 247, 0.96);
+  border-bottom: 1px solid rgba(234, 219, 200, 0.9);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
   z-index: 90;
   gap: 16px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 8px 26px rgba(44, 26, 20, 0.05);
+}
+
+.topbar-adventure {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 172px;
+}
+
+.topbar-orbit {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 8px 20px rgba(141, 73, 58, 0.18);
+  animation: topbar-spin 9s linear infinite;
+}
+
+.topbar-orbit::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: inherit;
+  background: #fffaf4;
+}
+
+.topbar-orbit span {
+  position: absolute;
+  inset: 11px;
+  border-radius: inherit;
+  background: var(--primary);
+  box-shadow: 0 0 0 5px rgba(141, 73, 58, 0.1);
+}
+
+.topbar-adventure-copy {
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.topbar-adventure-copy span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.topbar-adventure-copy strong {
+  display: block;
+  color: var(--text-primary);
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .topbar-search {
   flex: 1;
-  max-width: 400px;
+  max-width: 460px;
   position: relative;
 }
 
 .topbar-search input {
   width: 100%;
-  height: 34px;
-  background: var(--bg-main);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 0 12px 0 34px;
+  height: 38px;
+  background: #fff;
+  border: 1px solid rgba(234, 219, 200, 0.98);
+  border-radius: 999px;
+  padding: 0 116px 0 36px;
   font-size: 13px;
   color: var(--text-primary);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
 }
 
 .topbar-search input::placeholder {
@@ -180,6 +238,8 @@
 
 .topbar-search input:focus {
   border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(141, 73, 58, 0.1);
+  transform: translateY(-1px);
 }
 
 .topbar-search-icon {
@@ -192,10 +252,57 @@
   height: 14px;
 }
 
+.topbar-search-spark {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  color: #fff;
+  background: var(--primary);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
 .topbar-right {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.topbar-xp-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 4px 10px;
+  color: var(--text-primary);
+  background: #fff;
+  border: 1px solid rgba(234, 219, 200, 0.95);
+  border-radius: 999px;
+  box-shadow: var(--shadow-sm);
+}
+
+.topbar-xp-pill span,
+.topbar-xp-pill strong {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.topbar-xp-pill span {
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.topbar-xp-pill strong {
+  color: var(--text-secondary);
+  font-weight: 700;
 }
 
 .topbar-lang {
@@ -236,6 +343,7 @@
   background: var(--primary);
   color: white;
   border-color: var(--primary);
+  transform: translateY(-1px);
 }
 
 .topbar-user {
@@ -275,6 +383,13 @@
   font-size: 12px;
   font-weight: 700;
   overflow: hidden;
+  box-shadow: 0 0 0 3px rgba(141, 73, 58, 0.1);
+}
+
+@keyframes topbar-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ── MAIN CONTENT ── */
@@ -342,6 +457,10 @@
     max-width: none;
   }
 
+  .topbar-adventure {
+    flex: 1 1 170px;
+  }
+
   .main-content {
     margin-left: 0;
     margin-top: 0;
@@ -351,8 +470,22 @@
 
 @media (max-width: 640px) {
   .sidebar-logo-text span:last-child,
-  .topbar-lang {
+  .topbar-lang,
+  .topbar-search-spark,
+  .topbar-xp-pill strong {
     display: none;
+  }
+
+  .topbar-adventure {
+    min-width: 0;
+  }
+
+  .topbar-adventure-copy strong {
+    font-size: 12px;
+  }
+
+  .topbar-search input {
+    padding-right: 12px;
   }
 
   .topbar-right {

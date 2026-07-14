@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import SignUpPage from '../components/AuthPage';
 
 export default function Signup() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [leaving, setLeaving] = useState(false);
 
   useEffect(() => {
@@ -15,7 +16,7 @@ export default function Signup() {
     setTimeout(() => {
       if (view === 'login') navigate('/login');
       else if (view === 'home') navigate('/');
-      else if (view === 'dashboard') navigate('/dashboard');
+      else if (view === 'dashboard') navigate('/dashboard', { state: location.state });
     }, 250);
   };
 
