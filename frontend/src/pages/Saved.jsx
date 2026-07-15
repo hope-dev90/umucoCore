@@ -129,7 +129,7 @@ export default function Saved() {
                           color: 'white',
                           fontSize: '1.5rem'
                         }}>
-                          {s.item_type === 'audio' ? '🎵' : s.item_type === 'video' ? '🎬' : '📄'}
+                          {s.item_type === 'audio' ? '\u266B' : s.item_type === 'video' ? '\uD83C\uDFAC' : '\uD83D\uDCC4'}
                         </div>
                       )}
                       <span className={`save-status-badge ${s.item_meta?.offline ? 'badge-offline' : 'badge-online'}`}>

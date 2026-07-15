@@ -78,7 +78,7 @@ const ADVENTURE_POPUPS = {
   'music-explorer': {
     label: 'music',
     accentWord: 'heritage',
-    accent: '#1F7A8C',
+    accent: '#8D493A',
     image: '/images/collections/music.jpg',
     icon: Drum,
     title: "Are you ready to hear Rwanda's heritage?",
@@ -300,6 +300,7 @@ export default function Home() {
 
   // Fetch the highlight card for this user's adventure type
   const [highlight, setHighlight] = useState(null);
+  const [audioHighlight, setAudioHighlight] = useState(null);
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/heritage?category=${category}`)
@@ -310,6 +311,22 @@ export default function Home() {
       })
       .catch(() => {});
   }, [category]);
+
+  // For music explorers, fetch a featured audio track for the highlight
+  useEffect(() => {
+    if (activeExplorerType !== 'music-explorer') return;
+    fetch('http://localhost:5000/api/audio/featured')
+      .then(r => r.json())
+      .then(data => {
+        const items = Array.isArray(data) ? data : data.items || [];
+        if (items.length > 0) {
+          // pick a random one each visit
+          const pick = items[Math.floor(Math.random() * items.length)];
+          setAudioHighlight(pick);
+        }
+      })
+      .catch(() => {});
+  }, [activeExplorerType]);
 
   // ── All original hardcoded content below ──────────────────
 
@@ -450,19 +467,31 @@ export default function Home() {
             <span className="highlight-badge">{t('home.todayHighlight')}</span>
             <div className="highlight-image">
               <img
-                src={highlightSrc}
-                alt={highlightTitle}
+                src={audioHighlight ? (audioHighlight.thumbnail_url || highlightSrc) : highlightSrc}
+                alt={audioHighlight ? audioHighlight.title : highlightTitle}
                 className="highlight-img"
                 onError={e => { e.target.src = nyanzeImage; }}
               />
             </div>
             <div className="highlight-content">
               <div>
-                <h2>{highlightTitle}</h2>
-                <p style={{ color: 'var(--text-secondary)' }}>{highlightDesc}</p>
+                <h2>{audioHighlight ? audioHighlight.title : highlightTitle}</h2>
+                <p style={{ color: 'var(--text-secondary)' }}>
+                  {audioHighlight ? audioHighlight.description : highlightDesc}
+                </p>
+                {audioHighlight?.audio_url && (
+                  <audio
+                    controls
+                    style={{ width: '100%', marginTop: 12, borderRadius: 8 }}
+                    aria-label={`Play ${audioHighlight.title}`}
+                  >
+                    <source src={audioHighlight.audio_url} />
+                    Your browser does not support audio playback.
+                  </audio>
+                )}
               </div>
               <div className="highlight-actions">
-                <button className="btn-primary" onClick={handleExploreNow}>
+                <button className="btn-primary" onClick={() => navigate('/listen')}>
                   {t('home.exploreNow')}
                 </button>
                 <button className="btn-outline" onClick={handleShare}>

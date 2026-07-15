@@ -257,7 +257,7 @@ export default function Contribute() {
                     />
                     {fileName && (
                       <div className="file-name-display">
-                        {formData.type === 'audio' ? '🎵' : formData.type === 'video' ? '🎬' : '🖼️'} {fileName}
+                        {formData.type === 'audio' ? '\u266B' : formData.type === 'video' ? '\uD83C\uDFAC' : '\uD83D\uDDBC'} {fileName}
                       </div>
                     )}
                   </div>

@@ -4,11 +4,41 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
 import { useAuth } from '../contexts/AuthContext';
 import './Listen.css';
-import CraneStory from '../assets/listen/crane-story.jpg';
-import MoonStory from '../assets/listen/moon-story.jpg';
 import RuganzuImg from '../assets/listen/ruganzu.png';
 
-const fallbackImages = [CraneStory, MoonStory];
+// Map audio title keywords / categories to public image paths
+const AUDIO_IMAGE_MAP = {
+  byivugo:      '/images/audio/byivugo.jpg',
+  ibyivugo:     '/images/audio/ibyivugo.jpg',
+  crane:        '/images/audio/crane.jpg',
+  drums:        '/images/audio/drums.jpg',
+  drum:         '/images/audio/drums.jpg',
+  ingoma:       '/images/audio/drums.jpg',
+  farming:      '/images/audio/farming.jpg',
+  ubudehe:      '/images/audio/farming.jpg',
+  inanga:       '/images/audio/inanga.jpg',
+  intore:       '/images/audio/intore.jpg',
+  moon:         '/images/audio/moon.jpg',
+  mwami:        '/images/audio/mwami.jpg',
+  nyamasheke:   '/images/audio/nyamasheke.jpg',
+  rain:         '/images/audio/rain.jpg',
+  'royal-court':'/images/audio/royal-court.jpg',
+  royal:        '/images/audio/royal-court.jpg',
+  court:        '/images/audio/royal-court.jpg',
+  ruganzu:      '/images/audio/ruganzu.png',
+  'war-drums':  '/images/audio/war-drums.jpg',
+  war:          '/images/audio/war-drums.jpg',
+};
+
+const ALL_AUDIO_IMAGES = Object.values(AUDIO_IMAGE_MAP);
+
+function resolveAudioImage(item, index) {
+  const key = `${item.title} ${item.category}`.toLowerCase();
+  for (const [word, path] of Object.entries(AUDIO_IMAGE_MAP)) {
+    if (key.includes(word)) return path;
+  }
+  return ALL_AUDIO_IMAGES[index % ALL_AUDIO_IMAGES.length];
+}
 
 export default function Listen() {
   const { t } = useLanguage();
@@ -42,7 +72,7 @@ export default function Listen() {
                 ).padStart(2, "0")}`
               : "0:00",
             durationSec: item.duration || 0,
-            image: fallbackImages[i % fallbackImages.length],
+            image: item.thumbnail_url || resolveAudioImage(item, i),
             audioUrl: item.audio_url || '',
           }));
           setFables(mapped);
@@ -54,7 +84,7 @@ export default function Listen() {
               narrator: t("listen.narratedBy") + " Jean d'Amour",
               duration: "12:40",
               durationSec: 760,
-              image: CraneStory,
+              image: '/images/audio/crane.jpg',
               audioUrl: '',
             },
             {
@@ -63,7 +93,7 @@ export default function Listen() {
               narrator: t("listen.narratedBy") + " Beatrice U.",
               duration: "15:15",
               durationSec: 915,
-              image: MoonStory,
+              image: '/images/audio/moon.jpg',
               audioUrl: '',
             },
           ]);
@@ -77,7 +107,7 @@ export default function Listen() {
             narrator: t("listen.narratedBy") + " Jean d'Amour",
             duration: "12:40",
             durationSec: 760,
-            image: CraneStory,
+            image: '/images/audio/crane.jpg',
             audioUrl: '',
           },
           {
@@ -86,7 +116,7 @@ export default function Listen() {
             narrator: t("listen.narratedBy") + " Beatrice U.",
             duration: "15:15",
             durationSec: 915,
-            image: MoonStory,
+            image: '/images/audio/moon.jpg',
             audioUrl: '',
           },
         ]);

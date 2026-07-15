@@ -1,6 +1,7 @@
 import React from "react";
 import { X, BookOpen, Headphones, Trophy } from "lucide-react";
 import UmucoLogo from "./UmucoLogo";
+import heroIllustration from "../assets/nyanza.jpg";
 
 // Imigongo-style triangle strip — reused from the dashboard/signup-card
 // components so this modal reads as the same product, not a one-off popup.
@@ -42,7 +43,7 @@ const SignupWelcomeModal = ({
   onMaybeLater = () => {},
   onCreateAccount = () => {},
   onSecondaryAction = null,
-  heroImageSrc = "/images/heritage/iraba.jpg",
+  heroImageSrc = heroIllustration,
   heroImageAlt = "The Royal Palace of Nyanza",
   heading = "Welcome to Umuco Core",
   description = "You're one step away from unlocking powerful stories, rich traditions, and the legacy of Rwanda.",

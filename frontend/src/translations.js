@@ -425,6 +425,9 @@ export const translations = {
     "explore.kibungo": "Kibungo",
     "explore.gitarama": "Gitarama",
     "explore.rubavu": "Rubavu",
+    "explore.rusizi": "Rusizi",
+    "explore.kayonza": "Kayonza",
+    "explore.kigali": "Kigali",
     "explore.map": "Heritage Map",
     "explore.discoverMore": "Discover More Heritage",
 
@@ -1032,6 +1035,9 @@ export const translations = {
     "explore.kibungo": "Kibungo",
     "explore.gitarama": "Gitarama",
     "explore.rubavu": "Rubavu",
+    "explore.rusizi": "Rusizi",
+    "explore.kayonza": "Kayonza",
+    "explore.kigali": "Kigali",
     "explore.map": "Ibara ry'Umurage",
     "explore.discoverMore": "Sura Umuco Wongeye",
 

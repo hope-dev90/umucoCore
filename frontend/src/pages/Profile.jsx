@@ -42,11 +42,11 @@ const EXPLORER_PROFILES = {
     accentTint: 'rgba(107, 74, 141, 0.10)',
   },
   'music-explorer': {
-    icon: '🥁',
+    icon: '\u266B',
     label: 'Music Explorer',
-    accent: '#1F7A8C',
-    accentDark: '#134A56',
-    accentTint: 'rgba(31, 122, 140, 0.10)',
+    accent: '#8D493A',
+    accentDark: '#3E2723',
+    accentTint: 'rgba(141, 73, 58, 0.10)',
   },
 };
 

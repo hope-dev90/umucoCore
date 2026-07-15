@@ -5,7 +5,7 @@ const CARD_META = {
   xp: { icon: '✨', accent: '#C4724A' },
   levelUp: { icon: '⬆️', accent: '#8D493A' },
   badge: { icon: '🏅', accent: '#A9821F' },
-  collectible: { icon: '💎', accent: '#1F7A8C' },
+  collectible: { icon: '💎', accent: '#8D493A' },
   streak: { icon: '🔥', accent: '#E67E22' },
 };
 
