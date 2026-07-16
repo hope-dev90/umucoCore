@@ -7,6 +7,11 @@ function Navbar({ onNavigate, activeSection }) {
   const { language, setLanguage, t } = useLanguage();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const languages = [
+    { code: 'en', short: 'EN', label: t('settings.english') },
+    { code: 'rw', short: 'RW', label: t('settings.kinyarwanda') },
+    { code: 'fr', short: 'FR', label: t('settings.french') },
+  ];
 
   const navItems = [
     { label: t('nav.home'), id: '#home-section' },
@@ -68,26 +73,20 @@ function Navbar({ onNavigate, activeSection }) {
               className="flex items-center space-x-1.5 text-sm font-semibold text-[#8D493A] hover:text-[#6f5b55] transition-colors tracking-wide focus:outline-none"
             >
               <Globe size={18} />
-              <span className="text-xs uppercase font-bold">{language === 'en' ? 'EN' : 'KN'}</span>
+              <span className="text-xs uppercase font-bold">{languages.find((item) => item.code === language)?.short || 'EN'}</span>
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-36 bg-[#FDFBF7] border border-[#EADBC8] rounded-xl shadow-lg py-1 z-50 animate-fadeIn">
-                {language === 'en' ? (
+              <div className="absolute right-0 mt-2 w-44 bg-[#FDFBF7] border border-[#EADBC8] rounded-xl shadow-lg py-1 z-50 animate-fadeIn">
+                {languages.map((item) => (
                   <button
-                    onClick={() => toggleLanguage('rw')}
+                    key={item.code}
+                    onClick={() => toggleLanguage(item.code)}
                     className="w-full text-left px-4 py-2 text-xs font-medium text-[#6F5B55] hover:bg-[#FCDFD3]/30 hover:text-[#8D493A] transition-colors"
                   >
-                    Kinyarwanda
+                    {item.label}
                   </button>
-                ) : (
-                  <button
-                    onClick={() => toggleLanguage('en')}
-                    className="w-full text-left px-4 py-2 text-xs font-medium text-[#6F5B55] hover:bg-[#FCDFD3]/30 hover:text-[#8D493A] transition-colors"
-                  >
-                    English
-                  </button>
-                )}
+                ))}
               </div>
             )}
           </div>
@@ -142,22 +141,17 @@ function Navbar({ onNavigate, activeSection }) {
           <div className="flex items-center justify-between py-2 border-b border-[#EADBC8]/30">
             <span className="text-sm font-medium text-[#6F5B55]">{t('landing.language')}</span>
             <div className="flex space-x-2">
-              <button
-                onClick={() => toggleLanguage('en')}
-                className={`px-3 py-1 text-xs font-bold rounded-lg ${
-                  language === 'en' ? 'bg-[#8D493A] text-white' : 'border border-[#EADBC8] text-[#6F5B55]'
-                }`}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => toggleLanguage('rw')}
-                className={`px-3 py-1 text-xs font-bold rounded-lg ${
-                  language === 'rw' ? 'bg-[#8D493A] text-white' : 'border border-[#EADBC8] text-[#6F5B55]'
-                }`}
-              >
-                KN
-              </button>
+              {languages.map((item) => (
+                <button
+                  key={item.code}
+                  onClick={() => toggleLanguage(item.code)}
+                  className={`px-3 py-1 text-xs font-bold rounded-lg ${
+                    language === item.code ? 'bg-[#8D493A] text-white' : 'border border-[#EADBC8] text-[#6F5B55]'
+                  }`}
+                >
+                  {item.short}
+                </button>
+              ))}
             </div>
           </div>
 

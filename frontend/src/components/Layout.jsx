@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useGamificationContext } from '../contexts/GamificationContext';
 import './Layout.css';
 import UmucoLogo from './UmucoLogo';
 
@@ -38,7 +37,11 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
   const location = useLocation();
   const { user, logout } = useAuth();
   const { language, setLanguage, t } = useLanguage();
-  const { xp, level, streak } = useGamificationContext();
+  const languages = [
+    { code: 'rw', short: 'RW', label: t('settings.kinyarwanda') },
+    { code: 'en', short: 'EN', label: t('settings.english') },
+    { code: 'fr', short: 'FR', label: t('settings.french') },
+  ];
 
   const mainNav = [
     { label: t('sidebar.home'),          path: '/dashboard', icon: 'home' },
@@ -60,8 +63,6 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
     { label: t('sidebar.profile'),  path: '/profile',  icon: 'profile' },
     { label: t('sidebar.settings'), path: '/settings', icon: 'settings' },
   ];
-  const allNav = [...mainNav, ...personalNav, ...accountNav];
-  const activeSection = allNav.find(item => location.pathname === item.path || location.pathname.startsWith(item.path + '/')) || mainNav[0];
 
   // No longer treats '/' as special — just exact/startsWith matching
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
@@ -108,43 +109,26 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
       </aside>
 
       <header className="topbar">
-        <div className="topbar-adventure">
-          <div className="topbar-orbit" aria-hidden="true">
-            <span />
-          </div>
-          <div className="topbar-adventure-copy">
-            <span>{activeSection.label}</span>
-            <strong>Level {level || 1} journey</strong>
-          </div>
-        </div>
         <div className="topbar-search">
           <span className="topbar-search-icon"><Icon d={Icons.search} size={14} /></span>
           <input type="text" placeholder={t(searchPlaceholder)} />
-          <span className="topbar-search-spark" aria-hidden="true">Search heritage</span>
         </div>
         <div className="topbar-right">
-          <div className="topbar-xp-pill" title="Your adventure progress">
-            <span>{xp || 0} XP</span>
-            <strong>{streak || 0} day streak</strong>
-          </div>
           <div className="topbar-lang">
-            <span
-              className={language === 'rw' ? 'active' : ''}
-              onClick={() => setLanguage('rw')}
-              style={{ cursor: 'pointer' }}
-            >
-              Kinyarwanda
-            </span>
-            <span
-              className={language === 'en' ? 'active' : ''}
-              onClick={() => setLanguage('en')}
-              style={{ cursor: 'pointer' }}
-            >
-              English
-            </span>
+            {languages.map((item) => (
+              <button
+                key={item.code}
+                type="button"
+                className={`topbar-lang-pill ${language === item.code ? 'active' : ''}`}
+                onClick={() => setLanguage(item.code)}
+              >
+                {item.short}
+              </button>
+            ))}
           </div>
-          <div className="topbar-icon-btn"><Icon d={Icons.bell} size={14} /></div>
-          <div className="topbar-icon-btn"><Icon d={Icons.translate} size={14} /></div>
+          <button type="button" className="topbar-icon-btn" aria-label={t('topbar.notifications')}>
+            <Icon d={Icons.bell} size={14} />
+          </button>
           <div className="topbar-avatar">
             {user?.profileImage ? (
               <img 

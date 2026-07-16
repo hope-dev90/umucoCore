@@ -354,30 +354,29 @@ export default function Home() {
   // ── All original hardcoded content below ──────────────────
 
   const exploreItems = [
-    { label: 'Intore Culture',      meta: 'History • 12 mins left',    image: intoreImage  },
-    { label: 'Kigeli IV Rwabugiri', meta: 'Linkage • New Activity',    image: kigeliImage  },
-    { label: 'Traditional Music',   meta: 'Audio • 4 Stories',         image: inangaImage  },
-    { label: 'Ubudehe',             meta: 'Values • Updated',          image: ubudeheImage },
+    { label: t('dashboard.explore.intore'),  meta: t('dashboard.explore.intoreMeta'),  image: intoreImage  },
+    { label: t('dashboard.explore.kigeli'),  meta: t('dashboard.explore.kigeliMeta'),  image: kigeliImage  },
+    { label: t('dashboard.explore.music'),   meta: t('dashboard.explore.musicMeta'),   image: inangaImage  },
+    { label: t('dashboard.explore.ubudehe'), meta: t('dashboard.explore.ubudeheMeta'), image: ubudeheImage },
   ];
 
   const recentItems = [
-    { icon: <Music    size={16} />, type: 'audio', title: 'Oral History – Nyamasheke',    date: 'Audio • 12 May 2025'    },
-    { icon: <Video    size={16} />, type: 'video', title: 'Traditional Dance – Intore',   date: 'Video • 10 May 2025'    },
-    { icon: <FileText size={16} />, type: 'doc',   title: 'Document – 1962 Letter',       date: 'Document • 8 May 2025'  },
+    { icon: <Music    size={16} />, type: 'audio', title: t('dashboard.recent.oralHistory'), date: t('dashboard.recent.oralHistoryDate') },
+    { icon: <Video    size={16} />, type: 'video', title: t('dashboard.recent.intoreDance'), date: t('dashboard.recent.intoreDanceDate') },
+    { icon: <FileText size={16} />, type: 'doc',   title: t('dashboard.recent.letter'),      date: t('dashboard.recent.letterDate') },
   ];
 
   const activityItems = [
-    { label: 'Viewed: The Royal Palace – Nyanza', time: '16 May 2025' },
-    { label: 'Saved: Intore Dance',               time: '15 May 2025' },
-    { label: 'Listened: Byivugo by Intore',       time: '16 May 2025' },
+    { label: t('dashboard.activity.viewedPalace'), time: t('dashboard.activity.dateMay16') },
+    { label: t('dashboard.activity.savedIntore'),  time: t('dashboard.activity.dateMay15') },
+    { label: t('dashboard.activity.listened'),     time: t('dashboard.activity.dateMay16') },
   ];
 
   const upcomingDays = [
-    { day: '21', month: 'MAY', title: 'Cultural Diversity Day',       sub: 'Dialogue and Development • 21 May 2025'          },
-    { day: '23', month: 'JUN', title: "International Widows' Day",    sub: 'Community Support & History • 23 June 2025'      },
-    { day: '09', month: 'AUG', title: 'Day of Indigenous Peoples',    sub: 'Global Heritage Preservation • 9 August 2025'    },
+    { day: '21', month: t('dashboard.monthMay'), title: t('dashboard.calendar.diversity'),  sub: t('dashboard.calendar.diversitySub') },
+    { day: '23', month: t('dashboard.monthJun'), title: t('dashboard.calendar.widows'),     sub: t('dashboard.calendar.widowsSub') },
+    { day: '09', month: t('dashboard.monthAug'), title: t('dashboard.calendar.indigenous'), sub: t('dashboard.calendar.indigenousSub') },
   ];
-
   const quickActions = [
     { icon: <Headphones size={16} />, label: t('home.listen')         },
     { icon: <Plus       size={16} />, label: t('home.contribute')     },
@@ -385,17 +384,17 @@ export default function Home() {
   ];
 
   const dashboardStats = [
-    { icon: <Trophy size={18} />, label: 'Level', value: level || 1, detail: `${xp || 0} XP earned` },
-    { icon: <Flame size={18} />, label: 'Daily streak', value: `${streak || 0} days`, detail: `Best: ${bestStreak || 0}` },
-    { icon: <BookOpen size={18} />, label: 'Story quest', value: `${ALL_STORIES.length} tales`, detail: 'Read, quiz, collect XP' },
+    { icon: <Trophy size={18} />, label: t('dashboard.level'), value: level || 1, detail: t('dashboard.xpEarned').replace('{xp}', xp || 0) },
+    { icon: <Flame size={18} />, label: t('dashboard.dailyStreak'), value: t('dashboard.daysValue').replace('{days}', streak || 0), detail: t('dashboard.bestValue').replace('{best}', bestStreak || 0) },
+    { icon: <BookOpen size={18} />, label: t('dashboard.storyQuest'), value: t('dashboard.talesValue').replace('{count}', ALL_STORIES.length), detail: t('dashboard.storyQuestDetail') },
   ];
 
   const explorerGreetings = {
-    'warrior':         { prefix: 'Ready for battle,' },
-    'nature-lover':    { prefix: 'Welcome back to the wild,' },
-    'royal-historian': { prefix: 'The court awaits,' },
-    'folktale-hunter': { prefix: 'The legend continues,' },
-    'music-explorer':  { prefix: 'The rhythm calls you,' },
+    'warrior':         { prefix: t('dashboard.greeting.warrior') },
+    'nature-lover':    { prefix: t('dashboard.greeting.nature') },
+    'royal-historian': { prefix: t('dashboard.greeting.royal') },
+    'folktale-hunter': { prefix: t('dashboard.greeting.folktale') },
+    'music-explorer':  { prefix: t('dashboard.greeting.music') },
   };
 
   const greeting   = explorerGreetings[activeExplorerType];
@@ -404,10 +403,10 @@ export default function Home() {
 
   const welcomeHeading = greeting
     ? `${greeting.prefix} ${firstName}`
-    : `Welcome back, ${firstName}`;
+    : `${t('dashboard.greeting.default')} ${firstName}`;
 
   const welcomeSub = greeting
-    ? `Your ${activeExplorerType.replace(/-/g, ' ')} journey awaits.`
+    ? t('dashboard.explorerJourneyAwaits').replace('{type}', t(`explorer.${activeExplorerType}.label`))
     : t('home.subtitle');
 
   const handleExploreNow = () => {
@@ -465,7 +464,7 @@ export default function Home() {
         });
       } else {
         await navigator.clipboard.writeText(window.location.href);
-        alert('Link copied to clipboard!');
+        alert(t('dashboard.linkCopied'));
       }
     } catch (err) {
       console.error('Error sharing:', err);
@@ -486,6 +485,13 @@ export default function Home() {
         onClose={closeAdventurePopup}
         onConfirm={confirmAdventurePopup}
       />
+      {activeStory ? (
+        <DashboardStoryView
+          story={activeStory}
+          onClose={() => setActiveStory(null)}
+          onComplete={() => console.log('Story completed')}
+        />
+      ) : (
       <Layout searchPlaceholder="search.placeholder">
       <div className="home-header">
         <h1>
@@ -517,14 +523,7 @@ export default function Home() {
 
       <div className="home-grid">
         <div>
-          {activeStory ? (
-            <DashboardStoryView
-              story={activeStory}
-              onClose={() => setActiveStory(null)}
-              onComplete={() => console.log('Story completed')}
-            />
-          ) : (
-            <>
+          <>
           <div className="highlight-card">
             <span className="highlight-badge">{t('home.todayHighlight')}</span>
             <div className="highlight-image">
@@ -577,7 +576,7 @@ export default function Home() {
             </span>
           </div>
           <div className="topics-wrap">
-            {["Ubwiru", "Amateka y'u Rwanda", "Ingoma", "Abami b'u Rwanda", "Indangagaciro", "Uburego"].map((topic, i) => (
+            {[t('dashboard.topic.ubwiru'), t('dashboard.topic.history'), t('dashboard.topic.drum'), t('dashboard.topic.kings'), t('dashboard.topic.values'), t('dashboard.topic.uburego')].map((topic, i) => (
               <button
                 type="button"
                 key={topic}
@@ -719,9 +718,7 @@ export default function Home() {
                 <div className="upcoming-info">
                   <h4>{day.title}</h4>
                   <p>{day.sub}</p>
-                  <button type="button" className="read-more-btn" onClick={() => openDashboardStory({ ...day, route: '/intl-days' }, 'calendar')}>
-                    Read More
-                  </button>
+                  <button type="button" className="read-more-btn" onClick={() => openDashboardStory({ ...day, route: '/intl-days' }, 'calendar')}>{t('dashboard.readMore')}</button>
                 </div>
               </div>
             ))}
@@ -730,6 +727,8 @@ export default function Home() {
         </div>
       </div>
     </Layout>
+      )}
     </>
   );
 }
+

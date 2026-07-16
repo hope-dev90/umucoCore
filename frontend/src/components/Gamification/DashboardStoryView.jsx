@@ -162,7 +162,7 @@ export function DashboardStoryView({ story, onClose, onComplete }) {
       <div className="dashboard-story-nav">
         <button type="button" onClick={onClose} className="dashboard-story-back">
           <ArrowLeft size={16} />
-          Back to Dashboard
+          {t('reader.backToDashboard')}
         </button>
 
         {!showQuiz && (
@@ -171,7 +171,7 @@ export function DashboardStoryView({ story, onClose, onComplete }) {
               <Minus size={15} />
             </button>
             <span>{Math.round(fontScale * 100)}%</span>
-            <button type="button" onClick={increaseFont} aria-label="Increase reading text size">
+            <button type="button" onClick={increaseFont} aria-label={t('reader.increaseText')}>
               <Plus size={15} />
             </button>
           </div>
@@ -216,8 +216,8 @@ export function DashboardStoryView({ story, onClose, onComplete }) {
               )}
             </header>
 
-            <div className="dashboard-story-progressline" aria-label="Reading checkpoint progress">
-              <span>Checkpoint {activeParagraph + 1} of {checkpointCount}</span>
+            <div className="dashboard-story-progressline" aria-label={t('reader.checkpointProgress')}>
+              <span>{t('reader.checkpointOf').replace('{current}', activeParagraph + 1).replace('{total}', checkpointCount)}</span>
               <strong>{progressPercent}%</strong>
               <div aria-hidden="true">
                 <span style={{ width: `${progressPercent}%` }} />
@@ -236,7 +236,7 @@ export function DashboardStoryView({ story, onClose, onComplete }) {
                   transition={{ delay: Math.min(i * 0.04, 0.24) }}
                 >
                   <span className="story-paragraph-number">
-                    {i < activeParagraph ? <CheckCircle2 size={14} /> : `Checkpoint ${i + 1}`}
+                    {i < activeParagraph ? <CheckCircle2 size={14} /> : t('reader.checkpoint').replace('{number}', i + 1)}
                   </span>
                   <p>{paragraph}</p>
                 </motion.section>
@@ -245,18 +245,18 @@ export function DashboardStoryView({ story, onClose, onComplete }) {
 
             <footer className="dashboard-story-footer">
             <div>
-              <span>Session XP</span>
+              <span>{t('reader.sessionXp')}</span>
               <strong>+{sessionXP}</strong>
             </div>
             <div className="dashboard-story-footer-actions">
               {!isLastCheckpoint && (
                 <button type="button" className="btn-outline story-action-btn" onClick={handleNextCheckpoint}>
-                  Next checkpoint
+                  {t('reader.nextCheckpoint')}
                   <ChevronRight size={16} />
                 </button>
               )}
               <button type="button" onClick={handleFinishReading} className="btn-primary story-action-btn">
-                {hasQuiz ? 'Start quiz' : t('gamification.finishReading')}
+                {hasQuiz ? t('reader.startQuiz') : t('gamification.finishReading')}
                 <ChevronRight size={16} />
               </button>
             </div>
