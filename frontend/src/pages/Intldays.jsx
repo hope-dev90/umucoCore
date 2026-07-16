@@ -55,9 +55,18 @@ const DAYS_RW = ['CYU', 'GTW', 'GTN', 'GTA', 'GTC', 'GTL', 'GTR'];
 export default function Intldays() {
   const [activeFilter, setActiveFilter] = useState('National');
   const { t, language } = useLanguage();
+  const [topbarSearch, setTopbarSearch] = useState('');
+
+  const filteredStories = topbarSearch.trim()
+    ? relatedStories.filter(s => {
+        const q = topbarSearch.toLowerCase();
+        return (s.label.en || '').toLowerCase().includes(q)
+          || (s.label.rw || '').toLowerCase().includes(q);
+      })
+    : relatedStories;
 
   return (
-    <Layout searchPlaceholder={t('intl.searchPlaceholder')}>
+    <Layout searchPlaceholder={t('intl.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="intl-page">
 
         {/* Header + Theme card */}
@@ -172,7 +181,7 @@ export default function Intldays() {
               <div className="spotlight-date-title">{t('intl.spotlightTitle')}</div>
               <p className="spotlight-desc">{t('intl.spotlightDesc')}</p>
               <div className="related-stories-label">{t('intl.relatedStoriesLabel')}</div>
-              {relatedStories.map((s, i) => (
+              {filteredStories.map((s, i) => (
                 <div key={i} className="related-story-item">
                   <div className="story-thumb" />
                   <div className="story-info">

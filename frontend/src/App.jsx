@@ -7,6 +7,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { GamificationProvider } from './contexts/GamificationContext';
 import { RewardToastContainer } from './components/Gamification/RewardToastContainer';
 import UmucoLogo from './components/UmucoLogo';
+import ChatWidget from './components/ChatWidget';
 
 import Landing     from './pages/Landing';
 import Login       from './pages/Login';
@@ -60,6 +61,12 @@ function PrivateRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />;
 }
 
+// Only render the chat widget when a user is logged in
+function ChatWidgetGate() {
+  const { user } = useAuth();
+  return user ? <ChatWidget /> : null;
+}
+
 export default function App() {
   const googleClientId = "829742825170-qu62f7f662o16iv6hcpgcep8g80fotb9.apps.googleusercontent.com";
 
@@ -92,6 +99,8 @@ export default function App() {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               <RewardToastContainer />
+              {/* Global floating chat widget — only shown to authenticated users */}
+              <ChatWidgetGate />
             </Router>
           </LanguageProvider>
         </GamificationProvider>

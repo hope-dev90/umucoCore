@@ -8,6 +8,7 @@ import './Explore.css';
 import HeritageMap, { hasValidCoordinates } from '../components/Map/HeritageMap';
 import MapDiscoveryHint from '../components/Map/MapDiscoveryHint';
 import { mapHeritageApiItem } from '../utils/heritageMapping';
+import { getCommonsImage } from '../utils/getCommonsImage';
 import nyanzaImg from '../assets/explore/nyanza.jpg';
 import buhangaImg from '../assets/explore/buhanga.jpg';
 import intoreImg from '../assets/explore/intore2.jpg';
@@ -31,105 +32,141 @@ const IMAGE_OVERRIDES = {
 };
 const COMPLETED_STORIES_KEY = 'umuco_completed_story_ids';
 
-// Shown immediately — API data merges into these in the background
+// Maps a user's chosen explorer/adventure type → the heritage catKey(s)
+// that are most relevant to them. Cards matching one of these catKeys
+// are sorted to the top of the (not-yet-completed) grid.
+// Adjust these mappings to match your content taxonomy as needed.
+const EXPLORER_CATKEY_MAP = {
+  'warrior':         ['performance', 'history'],
+  'nature-lover':    ['wildlife', 'lakes'],
+  'royal-historian': ['architecture', 'history'],
+  'folktale-hunter': ['culture', 'crafts', 'art'],
+  'music-explorer':  ['artifacts'],
+};
+
+// Shown immediately -- API data merges into these in the background.
+// Titles, category labels, locations and descriptions are in Kinyarwanda.
+// catKey values are unchanged so CSS classes and explorer-type sorting work.
 const FALLBACK_ITEMS = [
   {
-    category: 'Architecture', catKey: 'architecture',
-    title: "The King's Palace", location: 'Nyanza', locationKey: 'Nyanza',
+    // Card 1 -- Ingoro y'Ubwami ya Nyanza
+    category: 'Ubwami', catKey: 'architecture',
+    title: "Ingoro y'Ubwami ya Nyanza", location: 'Nyanza', locationKey: 'Nyanza',
     image: nyanzaImg,
-    desc: 'Discover the majestic dome-shaped structures that served as the heart of pre-colonial Rwanda.',
-    lat: -2.358, lng: 29.546,
+    desc: "Ingoro y'Ubwami yubatswe bundi bushya, yerekana ubwubatsi, imihango n'ubuzima bwa buri munsi bw'Urukiko rw'Ubwami rw'u Rwanda.",
+    lat: -2.358, lng: 29.546, era: 'pre-colonial',
   },
   {
-    category: 'History', catKey: 'history',
-    title: 'Buhanga Eco-Park', location: 'Musanze', locationKey: 'Musanze',
-    image: buhangaImg,
-    desc: 'An ancient forest where kings were consecrated, preserving both the ecological and spiritual heritage of the nation.',
-    lat: -1.507, lng: 29.632,
-  },
-  {
-    category: 'Performance', catKey: 'performance',
-    title: 'Intore Rituals', location: 'National', locationKey: 'National',
+    // Card 2 -- Intore
+    category: 'Ubutwari', catKey: 'performance',
+    title: "Intore – Umubyino w'Ubutwari", location: 'Nyanza', locationKey: 'Nyanza',
     image: intoreImg,
-    desc: 'The dance of heroes, characterized by rhythmic movements, traditional drums, and warrior symbolism.',
-    lat: -1.970, lng: 30.104,
+    desc: "Umuco ukomeye wa Intore, umubyino w'abasirikare uzwi cyane mu Rwanda, wavutse ku murwa w'intambara z'ubwami maze ugezwa ku bindi bisekuru.",
+    lat: -1.970, lng: 30.104, era: 'pre-colonial',
   },
   {
-    category: 'Crafts', catKey: 'crafts',
-    title: 'Agaseke Weaving', location: 'Gitarama', locationKey: 'Gitarama',
+    // Card 3 -- Inanga (music instrument, nationwide)
+    category: 'Umuziki', catKey: 'artifacts',
+    title: "Inanga – Umutima w'Umuziki Nyarwanda", location: 'Igihugu hose', locationKey: 'National',
+    image: artifactImg,
+    desc: "Umva inanga, ikembe n'ingoma nk'uko byacurangwaga mu binyejana byinshi mu nkambi z'ubwami no mu materaniro y'imidugudu mu Rwanda hose.",
+    lat: -1.9500, lng: 29.9000, era: 'pre-colonial',
+  },
+  {
+    // Card 4 -- Imigani (fireside folktales)
+    category: 'Imigani', catKey: 'culture',
+    title: "Imigani – Inkuru zivugwa ku Muriro", location: 'Igihugu hose', locationKey: 'National',
+    image: buhangaImg,
+    desc: "Injira mu muco nyarwanda w'imvugo dukesha abakurambere: imigani, inkuru n'ibitekerezo byigishwa ku muriro w'ijoro, uva ku gisekuru kigana ikindi.",
+    lat: -1.9500, lng: 29.9000, era: 'pre-colonial',
+  },
+  {
+    // Card 5 -- Kigeli IV Rwabugiri
+    category: 'Ubwami', catKey: 'history',
+    title: "Kigeli IV Rwabugiri – Umwami w'Intwari", location: 'Kigali', locationKey: 'Kigali',
     image: weavingImg,
-    desc: 'The iconic peace basket, a symbol of reconciliation and intricate craftsmanship passed down through generations.',
-    lat: -2.073, lng: 29.752,
+    desc: "Umwe mu bami b'u Rwanda bakomeye cyane, wagushije ubutaka bw'igihugu binyuze mu ntambara no mu ivugurura ry'ubuyobozi.",
+    lat: -1.9346, lng: 30.0621, era: 'colonial',
   },
   {
-    category: 'Art', catKey: 'art',
-    title: 'Imigongo Geometry', location: 'Kibungo', locationKey: 'Kibungo',
-    image: imigongoImg,
-    desc: 'Explore the rhythmic patterns of imigongo, a unique art form using natural pigments and relief structures.',
-    lat: -2.237, lng: 30.456,
-  },
-  {
-    category: 'Artifacts', catKey: 'artifacts',
-    title: 'Earthenware Legacy', location: 'Rubavu', locationKey: 'Rubavu',
-    image: artifactImg,
-    desc: 'Centuries of functional art, from milk jars to communal cooking vessels, reflecting the daily lives of ancestors.',
-    lat: -1.703, lng: 29.270,
-  },
-  {
-    category: 'Wildlife', catKey: 'wildlife',
-    title: 'Volcanoes National Park', location: 'Musanze', locationKey: 'Musanze',
-    image: safariImg,
-    desc: 'Home to endangered mountain gorillas, a 2.5-hour drive north of Kigali through the Virunga volcanic range.',
-    lat: -1.4696, lng: 29.4906,
-  },
-  {
-    category: 'Wildlife', catKey: 'wildlife',
-    title: 'Nyungwe Forest National Park', location: 'Rusizi', locationKey: 'Rusizi',
-    image: buhangaImg,
-    desc: 'An ancient montane rainforest famous for chimpanzee tracking and a suspension canopy walk.',
-    lat: -2.4680, lng: 29.1929,
-  },
-  {
-    category: 'History', catKey: 'history',
-    title: 'The Sacred Forests of Rwanda', location: 'National', locationKey: 'National',
+    // Card 6 -- Ubwiru (royal court ceremonies)
+    category: 'Imigani', catKey: 'culture',
+    title: "Ubwiru – Imihango y'Urukiko rw'Ubwami", location: 'Nyanza', locationKey: 'Nyanza',
     image: nyanzaImg,
-    desc: 'Sacred forests linked to royal rituals, spiritual heritage, and the preservation of Rwanda’s cultural landscape.',
-    lat: -1.9500, lng: 29.9000,
+    desc: "Imihango yera n'ubumenyi bwihishe byayoboraga ubuzima bw'urukiko rw'ubwami, bigezwa gusa ku bantu bemerewe kubimenya.",
+    lat: -2.358, lng: 29.546, era: 'pre-colonial',
   },
   {
-    category: 'Wildlife', catKey: 'wildlife',
-    title: 'Akagera National Park', location: 'Kayonza', locationKey: 'Kayonza',
-    image: safariImg,
-    desc: "Rwanda's only savannah park — lions, rhinos, elephants, and hippos for a classic Big Five safari.",
-    lat: -1.8656, lng: 30.7397,
+    // Card 7 -- Imigani zo ku Muriro (second fireside variant, different image)
+    category: 'Imigani', catKey: 'culture',
+    title: "Imigani – Inkuru zo ku Muriro", location: 'Igihugu hose', locationKey: 'National',
+    image: imigongoImg,
+    desc: "Umuco nyarwanda w'imvugo, aho abakuru bateranyaga abana ku muriro kugira ngo babibwire imigani n'inyigisho z'imyitwarire.",
+    lat: -1.9500, lng: 29.9000, era: 'pre-colonial',
   },
   {
-    category: 'Lakes', catKey: 'lakes',
-    title: 'Lake Kivu', location: 'Rubavu', locationKey: 'Rubavu',
+    // Card 8 -- Ibyivugo (warrior self-praise poetry)
+    category: 'Imigani', catKey: 'culture',
+    title: "Ibyivugo – Ibisigo by'Ubutwari", location: 'Igihugu hose', locationKey: 'National',
+    image: intoreImg,
+    desc: "Ibisigo byanditswe n'ababivuga ubwabo, bikavugwa n'abasirikare n'abahigi basingiza ubutwari n'ibikorwa byabo bwite.",
+    lat: -1.9700, lng: 30.1040, era: 'pre-colonial',
+  },
+  {
+    // Card 9 -- Inzira z'Ubwenge (riddles and wisdom)
+    category: 'Imigani', catKey: 'culture',
+    title: "Inzira z'Ubwenge – Ibisakuzo n'Ubuhanga", location: 'Igihugu hose', locationKey: 'National',
     image: artifactImg,
-    desc: 'Great Rift Valley lake with beach resorts and the scenic Congo Nile Trail.',
-    lat: -1.7025, lng: 29.2569,
+    desc: "Ibisakuzo n'imigani gakondo byakoreshwaga mu kwigisha ubuhanga no gutekereza neza mu bisekuru.",
+    lat: -1.9500, lng: 29.9000, era: 'pre-colonial',
   },
   {
-    category: 'Lakes', catKey: 'lakes',
-    title: 'Twin Lakes Burera & Ruhondo', location: 'Musanze', locationKey: 'Musanze',
+    // Card 10 -- Ingoma (royal drums)
+    category: 'Umuziki', catKey: 'performance',
+    title: "Ingoma – Ingoma Zera z'Ubwami", location: 'Nyanza', locationKey: 'Nyanza',
+    image: nyanzaImg,
+    desc: "Ingoma zari umutima w'urukiko rw'ubwami, zikoreshwa mu mihango, mu gutangaza amakuru no mu birori.",
+    lat: -2.358, lng: 29.546, era: 'pre-colonial',
+  },
+  {
+    // Card 11 -- Umuvugo (praise songs)
+    category: 'Umuziki', catKey: 'artifacts',
+    title: "Umuvugo – Indirimbo z'Ishimwe", location: 'Igihugu hose', locationKey: 'National',
     image: buhangaImg,
-    desc: 'Peaceful boat rides framed by volcanic peaks near Musanze.',
-    lat: -1.4074, lng: 29.6033,
+    desc: "Indirimbo gakondo zasingizaga abami, intwari n'ibintu bikomeye, zicurangwa kugira ngo babishimire.",
+    lat: -1.9500, lng: 29.9000, era: 'pre-colonial',
   },
   {
-    category: 'History', catKey: 'history',
-    title: 'Kigali Genocide Memorial', location: 'Kigali', locationKey: 'Kigali',
-    image: artifactImg,
-    desc: 'A solemn site honoring the victims of the 1994 genocide.',
-    lat: -1.9346, lng: 30.0621,
+    // Card 12 -- Ubudehe (community work)
+    category: 'Rusange', catKey: 'crafts',
+    title: "Ubudehe – Ubufatanye bw'Abaturage", location: 'Igihugu hose', locationKey: 'National',
+    image: weavingImg,
+    desc: "Umuco wa kera w'akazi gakorwa hamwe no gufashanya, wagaragaje ubuzima bw'abaturage b'u Rwanda mu binyejana byinshi.",
+    lat: -1.9500, lng: 29.9000, era: 'colonial',
   },
   {
-    category: 'Culture', catKey: 'culture',
-    title: 'Kimironko Market', location: 'Kigali', locationKey: 'Kigali',
+    // Card 13 -- Agaseke baskets
+    category: 'Rusange', catKey: 'crafts',
+    title: "Agaseke – Ibiseke by'Amahoro", location: 'Igihugu hose', locationKey: 'National',
+    image: weavingImg,
+    desc: "Ibiseke bidukanywe mu buryo bw'ubuhanga, bifite icyerekezo cy'umuco mwinshi, bikoreshwa mu mihango, nk'impano no mu bikoresho bya buri munsi.",
+    lat: -2.073, lng: 29.752, era: 'pre-colonial',
+  },
+  {
+    // Card 14 -- Inanga instrument
+    category: 'Umuziki', catKey: 'artifacts',
+    title: "Inanga – Ikinanga cy'u Rwanda", location: 'Igihugu hose', locationKey: 'National',
     image: artifactImg,
-    desc: "Kigali's largest, most vibrant local market for produce, fabrics, and handicrafts.",
-    lat: -1.9436, lng: 30.1044,
+    desc: "Ikirangantego mu bikoresho by'umuziki gakondo by'u Rwanda, inanga icurangwa mu nkambi z'ubwami no mu mihango y'imidugudu.",
+    lat: -1.9500, lng: 29.9000, era: 'pre-colonial',
+  },
+  {
+    // Card 15 -- Ingabo royal guard
+    category: 'Ubutwari', catKey: 'history',
+    title: "Ingabo – Abarinzi b'Ubwami", location: 'Kigali', locationKey: 'Kigali',
+    image: intoreImg,
+    desc: "Abarinzi b'intwari b'ubwami barinzaga Umwami kandi bagacunga umutekano mu gihugu.",
+    lat: -1.9346, lng: 30.0621, era: 'post-1994',
   },
 ];
 
@@ -163,6 +200,7 @@ export default function Explore() {
   const [audioItems, setAudioItems] = useState([]);
   const [selectedAudio, setSelectedAudio] = useState(null);
   const [imageLoadErrors, setImageLoadErrors] = useState({});
+  const [commonsImages, setCommonsImages] = useState({});
   const [completedStoryIds, setCompletedStoryIds] = useState(() => {
     try {
       return new Set(JSON.parse(localStorage.getItem(COMPLETED_STORIES_KEY) || '[]'));
@@ -170,6 +208,11 @@ export default function Explore() {
       return new Set();
     }
   });
+
+  const activeExplorerType = user?.explorerType || user?.explorer_type;
+  const isMusicExplorer = activeExplorerType === 'music-explorer';
+
+  const [topbarSearch, setTopbarSearch] = useState('');
 
   const regions = [
     t('explore.allRegions'),
@@ -248,6 +291,27 @@ export default function Explore() {
     fetchAudio();
   }, []);
 
+  // Load Commons images for all fallback cards.
+  // Results are cached in commonsImageCache.json (committed) and sessionStorage
+  // so the API is only hit once per browser session for missing entries.
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      const resolved = {};
+      await Promise.all(
+        FALLBACK_ITEMS.map(async (item) => {
+          try {
+            const url = await getCommonsImage(item.title);
+            if (url && !cancelled) resolved[item.title] = url;
+          } catch { /* fall back to local asset */ }
+        })
+      );
+      if (!cancelled) setCommonsImages(resolved);
+    };
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
   // Handle pending story read from Saved page
   useEffect(() => {
     const pending = localStorage.getItem('pendingStoryRead');
@@ -265,19 +329,41 @@ export default function Explore() {
     }
   }, [heritageItems]);
 
-  const isMusicExplorer = (user?.explorerType || user?.explorer_type) === 'music-explorer';
-
   const toggleEra = (era) => {
     setActiveEras(prev =>
       prev.includes(era) ? prev.filter(e => e !== era) : [...prev, era]
     );
   };
 
+  // Region → locationKey mapping (maps display labels to locationKey values in items)
+  const REGION_LOCATION_MAP = useMemo(() => ({
+    [t('explore.north')]:  ['Musanze', 'Rubavu'],
+    [t('explore.south')]:  ['Nyanza', 'Gitarama', 'Rusizi'],
+    [t('explore.east')]:   ['Kibungo', 'Kayonza'],
+    [t('explore.west')]:   ['Rubavu', 'Rusizi'],
+    [t('explore.kigali')]: ['Kigali'],
+  }), [t]);
+
+  // Era label → era key mapping
+  const ERA_KEY_MAP = useMemo(() => ({
+    [t('explore.preColonial')]: 'pre-colonial',
+    [t('explore.colonial')]:    'colonial',
+    [t('explore.post1994')]:    'post-1994',
+  }), [t]);
+
   const filteredHeritageItems = heritageItems.filter(item => {
-    const regionMatch = activeRegion === t('explore.allRegions');
-    const eraMatch = activeEras.length === 0;
+    const regionMatch = activeRegion === t('explore.allRegions')
+      || (REGION_LOCATION_MAP[activeRegion] || []).includes(item.locationKey);
+    const eraMatch = activeEras.length === 0
+      || activeEras.some(era => ERA_KEY_MAP[era] === item.era);
     const placeMatch = activePlace === 'all' || normalizePlaceValue(item.locationKey) === normalizePlaceValue(activePlace);
-    return regionMatch && eraMatch && placeMatch;
+    const query = topbarSearch.trim().toLowerCase();
+    const searchMatch = !query
+      || (item.title || '').toLowerCase().includes(query)
+      || (item.desc || '').toLowerCase().includes(query)
+      || (item.category || '').toLowerCase().includes(query)
+      || (item.location || '').toLowerCase().includes(query);
+    return regionMatch && eraMatch && placeMatch && searchMatch;
   });
 
   const audioForExplorer = useMemo(() => {
@@ -310,13 +396,22 @@ export default function Explore() {
     return [...heritageMapped, ...audioMapped];
   }, [filteredHeritageItems, audioForExplorer, completedStoryIds]);
 
-  const sortedItems = useMemo(() => (
-    combinedItems
-      .sort((a, b) => {
-        if (a.isCompleted !== b.isCompleted) return a.isCompleted ? 1 : -1;
-        return a.index - b.index;
-      })
-  ), [combinedItems]);
+  // Sort priority: not-completed & matches the user's explorer type first,
+  // then not-completed & non-matching, then completed items last.
+  // Ties within each group preserve original relative order.
+  const sortedItems = useMemo(() => {
+    const matchCatKeys = EXPLORER_CATKEY_MAP[activeExplorerType] || [];
+
+    return combinedItems.slice().sort((a, b) => {
+      if (a.isCompleted !== b.isCompleted) return a.isCompleted ? 1 : -1;
+
+      const aMatch = !a.isAudio && matchCatKeys.includes(a.item.catKey) ? 0 : 1;
+      const bMatch = !b.isAudio && matchCatKeys.includes(b.item.catKey) ? 0 : 1;
+      if (aMatch !== bMatch) return aMatch - bMatch;
+
+      return a.index - b.index;
+    });
+  }, [combinedItems, activeExplorerType]);
 
   const [awardedItems, setAwardedItems] = useState(new Set());
   const [selectedStory, setSelectedStory] = useState(null);
@@ -389,9 +484,42 @@ export default function Explore() {
   }, []);
 
   return (
-    <Layout searchPlaceholder={t('search.placeholder')}>
+    <Layout searchPlaceholder={t('search.placeholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="explore-page">
         <h1>{t('explore.title')}</h1>
+
+        {/* Map shortcut overlay — compact floating banner */}
+        <div
+          className="map-shortcut-overlay"
+          role="button"
+          tabIndex={0}
+          onClick={() => {
+            setMapVisible(true);
+            setTimeout(() => {
+              document.getElementById('explore-map-section')?.scrollIntoView({ behavior: 'smooth' });
+            }, 50);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setMapVisible(true);
+              setTimeout(() => {
+                document.getElementById('explore-map-section')?.scrollIntoView({ behavior: 'smooth' });
+              }, 50);
+            }
+          }}
+          aria-label={t('explore.mapShortcutLabel')}
+        >
+          <svg className="map-shortcut-overlay-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+            <line x1="8" y1="2" x2="8" y2="18" />
+            <line x1="16" y1="6" x2="16" y2="22" />
+          </svg>
+          <span className="map-shortcut-overlay-text">{t('explore.mapShortcutTitle')}</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </div>
 
         <div className="filter-bar">
           <div className="filter-row">
@@ -509,12 +637,34 @@ export default function Explore() {
                     {'\u266B'}
                   </div>
                 ) : (
-                  <img
-                    src={imageLoadErrors[item.title] ? artifactImg : item.image}
-                    alt={item.title}
-                    className="heritage-card-image"
-                    onError={() => handleCardImageError(item.title)}
-                  />
+                  // Task 2: prefer Commons image, then local asset, then brown placeholder
+                  imageLoadErrors[item.title] ? (
+                    <div
+                      className="heritage-card-image"
+                      style={{
+                        height: 230,
+                        background: 'linear-gradient(135deg, #6B4226 0%, #3E2723 100%)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                      role="img"
+                      aria-label={item.title}
+                    >
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,235,224,0.5)" strokeWidth="1.5" aria-hidden="true">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <polyline points="21 15 16 10 5 21" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <img
+                      src={commonsImages[item.title] || item.image}
+                      alt={item.title}
+                      className="heritage-card-image"
+                      onError={() => handleCardImageError(item.title)}
+                    />
+                  )
                 )}
               </div>
               <div className="heritage-card-body">
@@ -546,7 +696,7 @@ export default function Explore() {
                       display: 'inline-flex', alignItems: 'center', gap: 4,
                     }}
                   >
-                    Read More {'\u2192'}
+                    Soma Byinshi {'\u2192'}
                   </button>
                 )}
               </div>
@@ -556,7 +706,7 @@ export default function Explore() {
 
         <div className="discover-more-wrap" style={{ position: 'relative', display: 'inline-block' }}>
           <button className="discover-btn" onClick={() => setMapVisible(!mapVisible)}>
-            {mapVisible ? 'Hide Map' : t('explore.map')}
+            {mapVisible ? 'Hisha Ibara' : t('explore.map')}
             <svg 
               width="14" 
               height="14" 
@@ -576,7 +726,7 @@ export default function Explore() {
         </div>
 
         {mapVisible && (
-          <div className="map-section">
+          <div id="explore-map-section" className="map-section">
             <HeritageMap
               items={heritageItems}
               selectedMarker={selectedMarker}

@@ -330,12 +330,42 @@ export default function Home() {
 
   // ── All original hardcoded content below ──────────────────
 
+  // Each item is tagged with the explorer type(s) it's most relevant to.
+  // Adjust these tags to match your content taxonomy as needed.
   const exploreItems = [
-    { title: 'Intore Culture', category: 'Royal', xp: 25, meta: 'History • 12 mins left', image: intoreImage },
-    { title: 'Kigeli IV Rwabugiri', category: 'Legends', xp: 30, meta: 'Linkage • New Activity', image: kigeliImage },
-    { title: 'Traditional Music', category: 'Audio', xp: 20, meta: 'Audio • 4 Stories', image: inangaImage },
-    { title: 'Ubudehe', category: 'Values', xp: 15, meta: 'Values • Updated', image: ubudeheImage },
+    {
+      title: 'Intore Culture', category: 'Royal', xp: 25,
+      meta: 'History • 12 mins left', image: intoreImage,
+      route: '/explore',
+      explorerTypes: ['warrior', 'royal-historian'],
+    },
+    {
+      title: 'Kigeli IV Rwabugiri', category: 'Legends', xp: 30,
+      meta: 'Linkage • New Activity', image: kigeliImage,
+      route: '/collections',
+      explorerTypes: ['warrior', 'royal-historian'],
+    },
+    {
+      title: 'Traditional Music', category: 'Audio', xp: 20,
+      meta: 'Audio • 4 Stories', image: inangaImage,
+      route: '/listen',
+      explorerTypes: ['music-explorer'],
+    },
+    {
+      title: 'Ubudehe', category: 'Values', xp: 15,
+      meta: 'Values • Updated', image: ubudeheImage,
+      route: '/collections',
+      explorerTypes: ['nature-lover', 'folktale-hunter'],
+    },
   ];
+
+  // Sort so items matching the user's active explorer type float to the
+  // top; ties keep their original relative order (stable sort).
+  const sortedExploreItems = [...exploreItems].sort((a, b) => {
+    const aMatch = a.explorerTypes.includes(activeExplorerType) ? 0 : 1;
+    const bMatch = b.explorerTypes.includes(activeExplorerType) ? 0 : 1;
+    return aMatch - bMatch;
+  });
 
   const recentItems = [
     { icon: <Music    size={16} />, type: 'audio', title: 'Oral History – Nyamasheke',    date: 'Audio • 12 May 2025'    },
@@ -397,7 +427,6 @@ export default function Home() {
     'Day of Indigenous Peoples': 'A global reminder that language, land, memory, and cultural knowledge need active protection.',
   };
 
-  const routeForExploreItem = (index) => ['/explore', '/collections', '/listen', '/collections'][index] || '/explore';
   const routeForRecentItem = (type) => ({ audio: '/listen', video: '/videos', doc: '/history' }[type] || '/history');
   const routeForQuickAction = (index) => ['/listen', '/contribute', '/explore'][index] || '/explore';
 
@@ -491,7 +520,7 @@ export default function Home() {
                 )}
               </div>
               <div className="highlight-actions">
-                <button className="btn-primary" onClick={() => navigate('/listen')}>
+                <button className="btn-primary" onClick={() => navigate('/explore')}>
                   {t('home.exploreNow')}
                 </button>
                 <button className="btn-outline" onClick={handleShare}>
@@ -514,10 +543,10 @@ export default function Home() {
           </div>
 
           <div className="explore-cards">
-            {exploreItems.map((item, i) => (
-              <div key={i} className="explore-thumb" role="button" tabIndex={0}
-                onClick={() => openDashboardStory({ ...item, route: routeForExploreItem(i) }, 'continue')}
-                onKeyDown={(e) => { if (e.key === 'Enter') openDashboardStory({ ...item, route: routeForExploreItem(i) }, 'continue'); }}>
+            {sortedExploreItems.map((item) => (
+              <div key={item.title} className="explore-thumb" role="button" tabIndex={0}
+                onClick={() => openDashboardStory(item, 'continue')}
+                onKeyDown={(e) => { if (e.key === 'Enter') openDashboardStory(item, 'continue'); }}>
                 <div className="explore-thumb-img">
                   <img src={item.image} alt={item.title} />
                 </div>

@@ -54,9 +54,19 @@ const events = [
 
 export default function Kwibuka() {
   const { t, language } = useLanguage();
+  const [topbarSearch, setTopbarSearch] = React.useState('');
+
+  const filteredVoices = topbarSearch.trim()
+    ? voices.filter(v => {
+        const q = topbarSearch.toLowerCase();
+        return (v.title.en || '').toLowerCase().includes(q)
+          || (v.title.rw || '').toLowerCase().includes(q)
+          || (v.excerpt.en || '').toLowerCase().includes(q);
+      })
+    : voices;
 
   return (
-    <Layout searchPlaceholder={t('kwibuka.searchPlaceholder')}>
+    <Layout searchPlaceholder={t('kwibuka.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="kwibuka-page">
 
         {/* Today's Reflection hero */}
@@ -114,7 +124,7 @@ export default function Kwibuka() {
 
           <div className="voices-card">
             <div className="voices-title">{t('kwibuka.voicesTitle')}</div>
-            {voices.map((v, i) => (
+            {filteredVoices.map((v, i) => (
               <div key={i} className="voice-item">
                 <div className="voice-type">{getLocalizedText(v.type, language)}</div>
                 <div className="voice-title">{getLocalizedText(v.title, language)}</div>

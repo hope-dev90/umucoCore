@@ -430,6 +430,8 @@ export const translations = {
     "explore.kigali": "Kigali",
     "explore.map": "Heritage Map",
     "explore.discoverMore": "Discover More Heritage",
+    "explore.mapShortcutTitle": "View Heritage Map",
+    "explore.mapShortcutLabel": "View Heritage Map — explore cultural sites by location",
 
     // Collections page
     "collections.title": "Curated Collections",
@@ -1040,6 +1042,8 @@ export const translations = {
     "explore.kigali": "Kigali",
     "explore.map": "Ibara ry'Umurage",
     "explore.discoverMore": "Sura Umuco Wongeye",
+    "explore.mapShortcutTitle": "Reba Ikarita y'Umurage",
+    "explore.mapShortcutLabel": "Reba Ikarita y'Umurage — Shakisha aho ahantu h'umuco biherereye",
 
     // Collections page
     "collections.title": "Amakusanyirizo Yatoranyijwe",

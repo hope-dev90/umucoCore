@@ -12,6 +12,7 @@ export default function Saved() {
   const [items, setItems] = useState([]);
   const [stats, setStats] = useState({ total: 0, offline: 0, storageUsedMB: 0, storageLimitMB: 5120 });
   const [loading, setLoading] = useState(true);
+  const [topbarSearch, setTopbarSearch] = useState('');
 
   useEffect(() => {
     const fetchSaved = async () => {
@@ -79,8 +80,17 @@ export default function Saved() {
     return `${mb} MB`;
   };
 
+  const filteredItems = topbarSearch.trim()
+    ? items.filter(s => {
+        const q = topbarSearch.toLowerCase();
+        return (s.item_title || '').toLowerCase().includes(q)
+          || (s.item_subtitle || '').toLowerCase().includes(q)
+          || (s.item_type || '').toLowerCase().includes(q);
+      })
+    : items;
+
   return (
-    <Layout searchPlaceholder={t('saved.searchPlaceholder')}>
+    <Layout searchPlaceholder={t('saved.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="saved-page">
         <div className="saved-header">
           <div className="saved-header-left">
@@ -115,7 +125,7 @@ export default function Saved() {
               <div className="pf-empty">Your saved audio, videos, and stories will appear here.</div>
             ) : (
               <div className="saves-grid">
-                {items.map((s, i) => (
+                {filteredItems.map((s, i) => (
                   <div key={s.id || i} className="save-card">
                     <div className="save-card-img">
                       {s.item_image ? (

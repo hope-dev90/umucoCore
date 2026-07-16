@@ -37,7 +37,7 @@ const Icons = {
   menu:      "M3 12h18 M3 6h18 M3 18h18",
 };
 
-export default function Layout({ children, searchPlaceholder = 'search.placeholder' }) {
+export default function Layout({ children, searchPlaceholder = 'search.placeholder', searchQuery = '', onSearchChange }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -153,7 +153,12 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
           </button>
           <div className="topbar-search">
             <span className="topbar-search-icon"><Icon d={Icons.search} size={14} /></span>
-            <input type="text" placeholder={t(searchPlaceholder)} />
+            <input
+              type="text"
+              placeholder={t(searchPlaceholder)}
+              value={searchQuery}
+              onChange={e => onSearchChange?.(e.target.value)}
+            />
           </div>
           <div className="topbar-right">
             <div className="topbar-lang">
