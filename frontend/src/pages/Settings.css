@@ -284,3 +284,34 @@
   font-size: 13px; font-weight: 700; cursor: pointer; transition: background 0.15s;
 }
 .btn-delete:hover { background: var(--primary-dark); }
+.btn-deactivate {
+  background: transparent; color: var(--text-secondary); border: 1.5px solid var(--border);
+  padding: 9px 20px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s;
+}
+.btn-deactivate:hover {
+  border-color: var(--primary); color: var(--primary);
+}
+.btn-save-notifs,
+.save-access-btn {
+  width: 100%; margin-top: 12px; background: var(--primary); color: white;
+  border: none; padding: 10px 16px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s;
+}
+.btn-save-notifs:hover,
+.save-access-btn:hover { opacity: 0.9; }
+.save-access-btn:disabled,
+.btn-save-notifs:disabled { opacity: 0.6; cursor: not-allowed; }
+.security-item-clickable {
+  cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border-light);
+  transition: background 0.1s;
+}
+.security-item-clickable:hover {
+  background: rgba(141, 73, 58, 0.04);
+  margin: 0 -8px;
+  padding: 10px 8px;
+  border-radius: 8px;
+}
+.security-item-clickable:last-child { border-bottom: none; }

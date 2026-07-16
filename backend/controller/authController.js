@@ -85,11 +85,10 @@ export const register = async (req, res) => {
 
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
-      return errorResponse(
-        res,
-        "This email is already registered. Please sign in or reset your password.",
-        400,
-      );
+      return res.status(409).json({
+        success: false,
+        message: "An account with this email already exists. Sign in or reset your password.",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -239,9 +238,9 @@ export const login = async (req, res) => {
 
     const user = await findUserByEmail(email);
     if (!user) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
-        message: "Invalid credentials",
+        message: "No account found with that email address",
       });
     }
 

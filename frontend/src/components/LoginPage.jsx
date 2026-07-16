@@ -231,8 +231,45 @@ function LoginPage({ onNavigate }) {
                 </div>
 
                 {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600">
-                    {error}
+                  <div className="mb-4 rounded-xl overflow-hidden" style={{ border: '1px solid #e8dcd0', background: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}>
+                    <div className="flex items-start gap-3 p-4">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-base" style={{ background: '#e8dcd0', color: '#6b3e26' }}>
+                        🔒
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold mb-0.5" style={{ color: '#4b2e1e' }}>
+                          {error.toLowerCase().includes('no account') ? "Account not found" : "Couldn't sign you in"}
+                        </p>
+                        <p className="text-xs leading-relaxed" style={{ color: '#6b4c3b' }}>{error}</p>
+                        <p className="text-[11px] mt-1" style={{ color: '#8a6a58' }}>
+                          {error.toLowerCase().includes('no account') ? (
+                            <>
+                              Want to join?{' '}
+                              <button
+                                type="button"
+                                onClick={() => onNavigate('signup')}
+                                className="font-bold bg-transparent border-none p-0 cursor-pointer hover:underline"
+                                style={{ color: '#6b3e26' }}
+                              >
+                                Create an account
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              Need help?{' '}
+                              <button
+                                type="button"
+                                onClick={() => { setIsForgotPassword(true); setVerificationStep('email'); setError(''); }}
+                                className="font-bold bg-transparent border-none p-0 cursor-pointer hover:underline"
+                                style={{ color: '#6b3e26' }}
+                              >
+                                Reset your password
+                              </button>
+                            </>
+                          )}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
 

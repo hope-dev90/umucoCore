@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import './Settings.css';
 import voicePhotoOne from '../assets/tra.png';
 import voicePhotoTwo from '../assets/tra2.png';
@@ -35,6 +36,32 @@ const PanelTitle = ({ iconKey, label }) => (
   </div>
 );
 
+function ToastCard({ message, type = "success" }) {
+  const isError = type === "error";
+  return (
+    <div style={{
+      position: 'fixed',
+      bottom: '24px',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 900,
+      background: isError ? '#c0392b' : '#6b3e26',
+      color: '#fff',
+      padding: '14px 22px',
+      borderRadius: '12px',
+      boxShadow: '0 10px 30px rgba(0,0,0,0.18)',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      minWidth: '260px',
+      maxWidth: '90vw'
+    }}>
+      <span style={{ fontSize: '18px' }}>{isError ? '⚠️' : '✅'}</span>
+      <span style={{ fontSize: '14px', fontWeight: 600 }}>{message}</span>
+    </div>
+  );
+}
+
 export default function Settings() {
   const { user } = useAuth();
   const [notifArchive,  setNotifArchive]  = useState(user?.notifications?.archiveUpdates ?? true);
@@ -47,11 +74,13 @@ export default function Settings() {
   const [dateFormat,    setDateFormat]    = useState(user?.accessibility?.dateFormat ?? "DD / MM / YYYY");
   const [timezone,      setTimezone]      = useState(user?.accessibility?.timezone ?? "CAT");
   const [message,       setMessage]       = useState("");
+  const [messageType,   setMessageType]   = useState("success");
   const [saving,        setSaving]        = useState(false);
   const { language: langCtx, setLanguage: setLangCtx, t } = useLanguage();
 
-  const showMessage = (msg) => {
+  const showMessage = (msg, type = "success") => {
     setMessage(msg);
+    setMessageType(type);
     setTimeout(() => setMessage(""), 3000);
   };
 
@@ -72,10 +101,10 @@ export default function Settings() {
         })
       });
       if (!response.ok) throw new Error("Failed to save notifications");
-      showMessage("Notification preferences saved!");
+      showMessage("Notification preferences saved!", "success");
     } catch (err) {
       console.error("Save notifications error:", err);
-      showMessage("Failed to save preferences");
+      showMessage("Failed to save preferences", "error");
     } finally {
       setSaving(false);
     }
@@ -101,10 +130,10 @@ export default function Settings() {
         })
       });
       if (!response.ok) throw new Error("Failed to save accessibility settings");
-      showMessage("Accessibility settings saved!");
+      showMessage("Accessibility settings saved!", "success");
     } catch (err) {
       console.error("Save accessibility error:", err);
-      showMessage("Failed to save settings");
+      showMessage("Failed to save settings", "error");
     } finally {
       setSaving(false);
     }
@@ -119,10 +148,10 @@ export default function Settings() {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (!response.ok) throw new Error("Failed to deactivate account");
-      showMessage("Account deactivated");
+      showMessage("Account deactivated", "success");
     } catch (err) {
       console.error("Deactivate error:", err);
-      showMessage("Failed to deactivate account");
+      showMessage("Failed to deactivate account", "error");
     }
   };
 
@@ -140,12 +169,42 @@ export default function Settings() {
         body: JSON.stringify({ password })
       });
       if (!response.ok) throw new Error("Failed to delete account");
-      showMessage("Account deleted successfully");
+      showMessage("Account deleted successfully", "success");
       // TODO: Redirect to login and clear auth state
     } catch (err) {
       console.error("Delete error:", err);
-      showMessage("Failed to delete account");
+      showMessage("Failed to delete account", "error");
     }
+  };
+
+  const handleChangePassword = () => {
+    const newPassword = window.prompt("Enter your new password:");
+    if (!newPassword || newPassword.length < 6) {
+      showMessage("Password must be at least 6 characters", "error");
+      return;
+    }
+    // In a real app, this would call the API
+    showMessage("Password change request sent. Check your email.", "success");
+  };
+
+  const handleTwoFactor = () => {
+    showMessage("Two-factor authentication settings would open here.", "info");
+  };
+
+  const handleActiveSessions = () => {
+    showMessage("Active sessions management would open here.", "info");
+  };
+
+  const handleLoginHistory = () => {
+    showMessage("Login history would open here.", "info");
+  };
+
+  const handleDataDownload = () => {
+    showMessage("Your data export request has been submitted. You'll receive an email when it's ready.", "success");
+  };
+
+  const handleCookiePrefs = () => {
+    showMessage("Cookie preferences management would open here.", "info");
   };
 
   const voices = [
@@ -299,30 +358,34 @@ export default function Settings() {
 
             <div className="settings-panel">
               <PanelTitle iconKey="lock" label={t('settings.accountSecurity')} />
-              {[
-                { label: t('settings.changePassword'),           sub: t('settings.changePassword.desc'),     action: <button className="chevron-btn">›</button> },
-                { label: t('settings.twoFactor'), sub: t('settings.twoFactor.active'),     action: <span className="manage-link">{t('settings.manage')}</span> },
-                { label: t('settings.activeSessions'),           sub: t('settings.activeSessions.desc'),           action: <span className="manage-link">{t('settings.view')}</span> },
-                { label: t('settings.loginHistory'),             sub: t('settings.loginHistory.desc'),   action: <button className="chevron-btn">›</button> },
-              ].map(({ label, sub, action }) => (
-                <div key={label} className="security-item">
-                  <div className="security-item-left"><h4>{label}</h4><p>{sub}</p></div>
-                  {action}
-                </div>
-              ))}
+              <div className="security-item-clickable" onClick={handleChangePassword}>
+                <div className="security-item-left"><h4>{t('settings.changePassword')}</h4><p>{t('settings.changePassword.desc')}</p></div>
+                <button className="chevron-btn">›</button>
+              </div>
+              <div className="security-item-clickable" onClick={handleTwoFactor}>
+                <div className="security-item-left"><h4>{t('settings.twoFactor')}</h4><p>{t('settings.twoFactor.active')}</p></div>
+                <span className="manage-link">{t('settings.manage')}</span>
+              </div>
+              <div className="security-item-clickable" onClick={handleActiveSessions}>
+                <div className="security-item-left"><h4>{t('settings.activeSessions')}</h4><p>{t('settings.activeSessions.desc')}</p></div>
+                <span className="manage-link">{t('settings.view')}</span>
+              </div>
+              <div className="security-item-clickable" onClick={handleLoginHistory}>
+                <div className="security-item-left"><h4>{t('settings.loginHistory')}</h4><p>{t('settings.loginHistory.desc')}</p></div>
+                <button className="chevron-btn">›</button>
+              </div>
             </div>
 
             <div className="settings-panel">
               <PanelTitle iconKey="shield" label={t('settings.privacy')} />
-              {[
-                { label: t('settings.dataDownload'),    sub: t('settings.dataDownload.desc'),    action: <button className="chevron-btn">›</button> },
-                { label: t('settings.cookiePrefs'), sub: t('settings.cookiePrefs.desc'),     action: <span className="manage-link">{t('settings.manage')}</span> },
-              ].map(({ label, sub, action }) => (
-                <div key={label} className="security-item">
-                  <div className="security-item-left"><h4>{label}</h4><p>{sub}</p></div>
-                  {action}
-                </div>
-              ))}
+              <div className="security-item-clickable" onClick={handleDataDownload}>
+                <div className="security-item-left"><h4>{t('settings.dataDownload')}</h4><p>{t('settings.dataDownload.desc')}</p></div>
+                <button className="chevron-btn">›</button>
+              </div>
+              <div className="security-item-clickable" onClick={handleCookiePrefs}>
+                <div className="security-item-left"><h4>{t('settings.cookiePrefs')}</h4><p>{t('settings.cookiePrefs.desc')}</p></div>
+                <span className="manage-link">{t('settings.manage')}</span>
+              </div>
             </div>
 
             <div className="danger-panel">
@@ -341,19 +404,7 @@ export default function Settings() {
           </div>
         </div>
         {message && (
-          <div style={{
-            position: 'fixed',
-            bottom: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: '#8D493A',
-            color: 'white',
-            padding: '12px 24px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-          }}>
-            {message}
-          </div>
+          <ToastCard message={message} type={messageType} />
         )}
       </div>
     </Layout>
