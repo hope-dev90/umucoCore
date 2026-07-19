@@ -6,6 +6,7 @@ import { ReadingCompletePopup } from './ReadingCompletePopup';
 import { StoryQuiz } from './StoryQuiz';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { localizeStory } from '../../utils/storyLocalization';
 
 /**
  * StoryReadModal
@@ -21,7 +22,8 @@ export function StoryReadModal({ story, onClose, onComplete }) {
   const scrollRef = useRef(null);
   const { awardXP, refresh, xp, level, leaderboard, getCurrentLevelData, getNextLevelData } = useGamificationContext();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const localizedStory = localizeStory(story, language);
   const [showCompletion, setShowCompletion] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [sessionXP, setSessionXP] = useState(0);
@@ -29,16 +31,9 @@ export function StoryReadModal({ story, onClose, onComplete }) {
   const completionNotifiedRef = useRef(false);
 
   // Estimate word count from available text
-  const bodyText = story?.content || story?.desc || story?.description || '';
+  const bodyText = localizedStory?.content || localizedStory?.desc || localizedStory?.description || '';
   const wordCount = bodyText.trim().split(/\s+/).filter(Boolean).length || 200;
   const xpReward = story?.xpReward ?? 50;
-
-  const handleMilestone = useCallback((pct) => {
-    const amounts = { 25: 15, 50: 20, 75: 25 };
-    const amount = amounts[pct] || 10;
-    awardXP(amount, `reading_progress_${pct}`).catch(() => {});
-    setSessionXP(prev => prev + amount);
-  }, [awardXP]);
 
   const triggerCompletion = useCallback(() => {
     if (!awardedRef.current) {
@@ -48,16 +43,16 @@ export function StoryReadModal({ story, onClose, onComplete }) {
       refresh().catch(() => {});
     }
 
-    if (story?.quiz && story.quiz.length > 0) {
+    if (localizedStory?.quiz && localizedStory.quiz.length > 0) {
       setShowQuiz(true);
     } else {
       if (!completionNotifiedRef.current) {
         completionNotifiedRef.current = true;
-        onComplete?.(story);
+        onComplete?.(localizedStory);
       }
       setShowCompletion(true);
     }
-  }, [awardXP, onComplete, refresh, story, xpReward]);
+  }, [awardXP, localizedStory, onComplete, refresh, xpReward]);
 
   const handleQuizComplete = useCallback((bonusXP) => {
     if (bonusXP > 0) {
@@ -68,13 +63,10 @@ export function StoryReadModal({ story, onClose, onComplete }) {
     setShowQuiz(false);
     if (!completionNotifiedRef.current) {
       completionNotifiedRef.current = true;
-      onComplete?.(story);
+      onComplete?.(localizedStory);
     }
     setShowCompletion(true);
-  }, [awardXP, onComplete, refresh, story]);
-
-  // Called by ReadingProgress when scroll hits 100%
-  const handleComplete = useCallback(() => triggerCompletion(), [triggerCompletion]);
+  }, [awardXP, localizedStory, onComplete, refresh]);
 
   // Called by "Finish Reading" button
   const handleFinishReading = useCallback(() => triggerCompletion(), [triggerCompletion]);
@@ -90,14 +82,14 @@ export function StoryReadModal({ story, onClose, onComplete }) {
   const currentXP     = xp || 0;
   const requiredXP    = nextLevelData?.requiredXP ?? levelData?.requiredXP ?? 1000;
 
-  const image = story?.image_url || story?.image;
-  const title = story?.title     || t('gamification.story');
-  const desc  = story?.desc      || story?.description || '';
-  const category = story?.category || '';
-  const location = story?.location || '';
+  const image = localizedStory?.image_url || localizedStory?.image;
+  const title = localizedStory?.title     || t('gamification.story');
+  const desc  = localizedStory?.desc      || localizedStory?.description || '';
+  const category = localizedStory?.category || '';
+  const location = localizedStory?.location || '';
 
   // Generate rich placeholder content when no content field exists
-  const readableContent = story?.content || generatePlaceholderContent(title, desc, category);
+  const readableContent = localizedStory?.content || generatePlaceholderContent(title, desc, category);
 
   return (
     <>
@@ -130,7 +122,7 @@ export function StoryReadModal({ story, onClose, onComplete }) {
           onClick={e => e.stopPropagation()}
         >
           {showQuiz ? (
-            <StoryQuiz quizData={story.quiz} onComplete={handleQuizComplete} />
+            <StoryQuiz quizData={localizedStory.quiz} onComplete={handleQuizComplete} />
           ) : (
             <>
               {/* Reading progress bar — sticky at top */}
@@ -138,8 +130,6 @@ export function StoryReadModal({ story, onClose, onComplete }) {
                 totalWords={wordCount}
                 scrollContainerRef={scrollRef}
                 xpReward={xpReward}
-                onMilestone={handleMilestone}
-                onComplete={handleComplete}
               />
 
               {/* Scrollable body */}

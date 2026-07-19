@@ -13,6 +13,41 @@ const IMG = {
   memorial2: Memorial2Img,
 };
 
+function KwibukaFlameLogo({ className = '' }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 120 160"
+      role="img"
+      aria-label="Kwibuka remembrance flame"
+    >
+      <path
+        d="M67 7C47 35 42 61 53 84c5 11 4 21-3 31 25-16 38-39 33-67-2-13-8-27-16-41Z"
+        fill="currentColor"
+      />
+      <path
+        d="M39 55C22 78 20 103 34 124c7 10 16 17 28 22-13-20-8-38 9-55-10 8-20 7-26-2-6-9-6-21-6-34Z"
+        fill="currentColor"
+      />
+      <path
+        d="M73 88c20 22 20 44-2 66 31-15 44-39 36-65-3-11-10-21-20-30 3 13-1 22-14 29Z"
+        fill="currentColor"
+      />
+      <path
+        className="kwibuka-flame-cutout"
+        d="M58 97c-12-10-11-24 4-42-3 24 5 32 18 39-19 6-30 22-28 47-14-15-13-31 6-44Z"
+      />
+      <path
+        d="M58 97c-12-10-11-24 4-42"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="5"
+      />
+    </svg>
+  );
+}
+
 const voices = [
   { 
     type: { en: 'Audio Testimony', rw: 'Ubutumwa bw\'Umva' }, 
@@ -54,9 +89,19 @@ const events = [
 
 export default function Kwibuka() {
   const { t, language } = useLanguage();
+  const [topbarSearch, setTopbarSearch] = React.useState('');
+
+  const filteredVoices = topbarSearch.trim()
+    ? voices.filter(v => {
+        const q = topbarSearch.toLowerCase();
+        return (v.title.en || '').toLowerCase().includes(q)
+          || (v.title.rw || '').toLowerCase().includes(q)
+          || (v.excerpt.en || '').toLowerCase().includes(q);
+      })
+    : voices;
 
   return (
-    <Layout searchPlaceholder={t('kwibuka.searchPlaceholder')}>
+    <Layout searchPlaceholder={t('kwibuka.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="kwibuka-page">
 
         {/* Today's Reflection hero */}
@@ -65,6 +110,10 @@ export default function Kwibuka() {
             onError={e => e.target.style.display='none'} />
           <div className="reflection-hero-overlay" />
           <div className="reflection-hero-content">
+            <div className="kwibuka-flame-badge">
+              <KwibukaFlameLogo className="kwibuka-flame-logo" />
+              <span>{t('kwibuka.markLabel')}</span>
+            </div>
             <div className="reflection-label">{t('kwibuka.reflectionLabel')}</div>
             <div className="reflection-quote">
               {t('kwibuka.reflectionQuote')}
@@ -94,9 +143,7 @@ export default function Kwibuka() {
                 <div className="memorial-card-title">{t('kwibuka.memorialTitle')}</div>
                 <div className="memorial-card-sub">{t('kwibuka.memorialSub')}</div>
               </div>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.8">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-              </svg>
+              <KwibukaFlameLogo className="memorial-flame-logo" />
             </div>
             <div className="memorial-photos">
               {[IMG.memorial1, IMG.memorial2].map((src, i) => (
@@ -114,7 +161,7 @@ export default function Kwibuka() {
 
           <div className="voices-card">
             <div className="voices-title">{t('kwibuka.voicesTitle')}</div>
-            {voices.map((v, i) => (
+            {filteredVoices.map((v, i) => (
               <div key={i} className="voice-item">
                 <div className="voice-type">{getLocalizedText(v.type, language)}</div>
                 <div className="voice-title">{getLocalizedText(v.title, language)}</div>
@@ -152,7 +199,6 @@ export default function Kwibuka() {
         </div>
       </div>
 
-      <button className="access-fab"></button>
     </Layout>
   );
 }

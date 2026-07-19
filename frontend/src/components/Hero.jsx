@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Compass, BookOpen, Users } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { UmucoGlyph } from './UmucoGlyphs';
 
 import cardImg1 from '../assets/tradi.jpg';
 import cardImg2 from '../assets/book.png';
@@ -29,6 +30,12 @@ function Hero({ onNavigate }) {
     { value: '24/7', label: t('hero.stats.aiAssistant') },
   ];
 
+  const questSteps = [
+    { step: '01', label: t('landing.quest.pick') },
+    { step: '02', label: t('landing.quest.learn') },
+    { step: '03', label: t('landing.quest.earn') },
+  ];
+
   const features = [
     {
       title: t('hero.feature1.title'),
@@ -51,20 +58,19 @@ function Hero({ onNavigate }) {
   ];
 
   const positions = [
-    'absolute w-72 h-96 top-0 left-0 z-10 transform translate-x-0 translate-y-0 shadow-md scale-90',
-    'absolute w-72 h-96 top-0 left-0 z-20 transform translate-x-12 translate-y-12 shadow-lg scale-95',
-    'absolute w-72 h-96 top-0 left-0 z-30 transform translate-x-24 translate-y-24 shadow-2xl scale-100',
+    'absolute w-64 h-80 top-0 left-0 z-10 transform translate-x-0 translate-y-0 shadow-md scale-90',
+    'absolute w-64 h-80 top-0 left-0 z-20 transform translate-x-10 translate-y-10 shadow-lg scale-95',
+    'absolute w-64 h-80 top-0 left-0 z-30 transform translate-x-20 translate-y-20 shadow-2xl scale-100',
   ];
 
   return (
-    <section className="w-full bg-[#FDFBF7] font-sans px-4 sm:px-6 pt-24 pb-12 md:pt-36 md:pb-20 overflow-hidden">
+    <section className="landing-hero-section w-full bg-[#FDFBF7] font-sans px-4 sm:px-6 pt-24 pb-12 md:pt-32 md:pb-16 overflow-hidden">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         
         <div className="col-span-1 lg:col-span-6 flex flex-col items-start text-left px-2 sm:px-6">
-          <div className="inline-flex items-center space-x-2 bg-[#FCDFD3]/40 border border-[#EADBC8] rounded-full px-3 py-1 mb-4 sm:mb-6">
-            <span className="text-[9px] sm:text-xs font-semibold tracking-widest text-[#8D493A] uppercase">
-              {t('hero.tagline')}
-            </span>
+          <div className="quest-pill mb-4 sm:mb-6">
+            <UmucoGlyph type="trail" size={18} />
+            <span>{t('hero.tagline')}</span>
           </div>
 
           <h1 className="font-sans text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-[#2C1A14] leading-[1.15] lg:leading-[1.1] mb-4 sm:mb-6">
@@ -92,22 +98,31 @@ function Hero({ onNavigate }) {
               {t('hero.exploreMore')}
             </button>
           </div>
-          <div className="w-full pt-6 sm:pt-8 grid grid-cols-3 gap-2 sm:gap-4">
+          <div className="hero-stats-grid w-full">
             {stats.map((stat, index) => (
-              <div key={index} className="flex flex-col">
-                <span className="font-sans text-lg sm:text-xl md:text-2xl font-bold text-[#8D493A]">
+              <div key={index} className="hero-stat-card">
+                <span>
                   {stat.value}
                 </span>
-                <span className="text-[9px] sm:text-xxs md:text-xs text-[#8D493A] tracking-wider font-semibold mt-1 uppercase">
+                <strong>
                   {stat.label}
-                </span>
+                </strong>
+              </div>
+            ))}
+          </div>
+
+          <div className="quest-progress">
+            {questSteps.map((item) => (
+              <div key={item.step} className="quest-progress-step">
+                <span>{item.step}</span>
+                <strong>{item.label}</strong>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="hidden lg:flex lg:col-span-6 relative h-[520px] w-full items-start justify-start lg:pl-12 mt-8 lg:mt-0">
-          <div className="relative w-[384px] h-[480px]">
+        <div className="hidden xl:flex lg:col-span-6 relative h-[430px] w-full items-start justify-center mt-8 lg:mt-0 overflow-hidden">
+          <div className="relative w-[340px] h-[400px]">
             {features.map((item, index) => {
               const IconComponent = item.icon;
               const assignedPositionIndex = order[index];
@@ -115,7 +130,7 @@ function Hero({ onNavigate }) {
               return (
                 <div
                   key={index}
-                  className={`${positions[assignedPositionIndex]} group rounded-3xl overflow-hidden border border-[#EADBC8]/60 transition-all duration-700 ease-in-out cursor-pointer bg-neutral-900`}
+                  className={`${positions[assignedPositionIndex]} quest-card group overflow-hidden border border-[#EADBC8]/60 transition-all duration-700 ease-in-out cursor-pointer bg-neutral-900`}
                 >
                   <img
                     src={item.img}

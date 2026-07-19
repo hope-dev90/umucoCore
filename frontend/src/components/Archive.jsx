@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowRight, History, Landmark, Music } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
-function DigitalArchive() {
+function DigitalArchive({ onNavigate }) {
   const { t } = useLanguage();
 
   const collections = [
@@ -37,7 +37,11 @@ function DigitalArchive() {
             </p>
           </div>
 
-          <button className="inline-flex items-center space-x-2 text-[#8D493A] hover:text-[#3E2723] font-semibold text-xs sm:text-sm tracking-wide transition-colors duration-200 group self-start sm:self-auto shrink-0 pt-2 sm:pt-0">
+          <button
+            type="button"
+            onClick={() => onNavigate?.('collections')}
+            className="inline-flex items-center space-x-2 text-[#8D493A] hover:text-[#3E2723] font-semibold text-xs sm:text-sm tracking-wide transition-colors duration-200 group self-start sm:self-auto shrink-0 pt-2 sm:pt-0"
+          >
             <span>{t('archive.viewAll')}</span>
             <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transform transition-transform group-hover:translate-x-1" />
           </button>
@@ -49,12 +53,12 @@ function DigitalArchive() {
             return (
               <div
                 key={index}
-                className={`bg-[#FCDFD3]/15 border border-[#EADBC8]/30 rounded-2xl p-6 sm:p-8 text-left flex flex-col justify-between min-h-[220px] sm:h-64 shadow-xs hover:shadow-md transition-all duration-300 sm:hover:-translate-y-1 group ${
+                className={`quest-card bg-[#FCDFD3]/15 border border-[#EADBC8]/30 p-6 sm:p-8 text-left flex flex-col justify-between min-h-[220px] sm:h-64 shadow-xs hover:shadow-md transition-all duration-300 sm:hover:-translate-y-1 group ${
                   index === 2 ? 'sm:col-span-2 lg:col-span-1' : ''
                 }`}
               >
                 <div>
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#FCDFD3]/40 border border-[#EADBC8]/50 flex items-center justify-center mb-4 sm:mb-6 text-[#8D493A] sm:group-hover:bg-[#8D493A] sm:group-hover:text-[#FDFBF7] transition-colors duration-300">
+                  <div className="quest-card-icon w-10 h-10 sm:w-12 sm:h-12 bg-[#FCDFD3]/40 border border-[#EADBC8]/50 flex items-center justify-center mb-4 sm:mb-6 text-[#8D493A] sm:group-hover:bg-[#8D493A] sm:group-hover:text-[#FDFBF7] transition-colors duration-300">
                     <IconComponent className="w-4 sm:w-5 h-4 sm:h-5" />
                   </div>
                   

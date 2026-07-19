@@ -10,7 +10,7 @@ import intoreImage from '../assets/home/intore.jpg';
 import kigeliImage from '../assets/home/kigeli.jpg';
 import inangaImage from '../assets/home/inanga.jpg';
 import ubudeheImage from '../assets/home/ubudehe.jpg';
-import { ArrowRight, X, Swords, Leaf, Crown, Drama, Drum, BookOpen, Flame, Trophy, Share2 } from 'lucide-react';
+import { ArrowRight, Share2 } from 'lucide-react';
 import {
   Headphones,
   Plus,
@@ -19,13 +19,12 @@ import {
   Music,
   Video
 } from 'lucide-react';
-import { DailyStreakWidget } from '../components/Gamification/DailyStreakWidget';
-import { LeaderboardWidget } from '../components/Gamification/LeaderboardWidget';
-import { XPBar } from '../components/Gamification/XPBar';
+// Removed: these widgets are now in the persistent Layout panel
 import ExplorerTypeImage from '../components/ExplorerTypeImage';
 import { getHighlightForCategory, ALL_STORIES } from '../data/stories';
 import { DashboardStoryView } from '../components/Gamification/DashboardStoryView';
 import { useLocation } from 'react-router-dom';
+import { UmucoGlyph } from '../components/UmucoGlyphs';
 
 const EXPLORER_TYPES = [
   { id: 'warrior',         label: 'Warrior',          tagline: 'Battles, legends & brave deeds'   },
@@ -34,120 +33,6 @@ const EXPLORER_TYPES = [
   { id: 'folktale-hunter', label: 'Folktale Hunter',   tagline: 'Myths, proverbs & fireside tales' },
   { id: 'music-explorer',  label: 'Music Explorer',    tagline: 'Rhythms, songs & instruments'     },
 ];
-
-const ADVENTURE_POPUPS = {
-  warrior: {
-    label: 'warriors',
-    accentWord: 'warriors',
-    accent: '#8B4513',
-    image: '/images/collections/warriors.jpg',
-    icon: Swords,
-    title: 'Are you ready to discover more about warriors in ancient Rwanda?',
-    description: 'Uncover their stories, bravery, and the legacy they left behind.',
-    confirmText: "Yes, let's go!",
-    route: '/explore',
-  },
-  'nature-lover': {
-    label: 'nature',
-    accentWord: 'landscapes',
-    accent: '#3F7A4A',
-    image: '/images/collections/nature.jpg',
-    icon: Leaf,
-    title: "Are you ready to follow Rwanda's living landscapes?",
-    description: 'Walk through forests, hills, rivers, and the traditions shaped by the natural world.',
-    confirmText: 'Start the trail',
-    route: '/explore',
-  },
-  'royal-historian': {
-    label: 'royal heritage',
-    accentWord: 'royal court',
-    accent: '#9A7418',
-    image: '/images/collections/royal-court.jpg',
-    icon: Crown,
-    title: "Are you ready to enter Rwanda's royal court?",
-    description: 'Explore kings, dynasties, ceremonies, and the histories preserved around the palace.',
-    confirmText: 'Enter the court',
-    route: '/explore',
-  },
-  'folktale-hunter': {
-    label: 'folktales',
-    accentWord: 'stories',
-    accent: '#6B4A8D',
-    image: '/images/collections/folklore.jpg',
-    icon: Drama,
-    title: 'Are you ready to chase the old stories?',
-    description: 'Discover proverbs, myths, fireside lessons, and the imagination carried by oral tradition.',
-    confirmText: 'Chase the legend',
-    route: '/explore',
-  },
-  'music-explorer': {
-    label: 'music',
-    accentWord: 'heritage',
-    accent: '#1F7A8C',
-    image: '/images/collections/music.jpg',
-    icon: Drum,
-    title: "Are you ready to hear Rwanda's heritage?",
-    description: 'Listen for drums, inanga, praise poetry, and rhythms that keep memory alive.',
-    confirmText: 'Follow the rhythm',
-    route: '/explore',
-  },
-};
-
-function AdventurePopup({ type, isOpen, onClose, onConfirm }) {
-  const { t } = useLanguage();
-  if (!isOpen || !type) return null;
-
-  const popup = ADVENTURE_POPUPS[type] || ADVENTURE_POPUPS.warrior;
-  const Icon = popup.icon;
-  const title = t(`adventure.${type}.title`);
-  const description = t(`adventure.${type}.description`);
-  const confirmText = t(`adventure.${type}.confirm`);
-  const accentWord = t(`adventure.${type}.accentWord`);
-  const label = t(`explorer.${type}.label`);
-  const accentIndex = title.toLowerCase().indexOf(accentWord.toLowerCase());
-  const titleBefore = accentIndex >= 0 ? title.slice(0, accentIndex) : title;
-  const titleAccent = accentIndex >= 0 ? title.slice(accentIndex, accentIndex + accentWord.length) : '';
-  const titleAfter = accentIndex >= 0 ? title.slice(accentIndex + accentWord.length) : '';
-
-  return (
-    <div className="adventure-popup-backdrop" role="dialog" aria-modal="true" aria-labelledby="adventure-popup-title">
-      <div className="adventure-popup-card" style={{ '--adventure-accent': popup.accent }}>
-        <div className="adventure-popup-pattern adventure-popup-pattern-top" aria-hidden="true" />
-        <button type="button" onClick={onClose} className="adventure-popup-close" aria-label="Close adventure intro">
-          <X size={18} />
-        </button>
-
-        <div className="adventure-popup-inner">
-          <div className="adventure-popup-image">
-            <img src={popup.image} alt={`${label} adventure`} />
-          </div>
-
-          <div className="adventure-popup-content">
-            <div className="adventure-popup-icon">
-              <Icon size={30} />
-            </div>
-            <h2 id="adventure-popup-title">
-              {titleBefore}
-              {titleAccent && <span>{titleAccent}</span>}
-              {titleAfter}
-            </h2>
-            <p>{description}</p>
-
-            <div className="adventure-popup-actions">
-              <button type="button" onClick={onConfirm} className="adventure-popup-primary">
-                {confirmText}
-              </button>
-              <button type="button" onClick={onClose} className="adventure-popup-secondary">
-                {t('adventure.maybeLater')}
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="adventure-popup-pattern adventure-popup-pattern-bottom" aria-hidden="true" />
-      </div>
-    </div>
-  );
-}
 
 function ExplorerPickerModal({ onSave }) {
   const { t } = useLanguage();
@@ -257,7 +142,6 @@ export default function Home() {
   const explorerType = user?.explorerType || user?.explorer_type;
   const [localExplorerType, setLocalExplorerType] = useState(explorerType);
   const [showPicker, setShowPicker] = useState(false);
-  const [showAdventurePopup, setShowAdventurePopup] = useState(false);
   const [activeStory, setActiveStory] = useState(null);
   const [awardedDashboardItems, setAwardedDashboardItems] = useState(new Set());
   const location = useLocation();
@@ -288,35 +172,10 @@ export default function Home() {
     setLocalExplorerType(type);
     setShowPicker(false);
     updateUser({ explorerType: type });
-    setShowAdventurePopup(true);
   };
 
   const activeExplorerType = localExplorerType || explorerType;
   const category = EXPLORER_CATEGORY[activeExplorerType] || 'general';
-
-  useEffect(() => {
-    if (!activeExplorerType || showPicker) return;
-
-    const popupKey = `adventure-popup-seen:${user?.id || user?.email || 'guest'}:${activeExplorerType}`;
-    if (!sessionStorage.getItem(popupKey)) {
-      const timer = setTimeout(() => setShowAdventurePopup(true), 650);
-      return () => clearTimeout(timer);
-    }
-  }, [activeExplorerType, showPicker, user?.id, user?.email]);
-
-  const closeAdventurePopup = () => {
-    if (activeExplorerType) {
-      const popupKey = `adventure-popup-seen:${user?.id || user?.email || 'guest'}:${activeExplorerType}`;
-      sessionStorage.setItem(popupKey, 'true');
-    }
-    setShowAdventurePopup(false);
-  };
-
-  const confirmAdventurePopup = () => {
-    const route = ADVENTURE_POPUPS[activeExplorerType]?.route || '/explore';
-    closeAdventurePopup();
-    navigate(route);
-  };
 
   // Fetch the highlight card for this user's adventure type.
   // Backend endpoint (/api/heritage) doesn't exist yet, so this falls back to
@@ -325,6 +184,7 @@ export default function Home() {
   // data automatically the moment that endpoint is live, since a successful
   // fetch with real items always takes priority below.
   const [highlight, setHighlight] = useState(null);
+  const [audioHighlight, setAudioHighlight] = useState(null);
 
   useEffect(() => {
     const localFallback = getHighlightForCategory(category);
@@ -351,14 +211,60 @@ export default function Home() {
       });
   }, [category]);
 
+  // For music explorers, fetch a featured audio track for the highlight
+  useEffect(() => {
+    if (activeExplorerType !== 'music-explorer') return;
+    fetch('http://localhost:5000/api/audio/featured')
+      .then(r => r.json())
+      .then(data => {
+        const items = Array.isArray(data) ? data : data.items || [];
+        if (items.length > 0) {
+          // pick a random one each visit
+          const pick = items[Math.floor(Math.random() * items.length)];
+          setAudioHighlight(pick);
+        }
+      })
+      .catch(() => {});
+  }, [activeExplorerType]);
+
   // ── All original hardcoded content below ──────────────────
 
+  // Each item is tagged with the explorer type(s) it's most relevant to.
+  // Adjust these tags to match your content taxonomy as needed.
   const exploreItems = [
-    { label: t('dashboard.explore.intore'),  meta: t('dashboard.explore.intoreMeta'),  image: intoreImage  },
-    { label: t('dashboard.explore.kigeli'),  meta: t('dashboard.explore.kigeliMeta'),  image: kigeliImage  },
-    { label: t('dashboard.explore.music'),   meta: t('dashboard.explore.musicMeta'),   image: inangaImage  },
-    { label: t('dashboard.explore.ubudehe'), meta: t('dashboard.explore.ubudeheMeta'), image: ubudeheImage },
+    {
+      title: 'Intore Culture', category: 'Royal', xp: 25,
+      meta: 'History • 12 mins left', image: intoreImage,
+      route: '/explore',
+      explorerTypes: ['warrior', 'royal-historian'],
+    },
+    {
+      title: 'Kigeli IV Rwabugiri', category: 'Legends', xp: 30,
+      meta: 'Linkage • New Activity', image: kigeliImage,
+      route: '/collections',
+      explorerTypes: ['warrior', 'royal-historian'],
+    },
+    {
+      title: 'Traditional Music', category: 'Audio', xp: 20,
+      meta: 'Audio • 4 Stories', image: inangaImage,
+      route: '/listen',
+      explorerTypes: ['music-explorer'],
+    },
+    {
+      title: 'Ubudehe', category: 'Values', xp: 15,
+      meta: 'Values • Updated', image: ubudeheImage,
+      route: '/collections',
+      explorerTypes: ['nature-lover', 'folktale-hunter'],
+    },
   ];
+
+  // Sort so items matching the user's active explorer type float to the
+  // top; ties keep their original relative order (stable sort).
+  const sortedExploreItems = [...exploreItems].sort((a, b) => {
+    const aMatch = a.explorerTypes.includes(activeExplorerType) ? 0 : 1;
+    const bMatch = b.explorerTypes.includes(activeExplorerType) ? 0 : 1;
+    return aMatch - bMatch;
+  });
 
   const recentItems = [
     { icon: <Music    size={16} />, type: 'audio', title: t('dashboard.recent.oralHistory'), date: t('dashboard.recent.oralHistoryDate') },
@@ -383,12 +289,6 @@ export default function Home() {
     { icon: <Search     size={16} />, label: t('home.advancedSearch') },
   ];
 
-  const dashboardStats = [
-    { icon: <Trophy size={18} />, label: t('dashboard.level'), value: level || 1, detail: t('dashboard.xpEarned').replace('{xp}', xp || 0) },
-    { icon: <Flame size={18} />, label: t('dashboard.dailyStreak'), value: t('dashboard.daysValue').replace('{days}', streak || 0), detail: t('dashboard.bestValue').replace('{best}', bestStreak || 0) },
-    { icon: <BookOpen size={18} />, label: t('dashboard.storyQuest'), value: t('dashboard.talesValue').replace('{count}', ALL_STORIES.length), detail: t('dashboard.storyQuestDetail') },
-  ];
-
   const explorerGreetings = {
     'warrior':         { prefix: t('dashboard.greeting.warrior') },
     'nature-lover':    { prefix: t('dashboard.greeting.nature') },
@@ -408,6 +308,24 @@ export default function Home() {
   const welcomeSub = greeting
     ? t('dashboard.explorerJourneyAwaits').replace('{type}', t(`explorer.${activeExplorerType}.label`))
     : t('home.subtitle');
+
+  const questTiles = [
+    {
+      icon: 'medal',
+      label: t('dashboard.level'),
+      value: `${t('gamification.levelShort')} ${level || 1}`,
+    },
+    {
+      icon: 'trail',
+      label: t('dashboard.dailyStreak'),
+      value: t('dashboard.daysValue').replace('{days}', streak || 0),
+    },
+    {
+      icon: 'quest',
+      label: t('dashboard.storyQuest'),
+      value: t('dashboard.talesValue').replace('{count}', ALL_STORIES.length),
+    },
+  ];
 
   const handleExploreNow = () => {
     if (highlight?.storyId) {
@@ -434,7 +352,6 @@ export default function Home() {
     'Day of Indigenous Peoples': 'A global reminder that language, land, memory, and cultural knowledge need active protection.',
   };
 
-  const routeForExploreItem = (index) => ['/explore', '/collections', '/listen', '/collections'][index] || '/explore';
   const routeForRecentItem = (type) => ({ audio: '/listen', video: '/videos', doc: '/history' }[type] || '/history');
   const routeForQuickAction = (index) => ['/listen', '/contribute', '/explore'][index] || '/explore';
   const topicStoryForIndex = (index) => ALL_STORIES[index % ALL_STORIES.length];
@@ -479,12 +396,6 @@ export default function Home() {
   return (
     <>
       {showPicker && <ExplorerPickerModal onSave={handlePickerSave} />}
-      <AdventurePopup
-        type={activeExplorerType}
-        isOpen={showAdventurePopup && !showPicker}
-        onClose={closeAdventurePopup}
-        onConfirm={confirmAdventurePopup}
-      />
       {activeStory ? (
         <DashboardStoryView
           story={activeStory}
@@ -492,7 +403,8 @@ export default function Home() {
           onComplete={() => console.log('Story completed')}
         />
       ) : (
-      <Layout searchPlaceholder="search.placeholder">
+       <Layout searchPlaceholder="search.placeholder">
+       <div className="home-shell">
       <div className="home-header">
         <h1>
           {welcomeHeading}
@@ -508,39 +420,47 @@ export default function Home() {
         <p>{welcomeSub}</p>
       </div>
 
-      <div className="dashboard-overview" aria-label="Dashboard progress summary">
-        {dashboardStats.map((stat) => (
-          <div className="dashboard-stat-card" key={stat.label}>
-            <div className="dashboard-stat-icon">{stat.icon}</div>
-            <div>
-              <span>{stat.label}</span>
-              <strong>{stat.value}</strong>
-              <p>{stat.detail}</p>
-            </div>
+          <div className="dashboard-quest-strip" aria-label={t('dashboard.questOverview')}>
+            {questTiles.map((tile) => (
+              <div key={tile.label} className="dashboard-quest-tile">
+                <UmucoGlyph type={tile.icon} size={34} />
+                <div>
+                  <span>{tile.label}</span>
+                  <strong>{tile.value}</strong>
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
 
-      <div className="home-grid">
-        <div>
-          <>
           <div className="highlight-card">
             <span className="highlight-badge">{t('home.todayHighlight')}</span>
             <div className="highlight-image">
               <img
-                src={highlightSrc}
-                alt={highlightTitle}
+                src={audioHighlight ? (audioHighlight.thumbnail_url || highlightSrc) : highlightSrc}
+                alt={audioHighlight ? audioHighlight.title : highlightTitle}
                 className="highlight-img"
                 onError={e => { e.target.src = nyanzeImage; }}
               />
             </div>
             <div className="highlight-content">
               <div>
-                <h2>{highlightTitle}</h2>
-                <p>{highlightDesc}</p>
+                <h2>{audioHighlight ? audioHighlight.title : highlightTitle}</h2>
+                <p style={{ color: 'var(--text-secondary)' }}>
+                  {audioHighlight ? audioHighlight.description : highlightDesc}
+                </p>
+                {audioHighlight?.audio_url && (
+                  <audio
+                    controls
+                    style={{ width: '100%', marginTop: 12, borderRadius: 8 }}
+                    aria-label={`Play ${audioHighlight.title}`}
+                  >
+                    <source src={audioHighlight.audio_url} />
+                    Your browser does not support audio playback.
+                  </audio>
+                )}
               </div>
               <div className="highlight-actions">
-                <button className="btn-primary" onClick={handleExploreNow}>
+                <button className="btn-primary" onClick={() => navigate('/explore')}>
                   {t('home.exploreNow')}
                 </button>
                 <button className="btn-outline" onClick={handleShare}>
@@ -557,14 +477,18 @@ export default function Home() {
           </div>
 
           <div className="explore-cards">
-            {exploreItems.map((item, i) => (
-              <div key={i} className="explore-thumb" role="button" tabIndex={0}
-                onClick={() => openDashboardStory({ ...item, route: routeForExploreItem(i) }, 'continue')}
-                onKeyDown={(e) => { if (e.key === 'Enter') openDashboardStory({ ...item, route: routeForExploreItem(i) }, 'continue'); }}>
+            {sortedExploreItems.map((item) => (
+              <div key={item.title} className="explore-thumb" role="button" tabIndex={0}
+                onClick={() => openDashboardStory(item, 'continue')}
+                onKeyDown={(e) => { if (e.key === 'Enter') openDashboardStory(item, 'continue'); }}>
                 <div className="explore-thumb-img">
-                  <img src={item.image} alt={item.label} />
+                  <img src={item.image} alt={item.title} />
                 </div>
-                <div className="explore-thumb-label">{item.label}</div>
+                <div className="explore-thumb-top">
+                  <span className="explore-thumb-category">{item.category}</span>
+                  <span className="explore-thumb-xp">+{item.xp} XP</span>
+                </div>
+                <div className="explore-thumb-label">{item.title}</div>
                 <div className="explore-thumb-meta">{item.meta}</div>
               </div>
             ))}
@@ -641,94 +565,17 @@ export default function Home() {
               ))}
             </div>
           </div>
-            </>
-          )}
-        </div>
 
-        <div className="home-sidebar">
-          <div style={{ marginBottom: '1rem' }}>
-            <XPBar
-              currentXP={xp || 0}
-              requiredXP={getNextLevelData()?.required_xp || 100}
-              level={level || 1}
-            />
-          </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <DailyStreakWidget streak={streak} bestStreak={bestStreak} />
-          </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <LeaderboardWidget
-              entries={leaderboard}
-              currentUserId={user?.id}
-              limit={5}
-            />
-          </div>
-
-          <div className="date-card">
-            <div className="date-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-            </div>
-            <div className="date-info">
-              <span>{t('home.todayDateLabel')}</span>
-              <span>{t('home.todayDate')}</span>
-            </div>
-          </div>
-
-          <div className="quote-card">
-            <div className="quote-label">{t('home.quoteOfDay')}</div>
-            <div className="quote-text">{t('home.quoteText')}</div>
-            <div className="quote-sub">{t('home.quoteSub')}</div>
-          </div>
-
-          <div className="quick-actions">
-            <div className="quick-action-title">{t('home.quickActions')}</div>
-            {quickActions.map((qa, i) => (
-              <div key={i} className="quick-action-item" role="button" tabIndex={0}
-                onClick={() => navigate(routeForQuickAction(i))}
-                onKeyDown={(e) => { if (e.key === 'Enter') navigate(routeForQuickAction(i)); }}>
-                <div className="quick-action-left">
-                  <div className="quick-action-icon">{qa.icon}</div>
-                  <span className="quick-action-label">{qa.label}</span>
-                </div>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </div>
-            ))}
-          </div>
-
-          <div className="upcoming-card">
-            <div className="section-header" style={{ marginTop: 0 }}>
-              <span className="section-title">{t('home.upcomingDays')}</span>
-              <button type="button" className="section-link link-button" onClick={handleViewAllCalendar}>{t('home.viewAll')}</button>
-            </div>
-            {upcomingDays.map((day, i) => (
-              <div key={i} className="upcoming-item">
-                <div className="upcoming-date">
-                  <span className="day">{day.day}</span>
-                  <span className="month">{day.month}</span>
-                </div>
-                <div className="upcoming-info">
-                  <h4>{day.title}</h4>
-                  <p>{day.sub}</p>
-                  <button type="button" className="read-more-btn" onClick={() => openDashboardStory({ ...day, route: '/intl-days' }, 'calendar')}>{t('dashboard.readMore')}</button>
-                </div>
-              </div>
-            ))}
-            <button className="see-calendar-btn" onClick={handleViewAllCalendar}>{t('home.seeFullCalendar')}</button>
+        <div className="home-footer">
+          <div className="home-footer-quote">
+            <p className="home-footer-quote-text">{t('home.quoteText')}</p>
+            <p className="home-footer-quote-sub">{t('home.quoteSub')}</p>
           </div>
         </div>
       </div>
+
     </Layout>
       )}
     </>
   );
 }
-

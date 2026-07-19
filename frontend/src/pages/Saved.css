@@ -27,7 +27,39 @@
 
 /* Main grid */
 .saved-grid {
-  display: grid; grid-template-columns: 240px 1fr; gap: 20px;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 900px) {
+  .saved-grid {
+    grid-template-columns: 1fr;
+  }
+  .saved-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .storage-info {
+    text-align: left;
+    width: 100%;
+  }
+  .saves-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .saved-header-left h1 {
+    font-size: 20px;
+  }
+  .storage-actions {
+    flex-direction: column;
+  }
+  .storage-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* Collections sidebar */

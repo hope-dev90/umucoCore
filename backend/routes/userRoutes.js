@@ -9,6 +9,7 @@ import {
   updateUserProfile,
   updateUserNotifications,
   updateUserAccessibility,
+  updatePassword,
   deleteUserById,
   findUserById,
 } from "../models/userModels.js";
@@ -136,6 +137,27 @@ router.put("/accessibility", authMiddleware, async (req, res) => {
     res.json({ message: "Accessibility profile saved" });
   } catch (err) {
     res.status(500).json({ error: "Failed to save accessibility profile" });
+  }
+});
+
+router.put("/password", authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Current and new password are required" });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+
+    const isValid = await bcrypt.compare(currentPassword, req.user.password);
+    if (!isValid) return res.status(401).json({ error: "Current password is incorrect" });
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await updatePassword(req.user.email, hashedPassword);
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Password update failed" });
   }
 });
 

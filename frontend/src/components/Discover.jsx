@@ -5,6 +5,7 @@ import { gihangaStory } from '../data/stories/gihanga';
 import { nyirarucyabaStory } from '../data/stories/nyirarucyaba';
 import { ruganzuStory } from '../data/stories/ruganzu';
 import { kigeliStory } from '../data/stories/kigeli';
+import { localizeStory } from '../utils/storyLocalization';
 
 // Kept in actual chronological order: Gihanga founds the kingdom (~11th c.),
 // his daughter Nyirarucyaba's cattle story follows in the same founding era,
@@ -14,9 +15,9 @@ import { kigeliStory } from '../data/stories/kigeli';
 const FEATURED_STORIES = [gihangaStory, nyirarucyabaStory, ruganzuStory, kigeliStory];
 
 function Discover({ onNavigate }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [activeIndex, setActiveIndex] = useState(0);
-  const story = FEATURED_STORIES[activeIndex];
+  const story = localizeStory(FEATURED_STORIES[activeIndex], language);
 
   // Let the reader get well into the story before hitting the wall —
   // everything except the final paragraph (the actual climax) is fully
@@ -34,17 +35,17 @@ function Discover({ onNavigate }) {
       <div className="max-w-7xl mx-auto">
 
         <div className="flex flex-col items-center text-center mb-8 md:mb-10 px-2 sm:px-0">
-          <div className="inline-flex items-center space-x-2 bg-[#FCDFD3]/40 border border-[#EADBC8] rounded-full px-3 py-1 mb-4">
+          <div className="quest-pill mb-4">
+            <BookOpen className="w-4 h-4" />
             <span className="text-[9px] sm:text-xs font-semibold tracking-widest text-[#8D493A] uppercase">
-              Discover
+              {t('discover.kicker')}
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#8D493A] mb-2 sm:mb-4">
-            A story worth remembering
+            {t('discover.title')}
           </h2>
           <p className="text-xs sm:text-sm md:text-base text-[#6F5B55] leading-relaxed font-normal max-w-2xl">
-            Step into one of the oral histories carried through generations — read where it begins,
-            and continue the journey once you join.
+            {t('discover.subtitle')}
           </p>
         </div>
 
@@ -54,18 +55,18 @@ function Discover({ onNavigate }) {
             <button
               key={s.id}
               onClick={() => setActiveIndex(i)}
-              className={`px-4 sm:px-5 py-2 text-[11px] sm:text-xs font-semibold tracking-wide rounded-full border transition-all duration-200 whitespace-nowrap ${
+              className={`story-tab px-4 sm:px-5 py-2 text-[11px] sm:text-xs font-semibold tracking-wide border transition-all duration-200 whitespace-nowrap ${
                 i === activeIndex
                   ? 'bg-[#8D493A] border-[#8D493A] text-[#FDFBF7] shadow-sm'
                   : 'bg-transparent border-[#EADBC8] text-[#8D493A] hover:bg-[#FCDFD3]/30'
               }`}
             >
-              {s.title}
+              {localizeStory(s, language).title}
             </button>
           ))}
         </div>
 
-        <div className="max-w-2xl md:max-w-4xl mx-auto rounded-3xl overflow-hidden border border-[#EADBC8]/50 shadow-md bg-white">
+        <div className="story-lockup max-w-2xl md:max-w-4xl mx-auto overflow-hidden border border-[#EADBC8]/50 shadow-md bg-white">
 
           {/* Story banner */}
           <div className="relative h-56 sm:h-72 md:h-80 w-full">
@@ -79,7 +80,7 @@ function Discover({ onNavigate }) {
               <div className="flex items-center space-x-2 mb-1">
                 <BookOpen className="w-4 h-4 text-[#FCDFD3]" />
                 <span className="text-[10px] sm:text-xs font-semibold tracking-widest uppercase text-[#FCDFD3]">
-                  Featured story
+                  {t('discover.featuredStory')}
                 </span>
               </div>
               <h3 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
@@ -126,11 +127,11 @@ function Discover({ onNavigate }) {
               className="inline-flex items-center space-x-2 bg-[#8D493A] hover:bg-[#3E2723] text-[#FDFBF7] px-5 sm:px-7 py-3 text-xs sm:text-sm font-semibold tracking-wide rounded-xl transition-all duration-200 shadow-sm group"
             >
               <Lock className="w-3.5 h-3.5" />
-              <span>Continue reading</span>
+              <span>{t('discover.continue')}</span>
               <ArrowRight className="w-3.5 h-3.5 transform transition-transform group-hover:translate-x-1" />
             </button>
             <p className="text-[11px] sm:text-xs text-[#6F5B55] mt-3">
-              Join free to finish the story and start earning XP
+              {t('discover.joinToEarn')}
             </p>
           </div>
         </div>

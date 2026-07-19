@@ -17,6 +17,7 @@ export default function Landing() {
   const handleNavigate = (view, storyId) => {
     if (view === 'login') navigate('/login');
     else if (view === 'signup') navigate('/signup', { state: { continueStoryId: storyId } });
+    else if (view === 'collections') navigate('/collections');
     else if (view === 'home') navigate('/');
   };
 
@@ -41,10 +42,10 @@ export default function Landing() {
   }, []);
 
   return (
-    <div className={`w-full min-h-screen bg-[#FDFBF7] antialiased scroll-smooth transition-all duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`public-journey w-full min-h-screen bg-[#FDFBF7] antialiased scroll-smooth transition-all duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}>
       <Navbar onNavigate={handleNavigate} activeSection={activeSection} />
       <div id="home-section"><Hero onNavigate={handleNavigate} /></div>
-      <div id="archive" className="scroll-mt-20"><DigitalArchive /></div>
+      <div id="archive" className="scroll-mt-20"><DigitalArchive onNavigate={handleNavigate} /></div>
       <div id="discover" className="scroll-mt-20"><Discover onNavigate={handleNavigate} /></div>
       <div id="community" className="scroll-mt-20"><CommunityGuardian onNavigate={handleNavigate} /></div>
       <Footer />

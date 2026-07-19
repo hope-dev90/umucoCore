@@ -71,6 +71,28 @@ const HeritageModel = {
     );
     return result.rows[0];
   },
+
+  async getNearest(lat, lng, radiusMeters = 500) {
+    const query = `
+      SELECT *,
+        6371000 * 2 * asin(
+          sqrt(
+            power(sin(radians($1 - lat) / 2.0), 2) +
+            cos(radians($1)) * cos(radians(lat)) * power(sin(radians($2 - lng) / 2.0), 2)
+          )
+        ) AS distance_m
+      FROM heritage_items
+      WHERE is_active = true
+        AND lat IS NOT NULL
+        AND lng IS NOT NULL
+      ORDER BY distance_m ASC
+      LIMIT 1
+    `;
+    const result = await pool.query(query, [lat, lng]);
+    const row = result.rows[0];
+    if (!row || Number(row.distance_m) > radiusMeters) return null;
+    return row;
+  },
 };
 
 export default HeritageModel;

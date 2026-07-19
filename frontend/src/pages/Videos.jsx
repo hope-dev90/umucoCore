@@ -1,68 +1,52 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
+import { useAuth } from '../contexts/AuthContext';
 import './Videos.css';
-import IntoreImg from '../assets/listen/ruganzu.png';
-import AgasekeImg from '../assets/listen/crane-story.jpg';
-import ImigongoImg from '../assets/listen/moon-story.jpg';
+import IntoreImg from '../assets/home/intore.jpg';
+import AgasekeImg from '../assets/explore/weaving_agaseke.jpg';
+import ImigongoImg from '../assets/explore/imigongo.jpg';
+
+const fallbackImages = [IntoreImg, AgasekeImg, ImigongoImg];
 
 export default function Videos() {
   const { t } = useLanguage();
   const { awardXP } = useGamificationContext();
-  const [isPlaying, setIsPlaying] = useState(false);
+  const { user } = useAuth();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Fallback videos if backend isn't available
-  const fallbackVideos = [
-    {
-      genre: t('videos.performance'),
-      title: t('videos.intoreTitle'),
-      narrator: t('videos.narratedBy') + ' Traditional Group',
-      duration: '08:00',
-      image: IntoreImg,
-      category: 'Performance'
-    },
-    {
-      genre: t('videos.crafts'),
-      title: t('videos.agasekeTitle'),
-      narrator: t('videos.narratedBy') + ' Master Weaver',
-      duration: '12:00',
-      image: AgasekeImg,
-      category: 'Crafts'
-    },
-    {
-      genre: t('videos.art'),
-      title: t('videos.imigongoTitle'),
-      narrator: t('videos.narratedBy') + ' Imigongo Artists',
-      duration: '10:00',
-      image: ImigongoImg,
-      category: 'Art'
-    }
-  ];
+  const [currentVideo, setCurrentVideo] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const videoRef = useRef(null);
+  const [awardedItems, setAwardedItems] = useState(new Set());
+  const [savingVideoId, setSavingVideoId] = useState(null);
 
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/video/featured');
+        const res = await fetch('http://localhost:5000/api/video');
         const data = await res.json();
         if (data.video && data.video.length > 0) {
-          setVideos(data.video.map((v, i) => ({
+          const mapped = data.video.map((v, i) => ({
             id: v.id,
             genre: v.category,
             title: v.title,
             narrator: v.description,
             duration: v.duration ? `${Math.floor(v.duration / 60)}:${(v.duration % 60).toString().padStart(2, '0')}` : '00:00',
-            image: v.thumbnail_url || [IntoreImg, AgasekeImg, ImigongoImg][i % 3],
-            video_url: v.video_url
-          })));
+            durationSec: v.duration || 0,
+            image: v.thumbnail_url || fallbackImages[i % fallbackImages.length],
+            videoUrl: v.video_url || '',
+          }));
+          setVideos(mapped);
         } else {
-          setVideos(fallbackVideos);
+          setVideos([]);
         }
       } catch (err) {
         console.error('Error fetching videos:', err);
-        setVideos(fallbackVideos);
+        setVideos([]);
       } finally {
         setLoading(false);
       }
@@ -70,14 +54,118 @@ export default function Videos() {
     fetchVideos();
   }, [t]);
 
-  const [awardedItems, setAwardedItems] = useState(new Set());
+  useEffect(() => {
+    const pending = localStorage.getItem('pendingVideoPlay');
+    if (!pending || videos.length === 0) return;
+    try {
+      const payload = JSON.parse(pending);
+      localStorage.removeItem('pendingVideoPlay');
+      const video = videos.find(v => String(v.id) === String(payload.itemId));
+      if (video) playVideo(video);
+    } catch {
+      localStorage.removeItem('pendingVideoPlay');
+    }
+  }, [videos]);
+
+  const playVideo = useCallback((video) => {
+    if (!video.videoUrl) {
+      alert("No video file available for this item yet.");
+      return;
+    }
+    setCurrentVideo(video);
+    setIsPlaying(true);
+    if (videoRef.current) {
+      videoRef.current.src = video.videoUrl;
+      videoRef.current.load();
+      videoRef.current.play().catch(e => console.error("Playback failed:", e));
+    }
+  }, []);
+
+  const togglePlayPause = useCallback(() => {
+    if (!videoRef.current || !currentVideo) return;
+    if (isPlaying) {
+      videoRef.current.pause();
+    } else {
+      videoRef.current.play().catch(e => console.error("Playback failed:", e));
+    }
+    setIsPlaying(p => !p);
+  }, [isPlaying, currentVideo]);
+
+  const handleTimeUpdate = useCallback(() => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  }, []);
+
+  const handleLoadedMetadata = useCallback(() => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  }, []);
+
+  const handleEnded = useCallback(() => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+  }, []);
 
   const handleVideoClick = useCallback((video) => {
+    playVideo(video);
     if (!awardedItems.has(video.title)) {
       awardXP(25, `Watched video: ${video.title}`);
       setAwardedItems(prev => new Set([...prev, video.title]));
     }
-  }, [awardedItems, awardXP]);
+  }, [awardedItems, awardXP, playVideo]);
+
+  const handleAddToLibrary = useCallback(async (video) => {
+    if (!user) {
+      alert("Please sign in to save to your library.");
+      return;
+    }
+    if (!video.videoUrl) {
+      alert("No video file available for this item yet.");
+      return;
+    }
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please sign in to save to your library.");
+        return;
+      }
+      const res = await fetch("http://localhost:5000/api/saved", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          itemType: "video",
+          itemId: Number(video.id),
+          itemTitle: video.title,
+          itemSubtitle: video.narrator,
+          itemImage: video.image || "",
+          itemMeta: { duration: video.duration, videoUrl: video.videoUrl },
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `Failed to save (${res.status})`);
+      }
+      setSavingVideoId(video.id);
+      setTimeout(() => setSavingVideoId(null), 1500);
+    } catch (err) {
+      console.error("Save to library failed:", err);
+      alert(err.message || "Failed to add to library.");
+    }
+  }, [user]);
+
+  const formatTime = (secs) => {
+    if (!secs || !Number.isFinite(secs)) return "0:00";
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${String(s).padStart(2, "0")}`;
+  };
+
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <Layout searchPlaceholder={t('search.placeholder')}>
@@ -91,13 +179,13 @@ export default function Videos() {
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
-                8 min
+                {currentVideo ? formatTime(duration) : "8 min"}
               </span>
             </div>
-            <h1>{t('videos.intoreTitle')}</h1>
-            <p>{t('videos.intoreDesc')}</p>
+            <h1>{currentVideo ? currentVideo.title : t('videos.intoreTitle')}</h1>
+            <p>{currentVideo ? currentVideo.narrator : t('videos.intoreDesc')}</p>
             <div className="featured-actions">
-              <button className="play-btn" onClick={() => { setIsPlaying(p => !p); handleVideoClick({ title: t('videos.intoreTitle') }); }}>
+              <button className="play-btn" onClick={togglePlayPause}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   {isPlaying
                     ? <>
@@ -109,7 +197,14 @@ export default function Videos() {
                 </svg>
                 {isPlaying ? t('videos.pause') : t('videos.watchNow')}
               </button>
-              <button className="library-btn">{t('videos.addToLibrary')}</button>
+              <button
+                className="library-btn"
+                onClick={() => currentVideo && handleAddToLibrary(currentVideo)}
+                disabled={savingVideoId === currentVideo?.id}
+                style={{ opacity: currentVideo ? 1 : 0.6, cursor: currentVideo ? 'pointer' : 'not-allowed' }}
+              >
+                {savingVideoId === currentVideo?.id ? 'Saved ✓' : t('videos.addToLibrary')}
+              </button>
             </div>
           </div>
 
@@ -121,12 +216,14 @@ export default function Videos() {
             <div className="video-cards">
               {loading ? (
                 <p>Loading videos...</p>
+              ) : videos.length === 0 ? (
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No videos available yet.</p>
               ) : (
                 videos.map((video, i) => (
-                  <div key={i} className="video-card">
+                  <div key={i} className="video-card" onClick={() => handleVideoClick(video)} style={{ cursor: 'pointer' }}>
                     <div className="video-thumb">
                       <img src={video.image} alt={video.title} />
-                      <div className="video-play-overlay" onClick={() => { setIsPlaying(p => !p); handleVideoClick(video); }}>
+                      <div className="video-play-overlay" onClick={(e) => { e.stopPropagation(); handleVideoClick(video); }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                           <polygon points="5 3 19 12 5 21 5 3" />
                         </svg>
@@ -147,41 +244,42 @@ export default function Videos() {
 
         <div className="video-panel">
           <div className="video-player">
-            <img src={IntoreImg} alt="Intore Dance" />
-            <div className="video-play-center" onClick={() => setIsPlaying(p => !p)}>
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor">
-                {isPlaying
-                  ? <>
-                      <rect x="6" y="4" width="4" height="16" />
-                      <rect x="14" y="4" width="4" height="16" />
-                    </>
-                  : <polygon points="5 3 19 12 5 21 5 3" />
-                }
-              </svg>
-            </div>
+            {currentVideo ? (
+              <video
+                ref={videoRef}
+                src={currentVideo.videoUrl}
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
+                onEnded={handleEnded}
+                preload="metadata"
+              />
+            ) : (
+              <img src={IntoreImg} alt="Intore Dance" />
+            )}
           </div>
           <div className="player-info">
-            <div className="player-title">{t('videos.intoreTitle')}</div>
-            <div className="player-narrator">Traditional Performance • Rwanda</div>
+            <div className="player-title">{currentVideo ? currentVideo.title : t('videos.intoreTitle')}</div>
+            <div className="player-narrator">{currentVideo ? (currentVideo.narrator || currentVideo.genre) : "Traditional Performance • Rwanda"}</div>
           </div>
           <div className="player-controls">
             <div className="player-progress">
               <div className="player-time">
-                <span>02:30</span>
-                <span>08:00</span>
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
               </div>
               <div className="progress-bar">
-                <div className="progress-fill" style={{ width: '31%' }} />
+                <div className="progress-fill" style={{ width: `${progressPercent}%` }} />
               </div>
             </div>
             <div className="player-btns">
-              <button className="player-btn">
+              <button className="player-btn" onClick={() => { if (videoRef.current) videoRef.current.currentTime = Math.max(0, currentTime - 10); }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polygon points="19 20 9 12 19 4 19 20" />
                   <line x1="5" y1="19" x2="5" y2="5" />
                 </svg>
               </button>
-              <button className="player-btn play-pause" onClick={() => setIsPlaying(p => !p)}>
+              <button className="player-btn play-pause" onClick={togglePlayPause}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   {isPlaying
                     ? <>
@@ -192,7 +290,7 @@ export default function Videos() {
                   }
                 </svg>
               </button>
-              <button className="player-btn">
+              <button className="player-btn" onClick={() => { if (videoRef.current) videoRef.current.currentTime = Math.min(duration, currentTime + 10); }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polygon points="5 4 15 12 5 20 5 4" />
                   <line x1="19" y1="5" x2="19" y2="19" />

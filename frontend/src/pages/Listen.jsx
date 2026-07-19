@@ -1,20 +1,72 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
+import { useAuth } from '../contexts/AuthContext';
 import './Listen.css';
-import CraneStory from '../assets/listen/crane-story.jpg';
-import MoonStory from '../assets/listen/moon-story.jpg';
 import RuganzuImg from '../assets/listen/ruganzu.png';
+import craneImg from '../assets/listen/crane-story.jpg';
+import moonImg from '../assets/listen/moon-story.jpg';
+import intoreImg from '../assets/home/intore.jpg';
+import ubudeheImg from '../assets/home/ubudehe.jpg';
+import inangaImg from '../assets/home/inanga.jpg';
+import royalCourtImg from '../assets/collections/royal-court.jpg';
+import drumsImg from '../assets/home/intore.jpg';
+import mwamiImg from '../assets/home/kigeli.jpg';
+import rainImg from '../assets/home/nyanza.jpg';
+import warDrumsImg from '../assets/home/intore.jpg';
+import farmingImg from '../assets/home/ubudehe.jpg';
+import nyamashekeImg from '../assets/safari.jpg';
+import byivugoImg from '../assets/home/intore.jpg';
 
-const fallbackImages = [CraneStory, MoonStory];
+// Map audio title keywords / categories to local image imports
+const AUDIO_IMAGE_MAP = {
+  byivugo:      byivugoImg,
+  ibyivugo:     byivugoImg,
+  crane:        craneImg,
+  drums:        drumsImg,
+  drum:         drumsImg,
+  ingoma:       drumsImg,
+  farming:      farmingImg,
+  ubudehe:      farmingImg,
+  inanga:       inangaImg,
+  intore:       intoreImg,
+  moon:         moonImg,
+  mwami:        mwamiImg,
+  nyamasheke:   nyamashekeImg,
+  rain:         rainImg,
+  'royal-court': royalCourtImg,
+  royal:        royalCourtImg,
+  court:        royalCourtImg,
+  ruganzu:      RuganzuImg,
+  'war-drums':  warDrumsImg,
+  war:          warDrumsImg,
+};
+
+const ALL_AUDIO_IMAGES = Object.values(AUDIO_IMAGE_MAP);
+
+function resolveAudioImage(item, index) {
+  const key = `${item.title} ${item.category}`.toLowerCase();
+  for (const [word, path] of Object.entries(AUDIO_IMAGE_MAP)) {
+    if (key.includes(word)) return path;
+  }
+  return ALL_AUDIO_IMAGES[index % ALL_AUDIO_IMAGES.length];
+}
 
 export default function Listen() {
   const { t } = useLanguage();
   const { awardXP } = useGamificationContext();
-  const [isPlaying, setIsPlaying] = useState(true);
+  const { user } = useAuth();
   const [fables, setFables] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentTrack, setCurrentTrack] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const audioRef = useRef(null);
+  const [awardedItems, setAwardedItems] = useState(new Set());
+  const [proverbs, setProverbs] = useState([]);
+  const [savingTrackId, setSavingTrackId] = useState(null);
 
   useEffect(() => {
     const fetchAudio = async () => {
@@ -22,20 +74,21 @@ export default function Listen() {
         const res = await fetch("http://localhost:5000/api/audio");
         const data = await res.json();
         if (data.audio && data.audio.length > 0) {
-          setFables(
-            data.audio.map((item, i) => ({
-              id: item.id,
-              genre: item.category,
-              title: item.title,
-              narrator: item.description,
-              duration: item.duration
-                ? `${Math.floor(item.duration / 60)}:${String(
-                    item.duration % 60
-                  ).padStart(2, "0")}`
-                : "0:00",
-              image: fallbackImages[i % fallbackImages.length],
-            }))
-          );
+          const mapped = data.audio.map((item, i) => ({
+            id: item.id,
+            genre: item.category,
+            title: item.title,
+            narrator: item.description,
+            duration: item.duration
+              ? `${Math.floor(item.duration / 60)}:${String(
+                  item.duration % 60
+                ).padStart(2, "0")}`
+              : "0:00",
+            durationSec: item.duration || 0,
+            image: item.thumbnail_url || resolveAudioImage(item, i),
+            audioUrl: item.audio_url || '',
+          }));
+          setFables(mapped);
         } else {
           setFables([
             {
@@ -43,74 +96,205 @@ export default function Listen() {
               title: t("listen.craneStory"),
               narrator: t("listen.narratedBy") + " Jean d'Amour",
               duration: "12:40",
-              image: CraneStory,
+              durationSec: 760,
+              image: craneImg,
+              audioUrl: '',
             },
             {
               genre: t("listen.migani"),
               title: t("listen.moonStory"),
               narrator: t("listen.narratedBy") + " Beatrice U.",
               duration: "15:15",
-              image: MoonStory,
+              durationSec: 915,
+              image: moonImg,
+              audioUrl: '',
             },
           ]);
         }
       } catch (err) {
         console.error("Error fetching audio data:", err);
         setFables([
-          {
-            genre: t("listen.migani"),
-            title: t("listen.craneStory"),
-            narrator: t("listen.narratedBy") + " Jean d'Amour",
-            duration: "12:40",
-            image: CraneStory,
-          },
-          {
-            genre: t("listen.migani"),
-            title: t("listen.moonStory"),
-            narrator: t("listen.narratedBy") + " Beatrice U.",
-            duration: "15:15",
-            image: MoonStory,
-          },
-        ]);
+            {
+              genre: t("listen.migani"),
+              title: t("listen.craneStory"),
+              narrator: t("listen.narratedBy") + " Jean d'Amour",
+              duration: "12:40",
+              durationSec: 760,
+              image: craneImg,
+              audioUrl: '',
+            },
+            {
+              genre: t("listen.migani"),
+              title: t("listen.moonStory"),
+              narrator: t("listen.narratedBy") + " Beatrice U.",
+              duration: "15:15",
+              durationSec: 915,
+              image: moonImg,
+              audioUrl: '',
+            },
+          ]);
       } finally {
         setLoading(false);
       }
     };
 
+    const fetchProverbs = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/proverbs/featured?limit=6");
+        const data = await res.json();
+        if (data.proverbs && data.proverbs.length > 0) {
+          setProverbs(
+            data.proverbs.map((p, i) => ({
+              id: p.id,
+              text: p.text,
+              translation: p.translation || p.text,
+              meta: p.source || "Rwandan oral tradition",
+              numClass: i % 2 === 0 ? "gold" : "olive",
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Error fetching proverbs:", err);
+      }
+    };
+
     fetchAudio();
+    fetchProverbs();
   }, [t]);
 
-  const [awardedItems, setAwardedItems] = useState(new Set());
+  useEffect(() => {
+    const pending = localStorage.getItem('pendingAudioPlay');
+    if (!pending || fables.length === 0) return;
+    try {
+      const payload = JSON.parse(pending);
+      localStorage.removeItem('pendingAudioPlay');
+      const track = fables.find(f => String(f.id) === String(payload.itemId));
+      if (track) playTrack(track);
+    } catch {
+      localStorage.removeItem('pendingAudioPlay');
+    }
+  }, [fables]);
+
+  const handleAddToLibrary = useCallback(async (track) => {
+    if (!user) {
+      alert("Please sign in to save to your library.");
+      return;
+    }
+    if (!track.audioUrl) {
+      alert("No audio file available for this track yet.");
+      return;
+    }
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please sign in to save to your library.");
+        return;
+      }
+      const res = await fetch("http://localhost:5000/api/saved", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          itemType: "audio",
+          itemId: Number(track.id),
+          itemTitle: track.title,
+          itemSubtitle: track.narrator,
+          itemImage: track.image || "",
+          itemMeta: { duration: track.duration, audioUrl: track.audioUrl },
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || `Failed to save (${res.status})`);
+      }
+      setSavingTrackId(track.id);
+      setTimeout(() => setSavingTrackId(null), 1500);
+    } catch (err) {
+      console.error("Save to library failed:", err);
+      alert(err.message || "Failed to add to library.");
+    }
+  }, [user]);
+
+  const playTrack = useCallback((track) => {
+    if (!track.audioUrl) {
+      alert("No audio file available for this track yet.");
+      return;
+    }
+    setCurrentTrack(track);
+    setIsPlaying(true);
+    if (audioRef.current) {
+      audioRef.current.src = track.audioUrl;
+      audioRef.current.load();
+      audioRef.current.play().catch(e => console.error("Playback failed:", e));
+    }
+  }, []);
+
+  const togglePlayPause = useCallback(() => {
+    if (!audioRef.current || !currentTrack) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(e => console.error("Playback failed:", e));
+    }
+    setIsPlaying(p => !p);
+  }, [isPlaying, currentTrack]);
+
+  const handleTimeUpdate = useCallback(() => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  }, []);
+
+  const handleLoadedMetadata = useCallback(() => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  }, []);
+
+  const handleEnded = useCallback(() => {
+    setIsPlaying(false);
+    setCurrentTime(0);
+  }, []);
 
   const handleFableClick = useCallback((fable) => {
+    playTrack(fable);
     if (!awardedItems.has(fable.title)) {
       awardXP(15, `Listened to story: ${fable.title}`);
       setAwardedItems(prev => new Set([...prev, fable.title]));
     }
-  }, [awardedItems, awardXP]);
+  }, [awardedItems, awardXP, playTrack]);
 
   const handleRuganzuClick = useCallback(() => {
+    const ruganzuTrack = fables.find(f => f.title.includes("Ruganzu")) || fables[0];
+    if (ruganzuTrack) {
+      playTrack(ruganzuTrack);
+    }
     if (!awardedItems.has('Ruganzu Epic')) {
       awardXP(30, 'Listened to Ruganzu Epic');
       setAwardedItems(prev => new Set([...prev, 'Ruganzu Epic']));
     }
-  }, [awardedItems, awardXP]);
+  }, [fables, awardedItems, awardXP, playTrack]);
 
-  const proverbs = [
-    {
-      text: '"Urukwavu rurinda rukuze rukonshwa n\'imbwa."',
-      meta: 'Wisdom of the Elders • Commentary by Dr. Munyaeza',
-      numClass: 'gold',
-    },
-    {
-      text: '"Abari bose ntabwo ari abagabo."',
-      meta: 'Social Dynamics • Commentary by Prof. Nyiranong',
-      numClass: 'olive',
-    },
-  ];
+  const formatTime = (secs) => {
+    if (!secs || !Number.isFinite(secs)) return "0:00";
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${String(s).padStart(2, "0")}`;
+  };
+
+  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <Layout searchPlaceholder={t('search.placeholder')}>
+      <audio
+        ref={audioRef}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onEnded={handleEnded}
+        preload="metadata"
+      />
       <div className="listen-page">
         <div>
           <div className="featured-epic">
@@ -121,13 +305,13 @@ export default function Listen() {
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
-                45 min
+                {currentTrack ? formatTime(duration) : "45 min"}
               </span>
             </div>
-            <h1>{t('listen.ruganzuTitle')}</h1>
-            <p>{t('listen.ruganzuDesc')}</p>
+            <h1>{currentTrack ? currentTrack.title : t('listen.ruganzuTitle')}</h1>
+            <p>{currentTrack ? currentTrack.narrator : t('listen.ruganzuDesc')}</p>
             <div className="featured-actions">
-              <button className="play-btn" onClick={() => { setIsPlaying(p => !p); handleRuganzuClick(); }}>
+              <button className="play-btn" onClick={togglePlayPause}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                   {isPlaying
                     ? <>
@@ -137,9 +321,16 @@ export default function Listen() {
                     : <polygon points="5 3 19 12 5 21 5 3" />
                   }
                 </svg>
-                {isPlaying ? t('listen.pause') : t('listen.listenNow')}
+                {isPlaying ? t('listen.pause') : (currentTrack ? t('listen.listenNow') : t('listen.listenNow'))}
               </button>
-              <button className="library-btn">{t('listen.addToLibrary')}</button>
+              <button
+                className="library-btn"
+                onClick={() => currentTrack && handleAddToLibrary(currentTrack)}
+                disabled={savingTrackId === currentTrack?.id}
+                style={{ opacity: currentTrack ? 1 : 0.6, cursor: currentTrack ? 'pointer' : 'not-allowed' }}
+              >
+                {savingTrackId === currentTrack?.id ? 'Saved ✓' : t('listen.addToLibrary')}
+              </button>
             </div>
           </div>
 
@@ -172,50 +363,54 @@ export default function Listen() {
               <span className="listen-section-title">{t('listen.dailyProverbs')}</span>
             </div>
             <div className="proverb-list">
-              {proverbs.map((proverb, i) => (
-                <div key={i} className="proverb-item">
-                  <div className={`proverb-num ${proverb.numClass}`}>{i + 1}</div>
-                  <div className="proverb-info">
-                    <div className="proverb-text">{proverb.text}</div>
-                    <div className="proverb-meta">{proverb.meta}</div>
+              {proverbs.length === 0 ? (
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No proverbs available yet.</p>
+              ) : (
+                proverbs.map((proverb, i) => (
+                  <div key={proverb.id || i} className="proverb-item">
+                    <div className={`proverb-num ${proverb.numClass}`}>{i + 1}</div>
+                    <div className="proverb-info">
+                      <div className="proverb-text">{proverb.text}</div>
+                      <div className="proverb-meta">{proverb.meta}</div>
+                    </div>
+                    <button className="proverb-play">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                    </button>
                   </div>
-                  <button className="proverb-play">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                      <polygon points="5 3 19 12 5 21 5 3" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
 
         <div className="audio-panel">
           <div className="player-thumb">
-            <img src={RuganzuImg} alt="Ruganzu II" />
+            <img src={currentTrack ? (currentTrack.image || RuganzuImg) : RuganzuImg} alt={currentTrack ? currentTrack.title : "Ruganzu II"} />
           </div>
           <div className="player-info">
-            <div className="player-title">{t('listen.ruganzuTitle')}</div>
-            <div className="player-narrator">Mzee Silas • Oral Tradition</div>
+            <div className="player-title">{currentTrack ? currentTrack.title : t('listen.ruganzuTitle')}</div>
+            <div className="player-narrator">{currentTrack ? (currentTrack.narrator || currentTrack.genre) : "Mzee Silas • Oral Tradition"}</div>
           </div>
           <div className="player-controls">
             <div className="player-progress">
               <div className="player-time">
-                <span>12:45</span>
-                <span>45:00</span>
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
               </div>
               <div className="progress-bar">
-                <div className="progress-fill" />
+                <div className="progress-fill" style={{ width: `${progressPercent}%` }} />
               </div>
             </div>
             <div className="player-btns">
-              <button className="player-btn">
+              <button className="player-btn" onClick={() => { if (audioRef.current) audioRef.current.currentTime = Math.max(0, currentTime - 10); }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polygon points="19 20 9 12 19 4 19 20" />
                   <line x1="5" y1="19" x2="5" y2="5" />
                 </svg>
               </button>
-              <button className="player-btn play-pause" onClick={() => setIsPlaying(p => !p)}>
+              <button className="player-btn play-pause" onClick={togglePlayPause}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   {isPlaying
                     ? <>
@@ -226,7 +421,7 @@ export default function Listen() {
                   }
                 </svg>
               </button>
-              <button className="player-btn">
+              <button className="player-btn" onClick={() => { if (audioRef.current) audioRef.current.currentTime = Math.min(duration, currentTime + 10); }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polygon points="5 4 15 12 5 20 5 4" />
                   <line x1="19" y1="5" x2="19" y2="19" />

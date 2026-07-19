@@ -8,6 +8,7 @@ import UmucoLogo from './UmucoLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import ExplorerTypeImage from './ExplorerTypeImage';
+import { UmucoGlyph } from './UmucoGlyphs';
 
 const EXPLORER_TYPES = [
   {
@@ -328,12 +329,6 @@ function SignUpPage({ onNavigate }) {
   const [showExplorerModal, setShowExplorerModal] = useState(false);
   const [explorerType, setExplorerType] = useState(null);
 
-  // Show the modal after a short delay so the signup page is visible first
-  useEffect(() => {
-    const timer = setTimeout(() => setShowExplorerModal(true), 500);
-    return () => clearTimeout(timer);
-  }, []);
-
   const [showPassword, setShowPassword] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
@@ -488,7 +483,7 @@ function SignUpPage({ onNavigate }) {
     const explorerInfo = EXPLORER_TYPES.find(type => type.id === explorerType);
     const explorerCopy = explorerInfo ? getExplorerCopy(t, explorerInfo.id, explorerInfo) : null;
     return (
-      <div className="fixed inset-0 w-full min-h-screen flex items-center justify-center bg-[#FDFBF7]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+      <div className="youth-auth-shell fixed inset-0 w-full min-h-screen flex items-center justify-center bg-[#FDFBF7]" style={{ fontFamily: 'Poppins, sans-serif' }}>
         <div className="flex flex-col items-center text-center px-8 max-w-md mx-auto">
 
           {/* Glowing logo */}
@@ -517,7 +512,7 @@ function SignUpPage({ onNavigate }) {
 
           {/* XP badge */}
           <div className="flex items-center gap-2 mb-8 px-4 py-2 rounded-full" style={{ background: 'linear-gradient(135deg, #8D493A, #C4724A)', color: '#fff' }}>
-            <span className="text-lg">⚡</span>
+            <UmucoGlyph type="spark" size={18} style={{ color: '#fff' }} />
             <span className="text-xs font-bold tracking-wide">{t('auth.explorerUnlocked')}</span>
           </div>
 
@@ -552,7 +547,7 @@ function SignUpPage({ onNavigate }) {
   }
 
   return (
-    <section className="w-full min-h-screen flex font-sans bg-[#FDFBF7]">
+    <section className="youth-auth-shell w-full min-h-screen flex font-sans bg-[#FDFBF7]">
       {showVerificationNotice && !isVerifying && (
         <VerificationNotice email={formData.email} />
       )}
@@ -600,8 +595,30 @@ function SignUpPage({ onNavigate }) {
               </div>
 
               {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600">
-                  {error}
+                <div className="mb-4 rounded-xl overflow-hidden" style={{ border: '1px solid #e8dcd0', background: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}>
+                  <div className="flex items-start gap-3 p-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#e8dcd0', color: '#6b3e26' }}>
+                      <UmucoGlyph type="shield" size={18} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold mb-0.5" style={{ color: '#4b2e1e' }}>
+                        {error.toLowerCase().includes('already exists') ? 'Account already exists' : 'Something went wrong'}
+                      </p>
+                      <p className="text-xs leading-relaxed" style={{ color: '#6b4c3b' }}>{error}</p>
+                      {error.toLowerCase().includes('already exists') && (
+                        <p className="text-[11px] mt-1" style={{ color: '#8a6a58' }}>
+                          <button
+                            type="button"
+                            onClick={() => onNavigate('login')}
+                            className="font-bold bg-transparent border-none p-0 cursor-pointer hover:underline"
+                            style={{ color: '#6b3e26' }}
+                          >
+                            Sign in instead
+                          </button>
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -634,6 +651,7 @@ function SignUpPage({ onNavigate }) {
                     <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password}
                       onChange={handleInputChange} placeholder={t('auth.placeholder.password')}
                       className="w-full bg-white border border-[#EADBC8] rounded-xl pl-10 pr-10 py-2.5 text-xs text-[#2C1A14] placeholder-neutral-400 focus:outline-none focus:border-[#8D493A] transition-colors"
+                      minLength={8}
                       required />
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><Lock className="w-4 h-4" /></span>
                     <button type="button" onClick={() => setShowPassword(!showPassword)}
@@ -712,8 +730,16 @@ function SignUpPage({ onNavigate }) {
               </div>
 
               {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600">
-                  {error}
+                <div className="mb-4 rounded-xl overflow-hidden" style={{ border: '1px solid #e8dcd0', background: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}>
+                  <div className="flex items-start gap-3 p-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#e8dcd0', color: '#6b3e26' }}>
+                      <Mail className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold mb-0.5" style={{ color: '#4b2e1e' }}>Verification failed</p>
+                      <p className="text-xs leading-relaxed" style={{ color: '#6b4c3b' }}>{error}</p>
+                    </div>
+                  </div>
                 </div>
               )}
 

@@ -168,7 +168,7 @@ export function GamificationProvider({ children }) {
       const prev = user?.level || 1;
       if (d.data?.user) {
         updateUser({ xp: d.data.user.xp, level: d.data.user.level });
-        gamificationEvents.emit(GE.XP, { amount, newXP: d.data.user.xp, newLevel: d.data.user.level });
+        gamificationEvents.emit(GE.XP, { amount, reason, newXP: d.data.user.xp, newLevel: d.data.user.level });
         if (d.data.user.level > prev) {
           gamificationEvents.emit(GE.LEVEL_UP, { level: d.data.user.level });
         }

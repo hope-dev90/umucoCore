@@ -1,88 +1,105 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { Award, CheckCircle2, Flame, Star, Trophy, X } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import ExplorerTypeImage from '../ExplorerTypeImage';
+import { UmucoGlyph } from '../UmucoGlyphs';
 
-const RANK_EMOJI = { 1: '🥇', 2: '🥈', 3: '🥉' };
+function getEntryId(entry, index) {
+  return entry.userId || entry.id || entry.user_id || index;
+}
 
-const EXPLORER_EMOJI = {
-  warrior:          '🦁',
-  'nature-lover':   '🌿',
-  'royal-historian':'👑',
-  'folktale-hunter':'🎭',
-  'music-explorer': '🥁',
-};
+function entryExplorerLabel(entry, t) {
+  const explorerType = entry.explorerType || entry.explorer_type;
+  return explorerType ? t(`profile.explorer.${explorerType}`) : t('gamification.explorer');
+}
 
 export function LeaderboardWidget({ entries = [], currentUserId, limit = 10 }) {
   const { t } = useLanguage();
-  const sorted = [...entries]
+  const [selectedEntry, setSelectedEntry] = useState(null);
+
+  const sorted = useMemo(() => [...entries]
     .sort((a, b) => (b.xp || b.total_xp || 0) - (a.xp || a.total_xp || 0))
-    .slice(0, limit);
+    .slice(0, limit), [entries, limit]);
 
   if (!sorted.length) {
     return (
-      <div style={{ padding: '1rem', background: '#fff', border: '1px solid #EADBC8',
-        borderRadius: 16, textAlign: 'center', color: '#6F5B55', fontSize: '0.8rem' }}>
+      <div className="leaderboard-empty">
         {t('gamification.noLeaderboard')}
       </div>
     );
   }
 
+  const selectedRank = selectedEntry
+    ? sorted.findIndex((entry, index) => getEntryId(entry, index) === getEntryId(selectedEntry, index)) + 1
+    : 0;
+
   return (
-    <div style={{ background: '#fff', border: '1px solid #EADBC8', borderRadius: 16, overflow: 'hidden' }}>
-      <div style={{ padding: '0.9rem 1.1rem', borderBottom: '1px solid #EADBC8',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#2C1A14' }}>🏆 {t('gamification.leaderboard')}</span>
-        <span style={{ fontSize: '0.7rem', color: '#6F5B55' }}>{t('gamification.top')} {sorted.length}</span>
+    <div className="leaderboard-card">
+      <div className="leaderboard-header">
+        <span>
+          <UmucoGlyph type="medal" size={18} style={{ color: '#8D493A' }} />
+          {t('gamification.leaderboard')}
+        </span>
+        <small>{t('gamification.top')} {sorted.length}</small>
       </div>
 
-      {sorted.map((entry, i) => {
-        const rank        = i + 1;
-        const xp          = entry.xp || entry.total_xp || 0;
-        const level       = entry.level || 1;
-        const name        = entry.name || entry.username || t('gamification.explorer');
-        const explorerType= entry.explorerType || entry.explorer_type;
-        const isCurrent   = entry.userId === currentUserId || entry.id === currentUserId || entry.user_id === currentUserId;
+      {sorted.map((entry, index) => {
+        const rank = index + 1;
+        const xp = entry.xp || entry.total_xp || 0;
+        const level = entry.level || 1;
+        const name = entry.name || entry.username || t('gamification.explorer');
+        const explorerType = entry.explorerType || entry.explorer_type;
+        const isCurrent = entry.userId === currentUserId || entry.id === currentUserId || entry.user_id === currentUserId;
 
         return (
-          <div key={entry.userId || entry.id || i} style={{
-            display: 'flex', alignItems: 'center', gap: '0.75rem',
-            padding: '0.65rem 1.1rem',
-            background: isCurrent ? 'rgba(141,73,58,0.06)' : 'transparent',
-            borderLeft: isCurrent ? '3px solid #8D493A' : '3px solid transparent',
-            borderBottom: i < sorted.length - 1 ? '1px solid #F5EDE4' : 'none',
-          }}>
-            {/* Rank */}
-            <span style={{ fontSize: rank <= 3 ? '1rem' : '0.75rem', fontWeight: 700,
-              color: '#8D493A', minWidth: 20, textAlign: 'center' }}>
-              {RANK_EMOJI[rank] || rank}
+          <button
+            type="button"
+            key={getEntryId(entry, index)}
+            className={`leaderboard-row ${isCurrent ? 'is-current' : ''}`}
+            onClick={() => setSelectedEntry(entry)}
+          >
+            <span className="leaderboard-rank">
+              {rank <= 3 ? <UmucoGlyph type="medal" size={18} style={{ color: '#8D493A' }} /> : rank}
             </span>
-
-            {/* Avatar */}
-            <div style={{
-              width: 28, height: 28, borderRadius: '50%',
-              background: '#8D493A', color: '#fff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '0.75rem', fontWeight: 700, flexShrink: 0,
-            }}>
-              {name.charAt(0).toUpperCase()}
-            </div>
-
-            {/* Name + type */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#2C1A14',
-                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {name} {EXPLORER_EMOJI[explorerType] || ''}
-              </div>
-              <div style={{ fontSize: '0.65rem', color: '#6F5B55' }}>{xp.toLocaleString()} XP</div>
-            </div>
-
-            {/* Level pill */}
-            <span style={{ fontSize: '0.65rem', fontWeight: 700, background: '#FEF3C7',
-              color: '#92400E', padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-              {t('gamification.levelShort')} {level}
+            <span className="leaderboard-avatar">{name.charAt(0).toUpperCase()}</span>
+            <span className="leaderboard-person">
+              <strong>{name}</strong>
+              <small>
+                {explorerType ? <ExplorerTypeImage type={explorerType} label="" size={16} /> : null}
+                {xp.toLocaleString()} XP
+              </small>
             </span>
-          </div>
+            <span className="leaderboard-level">{t('gamification.levelShort')} {level}</span>
+          </button>
         );
       })}
+
+      {selectedEntry ? (
+        <div className="leaderboard-detail-backdrop" role="presentation" onClick={() => setSelectedEntry(null)}>
+          <div className="leaderboard-detail" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
+            <button type="button" className="leaderboard-detail-close" onClick={() => setSelectedEntry(null)} aria-label="Close">
+              <X size={16} />
+            </button>
+            <div className="leaderboard-detail-top">
+              <span className="leaderboard-detail-avatar">{(selectedEntry.name || selectedEntry.username || 'E').charAt(0).toUpperCase()}</span>
+              <div>
+                <h3>{selectedEntry.name || selectedEntry.username || t('gamification.explorer')}</h3>
+                <p>{entryExplorerLabel(selectedEntry, t)}</p>
+              </div>
+            </div>
+            <div className="leaderboard-detail-grid">
+              <div><Trophy size={18} /><span>Rank</span><strong>#{selectedRank || '-'}</strong></div>
+              <div><Star size={18} /><span>XP</span><strong>{(selectedEntry.xp || selectedEntry.total_xp || 0).toLocaleString()}</strong></div>
+              <div><Award size={18} /><span>Level</span><strong>{selectedEntry.level || 1}</strong></div>
+              <div><Flame size={18} /><span>Streak</span><strong>{selectedEntry.currentStreak || selectedEntry.current_streak || 0}</strong></div>
+            </div>
+            <div className="leaderboard-detail-note">
+              <CheckCircle2 size={16} />
+              <span>This explorer is building progress through stories, quests, and saved discoveries.</span>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

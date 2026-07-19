@@ -1,11 +1,12 @@
 import React, { useRef, useState, useCallback, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ReadingProgress } from './ReadingProgress';
 import { useGamificationContext } from '../../contexts/GamificationContext';
 import { ReadingCompletePopup } from './ReadingCompletePopup';
 import { StoryQuiz } from './StoryQuiz';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { localizeStory } from '../../utils/storyLocalization';
+import './Gamification.css';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -19,7 +20,8 @@ import {
 export function DashboardStoryView({ story, onClose, onComplete }) {
   const { awardXP, refresh, xp, level, leaderboard, getCurrentLevelData, getNextLevelData } = useGamificationContext();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const localizedStory = useMemo(() => localizeStory(story, language), [story, language]);
   const [showCompletion, setShowCompletion] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [sessionXP, setSessionXP] = useState(0);
@@ -30,7 +32,7 @@ export function DashboardStoryView({ story, onClose, onComplete }) {
   const containerRef = useRef(null);
   const paragraphRefs = useRef([]);
 
-  const bodyText = story?.content || story?.desc || story?.description || '';
+  const bodyText = localizedStory?.content || localizedStory?.desc || localizedStory?.description || '';
   const wordCount = bodyText.trim().split(/\s+/).filter(Boolean).length || 200;
   const xpReward = story?.xpReward ?? 50;
 
@@ -44,13 +46,6 @@ export function DashboardStoryView({ story, onClose, onComplete }) {
     completionNotifiedRef.current = false;
   }, [story?.id]);
 
-  const handleMilestone = useCallback((pct) => {
-    const amounts = { 25: 15, 50: 20, 75: 25 };
-    const amount = amounts[pct] || 10;
-    awardXP(amount, `reading_progress_${pct}`).catch(() => {});
-    setSessionXP(prev => prev + amount);
-  }, [awardXP]);
-
   const triggerCompletion = useCallback(() => {
     if (!awardedRef.current) {
       awardedRef.current = true;
@@ -59,16 +54,16 @@ export function DashboardStoryView({ story, onClose, onComplete }) {
       refresh().catch(() => {});
     }
 
-    if (story?.quiz?.length) {
+    if (localizedStory?.quiz?.length) {
       setShowQuiz(true);
     } else {
       if (!completionNotifiedRef.current) {
         completionNotifiedRef.current = true;
-        onComplete?.(story);
+        onComplete?.(localizedStory);
       }
       setShowCompletion(true);
     }
-  }, [awardXP, onComplete, refresh, story, xpReward]);
+  }, [awardXP, localizedStory, onComplete, refresh, xpReward]);
 
   const handleQuizComplete = useCallback((bonusXP) => {
     if (bonusXP > 0) {
@@ -79,10 +74,10 @@ export function DashboardStoryView({ story, onClose, onComplete }) {
     setShowQuiz(false);
     if (!completionNotifiedRef.current) {
       completionNotifiedRef.current = true;
-      onComplete?.(story);
+      onComplete?.(localizedStory);
     }
     setShowCompletion(true);
-  }, [awardXP, onComplete, refresh, story]);
+  }, [awardXP, localizedStory, onComplete, refresh]);
 
   const handleDismissCompletion = useCallback(() => {
     setShowCompletion(false);
@@ -94,29 +89,28 @@ export function DashboardStoryView({ story, onClose, onComplete }) {
   const nextLevelData = getNextLevelData?.() || {};
   const requiredXP = nextLevelData?.requiredXP ?? levelData?.requiredXP ?? 1000;
 
-  const image = story?.image_url || story?.image;
-  const title = story?.title || t('gamification.story');
-  const desc = story?.desc || story?.description || '';
-  const category = story?.category || '';
-  const location = story?.location || '';
-  const readableContent = story?.content || desc || 'This heritage note is ready to explore in the archive.';
+  const image = localizedStory?.image_url || localizedStory?.image;
+  const title = localizedStory?.title || t('gamification.story');
+  const desc = localizedStory?.desc || localizedStory?.description || '';
+  const category = localizedStory?.category || '';
+  const location = localizedStory?.location || '';
+  const readableContent = localizedStory?.content || desc || 'This heritage note is ready to explore in the archive.';
   const contentParagraphs = useMemo(
     () => readableContent.split('\n\n').map(paragraph => paragraph.trim()).filter(Boolean),
     [readableContent]
   );
   const checkpointCount = Math.max(contentParagraphs.length, 1);
   const progressPercent = Math.round(((activeParagraph + 1) / checkpointCount) * 100);
-  const hasQuiz = Boolean(story?.quiz?.length);
+  const hasQuiz = Boolean(localizedStory?.quiz?.length);
   const isLastCheckpoint = activeParagraph >= checkpointCount - 1;
 
-  const handleComplete = useCallback(() => triggerCompletion(), [triggerCompletion]);
   const handleFinishReading = useCallback(() => triggerCompletion(), [triggerCompletion]);
 
   const handleNextCheckpoint = useCallback(() => {
-    const next = Math.min(activeParagraph + 1, paragraphRefs.current.length - 1);
+    const next = Math.min(activeParagraph + 1, contentParagraphs.length - 1);
     setActiveParagraph(next);
     paragraphRefs.current[next]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [activeParagraph]);
+  }, [activeParagraph, contentParagraphs.length]);
 
   const handleParagraphClick = useCallback((index) => {
     setActiveParagraph(index);
@@ -166,7 +160,7 @@ export function DashboardStoryView({ story, onClose, onComplete }) {
         </button>
 
         {!showQuiz && (
-          <div className="dashboard-story-controls" aria-label="Reading controls">
+          <div className="dashboard-story-controls" aria-label={t('reader.readingControls')}>
             <button type="button" onClick={decreaseFont} aria-label="Decrease reading text size">
               <Minus size={15} />
             </button>
@@ -178,19 +172,9 @@ export function DashboardStoryView({ story, onClose, onComplete }) {
         )}
       </div>
 
-      {!showQuiz && (
-        <ReadingProgress
-          totalWords={wordCount}
-          scrollContainerRef={null}
-          xpReward={xpReward}
-          onMilestone={handleMilestone}
-          onComplete={handleComplete}
-        />
-      )}
-
       {showQuiz ? (
         <div className="dashboard-story-quiz">
-          <StoryQuiz quizData={story.quiz} onComplete={handleQuizComplete} />
+          <StoryQuiz quizData={localizedStory.quiz} onComplete={handleQuizComplete} />
         </div>
       ) : (
         <div className="dashboard-story-reader">

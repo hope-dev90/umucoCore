@@ -1,11 +1,16 @@
 import React from 'react';
+import warriorImage from '../assets/login/tra.png';
+import natureImage from '../assets/home/nyanza.jpg';
+import royalImage from '../assets/explore/buhanga.jpg';
+import folktaleImage from '../assets/collections/imigongo.jpg';
+import musicImage from '../assets/home/intore.jpg';
 
 export const EXPLORER_IMAGES = {
-  warrior: 'https://www.shutterstock.com/image-vector/solder-silhouette-on-blur-background-600w-1837982104.jpg',
-  'nature-lover': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjbLV2wnqCmAR5uTDgkAxyXcMVC8RwFOr3BCdbpE8hUg&s=10',
-  'royal-historian': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-bqQ0M2WDVPFlcsCbQ6joxKkjRtKR5fGMTBi25EbZng&s=10',
-  'folktale-hunter': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxfN6n-qJkm9AdPpumqft9-60Y_w-9GaLheJH5D40mKw&s',
-  'music-explorer': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsLbRi2zzsyfE9SfYIi7AXHabm-nbLOdfv57hZW7CxNQ&s=10',
+  warrior: warriorImage,
+  'nature-lover': natureImage,
+  'royal-historian': royalImage,
+  'folktale-hunter': folktaleImage,
+  'music-explorer': musicImage,
 };
 
 export function getExplorerImage(type) {

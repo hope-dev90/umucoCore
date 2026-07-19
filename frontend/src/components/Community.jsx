@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Quote, FilePlus, ShieldAlert } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import joinImg from '../assets/tra.png';
+import joinImg from '../assets/login/tra.png';
 
 function CommunityGuardian({ onNavigate }) {
   const { t } = useLanguage();

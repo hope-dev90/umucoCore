@@ -7,6 +7,7 @@ import UmucoLogo from './UmucoLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getLocalizedText } from '../utils/i18n';
+import { UmucoGlyph } from './UmucoGlyphs';
 
 function getSlides(t) {
   return [
@@ -205,7 +206,7 @@ function LoginPage({ onNavigate }) {
 
   return (
     <>
-      <section className="w-full min-h-screen flex font-sans bg-[#FDFBF7]">
+      <section className="youth-auth-shell w-full min-h-screen flex font-sans bg-[#FDFBF7]">
         <LeftSlideshow t={t} language={language} />
 
         <div className="w-full lg:w-1/2 flex flex-col p-8 md:p-10 bg-[#FDFBF7]">
@@ -231,8 +232,45 @@ function LoginPage({ onNavigate }) {
                 </div>
 
                 {error && (
-                  <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600">
-                    {error}
+                  <div className="mb-4 rounded-xl overflow-hidden" style={{ border: '1px solid #e8dcd0', background: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}>
+                    <div className="flex items-start gap-3 p-4">
+                      <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#e8dcd0', color: '#6b3e26' }}>
+                        <UmucoGlyph type="shield" size={18} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold mb-0.5" style={{ color: '#4b2e1e' }}>
+                          {error.toLowerCase().includes('no account') ? "Account not found" : "Couldn't sign you in"}
+                        </p>
+                        <p className="text-xs leading-relaxed" style={{ color: '#6b4c3b' }}>{error}</p>
+                        <p className="text-[11px] mt-1" style={{ color: '#8a6a58' }}>
+                          {error.toLowerCase().includes('no account') ? (
+                            <>
+                              Want to join?{' '}
+                              <button
+                                type="button"
+                                onClick={() => onNavigate('signup')}
+                                className="font-bold bg-transparent border-none p-0 cursor-pointer hover:underline"
+                                style={{ color: '#6b3e26' }}
+                              >
+                                Create an account
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              Need help?{' '}
+                              <button
+                                type="button"
+                                onClick={() => { setIsForgotPassword(true); setVerificationStep('email'); setError(''); }}
+                                className="font-bold bg-transparent border-none p-0 cursor-pointer hover:underline"
+                                style={{ color: '#6b3e26' }}
+                              >
+                                Reset your password
+                              </button>
+                            </>
+                          )}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -379,7 +417,7 @@ function LoginPage({ onNavigate }) {
                 {verificationStep === 'success' && (
                   <div className="bg-[#FCDFD3]/15 border border-[#EADBC8]/30 rounded-xl p-5 flex flex-col items-center text-center">
                     <div className="w-12 h-12 bg-[var(--primary)]/20 rounded-full flex items-center justify-center mb-3">
-                      <span className="text-[#8D493A] text-2xl">✅</span>
+                      <UmucoGlyph type="medal" size={26} style={{ color: '#8D493A' }} />
                     </div>
                     <p className="text-sm font-bold text-[#8D493A] mb-1">{t('auth.success.identityVerified')}</p>
                     <p className="text-xs text-[#6F5B55] leading-relaxed max-w-xs">

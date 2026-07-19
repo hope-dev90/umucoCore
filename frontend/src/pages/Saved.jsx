@@ -1,105 +1,96 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import './Saved.css';
-import hillsImg from '../assets/nyanza.jpg';
-import weavingImg from '../assets/weaving_agaseke.jpg';
-import campfireImg from '../assets/listen/moon-story.jpg';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getLocalizedText } from '../utils/i18n';
-
-const IMG = {
-  hills: hillsImg,
-  weaving: weavingImg,
-  campfire: campfireImg,
-};
-
-// Dynamic content with multilingual support example
-const savedCollections = [
-  { 
-    icon: '', 
-    color: 'var(--primary-soft)', 
-    name: { 
-      en: 'Oral Traditions', 
-      rw: 'Imigenzo z\'Umucyo' 
-    }, 
-    meta: { 
-      en: '45 Stories • 420 MB', 
-      rw: 'Inkuru 45 • 420 MB' 
-    }, 
-    toggle: 'on', 
-    status: 'offline' 
-  },
-  { 
-    icon: '', 
-    color: 'var(--primary-soft)', 
-    name: { 
-      en: 'Inanga Melodies', 
-      rw: 'Indirimbo z\'Inanga' 
-    }, 
-    meta: { 
-      en: '12 Audios • 158 MB', 
-      rw: 'Amajwi 12 • 158 MB' 
-    }, 
-    toggle: 'off', 
-    status: 'online' 
-  },
-  { 
-    icon: '', 
-    color: 'var(--primary-soft)', 
-    name: { 
-      en: 'Pre-Colonial Maps', 
-      rw: 'Imibare y\'Ibihembwa' 
-    }, 
-    meta: { 
-      en: '8 Artifacts • 89 MB', 
-      rw: 'Ibintu 8 • 89 MB' 
-    }, 
-    toggle: 'on', 
-    status: 'offline' 
-  },
-];
-
-const recentSaves = [
-  { 
-    img: IMG.hills, 
-    badge: 'offline', 
-    cat: { 
-      en: 'History • 12 hrs read', 
-      rw: 'Amateka • 12 amasaha' 
-    }, 
-    title: { 
-      en: 'The Kings of Nyanza: A Legacy of Unity', 
-      rw: 'Abami b\'Nyanza: Umwenda w\'Ubumwe' 
-    }, 
-    action: { 
-      en: 'Listen', 
-      rw: 'Umva' 
-    } 
-  },
-  { 
-    img: IMG.weaving, 
-    badge: 'online', 
-    cat: { 
-      en: 'Artisan • Video Tutorial', 
-      rw: 'Umuhanzi • Ishusho' 
-    }, 
-    title: { 
-      en: 'Agaseke: Secrets of the Peace Basket', 
-      rw: 'Agaseke: Ibintu bya gaciro' 
-    }, 
-    action: { 
-      en: 'Make Offline', 
-      rw: 'Kubika Bihari' 
-    } 
-  },
-];
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Saved() {
-  const [toggles, setToggles] = useState({ 0: true, 1: false, 2: true });
   const { t, language } = useLanguage();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [items, setItems] = useState([]);
+  const [stats, setStats] = useState({ total: 0, offline: 0, storageUsedMB: 0, storageLimitMB: 5120 });
+  const [loading, setLoading] = useState(true);
+  const [topbarSearch, setTopbarSearch] = useState('');
+
+  useEffect(() => {
+    const fetchSaved = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+        const res = await fetch("http://localhost:5000/api/saved", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to fetch saved items");
+        const data = await res.json();
+        setItems(data.items || []);
+        setStats(data.stats || { total: 0, offline: 0, storageUsedMB: 0, storageLimitMB: 5120 });
+      } catch (err) {
+        console.error("Error fetching saved items:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSaved();
+  }, []);
+
+  const handleRemove = async (itemId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:5000/api/saved/${itemId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to remove");
+      setItems(prev => prev.filter(i => String(i.item_id) !== String(itemId)));
+    } catch (err) {
+      console.error("Remove failed:", err);
+      alert("Failed to remove item.");
+    }
+  };
+
+  const handlePlay = (savedItem) => {
+    const payload = {
+      itemType: savedItem.item_type,
+      itemId: savedItem.item_id,
+      itemTitle: savedItem.item_title,
+      itemSubtitle: savedItem.item_subtitle,
+      itemImage: savedItem.item_image,
+      itemMeta: savedItem.item_meta,
+    };
+
+    if (savedItem.item_type === 'audio') {
+      localStorage.setItem('pendingAudioPlay', JSON.stringify(payload));
+      navigate('/listen');
+    } else if (savedItem.item_type === 'video') {
+      localStorage.setItem('pendingVideoPlay', JSON.stringify(payload));
+      navigate('/videos');
+    } else if (savedItem.item_type === 'story' || savedItem.item_type === 'heritage') {
+      localStorage.setItem('pendingStoryRead', JSON.stringify(payload));
+      navigate('/explore');
+    }
+  };
+
+  const formatStorage = (mb) => {
+    if (mb >= 1024) return `${(mb / 1024).toFixed(1)} GB`;
+    return `${mb} MB`;
+  };
+
+  const filteredItems = topbarSearch.trim()
+    ? items.filter(s => {
+        const q = topbarSearch.toLowerCase();
+        return (s.item_title || '').toLowerCase().includes(q)
+          || (s.item_subtitle || '').toLowerCase().includes(q)
+          || (s.item_type || '').toLowerCase().includes(q);
+      })
+    : items;
 
   return (
-    <Layout searchPlaceholder={t('saved.searchPlaceholder')}>
+    <Layout searchPlaceholder={t('saved.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="saved-page">
         <div className="saved-header">
           <div className="saved-header-left">
@@ -107,8 +98,15 @@ export default function Saved() {
             <p>{t('saved.subtitle')}</p>
           </div>
           <div className="storage-info">
-            <div className="storage-label">{t('saved.storageLabel')} 1.2 GB / 5.0 GB</div>
-            <div className="storage-bar"><div className="storage-fill" /></div>
+            <div className="storage-label">
+              {t('saved.storageLabel')} {formatStorage(stats.storageUsedMB)} / {formatStorage(stats.storageLimitMB)}
+            </div>
+            <div className="storage-bar">
+              <div
+                className="storage-fill"
+                style={{ width: `${Math.min(100, (stats.storageUsedMB / stats.storageLimitMB) * 100)}%` }}
+              />
+            </div>
             <div className="storage-actions">
               <button className="storage-btn sync">{t('saved.syncBtn')}</button>
               <button className="storage-btn download">{t('saved.downloadAllBtn')}</button>
@@ -117,89 +115,54 @@ export default function Saved() {
         </div>
 
         <div className="saved-grid">
-          {/* Collections sidebar */}
-          <div className="saved-collections">
-            <h3>{t('saved.collectionsHeader')}</h3>
-            {savedCollections.map((c, i) => (
-              <div key={i} className="saved-coll-item">
-                <div className="coll-item-top">
-                  <div className="coll-item-icon-wrap">
-                    <div className="coll-item-icon" style={{ background: c.color }}>{c.icon}</div>
-                    <span className="coll-item-name">{getLocalizedText(c.name, language)}</span>
-                  </div>
-                  <button
-                    className={`coll-toggle ${toggles[i] ? 'on' : 'off'}`}
-                    onClick={() => setToggles(t => ({ ...t, [i]: !t[i] }))}
-                  />
-                </div>
-                <div className="coll-item-meta">{getLocalizedText(c.meta, language)}</div>
-                <div className={`coll-item-status ${c.status === 'offline' ? 'status-offline' : 'status-online'}`}>
-                  {c.status === 'offline' ? t('saved.statusOffline') : t('saved.statusOnline')}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Recent Saves */}
-          <div className="recent-saves">
+          <div className="recent-saves" style={{ gridColumn: '1 / -1' }}>
             <h3>
               {t('saved.recentSavesHeader')}
-              <div className="saves-toggle-btns">
-                <button className="saves-view-btn active">⊞</button>
-                <button className="saves-view-btn">≡</button>
-              </div>
             </h3>
-            <div className="saves-grid">
-              {recentSaves.map((s, i) => (
-                <div key={i} className="save-card">
-                  <div className="save-card-img">
-                    <img src={s.img} alt={getLocalizedText(s.title, language)}
-                      onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
-                    <div className="save-card-img-placeholder"
-                      style={{ background: i===0?'linear-gradient(135deg,var(--primary),var(--primary-dark))':'linear-gradient(135deg,var(--primary),var(--primary-dark))', display:'none' }}>
-                      {i===0?'':''}
+            {loading ? (
+              <p style={{ color: 'var(--text-muted)' }}>Loading saved items...</p>
+            ) : items.length === 0 ? (
+              <div className="pf-empty">Your saved audio, videos, and stories will appear here.</div>
+            ) : (
+              <div className="saves-grid">
+                {filteredItems.map((s, i) => (
+                  <div key={s.id || i} className="save-card">
+                    <div className="save-card-img">
+                      {s.item_image ? (
+                        <img src={s.item_image} alt={s.item_title} />
+                      ) : (
+                        <div className="save-card-img-placeholder" style={{
+                          background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontSize: '1.5rem'
+                        }}>
+                          {s.item_type === 'audio' ? '\u266B' : s.item_type === 'video' ? '\uD83C\uDFAC' : '\uD83D\uDCC4'}
+                        </div>
+                      )}
+                      <span className={`save-status-badge ${s.item_meta?.offline ? 'badge-offline' : 'badge-online'}`}>
+                        {s.item_meta?.offline ? t('saved.OFFLINE') : t('saved.ONLINE')}
+                      </span>
                     </div>
-                    <span className={`save-status-badge ${s.badge==='offline'?'badge-offline':'badge-online'}`}>
-                      {s.badge==='offline' ? t('saved.OFFLINE') : t('saved.ONLINE')}
-                    </span>
-                  </div>
-                  <div className="save-card-body">
-                    <div className="save-card-cat">{getLocalizedText(s.cat, language)}</div>
-                    <div className="save-card-title">{getLocalizedText(s.title, language)}</div>
-                    <div className="save-card-actions">
-                      <button className="save-card-action-btn">
-                        {''} {getLocalizedText(s.action, language)}
-                      </button>
-                      <button className="save-card-delete">🗑</button>
+                    <div className="save-card-body">
+                      <div className="save-card-cat">
+                        {s.item_type === 'audio' ? (language === 'rw' ? 'Umva' : 'Audio') : s.item_type === 'video' ? (language === 'rw' ? 'Video' : 'Video') : (language === 'rw' ? 'Inkuru' : 'Story')}
+                        {s.item_subtitle ? ` • ${s.item_subtitle}` : ''}
+                      </div>
+                      <div className="save-card-title">{s.item_title}</div>
+                      <div className="save-card-actions">
+                        <button className="save-card-action-btn" onClick={() => handlePlay(s)}>
+                          {s.item_type === 'audio' ? (language === 'rw' ? 'Umva' : 'Listen') : s.item_type === 'video' ? (language === 'rw' ? 'Reba' : 'Watch') : (language === 'rw' ? 'Soma' : 'Read')}
+                        </button>
+                        <button className="save-card-delete" onClick={() => handleRemove(s.item_id)}>🗑</button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-
-              {/* Campfire image card */}
-              <div className="save-card">
-                <div className="save-card-img">
-                  <img src={IMG.campfire} alt="Campfire story"
-                    onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
-                  <div className="save-card-img-placeholder"
-                    style={{ background:'linear-gradient(135deg,var(--primary-dark),var(--primary-dark))', display:'none' }}></div>
-                </div>
-                <div className="save-card-body">
-                  <div className="save-card-cat">{language === 'rw' ? 'Indirimbo • Umva' : 'Music • Audio Track'}</div>
-                  <div className="save-card-title">{language === 'rw' ? 'Umushayayo: Indirimbo z\'Umugabo' : 'Umushayayo: Rhythms of Grace'}</div>
-                  <div className="save-card-actions">
-                    <span className="playing-badge">▶ {language === 'rw' ? 'Ururimi' : 'Playing'}</span>
-                    <button className="save-card-delete">🗑</button>
-                  </div>
-                </div>
+                ))}
               </div>
-
-              {/* Save New Story */}
-              <div className="save-new-card">
-                <div className="save-new-plus">＋</div>
-                <div className="save-new-label">{t('saved.saveNewLabel1')}<br/>{t('saved.saveNewLabel2')}</div>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

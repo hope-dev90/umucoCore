@@ -11,6 +11,8 @@ import audioRouter from "./routes/audioRoutes.js";
 import videoRouter from "./routes/videoRoutes.js";
 import gamificationRouter from "./routes/gamificationRoutes.js";
 import searchRouter from "./routes/searchRoutes.js";
+import proverbRouter from "./routes/proverbRoutes.js";
+import locationsRouter from "./routes/locationsRoutes.js";
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
@@ -60,6 +62,8 @@ app.use("/api/collections", collectionsRouter);
 app.use("/api/kwibuka", kwibukaRouter);
 app.use("/api/audio", audioRouter);
 app.use("/api/video", videoRouter);
+app.use("/api/proverbs", proverbRouter);
+app.use("/api/locations", locationsRouter);
 app.use("/api/gamification", gamificationRouter);
 app.use("/api/search", searchRouter);
 app.use("/api", searchRouter); // For /api/dashboard
