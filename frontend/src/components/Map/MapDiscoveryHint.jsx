@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import './MapDiscoveryHint.css';
 
 const INITIAL_DELAY_MS = 0;
-const PULSE_INTERVAL_MS = 1200;
 const AUTO_DISMISS_AFTER_MS = 20000;
 
 export default function MapDiscoveryHint(props) {
@@ -10,8 +9,6 @@ export default function MapDiscoveryHint(props) {
   const onOpenMap = props.onOpenMap;
 
   const [visible, setVisible] = useState(false);
-  const [pulseKey, setPulseKey] = useState(0);
-  const pulseIntervalRef = useRef(null);
   const autoDismissRef = useRef(null);
   const dismissedRef = useRef(false);
 
@@ -20,11 +17,6 @@ export default function MapDiscoveryHint(props) {
 
     const showTimer = setTimeout(function () {
       setVisible(true);
-      setPulseKey(function (k) { return k + 1; });
-
-      pulseIntervalRef.current = setInterval(function () {
-        setPulseKey(function (k) { return k + 1; });
-      }, PULSE_INTERVAL_MS);
 
       autoDismissRef.current = setTimeout(function () {
         setVisible(false);
@@ -33,7 +25,6 @@ export default function MapDiscoveryHint(props) {
 
     return function () {
       clearTimeout(showTimer);
-      if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
       if (autoDismissRef.current) clearTimeout(autoDismissRef.current);
     };
   }, [mapVisible]);
@@ -41,7 +32,6 @@ export default function MapDiscoveryHint(props) {
   useEffect(function () {
     if (mapVisible) {
       setVisible(false);
-      if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
       if (autoDismissRef.current) clearTimeout(autoDismissRef.current);
     }
   }, [mapVisible]);
@@ -50,7 +40,6 @@ export default function MapDiscoveryHint(props) {
     e.stopPropagation();
     dismissedRef.current = true;
     setVisible(false);
-    if (pulseIntervalRef.current) clearInterval(pulseIntervalRef.current);
     if (autoDismissRef.current) clearTimeout(autoDismissRef.current);
   };
 
@@ -63,7 +52,7 @@ export default function MapDiscoveryHint(props) {
   if (!visible) return null;
 
   return (
-    <div className="mdh-wrap" key={pulseKey}>
+    <div className="mdh-wrap">
       <div className="mdh-bubble" onClick={handleClick} role="button" tabIndex={0}>
         <button className="mdh-close" onClick={handleDismiss} aria-label="Dismiss">
           ×

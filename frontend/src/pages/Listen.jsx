@@ -64,9 +64,50 @@ export default function Listen() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const audioRef = useRef(null);
+  const speechRef = useRef(null);
+  const speechTimerRef = useRef(null);
   const [awardedItems, setAwardedItems] = useState(new Set());
   const [proverbs, setProverbs] = useState([]);
   const [savingTrackId, setSavingTrackId] = useState(null);
+  const [playbackMode, setPlaybackMode] = useState('audio');
+  const [speechNarration, setSpeechNarration] = useState(null);
+
+  const getSelectedVoice = useCallback(() => Number(user?.accessibility?.voice ?? 0), [user]);
+
+  const clearSpeechTimer = useCallback(() => {
+    if (speechTimerRef.current) {
+      clearInterval(speechTimerRef.current);
+      speechTimerRef.current = null;
+    }
+  }, []);
+
+  const stopSpeech = useCallback(() => {
+    clearSpeechTimer();
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    speechRef.current = null;
+  }, [clearSpeechTimer]);
+
+  useEffect(() => () => stopSpeech(), [stopSpeech]);
+
+  const chooseBrowserVoice = useCallback((profile) => {
+    if (!window.speechSynthesis || !profile) return null;
+    const browserVoices = window.speechSynthesis.getVoices();
+    const hints = profile.preferredVoiceHints || [];
+    return browserVoices.find((voice) => hints.some((hint) => voice.name.toLowerCase().includes(hint.toLowerCase()))) ||
+      browserVoices.find((voice) => voice.lang?.toLowerCase().startsWith(profile.lang?.toLowerCase().slice(0, 2))) ||
+      null;
+  }, []);
+
+  const startSpeechProgress = useCallback((estimatedDuration) => {
+    clearSpeechTimer();
+    speechTimerRef.current = setInterval(() => {
+      setCurrentTime((prev) => {
+        const next = Math.min(prev + 1, estimatedDuration);
+        if (next >= estimatedDuration) clearSpeechTimer();
+        return next;
+      });
+    }, 1000);
+  }, [clearSpeechTimer]);
 
   useEffect(() => {
     const fetchAudio = async () => {
@@ -180,10 +221,6 @@ export default function Listen() {
       alert("Please sign in to save to your library.");
       return;
     }
-    if (!track.audioUrl) {
-      alert("No audio file available for this track yet.");
-      return;
-    }
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -202,7 +239,7 @@ export default function Listen() {
           itemTitle: track.title,
           itemSubtitle: track.narrator,
           itemImage: track.image || "",
-          itemMeta: { duration: track.duration, audioUrl: track.audioUrl },
+          itemMeta: { duration: track.duration, audioUrl: track.audioUrl, playback: track.audioUrl ? "audio" : "ai-voice" },
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -217,29 +254,119 @@ export default function Listen() {
     }
   }, [user]);
 
-  const playTrack = useCallback((track) => {
-    if (!track.audioUrl) {
-      alert("No audio file available for this track yet.");
+  const getLocalNarration = useCallback((track) => {
+    const selectedVoice = getSelectedVoice();
+    return {
+      mode: 'speech-synthesis',
+      title: track.title,
+      text: `${track.title}. ${track.narrator || track.genre || 'A story from Rwanda cultural heritage.'}`,
+      estimatedDuration: Math.max(20, Math.round(`${track.title} ${track.narrator || ''}`.split(/\s+/).length / 2.4)),
+      voice: {
+        id: selectedVoice,
+        name: selectedVoice === 1 ? 'Kamanzi' : selectedVoice === 2 ? 'Ineza' : 'Umutoni',
+        preferredVoiceHints: selectedVoice === 1 ? ['male', 'daniel', 'david'] : ['female', 'samantha', 'zira'],
+        rate: selectedVoice === 1 ? 0.88 : selectedVoice === 2 ? 1 : 0.92,
+        pitch: selectedVoice === 1 ? 0.82 : selectedVoice === 2 ? 1 : 1.08,
+        lang: 'en-GB',
+      },
+    };
+  }, [getSelectedVoice]);
+
+  const fetchNarration = useCallback(async (track) => {
+    if (!track.id) return getLocalNarration(track);
+    const response = await fetch(`http://localhost:5000/api/audio/${track.id}/narration?voice=${getSelectedVoice()}`);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || 'Failed to prepare narration');
+    return data;
+  }, [getLocalNarration, getSelectedVoice]);
+
+  const speakNarration = useCallback((narration) => {
+    if (!window.speechSynthesis) {
+      alert("Your browser does not support AI voice narration.");
       return;
     }
+    stopSpeech();
+    const utterance = new SpeechSynthesisUtterance(narration.text);
+    const browserVoice = chooseBrowserVoice(narration.voice);
+    if (browserVoice) utterance.voice = browserVoice;
+    utterance.lang = narration.voice?.lang || 'en-GB';
+    utterance.rate = narration.voice?.rate || 0.95;
+    utterance.pitch = narration.voice?.pitch || 1;
+    utterance.onend = () => {
+      clearSpeechTimer();
+      setIsPlaying(false);
+      setCurrentTime(narration.estimatedDuration || 0);
+    };
+    utterance.onerror = () => {
+      clearSpeechTimer();
+      setIsPlaying(false);
+    };
+    speechRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+    startSpeechProgress(narration.estimatedDuration || 30);
+  }, [chooseBrowserVoice, clearSpeechTimer, startSpeechProgress, stopSpeech]);
+
+  const playTrack = useCallback(async (track) => {
+    stopSpeech();
+    if (audioRef.current) audioRef.current.pause();
     setCurrentTrack(track);
-    setIsPlaying(true);
-    if (audioRef.current) {
-      audioRef.current.src = track.audioUrl;
-      audioRef.current.load();
-      audioRef.current.play().catch(e => console.error("Playback failed:", e));
+    setCurrentTime(0);
+
+    try {
+      const narration = await fetchNarration(track);
+      if (narration.mode === 'audio') {
+        setPlaybackMode('audio');
+        setSpeechNarration(null);
+        if (audioRef.current) {
+          audioRef.current.src = narration.audioUrl || track.audioUrl;
+          audioRef.current.load();
+          await audioRef.current.play();
+          setIsPlaying(true);
+        }
+        return;
+      }
+
+      setPlaybackMode('speech-synthesis');
+      setSpeechNarration(narration);
+      setDuration(narration.estimatedDuration || 30);
+      setIsPlaying(true);
+      speakNarration(narration);
+    } catch (err) {
+      console.error("Playback failed:", err);
+      alert(err.message || "Playback failed.");
     }
-  }, []);
+  }, [fetchNarration, speakNarration, stopSpeech]);
 
   const togglePlayPause = useCallback(() => {
-    if (!audioRef.current || !currentTrack) return;
+    if (!currentTrack) {
+      const ruganzuTrack = fables.find(f => f.title.includes("Ruganzu")) || fables[0];
+      if (ruganzuTrack) playTrack(ruganzuTrack);
+      return;
+    }
+
+    if (playbackMode === 'speech-synthesis') {
+      if (!window.speechSynthesis) return;
+      if (isPlaying) {
+        window.speechSynthesis.pause();
+        clearSpeechTimer();
+      } else if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+        startSpeechProgress(duration || speechNarration?.estimatedDuration || 30);
+      } else if (speechNarration) {
+        speakNarration(speechNarration);
+      }
+      setIsPlaying(p => !p);
+      return;
+    }
+
+    if (!audioRef.current) return;
     if (isPlaying) {
       audioRef.current.pause();
     } else {
       audioRef.current.play().catch(e => console.error("Playback failed:", e));
     }
     setIsPlaying(p => !p);
-  }, [isPlaying, currentTrack]);
+  }, [clearSpeechTimer, currentTrack, duration, fables, isPlaying, playTrack, playbackMode, speakNarration, speechNarration, startSpeechProgress]);
 
   const handleTimeUpdate = useCallback(() => {
     if (audioRef.current) {
@@ -256,7 +383,8 @@ export default function Listen() {
   const handleEnded = useCallback(() => {
     setIsPlaying(false);
     setCurrentTime(0);
-  }, []);
+    clearSpeechTimer();
+  }, [clearSpeechTimer]);
 
   const handleFableClick = useCallback((fable) => {
     playTrack(fable);
@@ -404,7 +532,7 @@ export default function Listen() {
               </div>
             </div>
             <div className="player-btns">
-              <button className="player-btn" onClick={() => { if (audioRef.current) audioRef.current.currentTime = Math.max(0, currentTime - 10); }}>
+              <button className="player-btn" onClick={() => { if (playbackMode === 'audio' && audioRef.current) audioRef.current.currentTime = Math.max(0, currentTime - 10); }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polygon points="19 20 9 12 19 4 19 20" />
                   <line x1="5" y1="19" x2="5" y2="5" />
@@ -421,7 +549,7 @@ export default function Listen() {
                   }
                 </svg>
               </button>
-              <button className="player-btn" onClick={() => { if (audioRef.current) audioRef.current.currentTime = Math.min(duration, currentTime + 10); }}>
+              <button className="player-btn" onClick={() => { if (playbackMode === 'audio' && audioRef.current) audioRef.current.currentTime = Math.min(duration, currentTime + 10); }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polygon points="5 4 15 12 5 20 5 4" />
                   <line x1="19" y1="5" x2="19" y2="19" />
@@ -430,7 +558,7 @@ export default function Listen() {
             </div>
           </div>
           <div className="player-extra">
-            <span className="player-speed">⊙ 1.0x</span>
+            <span className="player-speed">{playbackMode === 'speech-synthesis' ? 'AI voice' : '1.0x'}</span>
             <div className="player-extra-icons">
               <button className="player-icon-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

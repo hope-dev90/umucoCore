@@ -1723,6 +1723,7 @@ Object.assign(translations.en, {
   "reader.sessionXp": "Session XP",
   "reader.nextCheckpoint": "Next checkpoint",
   "reader.startQuiz": "Start quiz",
+  "settings.voice.clearYouth": "(Clear, Youth)",
 });
 
 Object.assign(translations.rw, {

@@ -7,10 +7,12 @@ import { useAuth } from '../contexts/AuthContext';
 import './Settings.css';
 import voicePhotoOne from '../assets/login/tra.png';
 import voicePhotoTwo from '../assets/login/tra2.png';
+import voicePhotoThree from '../assets/login/tra3.jpg';
 
 const voices = [
-  { name: 'Umutoni', img: voicePhotoOne, key: 'settings.voice.femaleSoft' },
-  { name: 'Kamanzi', img: voicePhotoTwo, key: 'settings.voice.maleDeep' },
+  { id: 0, name: 'Umutoni', img: voicePhotoOne, key: 'settings.voice.femaleSoft' },
+  { id: 1, name: 'Kamanzi', img: voicePhotoTwo, key: 'settings.voice.maleDeep' },
+  { id: 2, name: 'Ineza', img: voicePhotoThree, key: 'settings.voice.clearYouth' },
 ];
 
 function PanelTitle({ icon: Icon, label }) {
@@ -328,13 +330,14 @@ export default function Settings() {
             <div className="settings-panel">
               <PanelTitle icon={Mic2} label={t('settings.voiceSelection')} />
               <p className="panel-sub">{t('settings.voiceSelection.desc')}</p>
-              {voices.map((voice, index) => (
-                <button type="button" key={voice.name} className={`voice-option ${selectedVoice === index ? 'selected' : ''}`} onClick={() => setSelectedVoice(index)}>
+              {voices.map((voice) => (
+                <button type="button" key={voice.name} className={`voice-option ${Number(selectedVoice) === voice.id ? 'selected' : ''}`} onClick={() => setSelectedVoice(voice.id)}>
                   <div className="voice-option-avatar"><img src={voice.img} alt={voice.name} onError={(e) => { e.currentTarget.style.display = 'none'; }} /></div>
                   <div className="voice-option-info"><h4>{voice.name}</h4><p>{t(voice.key)}</p></div>
-                  {selectedVoice === index ? <span className="voice-active-badge">Active</span> : null}
+                  {Number(selectedVoice) === voice.id ? <span className="voice-active-badge">Active</span> : null}
                 </button>
               ))}
+              <button className="save-access-btn" onClick={saveAccessibility} disabled={savingKey === 'accessibility'}>{savingKey === 'accessibility' ? 'Saving...' : 'Save Voice'}</button>
             </div>
           </div>
 

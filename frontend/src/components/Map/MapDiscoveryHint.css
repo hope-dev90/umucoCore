@@ -6,7 +6,7 @@
   margin-bottom: 12px;
   z-index: 50;
   pointer-events: none;
-  animation: mdhPulse 3s ease-in-out;
+  animation: mdhPopIn 0.22s ease-out;
 }
 
 .mdh-bubble {
@@ -82,25 +82,14 @@
   border-top: 8px solid #2C1A14;
 }
 
-@keyframes mdhPulse {
+@keyframes mdhPopIn {
   0% {
     opacity: 0;
-    transform: translateX(-50%) translateY(8px) scale(0.9);
-  }
-  12% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1.04);
-  }
-  20% {
-    transform: translateX(-50%) translateY(0) scale(1);
-  }
-  85% {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0) scale(1);
+    transform: translateX(-50%) translateY(6px) scale(0.98);
   }
   100% {
-    opacity: 0;
-    transform: translateX(-50%) translateY(4px) scale(0.97);
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
   }
 }
 
