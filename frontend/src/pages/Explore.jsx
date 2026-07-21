@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,7 +8,7 @@ import HeritageMap, { hasValidCoordinates } from '../components/Map/HeritageMap'
 import MapDiscoveryHint from '../components/Map/MapDiscoveryHint';
 import { mapHeritageApiItem } from '../utils/heritageMapping';
 import { getCommonsImage } from '../utils/getCommonsImage';
-import { BookOpen, CheckCircle2, ChevronDown, Headphones, MapPinned, Play } from 'lucide-react';
+import { BookOpen, CheckCircle2, ChevronDown, Headphones, MapPinned, Play, X } from 'lucide-react';
 import nyanzaImg from '../assets/explore/nyanza.jpg';
 import buhangaImg from '../assets/explore/buhanga.jpg';
 import intoreImg from '../assets/explore/intore2.jpg';
@@ -189,6 +189,15 @@ const normalizePlaceValue = (value) => String(value ?? '').trim().toLowerCase();
 export default function Explore() {
   const { t } = useLanguage();
   const { user } = useAuth();
+
+  // Some i18n setups return the key itself (e.g. "explore.clearFilters")
+  // when a translation is missing, instead of '' or undefined. That makes
+  // `t(key) || fallback` useless, since the returned key is truthy.
+  // This helper treats "t() echoed the key back" as "missing" too.
+  const tf = useCallback((key, fallback) => {
+    const value = t(key);
+    return !value || value === key ? fallback : value;
+  }, [t]);
   const [activeRegion, setActiveRegion] = useState(t('explore.allRegions'));
   const [activeEras, setActiveEras] = useState([]);
   const [activePlace, setActivePlace] = useState('all');
@@ -349,6 +358,23 @@ export default function Explore() {
     [t('explore.post1994')]:    'post-1994',
   }), [t]);
 
+  // Only show Place chips that are valid for the currently selected Region.
+  // "All places" is always shown. When Region = "All regions", every place is shown.
+  // This is what prevents the user from ever building an impossible
+  // region + place combination that silently empties the grid.
+  const visiblePlaces = useMemo(() => {
+    if (activeRegion === t('explore.allRegions')) return places;
+    const allowedKeys = REGION_LOCATION_MAP[activeRegion] || [];
+    return places.filter((p) => p.value === 'all' || allowedKeys.includes(p.value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeRegion, REGION_LOCATION_MAP, t]);
+
+  // Changing Region resets Place, so the two filters can never conflict.
+  const handleRegionChange = useCallback((region) => {
+    setActiveRegion(region);
+    setActivePlace('all');
+  }, []);
+
   const filteredHeritageItems = heritageItems.filter(item => {
     const regionMatch = activeRegion === t('explore.allRegions')
       || (REGION_LOCATION_MAP[activeRegion] || []).includes(item.locationKey);
@@ -363,6 +389,21 @@ export default function Explore() {
       || (item.location || '').toLowerCase().includes(query);
     return regionMatch && eraMatch && placeMatch && searchMatch;
   });
+
+  // True when any filter differs from its default — drives the "Clear filters" control.
+  const hasActiveFilters =
+    activeRegion !== t('explore.allRegions') ||
+    activePlace !== 'all' ||
+    activeEras.length > 0 ||
+    topbarSearch.trim() !== '';
+
+  const clearAllFilters = useCallback(() => {
+    setActiveRegion(t('explore.allRegions'));
+    setActivePlace('all');
+    setActiveEras([]);
+    setTopbarSearch('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]);
 
   const audioForExplorer = useMemo(() => {
     if (!isMusicExplorer || !audioItems.length) return [];
@@ -506,7 +547,7 @@ export default function Explore() {
                 <button
                   key={region}
                   className={`filter-chip ${activeRegion === region ? 'active' : ''}`}
-                  onClick={() => setActiveRegion(region)}
+                  onClick={() => handleRegionChange(region)}
                 >
                   {region}
                 </button>
@@ -516,7 +557,7 @@ export default function Explore() {
           <div className="filter-row">
             <span className="filter-label">{t('explore.places')}</span>
             <div className="filter-chips">
-               {places.map((place) => (
+               {visiblePlaces.map((place) => (
                  <button
                    key={place.value}
                    className={`filter-chip ${activePlace === place.value ? 'active' : ''}`}
@@ -541,116 +582,137 @@ export default function Explore() {
               ))}
             </div>
           </div>
+
+          {hasActiveFilters && (
+            <button
+              type="button"
+              className="filter-clear-btn"
+              onClick={clearAllFilters}
+            >
+              <X size={13} aria-hidden="true" />
+              {tf('explore.clearFilters', 'Clear filters')}
+            </button>
+          )}
         </div>
 
         <div className="archive-grid">
-          {sortedItems.map(({ item, index, isCompleted, isAudio }) => (
-            <div 
-              key={isAudio ? `audio-${item.id}` : (getStoryId(item) || index)} 
-              className="heritage-card"
-              onClick={() => {
-                if (isAudio) {
-                  setSelectedAudio(item);
-                  return;
-                }
-                handleCardClick(item);
-              }}
-            >
-              <div className="heritage-img-wrap">
-                <span className={`heritage-card-category cat-${item.catKey}`}>
-                  {isAudio ? <Headphones size={12} aria-hidden="true" /> : null}
-                  {item.category}
-                </span>
-                {isCompleted && !isAudio && (
-                  <span className="heritage-status-badge completed">
-                    <CheckCircle2 size={12} aria-hidden="true" />
-                    Read
+          {sortedItems.length === 0 ? (
+            <div className="archive-empty-state">
+              <p>{tf('explore.noResults', 'No heritage sites match your current filters.')}</p>
+              <button type="button" className="heritage-action secondary" onClick={clearAllFilters}>
+                <X size={14} aria-hidden="true" />
+                {tf('explore.clearFilters', 'Clear filters')}
+              </button>
+            </div>
+          ) : (
+            sortedItems.map(({ item, index, isCompleted, isAudio }) => (
+              <div
+                key={isAudio ? `audio-${item.id}` : (getStoryId(item) || index)}
+                className="heritage-card"
+                onClick={() => {
+                  if (isAudio) {
+                    setSelectedAudio(item);
+                    return;
+                  }
+                  handleCardClick(item);
+                }}
+              >
+                <div className="heritage-img-wrap">
+                  <span className={`heritage-card-category cat-${item.catKey}`}>
+                    {isAudio ? <Headphones size={12} aria-hidden="true" /> : null}
+                    {item.category}
                   </span>
-                )}
-                {isAudio && (
-                  <span className="heritage-status-badge audio">
-                    <Headphones size={12} aria-hidden="true" />
-                    Listen
-                  </span>
-                )}
-                {isAudio ? (
-                  <div className="heritage-card-image heritage-card-audio-art" role="img" aria-label={item.title}>
-                    <Headphones size={52} aria-hidden="true" />
-                  </div>
-                ) : (
-                  // Task 2: prefer Commons image, then local asset, then brown placeholder
-                  imageLoadErrors[item.title] ? (
-                    <div
-                      className="heritage-card-image"
-                      style={{
-                        height: 230,
-                        background: 'linear-gradient(135deg, #6B4226 0%, #3E2723 100%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                      role="img"
-                      aria-label={item.title}
-                    >
-                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,235,224,0.5)" strokeWidth="1.5" aria-hidden="true">
-                        <rect x="3" y="3" width="18" height="18" rx="2" />
-                        <circle cx="8.5" cy="8.5" r="1.5" />
-                        <polyline points="21 15 16 10 5 21" />
-                      </svg>
+                  {isCompleted && !isAudio && (
+                    <span className="heritage-status-badge completed">
+                      <CheckCircle2 size={12} aria-hidden="true" />
+                      Read
+                    </span>
+                  )}
+                  {isAudio && (
+                    <span className="heritage-status-badge audio">
+                      <Headphones size={12} aria-hidden="true" />
+                      Listen
+                    </span>
+                  )}
+                  {isAudio ? (
+                    <div className="heritage-card-image heritage-card-audio-art" role="img" aria-label={item.title}>
+                      <Headphones size={52} aria-hidden="true" />
                     </div>
                   ) : (
-                    <img
-                      src={commonsImages[item.title] || item.image}
-                      alt={item.title}
-                      className="heritage-card-image"
-                      onError={() => handleCardImageError(item.title)}
-                    />
-                  )
-                )}
-              </div>
-              <div className="heritage-card-body">
-                <div className="heritage-card-heading">
-                  <h3 className="heritage-card-title">{item.title}</h3>
-                  <span className="heritage-card-location">{item.location}</span>
+                    // Task 2: prefer Commons image, then local asset, then brown placeholder
+                    imageLoadErrors[item.title] ? (
+                      <div
+                        className="heritage-card-image"
+                        style={{
+                          height: 230,
+                          background: 'linear-gradient(135deg, #6B4226 0%, #3E2723 100%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                        role="img"
+                        aria-label={item.title}
+                      >
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,235,224,0.5)" strokeWidth="1.5" aria-hidden="true">
+                          <rect x="3" y="3" width="18" height="18" rx="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
+                        </svg>
+                      </div>
+                    ) : (
+                      <img
+                        src={commonsImages[item.title] || item.image}
+                        alt={item.title}
+                        className="heritage-card-image"
+                        onError={() => handleCardImageError(item.title)}
+                      />
+                    )
+                  )}
                 </div>
-                <p className="heritage-card-desc">{item.desc}</p>
-                <div className="heritage-card-actions">
-                  {!isAudio ? (
+                <div className="heritage-card-body">
+                  <div className="heritage-card-heading">
+                    <h3 className="heritage-card-title">{item.title}</h3>
+                    <span className="heritage-card-location">{item.location}</span>
+                  </div>
+                  <p className="heritage-card-desc">{item.desc}</p>
+                  <div className="heritage-card-actions">
+                    {!isAudio ? (
+                      <button
+                        type="button"
+                        className="heritage-action secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCardClick(item);
+                          setMapVisible(true);
+                          setTimeout(() => {
+                            document.getElementById('explore-map-section')?.scrollIntoView({ behavior: 'smooth' });
+                          }, 50);
+                        }}
+                      >
+                        <MapPinned size={15} aria-hidden="true" />
+                        Map
+                      </button>
+                    ) : null}
                     <button
                       type="button"
-                      className="heritage-action secondary"
+                      className="heritage-action primary"
                       onClick={(e) => {
-                        e.stopPropagation();
-                        handleCardClick(item);
-                        setMapVisible(true);
-                        setTimeout(() => {
-                          document.getElementById('explore-map-section')?.scrollIntoView({ behavior: 'smooth' });
-                        }, 50);
+                        if (isAudio) {
+                          e.stopPropagation();
+                          setSelectedAudio(item);
+                          return;
+                        }
+                        handleReadMore(e, item);
                       }}
                     >
-                      <MapPinned size={15} aria-hidden="true" />
-                      Map
+                      {isAudio ? <Play size={14} aria-hidden="true" /> : <BookOpen size={14} aria-hidden="true" />}
+                      {isAudio ? 'Play audio' : 'Read more'}
                     </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    className="heritage-action primary"
-                    onClick={(e) => {
-                      if (isAudio) {
-                        e.stopPropagation();
-                        setSelectedAudio(item);
-                        return;
-                      }
-                      handleReadMore(e, item);
-                    }}
-                  >
-                    {isAudio ? <Play size={14} aria-hidden="true" /> : <BookOpen size={14} aria-hidden="true" />}
-                    {isAudio ? 'Play audio' : 'Read more'}
-                  </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         <div className="discover-more-wrap">

@@ -105,7 +105,8 @@ export function StoryCompletionScreen({
           </div>
           <div style={{ height: 8, background: '#EADBC8', borderRadius: 999, overflow: 'hidden' }}>
             <motion.div
-              animate={{ width: `${xpPct}%` }}
+              initial={{ width: 0 }}
+              animate={{ width: `${xpPct || 0}%` }}
               transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1], delay: 0.3 }}
               style={{ height: '100%', background: 'linear-gradient(90deg,#8D493A,#3E2723)', borderRadius: 999 }}
             />

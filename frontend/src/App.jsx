@@ -7,8 +7,10 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { GamificationProvider } from './contexts/GamificationContext';
 import { RewardToastContainer } from './components/Gamification/RewardToastContainer';
+import BadgeUnlockToast from './components/Gamification/BadgeUnlockToast';
 import UmucoLogo from './components/UmucoLogo';
 import ChatWidget from './components/ChatWidget';
+import RiddlePopup from './components/RiddlePopup';
 
 import Landing     from './pages/Landing';
 import Login       from './pages/Login';
@@ -68,6 +70,12 @@ function ChatWidgetGate() {
   return user ? <ChatWidget /> : null;
 }
 
+// Only render the riddle popup when a user is logged in
+function RiddlePopupGate() {
+  const { user } = useAuth();
+  return user ? <RiddlePopup /> : null;
+}
+
 export default function App() {
   const googleClientId = "829742825170-qu62f7f662o16iv6hcpgcep8g80fotb9.apps.googleusercontent.com";
 
@@ -100,8 +108,11 @@ export default function App() {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               <RewardToastContainer />
+              <BadgeUnlockToast />
               {/* Global floating chat widget — only shown to authenticated users */}
               <ChatWidgetGate />
+              {/* Global riddle popup — cycles through ibisakuzo for logged-in users */}
+              <RiddlePopupGate />
             </Router>
           </LanguageProvider>
         </GamificationProvider>

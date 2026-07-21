@@ -31,3 +31,19 @@ INSERT INTO badges (name, description, icon, rarity, xp_reward, trigger_type, tr
   ('Elite Scholar',      'Reach Level 10',                      '🎓', 'rare',     100,  'level',        10)
 
 ON CONFLICT (name) DO NOTHING;
+
+-- ============================================================
+-- ACTIVITY-BASED BADGES (riddles, stories, proverbs, map, video)
+-- ============================================================
+INSERT INTO badges (name, description, icon, rarity, xp_reward, trigger_type, trigger_value) VALUES
+  ('Riddle Novice',    'Solve 5 riddles',             '🧩', 'common',    20,  'riddles_solved',        5),
+  ('Riddle Master',    'Solve 25 riddles',            '🎯', 'uncommon',  50,  'riddles_solved',        25),
+  ('Story Enthusiast', 'Read 10 heritage stories',    '📖', 'common',    30,  'stories_read',          10),
+  ('Heritage Scholar', 'Read 30 heritage stories',    '🏛', 'rare',      75,  'stories_read',          30),
+  ('Proverb Reader',   'Reveal 20 proverbs',          '💬', 'common',    30,  'proverbs_read',         20),
+  ('Wisdom Keeper',    'Reveal 50 proverbs',          '🦉', 'rare',      80,  'proverbs_read',         50),
+  ('Map Explorer',     'Discover 5 map locations',    '🗺', 'common',    25,  'map_locations_visited', 5),
+  ('Navigator',        'Discover 15 map locations',   '🧭', 'uncommon',  60,  'map_locations_visited', 15),
+  ('Cinema Goer',      'Watch 3 videos',              '🎬', 'common',    20,  'videos_watched',        3),
+  ('Film Buff',        'Watch 10 videos',             '🎥', 'uncommon',  50,  'videos_watched',        10)
+ON CONFLICT (name) DO NOTHING;

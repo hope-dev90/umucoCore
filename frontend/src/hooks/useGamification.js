@@ -143,6 +143,33 @@ export function useGamification() {
     }
   };
 
+  const trackActivity = async (activityType, itemId, metadata = {}) => {
+    if (!token) return null;
+    try {
+      const response = await fetch(`${apiBase}/track-activity`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ activityType, itemId: String(itemId), metadata }),
+      });
+      if (!response.ok) return null;
+      const data = await response.json();
+      const result = data.data;
+      if (result?.xpAwarded > 0) {
+        await fetchXPData();
+      }
+      if (result?.newBadges?.length > 0) {
+        await fetchUserBadges();
+        // Push badge unlock events for toast + profile feed
+        const { pushBadgeUnlock } = await import('../utils/rewardFeed.js');
+        pushBadgeUnlock(result.newBadges);
+      }
+      return result;
+    } catch (err) {
+      console.error('Error tracking activity:', err);
+      return null;
+    }
+  };
+
   const awardBadge = async (badgeId) => {
     try {
       const response = await fetch(`${apiBase}/award-badge`, {
@@ -233,6 +260,7 @@ export function useGamification() {
     awardBadge,
     awardCollectible,
     dailyLogin,
+    trackActivity,
     getCurrentLevelData,
     getNextLevelData,
     refresh: initialize,

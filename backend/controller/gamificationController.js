@@ -13,6 +13,7 @@ import {
   getUserNotifications,
   getLeaderboard,
   getAllLevels,
+  trackActivity,
 } from "../models/gamificationModel.js";
 
 export const getXP = async (req, res) => {
@@ -135,6 +136,17 @@ export const getUserNotificationsRoute = async (req, res) => {
     res.status(200).json({ success: true, data: notifications });
   } catch (error) {
     console.error("Get notifications error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const trackActivityRoute = async (req, res) => {
+  try {
+    const { activityType, itemId, metadata } = req.body;
+    const result = await trackActivity(req.user.id, activityType, itemId, metadata || {});
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    console.error("Track activity error:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

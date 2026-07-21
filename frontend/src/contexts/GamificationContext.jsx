@@ -221,7 +221,38 @@ export function GamificationProvider({ children }) {
     } catch { markService(false); }
   }, [collectibles]); // eslint-disable-line
 
-  // ── Level helpers ─────────────────────────────────────────────────────────
+  // ── Track Activity ────────────────────────────────────────────────────────
+
+  const trackActivity = useCallback(async (activityType, itemId, metadata = {}) => {
+    if (!localStorage.getItem('token')) return null;
+    try {
+      const r = await fetch(`${API}/track-activity`, {
+        method: 'POST', headers: getHeaders(),
+        body: JSON.stringify({ activityType, itemId: String(itemId), metadata }),
+      });
+      if (!r.ok) return null;
+      const d = await r.json();
+      const result = d.data;
+      if (result?.xpAwarded > 0) {
+        await fetchXP();
+      }
+      if (result?.newBadges?.length > 0) {
+        result.newBadges.map(normalizeBadge).forEach((badge) => {
+          gamificationEvents.emit(GE.BADGE, { badge });
+        });
+        await fetchBadges();
+        await fetchXP();
+        // Trigger toast notifications
+        const { pushBadgeUnlock } = await import('../utils/rewardFeed.js');
+        pushBadgeUnlock(result.newBadges);
+      }
+      markService(true);
+      return result;
+    } catch {
+      markService(false);
+      return null;
+    }
+  }, []); // eslint-disable-line
 
   const getCurrentLevelData = useCallback(() => levels.find(l => l.level === (user?.level || 1)) || levels[0], [levels, user?.level]);
   const getNextLevelData    = useCallback(() => levels.find(l => l.level === (user?.level || 1) + 1), [levels, user?.level]);
@@ -243,9 +274,10 @@ export function GamificationProvider({ children }) {
     awardXP,
     awardBadge,
     awardCollectible,
+    trackActivity,
     getCurrentLevelData,
     getNextLevelData,
-  }), [user?.xp, user?.level, streak, bestStreak, badges, userBadges, collectibles, userCollectibles, leaderboard, levels, loading, serviceAvailable, refresh, awardXP, awardBadge, awardCollectible, getCurrentLevelData, getNextLevelData]);
+  }), [user?.xp, user?.level, streak, bestStreak, badges, userBadges, collectibles, userCollectibles, leaderboard, levels, loading, serviceAvailable, refresh, awardXP, awardBadge, awardCollectible, trackActivity, getCurrentLevelData, getNextLevelData]);
 
   return (
     <GamificationContext.Provider value={value}>

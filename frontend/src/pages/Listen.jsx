@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import proverbsData from '../data/proverbs.json';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
@@ -45,6 +46,11 @@ const AUDIO_IMAGE_MAP = {
 
 const ALL_AUDIO_IMAGES = Object.values(AUDIO_IMAGE_MAP);
 
+const PROVERB_LANG_CONFIG = {
+  fr: { tag: 'fr-FR', label: 'FR', preferredVoiceHints: ['amelie', 'thomas', 'french'] },
+  en: { tag: 'en-GB', label: 'EN', preferredVoiceHints: ['daniel', 'english'] },
+};
+
 function resolveAudioImage(item, index) {
   const key = `${item.title} ${item.category}`.toLowerCase();
   for (const [word, path] of Object.entries(AUDIO_IMAGE_MAP)) {
@@ -54,8 +60,8 @@ function resolveAudioImage(item, index) {
 }
 
 export default function Listen() {
-  const { t } = useLanguage();
-  const { awardXP } = useGamificationContext();
+  const { t, language } = useLanguage();
+  const { awardXP, trackActivity } = useGamificationContext();
   const { user } = useAuth();
   const [fables, setFables] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,8 +72,15 @@ export default function Listen() {
   const audioRef = useRef(null);
   const speechRef = useRef(null);
   const speechTimerRef = useRef(null);
+  const proverbUtteranceRef = useRef(null);
+  const [proverbAudioState, setProverbAudioState] = useState({ id: null, lang: null, playing: false });
   const [awardedItems, setAwardedItems] = useState(new Set());
-  const [proverbs, setProverbs] = useState([]);
+  const [proverbs, setProverbs] = useState(() => proverbsData.proverbs);
+  const [flippedCards, setFlippedCards] = useState(new Set());
+  const [proverbPage, setProverbPage] = useState(1);
+  const PROVERBS_PER_PAGE = 6;
+  const [proverbFilter, setProverbFilter] = useState('all'); // 'all', 'read', 'unread'
+  const [proverbSort, setProverbSort] = useState('default'); // 'default', 'alphabetical'
   const [savingTrackId, setSavingTrackId] = useState(null);
   const [playbackMode, setPlaybackMode] = useState('audio');
   const [speechNarration, setSpeechNarration] = useState(null);
@@ -87,7 +100,15 @@ export default function Listen() {
     speechRef.current = null;
   }, [clearSpeechTimer]);
 
-  useEffect(() => () => stopSpeech(), [stopSpeech]);
+  // stopProverbSpeech must be declared before the cleanup effect below,
+  // since the effect references it (const/useCallback bindings are not hoisted).
+  const stopProverbSpeech = useCallback(() => {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    proverbUtteranceRef.current = null;
+    setProverbAudioState({ id: null, lang: null, playing: false });
+  }, []);
+
+  useEffect(() => () => { stopSpeech(); stopProverbSpeech(); }, [stopSpeech, stopProverbSpeech]);
 
   const chooseBrowserVoice = useCallback((profile) => {
     if (!window.speechSynthesis || !profile) return null;
@@ -180,22 +201,30 @@ export default function Listen() {
     };
 
     const fetchProverbs = async () => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
       try {
-        const res = await fetch("http://localhost:5000/api/proverbs/featured?limit=6");
+        const res = await fetch("http://localhost:5000/api/proverbs/featured?limit=50", {
+          signal: controller.signal,
+        });
         const data = await res.json();
         if (data.proverbs && data.proverbs.length > 0) {
           setProverbs(
-            data.proverbs.map((p, i) => ({
-              id: p.id,
-              text: p.text,
-              translation: p.translation || p.text,
-              meta: p.source || "Rwandan oral tradition",
-              numClass: i % 2 === 0 ? "gold" : "olive",
+            data.proverbs.map((p) => ({
+              id: p.id || `api-${Math.random().toString(36).slice(2, 9)}`,
+              rw: p.text || p.rw || '',
+              en: p.translation || p.en || p.text || '',
+              fr: p.fr || p.translation || p.text || '',
+              meaning: p.meaning || '',
+              source: p.source || "Rwandan oral tradition",
             }))
           );
+          return;
         }
-      } catch (err) {
-        console.error("Error fetching proverbs:", err);
+      } catch {
+        // keep local proverbs already in state
+      } finally {
+        clearTimeout(timeout);
       }
     };
 
@@ -274,10 +303,15 @@ export default function Listen() {
 
   const fetchNarration = useCallback(async (track) => {
     if (!track.id) return getLocalNarration(track);
-    const response = await fetch(`http://localhost:5000/api/audio/${track.id}/narration?voice=${getSelectedVoice()}`);
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.error || 'Failed to prepare narration');
-    return data;
+    try {
+      const response = await fetch(`http://localhost:5000/api/audio/${track.id}/narration?voice=${getSelectedVoice()}`);
+      if (response.status === 404) return getLocalNarration(track);
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) return getLocalNarration(track);
+      return data;
+    } catch {
+      return getLocalNarration(track);
+    }
   }, [getLocalNarration, getSelectedVoice]);
 
   const speakNarration = useCallback((narration) => {
@@ -307,6 +341,7 @@ export default function Listen() {
   }, [chooseBrowserVoice, clearSpeechTimer, startSpeechProgress, stopSpeech]);
 
   const playTrack = useCallback(async (track) => {
+    stopProverbSpeech();
     stopSpeech();
     if (audioRef.current) audioRef.current.pause();
     setCurrentTrack(track);
@@ -335,7 +370,7 @@ export default function Listen() {
       console.error("Playback failed:", err);
       alert(err.message || "Playback failed.");
     }
-  }, [fetchNarration, speakNarration, stopSpeech]);
+  }, [fetchNarration, speakNarration, stopProverbSpeech, stopSpeech]);
 
   const togglePlayPause = useCallback(() => {
     if (!currentTrack) {
@@ -404,6 +439,91 @@ export default function Listen() {
       setAwardedItems(prev => new Set([...prev, 'Ruganzu Epic']));
     }
   }, [fables, awardedItems, awardXP, playTrack]);
+
+  // Persist read proverbs to localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('readProverbs');
+    if (stored) {
+      try { setFlippedCards(new Set(JSON.parse(stored))); } catch { /* ignore */ }
+    }
+  }, []);
+
+  const handleFlipCard = useCallback((proverbId) => {
+    setFlippedCards(prev => {
+      const next = new Set(prev);
+      if (next.has(proverbId)) {
+        next.delete(proverbId);
+      } else {
+        next.add(proverbId);
+        trackActivity?.('proverb', String(proverbId), {});
+      }
+      localStorage.setItem('readProverbs', JSON.stringify([...next]));
+      return next;
+    });
+  }, [trackActivity]);
+
+  const speakProverb = useCallback((proverb, lang) => {
+    if (!window.speechSynthesis) {
+      alert('Audio is not supported in your browser.');
+      return;
+    }
+    const { id } = proverb;
+    const isActiveToggle =
+      proverbAudioState.id === id &&
+      proverbAudioState.lang === lang &&
+      proverbAudioState.playing;
+
+    if (isActiveToggle) { stopProverbSpeech(); return; }
+
+    // Silence everything else
+    stopProverbSpeech();
+    if (audioRef.current && !audioRef.current.paused) audioRef.current.pause();
+    stopSpeech();
+
+    // Flip + XP if not already read
+    if (!flippedCards.has(id)) handleFlipCard(id);
+
+    const cfg = PROVERB_LANG_CONFIG[lang];
+    const text = proverb[lang] || proverb.en;
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = cfg.tag;
+    utterance.rate = 0.85;
+
+    // Voice selection
+    const voices = window.speechSynthesis.getVoices();
+    const matched =
+      voices.find(v => cfg.preferredVoiceHints.some(h => v.name.toLowerCase().includes(h))) ||
+      voices.find(v => v.lang?.toLowerCase().startsWith(cfg.tag.slice(0, 2)));
+    if (matched) utterance.voice = matched;
+
+    utterance.onend = () => setProverbAudioState({ id: null, lang: null, playing: false });
+    utterance.onerror = () => setProverbAudioState({ id: null, lang: null, playing: false });
+
+    proverbUtteranceRef.current = utterance;
+    setProverbAudioState({ id, lang, playing: true });
+    window.speechSynthesis.speak(utterance);
+  }, [proverbAudioState, stopProverbSpeech, audioRef, stopSpeech, flippedCards, handleFlipCard]);
+
+  // Reset to page 1 when filter or sort changes
+  useEffect(() => { setProverbPage(1); }, [proverbFilter, proverbSort]);
+
+  const visibleProverbs = useMemo(() => {
+    let result = [...proverbs];
+    // Filter
+    if (proverbFilter === 'read')   result = result.filter(p => flippedCards.has(p.id));
+    if (proverbFilter === 'unread') result = result.filter(p => !flippedCards.has(p.id));
+    // Sort
+    if (proverbSort === 'alphabetical') result.sort((a, b) => a.rw.localeCompare(b.rw));
+    if (proverbSort === 'read-first')   result.sort((a, b) => (flippedCards.has(b.id) ? 1 : 0) - (flippedCards.has(a.id) ? 1 : 0));
+    if (proverbSort === 'unread-first') result.sort((a, b) => (flippedCards.has(a.id) ? 1 : 0) - (flippedCards.has(b.id) ? 1 : 0));
+    return result.slice(0, proverbPage * PROVERBS_PER_PAGE);
+  }, [proverbs, proverbPage, proverbFilter, proverbSort, flippedCards]);
+
+  const filteredProverbCount = useMemo(() => {
+    if (proverbFilter === 'read')   return proverbs.filter(p => flippedCards.has(p.id)).length;
+    if (proverbFilter === 'unread') return proverbs.filter(p => !flippedCards.has(p.id)).length;
+    return proverbs.length;
+  }, [proverbs, proverbFilter, flippedCards]);
 
   const formatTime = (secs) => {
     if (!secs || !Number.isFinite(secs)) return "0:00";
@@ -490,26 +610,112 @@ export default function Listen() {
             <div className="listen-section-header">
               <span className="listen-section-title">{t('listen.dailyProverbs')}</span>
             </div>
-            <div className="proverb-list">
-              {proverbs.length === 0 ? (
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No proverbs available yet.</p>
-              ) : (
-                proverbs.map((proverb, i) => (
-                  <div key={proverb.id || i} className="proverb-item">
-                    <div className={`proverb-num ${proverb.numClass}`}>{i + 1}</div>
-                    <div className="proverb-info">
-                      <div className="proverb-text">{proverb.text}</div>
-                      <div className="proverb-meta">{proverb.meta}</div>
-                    </div>
-                    <button className="proverb-play">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                        <polygon points="5 3 19 12 5 21 5 3" />
-                      </svg>
-                    </button>
-                  </div>
-                ))
-              )}
+            <div className="proverb-controls">
+              <div className="proverb-filter-group">
+                <button
+                  className={`proverb-filter-btn${proverbFilter === 'all' ? ' active' : ''}`}
+                  onClick={() => setProverbFilter('all')}
+                >{t('listen.filterAll') || 'All'}</button>
+                <button
+                  className={`proverb-filter-btn${proverbFilter === 'unread' ? ' active' : ''}`}
+                  onClick={() => setProverbFilter('unread')}
+                >{t('listen.filterUnread') || 'Unread'}</button>
+                <button
+                  className={`proverb-filter-btn${proverbFilter === 'read' ? ' active' : ''}`}
+                  onClick={() => setProverbFilter('read')}
+                >{t('listen.filterRead') || 'Read'} {flippedCards.size > 0 && <span className="proverb-read-count">{flippedCards.size}</span>}</button>
+              </div>
+              <select
+                className="proverb-sort-select"
+                value={proverbSort}
+                onChange={e => setProverbSort(e.target.value)}
+              >
+                <option value="default">{t('listen.sortDefault') || 'Default'}</option>
+                <option value="unread-first">{t('listen.sortUnreadFirst') || 'Unread first'}</option>
+                <option value="read-first">{t('listen.sortReadFirst') || 'Read first'}</option>
+                <option value="alphabetical">{t('listen.sortAlpha') || 'A–Z'}</option>
+              </select>
             </div>
+            <div className="proverb-cards-grid">
+              {visibleProverbs.map((proverb) => {
+                const isFlipped = flippedCards.has(proverb.id);
+                let frontText, backText;
+                if (language === 'rw') {
+                  frontText = proverb.rw;
+                  backText  = proverb.en;
+                } else if (language === 'fr') {
+                  frontText = proverb.fr ?? proverb.en;
+                  backText  = proverb.rw;
+                } else {
+                  frontText = proverb.en;
+                  backText  = proverb.rw;
+                }
+                return (
+                  <div
+                    key={proverb.id}
+                    className={`proverb-flip-card${isFlipped ? ' flipped' : ''}`}
+                    onClick={() => handleFlipCard(proverb.id)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={isFlipped ? backText : t('listen.tapToReveal')}
+                    onKeyDown={e => e.key === 'Enter' && handleFlipCard(proverb.id)}
+                  >
+                    <div className="proverb-flip-inner">
+                      {/* Front */}
+                      <div className="proverb-flip-front">
+                        <div className="proverb-audio-controls">
+                          {['fr', 'en'].map(lang => {
+                            const cfg = PROVERB_LANG_CONFIG[lang];
+                            const isActive =
+                              proverbAudioState.id === proverb.id &&
+                              proverbAudioState.lang === lang &&
+                              proverbAudioState.playing;
+                            return (
+                              <button
+                                key={lang}
+                                type="button"
+                                className={`proverb-lang-btn${isActive ? ' active' : ''}`}
+                                onClick={(e) => { e.stopPropagation(); speakProverb(proverb, lang); }}
+                                aria-label={`${isActive ? 'Stop' : 'Play'} proverb in ${cfg.label}`}
+                                title={`${isActive ? 'Stop' : 'Play'} in ${cfg.label}`}
+                              >
+                                {isActive
+                                  ? <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                                  : <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                }
+                                {cfg.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <div className="proverb-card-label">{t('listen.proverbOf')}</div>
+                        <p className="proverb-card-rw">"{frontText}"</p>
+                        <span className="proverb-card-hint">{t('listen.tapToReveal')}</span>
+                      </div>
+                      {/* Back: translation + meaning */}
+                      <div className="proverb-flip-back">
+                        {isFlipped && <span className="proverb-read-badge">✓</span>}
+                        <div className="proverb-card-label">{t('listen.meaning')}</div>
+                        <p className="proverb-card-en">"{backText}"</p>
+                        <p className="proverb-card-meaning">{proverb.meaning}</p>
+                        <span className="proverb-card-xp">{t('listen.xpEarned')}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {visibleProverbs.length === 0 && (
+              <p className="proverb-empty-state">{t('listen.noProverbsMatch') || 'No proverbs match this filter.'}</p>
+            )}
+            {visibleProverbs.length < filteredProverbCount && (
+              <button
+                className="proverb-load-more"
+                onClick={() => setProverbPage(p => p + 1)}
+              >
+                {t('listen.loadMore')}
+              </button>
+            )}
           </div>
         </div>
 

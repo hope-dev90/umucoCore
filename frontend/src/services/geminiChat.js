@@ -30,6 +30,7 @@ const SYSTEM_PROMPTS = {
  */
 export async function sendMessage(history, userMessage, language = 'en') {
   const apiKey =
+    import.meta.env.VITE_GEMINI_API_KEY ||
     window.__UMUCO_CONFIG__?.GEMINI_API_KEY ||
     sessionStorage.getItem('UMUCO_GEMINI_API_KEY') ||
     localStorage.getItem('UMUCO_GEMINI_API_KEY');

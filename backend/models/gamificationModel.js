@@ -323,3 +323,133 @@ export const getAllLevels = async () => {
   const result = await pool.query(`SELECT * FROM levels ORDER BY level ASC`);
   return result.rows;
 };
+
+// ── Activity Tracking ──────────────────────────────────────────────────────
+
+/** Maps frontend activityType → badge trigger_type column value */
+const ACTIVITY_TRIGGER_MAP = {
+  riddle:  'riddles_solved',
+  story:   'stories_read',
+  proverb: 'proverbs_read',
+  video:   'videos_watched',
+  map:     'map_locations_visited',
+};
+
+/** XP to award per activity type + metadata */
+function resolveXP(activityType, metadata = {}) {
+  switch (activityType) {
+    case 'riddle':
+      if (metadata.correct)  return { xp: 10, reason: 'Riddle: correct answer' };
+      if (metadata.revealed) return { xp: metadata.correct === false ? 5 : 3, reason: 'Riddle: revealed answer' };
+      return { xp: 3, reason: 'Riddle: viewed' };
+    case 'story':
+      return metadata.complete
+        ? { xp: 20, reason: 'Story completed' }
+        : { xp: 15, reason: 'Story opened' };
+    case 'proverb':
+      return { xp: 5, reason: 'Proverb revealed' };
+    case 'video':
+      return metadata.complete
+        ? { xp: 20, reason: 'Video completed' }
+        : { xp: 10, reason: 'Video watched (partial)' };
+    case 'map':
+      return { xp: 8, reason: 'Map location discovered' };
+    default:
+      return { xp: 5, reason: `Activity: ${activityType}` };
+  }
+}
+
+/**
+ * Checks activity-based badges for the given trigger type and count.
+ * Awards any unearned badges where trigger_value <= count.
+ */
+async function checkActivityBadges(client, userId, activityType, count) {
+  const triggerType = ACTIVITY_TRIGGER_MAP[activityType];
+  if (!triggerType) return [];
+
+  const result = await client.query(
+    `SELECT b.* FROM badges b
+     WHERE b.trigger_type = $1
+       AND b.trigger_value <= $2
+       AND NOT EXISTS (
+         SELECT 1 FROM user_badges ub
+         WHERE ub.user_id = $3 AND ub.badge_id = b.id
+       )`,
+    [triggerType, count, userId]
+  );
+
+  const earned = [];
+  for (const badge of result.rows) {
+    await client.query(
+      `INSERT INTO user_badges (user_id, badge_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [userId, badge.id]
+    );
+    if (badge.xp_reward > 0) {
+      await client.query(
+        `UPDATE users SET xp = xp + $1, updated_at = NOW() WHERE id = $2`,
+        [badge.xp_reward, userId]
+      );
+      await client.query(
+        `INSERT INTO xp_logs (user_id, amount, reason) VALUES ($1, $2, $3)`,
+        [userId, badge.xp_reward, `Badge unlocked: ${badge.name}`]
+      );
+    }
+    earned.push(badge);
+  }
+  return earned;
+}
+
+/**
+ * Records a user activity, awards XP (deduplicated), and checks badge triggers.
+ */
+export const trackActivity = async (userId, activityType, itemId, metadata = {}) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Try to insert the activity log (UNIQUE constraint deduplicates)
+    const logResult = await client.query(
+      `INSERT INTO user_activity_log (user_id, activity_type, item_id)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (user_id, activity_type, item_id) DO NOTHING
+       RETURNING id`,
+      [userId, activityType, String(itemId)]
+    );
+
+    if (logResult.rows.length === 0) {
+      await client.query('COMMIT');
+      return { alreadyTracked: true, xpAwarded: 0, newBadges: [] };
+    }
+
+    // 2. Increment the activity count
+    const countResult = await client.query(
+      `INSERT INTO user_activity_counts (user_id, activity_type, count)
+       VALUES ($1, $2, 1)
+       ON CONFLICT (user_id, activity_type)
+       DO UPDATE SET count = user_activity_counts.count + 1
+       RETURNING count`,
+      [userId, activityType]
+    );
+    const newCount = parseInt(countResult.rows[0].count);
+
+    // 3. Award XP
+    const { xp, reason } = resolveXP(activityType, metadata);
+    await awardXPInTransaction(client, userId, xp, reason);
+
+    // 4. Check activity-based badge triggers
+    const newBadges = await checkActivityBadges(client, userId, activityType, newCount);
+
+    await client.query('COMMIT');
+    return {
+      alreadyTracked: false,
+      xpAwarded: xp,
+      newBadges,
+      activityCounts: { [ACTIVITY_TRIGGER_MAP[activityType] || activityType]: newCount },
+    };
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
