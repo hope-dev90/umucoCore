@@ -3,6 +3,13 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Tooltip, useMapEvents, useMap } from 'react-leaflet';
 import './HeritageMap.css';
+import commonsImageCache from '../../data/commonsImageCache.json';
+
+// Resolve the best available image for a heritage item
+function resolveImage(item) {
+  if (!item) return '';
+  return commonsImageCache[item.title] || (typeof item.image === 'string' ? item.image : '') || '';
+}
 
 const RWANDA_CENTER = [-1.940, 30.062];
 const RWANDA_BOUNDS = [
@@ -45,7 +52,7 @@ export function hasValidCoordinates(item) {
 function createMarkerIcon(item, isSelected) {
   const color = getMarkerBorderColor(item && item.catKey ? item.catKey : '');
   const pulseClass = isSelected ? ' hm-marker-pulse' : '';
-  const imageSrc = item && item.image ? item.image : '';
+  const imageSrc = resolveImage(item);
   const html = '<div class="hm-marker' + pulseClass + '" style="--hm-marker-color:' + color + '; background-color:' + color + '; background-image:url(\'' + imageSrc + '\')"></div>';
 
   return L.divIcon({
@@ -101,12 +108,13 @@ function PanelItemCard(props) {
   const item = props.item;
   const onClose = props.onClose;
   const directionsUrl = 'https://www.openstreetmap.org/directions?to=' + item.lat + ',' + item.lng;
+  const imageUrl = resolveImage(item);
 
   return (
     <div className="hm-panel-card">
       <button className="hm-panel-close" onClick={onClose} aria-label="Close">{'\u2715'}</button>
-      {item.image ? (
-        <img src={item.image} alt={item.title} className="hm-panel-card-image" />
+      {imageUrl ? (
+        <img src={imageUrl} alt={item.title} className="hm-panel-card-image" />
       ) : (
         <div className="hm-panel-card-image hm-panel-card-image--placeholder" />
       )}

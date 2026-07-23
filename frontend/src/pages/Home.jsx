@@ -129,6 +129,7 @@ export default function Home() {
   const { user, updateUser } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [topbarSearch, setTopbarSearch] = useState("");
   const {
     xp,
     level,
@@ -227,7 +228,7 @@ export default function Home() {
       .catch(() => {});
   }, [activeExplorerType]);
 
-  // ── All original hardcoded content below ──────────────────
+  // ── All original hardcoded content below ──────────────────────────────────
 
   // Each item is tagged with the explorer type(s) it's most relevant to.
   // Adjust these tags to match your content taxonomy as needed.
@@ -264,6 +265,13 @@ export default function Home() {
     const aMatch = a.explorerTypes.includes(activeExplorerType) ? 0 : 1;
     const bMatch = b.explorerTypes.includes(activeExplorerType) ? 0 : 1;
     return aMatch - bMatch;
+  });
+
+  const filteredSortedExploreItems = sortedExploreItems.filter(item => {
+    const query = topbarSearch.toLowerCase();
+    return item.title.toLowerCase().includes(query) || 
+           item.category.toLowerCase().includes(query) ||
+           item.meta.toLowerCase().includes(query);
   });
 
   const recentItems = [
@@ -388,7 +396,7 @@ export default function Home() {
     }
   };
 
-  // Highlight image: use DB url if available, else fallback to local nyanza
+  // Highlight image: use DB url if available, else fallback to local nyanze
   const highlightSrc = highlight?.image_url || nyanzeImage;
   const highlightTitle = highlight?.title || t('home.highlight.title');
   const highlightDesc  = highlight?.description || t('home.highlight.desc');
@@ -403,7 +411,7 @@ export default function Home() {
           onComplete={() => console.log('Story completed')}
         />
       ) : (
-       <Layout searchPlaceholder="search.placeholder">
+       <Layout searchPlaceholder={t('search.placeholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
        <div className="home-shell">
       <div className="home-header">
         <h1>
@@ -477,7 +485,7 @@ export default function Home() {
           </div>
 
           <div className="explore-cards">
-            {sortedExploreItems.map((item) => (
+            {filteredSortedExploreItems.map((item) => (
               <div key={item.title} className="explore-thumb" role="button" tabIndex={0}
                 onClick={() => openDashboardStory(item, 'continue')}
                 onKeyDown={(e) => { if (e.key === 'Enter') openDashboardStory(item, 'continue'); }}>

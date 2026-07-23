@@ -249,7 +249,7 @@ export default function Intldays() {
   };
 
   return (
-    <Layout searchPlaceholder="national.searchPlaceholder" searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
+    <Layout searchPlaceholder={t("national.searchPlaceholder")} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="national-page">
         <section className="national-hero">
           <div className="national-hero-copy">

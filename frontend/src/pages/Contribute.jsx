@@ -71,6 +71,19 @@ export default function Contribute() {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
+  const [topbarSearch, setTopbarSearch] = useState("");
+
+  const filteredPipelineItems = pipelineItems.filter(item => {
+    const query = topbarSearch.toLowerCase();
+    return getLocalizedText(item.title, language).toLowerCase().includes(query) || 
+           getLocalizedText(item.sub, language).toLowerCase().includes(query);
+  });
+
+  const filteredInsights = insights.filter(ins => {
+    const query = topbarSearch.toLowerCase();
+    return getLocalizedText(ins.title, language).toLowerCase().includes(query) || 
+           getLocalizedText(ins.desc, language).toLowerCase().includes(query);
+  });
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -160,7 +173,7 @@ export default function Contribute() {
   };
 
   return (
-    <Layout searchPlaceholder={t('contribute.searchPlaceholder')}>
+    <Layout searchPlaceholder={t('contribute.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="contribute-page">
         <div className="contribute-hero">
           <h1>{t('contribute.heroTitle')}</h1>
@@ -304,7 +317,7 @@ export default function Contribute() {
               <span className="pipeline-title">{t('contribute.pipelineTitle')}</span>
               <span className="pipeline-badge">3 {language === 'rw' ? 'Ibyo' : 'Tasks'} {language === 'rw' ? 'Biri' : 'Active'}</span>
             </div>
-            {pipelineItems.map((p, i) => (
+            {filteredPipelineItems.map((p, i) => (
               <div key={i} className="pipeline-item">
                 <div className="pipeline-item-title">{getLocalizedText(p.title, language)}</div>
                 <div className="pipeline-item-sub">{getLocalizedText(p.sub, language)}</div>
@@ -320,7 +333,7 @@ export default function Contribute() {
 
           <div className="insights-card">
             <div className="insights-title">{t('contribute.insightsTitle')}</div>
-            {insights.map((ins, i) => (
+            {filteredInsights.map((ins, i) => (
               <div key={i} className="insight-item">
                 <div className="insight-thumb">
                   <img

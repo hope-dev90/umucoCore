@@ -23,6 +23,7 @@ export default function Collections() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
+  const [topbarSearch, setTopbarSearch] = useState("");
 
   const handleOpenArchive = () => {
     navigate("/explore"); // Navigate to explore for now
@@ -68,8 +69,15 @@ export default function Collections() {
     },
   ];
 
+  const filteredSmallCollections = smallCollections.filter(c => {
+    const query = topbarSearch.toLowerCase();
+    return c.title.toLowerCase().includes(query) || 
+           c.catLabel.toLowerCase().includes(query) || 
+           c.desc.toLowerCase().includes(query);
+  });
+
   return (
-    <Layout searchPlaceholder={t('search.placeholder')}>
+    <Layout searchPlaceholder={t('search.placeholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="collections-page">
         <div className="collections-header">
           <h1>{t('collections.title')}</h1>
@@ -121,7 +129,7 @@ export default function Collections() {
         </div>
 
         <div className="coll-grid">
-          {smallCollections.map((c, i) => (
+          {filteredSmallCollections.map((c, i) => (
             <div key={i} className="coll-card">
               <div className="coll-card-img">
                 <img src={c.img} alt={c.title} />

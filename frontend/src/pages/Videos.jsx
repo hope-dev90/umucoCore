@@ -23,6 +23,14 @@ export default function Videos() {
   const videoRef = useRef(null);
   const [awardedItems, setAwardedItems] = useState(new Set());
   const [savingVideoId, setSavingVideoId] = useState(null);
+  const [topbarSearch, setTopbarSearch] = useState("");
+
+  const filteredVideos = videos.filter(video => {
+    const query = topbarSearch.toLowerCase();
+    return (video.title || "").toLowerCase().includes(query) ||
+           (video.narrator || "").toLowerCase().includes(query) ||
+           (video.genre || "").toLowerCase().includes(query);
+  });
 
   useEffect(() => {
     const fetchVideos = async () => {
@@ -168,7 +176,7 @@ export default function Videos() {
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <Layout searchPlaceholder={t('search.placeholder')}>
+    <Layout searchPlaceholder={t('search.placeholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="videos-page">
         <div>
           <div className="featured-video">
@@ -216,10 +224,10 @@ export default function Videos() {
             <div className="video-cards">
               {loading ? (
                 <p>Loading videos...</p>
-              ) : videos.length === 0 ? (
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No videos available yet.</p>
+              ) : filteredVideos.length === 0 ? (
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No videos match your search.</p>
               ) : (
-                videos.map((video, i) => (
+                filteredVideos.map((video, i) => (
                   <div key={i} className="video-card" onClick={() => handleVideoClick(video)} style={{ cursor: 'pointer' }}>
                     <div className="video-thumb">
                       <img src={video.image} alt={video.title} />

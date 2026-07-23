@@ -7,6 +7,7 @@ import { StoryQuiz } from './StoryQuiz';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { localizeStory } from '../../utils/storyLocalization';
+import commonsImageCache from '../../data/commonsImageCache.json';
 
 /**
  * StoryReadModal
@@ -82,7 +83,7 @@ export function StoryReadModal({ story, onClose, onComplete }) {
   const currentXP     = xp || 0;
   const requiredXP    = nextLevelData?.requiredXP ?? levelData?.requiredXP ?? 1000;
 
-  const image = localizedStory?.image_url || localizedStory?.image;
+  const image = commonsImageCache[localizedStory?.title] || localizedStory?.image_url || localizedStory?.image;
   const title = localizedStory?.title     || t('gamification.story');
   const desc  = localizedStory?.desc      || localizedStory?.description || '';
   const category = localizedStory?.category || '';

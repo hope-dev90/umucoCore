@@ -178,6 +178,12 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    // Clear riddle preferences and state for new user
+    localStorage.removeItem('riddlePreference');
+    localStorage.removeItem('riddleShownIds');
+    localStorage.removeItem('riddlePaused');
+    // Clear read proverbs from localStorage (just in case, since we now use backend)
+    localStorage.removeItem('readProverbs');
     // DO NOT remove profile_image_* keys! They stay so they survive logout/login
     setUser(null);
   }, []);

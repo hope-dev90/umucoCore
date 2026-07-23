@@ -13,6 +13,7 @@ import {
   dailyLogin,
   getUserNotificationsRoute,
   trackActivityRoute,
+  getUserActivityItemsRoute,
 } from "../controller/gamificationController.js";
 import { authMiddleware } from "../middleware/authMiddleWare.js";
 
@@ -31,5 +32,10 @@ router.get("/leaderboard", authMiddleware, getLeaderboardRoute);
 router.post("/daily-login", authMiddleware, dailyLogin);
 router.get("/notifications", authMiddleware, getUserNotificationsRoute);
 router.post("/track-activity", authMiddleware, trackActivityRoute);
+router.get(
+  "/activity/:activityType/items",
+  authMiddleware,
+  getUserActivityItemsRoute,
+);
 
 export default router;

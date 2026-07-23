@@ -254,6 +254,22 @@ export function GamificationProvider({ children }) {
     }
   }, []); // eslint-disable-line
 
+  const fetchUserActivityItems = useCallback(async (activityType) => {
+    if (!localStorage.getItem('token')) return [];
+    try {
+      const r = await fetch(`${API}/activity/${activityType}/items`, {
+        headers: getHeaders(),
+      });
+      if (!r.ok) return [];
+      const d = await r.json();
+      markService(true);
+      return d.data || [];
+    } catch {
+      markService(false);
+      return [];
+    }
+  }, []);
+
   const getCurrentLevelData = useCallback(() => levels.find(l => l.level === (user?.level || 1)) || levels[0], [levels, user?.level]);
   const getNextLevelData    = useCallback(() => levels.find(l => l.level === (user?.level || 1) + 1), [levels, user?.level]);
 
@@ -275,9 +291,10 @@ export function GamificationProvider({ children }) {
     awardBadge,
     awardCollectible,
     trackActivity,
+    fetchUserActivityItems,
     getCurrentLevelData,
     getNextLevelData,
-  }), [user?.xp, user?.level, streak, bestStreak, badges, userBadges, collectibles, userCollectibles, leaderboard, levels, loading, serviceAvailable, refresh, awardXP, awardBadge, awardCollectible, trackActivity, getCurrentLevelData, getNextLevelData]);
+  }), [user?.xp, user?.level, streak, bestStreak, badges, userBadges, collectibles, userCollectibles, leaderboard, levels, loading, serviceAvailable, refresh, awardXP, awardBadge, awardCollectible, trackActivity, fetchUserActivityItems, getCurrentLevelData, getNextLevelData]);
 
   return (
     <GamificationContext.Provider value={value}>

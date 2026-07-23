@@ -61,7 +61,7 @@ function resolveAudioImage(item, index) {
 
 export default function Listen() {
   const { t, language } = useLanguage();
-  const { awardXP, trackActivity } = useGamificationContext();
+  const { awardXP, trackActivity, fetchUserActivityItems } = useGamificationContext();
   const { user } = useAuth();
   const [fables, setFables] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -84,6 +84,7 @@ export default function Listen() {
   const [savingTrackId, setSavingTrackId] = useState(null);
   const [playbackMode, setPlaybackMode] = useState('audio');
   const [speechNarration, setSpeechNarration] = useState(null);
+  const [topbarSearch, setTopbarSearch] = useState('');
 
   const getSelectedVoice = useCallback(() => Number(user?.accessibility?.voice ?? 0), [user]);
 
@@ -440,13 +441,15 @@ export default function Listen() {
     }
   }, [fables, awardedItems, awardXP, playTrack]);
 
-  // Persist read proverbs to localStorage
+  // Load read proverbs from backend
   useEffect(() => {
-    const stored = localStorage.getItem('readProverbs');
-    if (stored) {
-      try { setFlippedCards(new Set(JSON.parse(stored))); } catch { /* ignore */ }
-    }
-  }, []);
+    if (!user?.id) return;
+    const loadReadProverbs = async () => {
+      const items = await fetchUserActivityItems('proverb');
+      setFlippedCards(new Set(items));
+    };
+    loadReadProverbs();
+  }, [user?.id, fetchUserActivityItems]);
 
   const handleFlipCard = useCallback((proverbId) => {
     setFlippedCards(prev => {
@@ -457,7 +460,6 @@ export default function Listen() {
         next.add(proverbId);
         trackActivity?.('proverb', String(proverbId), {});
       }
-      localStorage.setItem('readProverbs', JSON.stringify([...next]));
       return next;
     });
   }, [trackActivity]);
@@ -507,24 +509,6 @@ export default function Listen() {
   // Reset to page 1 when filter or sort changes
   useEffect(() => { setProverbPage(1); }, [proverbFilter, proverbSort]);
 
-  const visibleProverbs = useMemo(() => {
-    let result = [...proverbs];
-    // Filter
-    if (proverbFilter === 'read')   result = result.filter(p => flippedCards.has(p.id));
-    if (proverbFilter === 'unread') result = result.filter(p => !flippedCards.has(p.id));
-    // Sort
-    if (proverbSort === 'alphabetical') result.sort((a, b) => a.rw.localeCompare(b.rw));
-    if (proverbSort === 'read-first')   result.sort((a, b) => (flippedCards.has(b.id) ? 1 : 0) - (flippedCards.has(a.id) ? 1 : 0));
-    if (proverbSort === 'unread-first') result.sort((a, b) => (flippedCards.has(a.id) ? 1 : 0) - (flippedCards.has(b.id) ? 1 : 0));
-    return result.slice(0, proverbPage * PROVERBS_PER_PAGE);
-  }, [proverbs, proverbPage, proverbFilter, proverbSort, flippedCards]);
-
-  const filteredProverbCount = useMemo(() => {
-    if (proverbFilter === 'read')   return proverbs.filter(p => flippedCards.has(p.id)).length;
-    if (proverbFilter === 'unread') return proverbs.filter(p => !flippedCards.has(p.id)).length;
-    return proverbs.length;
-  }, [proverbs, proverbFilter, flippedCards]);
-
   const formatTime = (secs) => {
     if (!secs || !Number.isFinite(secs)) return "0:00";
     const m = Math.floor(secs / 60);
@@ -534,8 +518,47 @@ export default function Listen() {
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+  const filteredFables = useMemo(() => {
+    if (!topbarSearch.trim()) return fables;
+    const query = topbarSearch.toLowerCase();
+    return fables.filter(f => 
+      (f.title || '').toLowerCase().includes(query) || 
+      (f.narrator || '').toLowerCase().includes(query) || 
+      (f.genre || '').toLowerCase().includes(query)
+    );
+  }, [fables, topbarSearch]);
+
+  const filteredProverbs = useMemo(() => {
+    if (!topbarSearch.trim()) return proverbs;
+    const query = topbarSearch.toLowerCase();
+    return proverbs.filter(p => 
+      (p.rw || '').toLowerCase().includes(query) || 
+      (p.en || '').toLowerCase().includes(query) || 
+      (p.fr || '').toLowerCase().includes(query) || 
+      (p.meaning || '').toLowerCase().includes(query)
+    );
+  }, [proverbs, topbarSearch]);
+
+  const visibleProverbs = useMemo(() => {
+    let result = [...filteredProverbs];
+    // Filter
+    if (proverbFilter === 'read')   result = result.filter(p => flippedCards.has(p.id));
+    if (proverbFilter === 'unread') result = result.filter(p => !flippedCards.has(p.id));
+    // Sort
+    if (proverbSort === 'alphabetical') result.sort((a, b) => a.rw.localeCompare(b.rw));
+    if (proverbSort === 'read-first')   result.sort((a, b) => (flippedCards.has(b.id) ? 1 : 0) - (flippedCards.has(a.id) ? 1 : 0));
+    if (proverbSort === 'unread-first') result.sort((a, b) => (flippedCards.has(a.id) ? 1 : 0) - (flippedCards.has(b.id) ? 1 : 0));
+    return result.slice(0, proverbPage * PROVERBS_PER_PAGE);
+  }, [filteredProverbs, proverbPage, proverbFilter, proverbSort, flippedCards]);
+
+  const filteredProverbCount = useMemo(() => {
+    if (proverbFilter === 'read')   return filteredProverbs.filter(p => flippedCards.has(p.id)).length;
+    if (proverbFilter === 'unread') return filteredProverbs.filter(p => !flippedCards.has(p.id)).length;
+    return filteredProverbs.length;
+  }, [filteredProverbs, proverbFilter, flippedCards]);
+
   return (
-    <Layout searchPlaceholder={t('search.placeholder')}>
+    <Layout searchPlaceholder={t('search.placeholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <audio
         ref={audioRef}
         onTimeUpdate={handleTimeUpdate}
@@ -588,7 +611,7 @@ export default function Listen() {
               <span className="listen-view-all">{t('listen.viewAll')}</span>
             </div>
             <div className="fable-cards">
-              {fables.map((fable, i) => (
+              {filteredFables.map((fable, i) => (
                 <div key={i} className="fable-card" onClick={() => handleFableClick(fable)} style={{ cursor: 'pointer' }}>
                   <div className="fable-thumb">
                     <img src={fable.image} alt={fable.title} />

@@ -2,20 +2,13 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import riddlesData from '../data/riddles.json';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
+import { useAuth } from '../contexts/AuthContext';
 import './RiddlePopup.css';
 
 const INTERVAL_MS = 30000;
 const PREF_KEY    = 'riddlePreference';   // 'yes' | 'no' | 'maybe'
-const SHOWN_KEY   = 'riddleShownIds';
 const PAUSED_KEY  = 'riddlePaused';       // 'true' | null
 
-function loadShown() {
-  try { return new Set(JSON.parse(sessionStorage.getItem(SHOWN_KEY) || '[]')); }
-  catch { return new Set(); }
-}
-function saveShown(set) {
-  sessionStorage.setItem(SHOWN_KEY, JSON.stringify([...set]));
-}
 function pickNext(shownIds, riddles) {
   const unseen = riddles.filter(r => !shownIds.has(r.id));
   const pool   = unseen.length > 0 ? unseen : riddles;
@@ -42,7 +35,8 @@ function i18n(language, en, fr, rw) {
 
 export default function RiddlePopup() {
   const { language } = useLanguage();
-  const { trackActivity } = useGamificationContext();
+  const { trackActivity, fetchUserActivityItems } = useGamificationContext();
+  const { user } = useAuth();
   const riddles = riddlesData.ibisakuzo;
 
   // 'ask' = preference prompt | 'riddle' = showing a riddle | 'hidden' = user said no
@@ -58,11 +52,11 @@ export default function RiddlePopup() {
 
   // riddle interaction states
   const [userAnswer, setUserAnswer] = useState('');
-  const [verdict, setVerdict]       = useState(null); // null | 'correct' | 'wrong'
+  const [verdict, setVerdict]       = useState(null); // null | 'correct' | 'wrong' | 'idk'
   const [revealed, setRevealed]     = useState(false); // for 'maybe' mode
 
   const timerRef    = useRef(null);
-  const shownRef    = useRef(loadShown());
+  const shownRef    = useRef(new Set());
   const showNextRef = useRef(null); // filled after showNext is defined
   const [paused, setPaused] = useState(() => localStorage.getItem(PAUSED_KEY) === 'true');
 
@@ -85,7 +79,6 @@ export default function RiddlePopup() {
   const showNext = useCallback(() => {
     const next = pickNext(shownRef.current, riddles);
     shownRef.current = new Set([...shownRef.current, next.id]);
-    saveShown(shownRef.current);
     setCurrent(next);
     setUserAnswer('');
     setVerdict(null);
@@ -95,6 +88,16 @@ export default function RiddlePopup() {
 
   // Keep ref in sync so interval callbacks always call latest version
   useEffect(() => { showNextRef.current = showNext; }, [showNext]);
+
+  // Load shown riddles from backend when user changes
+  useEffect(() => {
+    if (!user?.id) return;
+    const loadShownRiddles = async () => {
+      const items = await fetchUserActivityItems('riddle');
+      shownRef.current = new Set(items);
+    };
+    loadShownRiddles();
+  }, [user?.id, fetchUserActivityItems]);
 
   // Boot: ask preference after 4s if not yet set, else start cycling
   useEffect(() => {
@@ -168,26 +171,32 @@ export default function RiddlePopup() {
     setTimeout(showNext, 400);
   };
 
+  const handleIdk = () => {
+    setVerdict('idk');
+    trackActivity?.('riddle', current.id, { revealed: true });
+  };
+
   // ── Labels ──
   const L = {
     badge:       i18n(language, 'Riddle', 'Devinette', 'Igissakuzo'),
     askTitle:    i18n(language, 'Riddles await you!', 'Des devinettes vous attendent\u00a0!', 'Ibisakuzo biraguteye\u00a0!'),
-    askSub:      i18n(language, 'Are you in the mood for some Rwandan riddles?', 'Êtes-vous prêt pour des devinettes rwandaises\u00a0?', 'Urashaka gukina ibisakuzo byo u Rwanda?'),
-    yes:         i18n(language, "Yes, let's go!", 'Oui, allons-y\u00a0!', 'Yego, tugiye!'),
-    no:          i18n(language, 'Not now', 'Pas maintenant', 'Oya, nta bushake'),
-    maybe:       i18n(language, "I'm not sure — show me", "Je ne sais pas — montrez-moi", 'Simbizi — mbereke'),
+    askSub:      i18n(language, 'Are you in the mood for some Rwandan riddles?', 'Êtes-vous prêt pour des devinettes rwandaises\u00a0?', 'Urashaka gukina ibisakuzo byo mu Rwanda?'),
+    yes:         i18n(language, "Yes, let's go!", 'Oui, allons-y\u00a0!', 'Yego, twagiye!'),
+    no:          i18n(language, 'Not now', 'Pas maintenant', 'Oya, nta byonshaka'),
+    maybe:       i18n(language, "I'm not sure — show me", "Je ne sais pas — montrez-moi", 'Simbizi — mbwira'),
     yourAnswer:  i18n(language, 'Your answer…', 'Votre réponse…', 'Igisubizo cyawe…'),
     submit:      i18n(language, 'Submit', 'Envoyer', 'Ohereza'),
-    hooray:      i18n(language, '🎉 Hooray! Correct!', '🎉 Bravo\u00a0! Bonne réponse\u00a0!', '🎉 Ni byo! Neza cyane!'),
-    oops:        i18n(language, 'Oops! The answer is:', 'Oups\u00a0! La réponse est\u00a0:', 'Ntibyo! Igisubizo ni:'),
+    hooray:      i18n(language, '🎉 Hooray! Correct!', '🎉 Bravo\u00a0! Bonne réponse\u00a0!', '🎉 Yegoooo!'),
+    oops:        i18n(language, 'Oops! The answer is:', 'Oups\u00a0! La réponse est\u00a0:', 'Igisubizo ni:'),
+    idkLabel:    i18n(language, "I don't know", 'Je ne sais pas', 'Ngicyo'),
     adventure:   i18n(language, 'Continue adventuring →', 'Continuer l\'aventure →', 'Komeza urugendo →'),
     reveal:      i18n(language, 'Show me the answer', 'Me montrer la réponse', 'Mbwira igisubizo'),
     answer:      i18n(language, 'Answer', 'Réponse', 'Igisubizo'),
     close:       i18n(language, 'Dismiss', 'Fermer', 'Funga'),
     pause:       i18n(language, 'Pause riddles', 'Mettre en pause', 'Hagarika ibisakuzo'),
-    resume:      i18n(language, '▶ Resume riddles', '▶ Reprendre les devinettes', '▶ Subira ku bisakuzo'),
+    resume:      i18n(language, '▶ Resume riddles', '▶ Reprendre les devinettes', '▶ Subira mu bisakuzo'),
     paused:      i18n(language, 'Riddles paused', 'Devinettes en pause', 'Ibisakuzo byahagaritswe'),
-    next:        i18n(language, 'Next riddle', 'Devinette suivante', 'Igissakuzo gikurikira'),
+    next:        i18n(language, 'Next riddle', 'Devinette suivante', 'Igisakuzo gikurikira'),
     source:      `#${current?.source_no}`,
   };
 
@@ -195,7 +204,6 @@ export default function RiddlePopup() {
 
   const riddleText = current ? i18n(language, current.en, current.fr, current.rw) : '';
   const answerText = current ? i18n(language, current.answer_en, current.answer_fr, current.answer_rw) : '';
-
   return (
     <>
       <div
@@ -252,18 +260,21 @@ export default function RiddlePopup() {
 
             {/* YES mode — type your answer */}
             {pref === 'yes' && !verdict && (
-              <div className="riddle-popup__input-row">
-                <input
-                  className="riddle-popup__input"
-                  type="text"
-                  placeholder={L.yourAnswer}
-                  value={userAnswer}
-                  onChange={e => setUserAnswer(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                  autoFocus
-                />
-                <button className="riddle-popup__submit" onClick={handleSubmit}>{L.submit}</button>
-              </div>
+              <>
+                <div className="riddle-popup__input-row">
+                  <input
+                    className="riddle-popup__input"
+                    type="text"
+                    placeholder={L.yourAnswer}
+                    value={userAnswer}
+                    onChange={e => setUserAnswer(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+                    autoFocus
+                  />
+                  <button className="riddle-popup__submit" onClick={handleSubmit}>{L.submit}</button>
+                </div>
+                <button className="riddle-popup__idk-btn" onClick={handleIdk}>{L.idkLabel}</button>
+              </>
             )}
 
             {/* YES mode — verdict */}
@@ -276,13 +287,15 @@ export default function RiddlePopup() {
               </div>
             )}
 
-            {pref === 'yes' && verdict === 'wrong' && (
+            {pref === 'yes' && (verdict === 'wrong' || verdict === 'idk') && (
               <div className="riddle-popup__verdict riddle-popup__verdict--wrong">
-                <p className="riddle-popup__verdict-msg">{L.oops}</p>
+                <p className="riddle-popup__verdict-msg">{verdict === 'idk' ? L.oops : L.oops}</p>
                 <p className="riddle-popup__verdict-answer">{current.answer_rw}</p>
                 {language !== 'rw' && <p className="riddle-popup__verdict-gloss">{answerText}</p>}
                 <button className="riddle-popup__btn riddle-popup__btn--maybe" onClick={() => {
-                  trackActivity?.('riddle', current.id, { correct: false, revealed: true });
+                  if (verdict === 'wrong') {
+                    trackActivity?.('riddle', current.id, { correct: false, revealed: true });
+                  }
                   handleNext();
                 }}>{L.adventure}</button>
               </div>

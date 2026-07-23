@@ -808,3 +808,57 @@
     flex-direction: column;
   }
 }
+/* Add this to Explore.css — styles for the "no results" empty state */
+
+.archive-empty-state {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+.archive-empty-illustration {
+  width: 220px;
+  height: auto;
+  margin-bottom: 1.25rem;
+  user-select: none;
+  pointer-events: none;
+}
+
+.archive-empty-title {
+  margin: 0 0 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #2C1A14;
+}
+
+.archive-empty-desc {
+  margin: 0 0 1.75rem;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #6F5B55;
+  max-width: 32rem;
+}
+
+.archive-empty-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
+  border: 1.5px solid #E3C9AC;
+  background: #FDFBF7;
+  color: #8D493A;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.archive-empty-clear-btn:hover {
+  background: #FBF0DF;
+  border-color: #D9A06B;
+}

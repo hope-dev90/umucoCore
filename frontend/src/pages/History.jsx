@@ -69,9 +69,17 @@ const historyItems = [
 
 export default function History() {
   const { t, language } = useLanguage();
+  const [topbarSearch, setTopbarSearch] = React.useState("");
+
+  const filteredHistoryItems = historyItems.filter(item => {
+    const query = topbarSearch.toLowerCase();
+    return getLocalizedText(item.title, language).toLowerCase().includes(query) || 
+           item.type.toLowerCase().includes(query) || 
+           getLocalizedText(item.date, language).toLowerCase().includes(query);
+  });
 
   return (
-    <Layout>
+    <Layout searchPlaceholder={t('history.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="history-page">
         <div className="history-header">
           <h1>{t('history.title')}</h1>
@@ -94,7 +102,7 @@ export default function History() {
         </div>
 
         <div className="history-list">
-          {historyItems.map((item, index) => {
+          {filteredHistoryItems.map((item, index) => {
             const icon = TYPE_ICONS[item.type] || TYPE_ICONS.Article;
             const typeKey = `history.type${item.type}`;
             return (

@@ -9,14 +9,14 @@
  * so the app doesn't need to fetch on every load.
  */
 
-import cachedUrls from '../data/commonsImageCache.json';
+import cachedUrls from "../data/commonsImageCache.json";
 
-const SESSION_KEY = 'commons_image_cache';
+const SESSION_KEY = "commons_image_cache";
 
 /** Read runtime cache from sessionStorage */
 function getRuntimeCache() {
   try {
-    return JSON.parse(sessionStorage.getItem(SESSION_KEY) || '{}');
+    return JSON.parse(sessionStorage.getItem(SESSION_KEY) || "{}");
   } catch {
     return {};
   }
@@ -48,9 +48,7 @@ async function fetchFromCommons(query) {
     const res = await fetch(url);
     const data = await res.json();
     const pages = Object.values(data?.query?.pages || {});
-    const first = pages.find(
-      (p) => p.imageinfo && p.imageinfo[0]?.url
-    );
+    const first = pages.find((p) => p.imageinfo && p.imageinfo[0]?.url);
     return first?.imageinfo[0]?.url ?? null;
   } catch {
     return null;
