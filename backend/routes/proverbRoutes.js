@@ -5,8 +5,8 @@ const router = Router();
 
 router.get('/', async (req, res) => {
   try {
-    const { language, category } = req.query;
-    const proverbs = await ProverbModel.getAll({ language, category });
+    const { language, category, limit } = req.query;
+    const proverbs = await ProverbModel.getAll({ language, category, limit: limit ? parseInt(limit) : undefined });
     res.json({ proverbs, total: proverbs.length });
   } catch (err) {
     console.error(err);

@@ -54,25 +54,41 @@ export default function Saved() {
   };
 
   const handlePlay = (savedItem) => {
-    const payload = {
-      itemType: savedItem.item_type,
-      itemId: savedItem.item_id,
-      itemTitle: savedItem.item_title,
-      itemSubtitle: savedItem.item_subtitle,
-      itemImage: savedItem.item_image,
-      itemMeta: savedItem.item_meta,
-    };
-
-    if (savedItem.item_type === 'audio') {
-      localStorage.setItem('pendingAudioPlay', JSON.stringify(payload));
-      navigate('/listen');
-    } else if (savedItem.item_type === 'video') {
-      localStorage.setItem('pendingVideoPlay', JSON.stringify(payload));
-      navigate('/videos');
-    } else if (savedItem.item_type === 'story' || savedItem.item_type === 'heritage') {
-      localStorage.setItem('pendingStoryRead', JSON.stringify(payload));
-      navigate('/explore');
+    const type = (savedItem.item_type || '').toLowerCase();
+    if (type === 'audio') {
+      navigate(`/listen?play=${savedItem.item_id}`);
+    } else if (type === 'video') {
+      navigate(`/videos?play=${savedItem.item_id}`);
+    } else if (type === 'collection') {
+      const slug = savedItem.item_meta?.slug;
+      navigate(slug ? `/collections?open=${slug}` : '/collections');
+    } else if (type === 'story' || type === 'heritage') {
+      navigate(`/explore?open=${savedItem.item_id}`);
     }
+  };
+
+  const getTypeLabel = (type) => {
+    const t_type = (type || '').toLowerCase();
+    if (t_type === 'audio') return language === 'rw' ? 'Umva' : 'Audio';
+    if (t_type === 'video') return language === 'rw' ? 'Video' : 'Video';
+    if (t_type === 'collection') return language === 'rw' ? 'Amakusanyirizo' : 'Collection';
+    return language === 'rw' ? 'Inkuru' : 'Story';
+  };
+
+  const getActionLabel = (type) => {
+    const t_type = (type || '').toLowerCase();
+    if (t_type === 'audio') return language === 'rw' ? 'Umva' : 'Listen';
+    if (t_type === 'video') return language === 'rw' ? 'Reba' : 'Watch';
+    if (t_type === 'collection') return language === 'rw' ? 'Reba' : 'View';
+    return language === 'rw' ? 'Soma' : 'Read';
+  };
+
+  const getTypeIcon = (type) => {
+    const t_type = (type || '').toLowerCase();
+    if (t_type === 'audio') return '♪';
+    if (t_type === 'video') return '▶';
+    if (t_type === 'collection') return '🏺';
+    return '📄';
   };
 
   const formatStorage = (mb) => {
@@ -126,20 +142,13 @@ export default function Saved() {
             ) : (
               <div className="saves-grid">
                 {filteredItems.map((s, i) => (
-                  <div key={s.id || i} className="save-card">
+                  <div key={s.id || i} className="save-card" onClick={() => handlePlay(s)}>
                     <div className="save-card-img">
                       {s.item_image ? (
                         <img src={s.item_image} alt={s.item_title} />
                       ) : (
-                        <div className="save-card-img-placeholder" style={{
-                          background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'white',
-                          fontSize: '1.5rem'
-                        }}>
-                          {s.item_type === 'audio' ? '\u266B' : s.item_type === 'video' ? '\uD83C\uDFAC' : '\uD83D\uDCC4'}
+                        <div className="save-card-img-placeholder">
+                          {getTypeIcon(s.item_type)}
                         </div>
                       )}
                       <span className={`save-status-badge ${s.item_meta?.offline ? 'badge-offline' : 'badge-online'}`}>
@@ -148,15 +157,15 @@ export default function Saved() {
                     </div>
                     <div className="save-card-body">
                       <div className="save-card-cat">
-                        {s.item_type === 'audio' ? (language === 'rw' ? 'Umva' : 'Audio') : s.item_type === 'video' ? (language === 'rw' ? 'Video' : 'Video') : (language === 'rw' ? 'Inkuru' : 'Story')}
+                        {getTypeLabel(s.item_type)}
                         {s.item_subtitle ? ` • ${s.item_subtitle}` : ''}
                       </div>
                       <div className="save-card-title">{s.item_title}</div>
                       <div className="save-card-actions">
-                        <button className="save-card-action-btn" onClick={() => handlePlay(s)}>
-                          {s.item_type === 'audio' ? (language === 'rw' ? 'Umva' : 'Listen') : s.item_type === 'video' ? (language === 'rw' ? 'Reba' : 'Watch') : (language === 'rw' ? 'Soma' : 'Read')}
+                        <button className="save-card-action-btn" onClick={(e) => { e.stopPropagation(); handlePlay(s); }}>
+                          {getActionLabel(s.item_type)}
                         </button>
-                        <button className="save-card-delete" onClick={() => handleRemove(s.item_id)}>🗑</button>
+                        <button className="save-card-delete" onClick={(e) => { e.stopPropagation(); handleRemove(s.item_id); }}>🗑</button>
                       </div>
                     </div>
                   </div>

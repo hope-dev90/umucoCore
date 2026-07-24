@@ -10,7 +10,7 @@ function normalizeCollectible(collectible) {
 }
 
 export function useGamification() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, getToken } = useAuth();
   const [badges, setBadges] = useState([]);
   const [userBadges, setUserBadges] = useState([]);
   const [collectibles, setCollectibles] = useState([]);
@@ -21,7 +21,7 @@ export function useGamification() {
   const [error, setError] = useState(null);
 
   const apiBase = 'http://localhost:5000/api/gamification';
-  const token = localStorage.getItem('token');
+  const token = getToken();
   const headers = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${token}`,

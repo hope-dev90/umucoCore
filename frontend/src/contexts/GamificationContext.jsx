@@ -4,10 +4,6 @@ import { gamificationEvents, GE } from '../utils/gamificationEvents';
 
 const GamificationContext = createContext(null);
 
-const MAX_PENDING = 20;
-const PENDING_KEY = 'pendingXPAwards';
-const LAST_LOGIN_KEY = 'lastLoginDate';
-
 const API = 'http://localhost:5000/api/gamification';
 
 function getHeaders() {
@@ -36,35 +32,11 @@ export function GamificationProvider({ children }) {
   const [serviceAvailable, setServiceAvailable] = useState(true);
   const [streak, setStreak]                   = useState(user?.currentStreak || 0);
   const [bestStreak, setBestStreak]           = useState(user?.bestStreak || 0);
+  const [lastLoginDate, setLastLoginDate]     = useState(null);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
 
   const markService = (ok) => setServiceAvailable(ok);
-
-  const queuePending = (amount, reason) => {
-    try {
-      const raw = localStorage.getItem(PENDING_KEY);
-      const arr = raw ? JSON.parse(raw) : [];
-      const next = [...arr, { amount, reason, ts: Date.now() }].slice(-MAX_PENDING);
-      localStorage.setItem(PENDING_KEY, JSON.stringify(next));
-    } catch (_) {}
-  };
-
-  const drainPending = useCallback(async () => {
-    try {
-      const raw = localStorage.getItem(PENDING_KEY);
-      if (!raw) return;
-      const arr = JSON.parse(raw);
-      if (!arr.length) return;
-      localStorage.removeItem(PENDING_KEY);
-      for (const item of arr) {
-        await fetch(`${API}/award-xp`, {
-          method: 'POST', headers: getHeaders(),
-          body: JSON.stringify({ amount: item.amount, reason: item.reason }),
-        }).catch(() => {});
-      }
-    } catch (_) {}
-  }, []);
 
   // ── Fetch functions ───────────────────────────────────────────────────────
 
@@ -111,7 +83,6 @@ export function GamificationProvider({ children }) {
     try {
       await Promise.all([fetchXP(), fetchBadges(), fetchCollectibles(), fetchLevels(), fetchLeaderboard()]);
       markService(true);
-      await drainPending();
     } catch {
       markService(false);
     } finally {
@@ -123,12 +94,12 @@ export function GamificationProvider({ children }) {
 
   const runDailyLogin = useCallback(async () => {
     const today = new Date().toDateString();
-    if (localStorage.getItem(LAST_LOGIN_KEY) === today) return;
+    if (lastLoginDate === today) return;
     try {
       const r = await fetch(`${API}/daily-login`, { method: 'POST', headers: getHeaders() });
       if (!r.ok) return;
       const d = await r.json();
-      localStorage.setItem(LAST_LOGIN_KEY, today);
+      setLastLoginDate(today);
       const newStreak    = d.data?.currentStreak ?? d.data?.streak ?? 0;
       const newBestStreak = d.data?.bestStreak ?? 0;
       setStreak(newStreak);
@@ -144,7 +115,7 @@ export function GamificationProvider({ children }) {
       await fetchBadges();
       markService(true);
     } catch { markService(false); }
-  }, []); // eslint-disable-line
+  }, [lastLoginDate]); // eslint-disable-line
 
   // ── Initialize when user is available ────────────────────────────────────
 
@@ -181,11 +152,9 @@ export function GamificationProvider({ children }) {
         await fetchXP();
       }
       markService(true);
-      await drainPending();
       return d;
     } catch {
       markService(false);
-      queuePending(amount, reason);
     }
   }, [user?.level]); // eslint-disable-line
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useGamificationContext } from '../contexts/GamificationContext';
 import { StoryReadModal } from '../components/Gamification/StoryReadModal';
 import './Explore.css';
 import HeritageMap, { hasValidCoordinates } from '../components/Map/HeritageMap';
@@ -20,6 +21,7 @@ import craneStoryImg from '../assets/listen/crane-story.jpg';
 import moonStoryImg from '../assets/listen/moon-story.jpg';
 import ruganzuImg from '../assets/listen/ruganzu.png';
 import notFoundImg from '../assets/explore/notfound.png';
+import { trackView } from '../utils/trackView';
 
 const fallbackImages = [nyanzaImg, buhangaImg, intoreImg, weavingImg, imigongoImg, artifactImg];
 
@@ -348,6 +350,7 @@ const normalizePlaceValue = (value) => String(value ?? '').trim().toLowerCase();
 export default function Explore() {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const { fetchUserActivityItems, trackActivity } = useGamificationContext();
 
   // Some i18n setups return the key itself (e.g. "explore.clearFilters")
   // when a translation is missing, instead of '' or undefined. That makes
@@ -368,13 +371,20 @@ export default function Explore() {
   const [selectedAudio, setSelectedAudio] = useState(null);
   const [imageLoadErrors, setImageLoadErrors] = useState({});
   const commonsImages = commonsImagesCached;
-  const [completedStoryIds, setCompletedStoryIds] = useState(() => {
-    try {
-      return new Set(JSON.parse(localStorage.getItem(COMPLETED_STORIES_KEY) || '[]'));
-    } catch {
-      return new Set();
+  const [completedStoryIds, setCompletedStoryIds] = useState(new Set());
+
+  // Fetch completed story ids from backend
+  useEffect(() => {
+    if (!user?.id) {
+      setCompletedStoryIds(new Set());
+      return;
     }
-  });
+    const loadCompleted = async () => {
+      const items = await fetchUserActivityItems('story');
+      setCompletedStoryIds(new Set(items.map(id => String(id))));
+    };
+    loadCompleted();
+  }, [user?.id, fetchUserActivityItems]);
 
   const activeExplorerType = user?.explorerType || user?.explorer_type;
   const isMusicExplorer = activeExplorerType === 'music-explorer';
@@ -554,21 +564,7 @@ export default function Explore() {
     }
   }, [t, activeRegion, activeEras, clearAllFilters]);
 
-  // Handle pending story read from Saved page
-  useEffect(() => {
-    const pending = localStorage.getItem('pendingStoryRead');
-    if (!pending) return;
-    try {
-      const payload = JSON.parse(pending);
-      localStorage.removeItem('pendingStoryRead');
-      const story = heritageItems.find(h => String(h.id) === String(payload.itemId));
-      if (story) {
-        setSelectedStory(story);
-      }
-    } catch {
-      localStorage.removeItem('pendingStoryRead');
-    }
-  }, [heritageItems]);
+  // Removed pendingStoryRead localStorage usage
 
   const audioForExplorer = useMemo(() => {
     if (!isMusicExplorer || !audioItems.length) return [];
@@ -636,6 +632,14 @@ export default function Explore() {
   const handleReadMore = useCallback((e, item) => {
     e.stopPropagation(); // don't trigger map logic
     setSelectedStory(item);
+    trackView({
+      type: 'Article',
+      itemId: item.id,
+      title: item.title,
+      image: commonsImagesCached[item.title] || item.image || '',
+      category: item.category || '',
+      location: item.location || '',
+    });
   }, []);
 
   const handleCardImageError = useCallback((title) => {
@@ -646,13 +650,19 @@ export default function Explore() {
     const storyId = getStoryId(story);
     if (!storyId) return;
 
+    // Call trackActivity to mark as completed in backend
+    trackActivity('story', storyId, { 
+      title: story.title,
+      category: story.category 
+    });
+
+    // Update local state
     setCompletedStoryIds(prev => {
       const next = new Set(prev);
       next.add(storyId);
-      localStorage.setItem(COMPLETED_STORIES_KEY, JSON.stringify([...next]));
       return next;
     });
-  }, []);
+  }, [trackActivity]);
 
   // Click-to-view: immediately show a loading popup, then fetch the
   // nearest location from the DB and replace its content.

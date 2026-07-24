@@ -79,6 +79,30 @@
   flex-shrink: 0;
 }
 
+.history-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.history-empty {
+  padding: 60px 24px;
+  text-align: center;
+}
+
+.history-empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.history-empty p {
+  font-size: 14px;
+  color: #8A7B73;
+  margin: 0;
+}
+
 .history-content {
   flex: 1;
   display: flex;

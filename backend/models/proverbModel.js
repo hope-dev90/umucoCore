@@ -16,16 +16,31 @@ const ProverbModel = {
     }
 
     query += ` ORDER BY created_at DESC`;
+
+    if (filters.limit) {
+      params.push(filters.limit);
+      query += ` LIMIT $${params.length}`;
+    }
+
     const result = await pool.query(query, params);
     return result.rows;
   },
 
   async getFeatured(limit = 10) {
-    const result = await pool.query(
+    // First try featured proverbs
+    const featured = await pool.query(
       `SELECT * FROM proverbs WHERE is_featured = true ORDER BY created_at DESC LIMIT $1`,
       [limit]
     );
-    return result.rows;
+    // If not enough featured, return all proverbs up to limit
+    if (featured.rows.length < 5) {
+      const all = await pool.query(
+        `SELECT * FROM proverbs ORDER BY created_at DESC LIMIT $1`,
+        [limit]
+      );
+      return all.rows;
+    }
+    return featured.rows;
   },
 
   async getById(id) {

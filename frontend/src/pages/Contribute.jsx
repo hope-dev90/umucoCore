@@ -17,6 +17,7 @@ import './Contribute.css';
 import insightWeaving from '../assets/explore/weaving_agaseke.jpg';
 import insightInanga from '../assets/home/inanga.jpg';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import { getLocalizedText } from '../utils/i18n';
 
 const IMG = {
@@ -69,6 +70,7 @@ const insights = [
 
 export default function Contribute() {
   const { t, language } = useLanguage();
+  const { getToken } = useAuth();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [topbarSearch, setTopbarSearch] = useState("");
@@ -124,7 +126,7 @@ export default function Contribute() {
       return;
     }
     try {
-      const token = localStorage.getItem("token");
+      const token = getToken();
       const endpoint = formData.type === 'audio' ? '/api/contributions/upload-audio'
         : formData.type === 'photo' ? '/api/contributions/capture-photo'
         : formData.type === 'video' ? '/api/contributions/upload-video'

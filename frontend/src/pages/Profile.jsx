@@ -54,7 +54,7 @@ function getRecentMarkCopy(item) {
 }
 
 export default function Profile() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, getToken } = useAuth();
   const { t } = useLanguage();
   const { badges, userBadges, collectibles, userCollectibles, loading, getNextLevelData } = useGamification();
   const [editMode, setEditMode] = useState(false);
@@ -63,10 +63,8 @@ export default function Profile() {
   const [profileImage, setProfileImage] = useState(user?.profileImage || user?.avatar || null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
-  const [recentMarks, setRecentMarks] = useState(() => getRewardFeed().slice(0, 3));
+  const [recentMarks, setRecentMarks] = useState([]);
   const fileInputRef = useRef(null);
-
-  useEffect(() => subscribeRewardFeed((items) => setRecentMarks(items.slice(0, 3))), []);
 
   useEffect(() => {
     setName(user?.name || '');
@@ -97,7 +95,7 @@ export default function Profile() {
     try {
       const formData = new FormData();
       formData.append('avatar', file);
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const response = await fetch('http://localhost:5000/api/users/avatar', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
@@ -121,7 +119,7 @@ export default function Profile() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
       const trimmedName = name.trim();
       if (!trimmedName) throw new Error('Name is required');

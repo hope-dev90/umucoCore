@@ -416,10 +416,9 @@ function SignUpPage({ onNavigate }) {
         throw new Error(data.message || 'Verification failed');
       }
 
-      // Store the token and user in localStorage and AuthContext
+      // Store the token in localStorage and update AuthContext
       if (data.token && data.user) {
         localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
         const userToSet = { ...data.user, explorerType: data.user.explorerType || explorerType };
         updateUser(userToSet);
       }

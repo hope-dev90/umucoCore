@@ -3,28 +3,19 @@ import Layout from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Home.css';
 import nyanzeImage from '../assets/home/nyanza.jpg';
 import intoreImage from '../assets/home/intore.jpg';
 import kigeliImage from '../assets/home/kigeli.jpg';
 import inangaImage from '../assets/home/inanga.jpg';
 import ubudeheImage from '../assets/home/ubudehe.jpg';
-import { ArrowRight, Share2 } from 'lucide-react';
-import {
-  Headphones,
-  Plus,
-  Search,
-  FileText,
-  Music,
-  Video
-} from 'lucide-react';
-// Removed: these widgets are now in the persistent Layout panel
+import { ArrowRight, Share2, Headphones, Plus, Search, Music, Video, FileText } from 'lucide-react';
 import ExplorerTypeImage from '../components/ExplorerTypeImage';
 import { getHighlightForCategory, ALL_STORIES } from '../data/stories';
 import { DashboardStoryView } from '../components/Gamification/DashboardStoryView';
-import { useLocation } from 'react-router-dom';
 import { UmucoGlyph } from '../components/UmucoGlyphs';
+import { trackView } from '../utils/trackView';
 
 const EXPLORER_TYPES = [
   { id: 'warrior',         label: 'Warrior',          tagline: 'Battles, legends & brave deeds'   },
@@ -36,6 +27,7 @@ const EXPLORER_TYPES = [
 
 function ExplorerPickerModal({ onSave }) {
   const { t } = useLanguage();
+  const { getToken } = useAuth();
   const [selected, setSelected] = useState(null);
   const [saving, setSaving]   = useState(false);
   const [error, setError] = useState('');
@@ -47,7 +39,7 @@ function ExplorerPickerModal({ onSave }) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000);
     try {
-      const token = localStorage.getItem('token');
+      const token = getToken();
       const response = await fetch('http://localhost:5000/api/users/explorer-type', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -126,7 +118,7 @@ const EXPLORER_CATEGORY = {
 };
 
 export default function Home() {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, getToken } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [topbarSearch, setTopbarSearch] = useState("");
@@ -274,11 +266,32 @@ export default function Home() {
            item.meta.toLowerCase().includes(query);
   });
 
-  const recentItems = [
-    { icon: <Music    size={16} />, type: 'audio', title: t('dashboard.recent.oralHistory'), date: t('dashboard.recent.oralHistoryDate') },
-    { icon: <Video    size={16} />, type: 'video', title: t('dashboard.recent.intoreDance'), date: t('dashboard.recent.intoreDanceDate') },
-    { icon: <FileText size={16} />, type: 'doc',   title: t('dashboard.recent.letter'),      date: t('dashboard.recent.letterDate') },
-  ];
+  const [recentItems, setRecentItems] = useState([]);
+
+  // Fetch real recent views from history API
+  useEffect(() => {
+    const token = getToken();
+    if (!token || !user) return;
+    fetch('http://localhost:5000/api/history?limit=5', {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.items && data.items.length > 0) {
+          const TYPE_ICON_MAP = { Audio: <Music size={16} />, Video: <Video size={16} />, Article: <FileText size={16} />, Place: <FileText size={16} /> };
+          setRecentItems(data.items.slice(0, 5).map(item => ({
+            icon: TYPE_ICON_MAP[item.type] || <FileText size={16} />,
+            type: item.type === 'Audio' ? 'audio' : item.type === 'Video' ? 'video' : 'doc',
+            title: item.title,
+            date: new Date(item.viewedAt).toLocaleDateString(),
+            image: item.image || '',
+            category: item.category || item.type,
+            id: item.itemId,
+          })));
+        }
+      })
+      .catch(() => {});
+  }, [user]);
 
   const activityItems = [
     { label: t('dashboard.activity.viewedPalace'), time: t('dashboard.activity.dateMay16') },
@@ -371,6 +384,15 @@ export default function Home() {
       title,
       content: item.content || storyBodies[title] || item.body || 'This heritage note is ready to explore in the archive.',
       category: item.category || 'Discovery',
+    });
+    // Track every view — topic chip, explore card, recent item, etc.
+    trackView({
+      type: item.isAudio ? 'Audio' : 'Article',
+      itemId: item.id,
+      title,
+      image: item.image_url || item.image || '',
+      category: item.category || reason,
+      token: getToken(),
     });
     const key = `${reason}:${title}`;
     if (!awardedDashboardItems.has(key)) {

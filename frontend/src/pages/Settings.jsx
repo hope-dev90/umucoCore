@@ -49,7 +49,7 @@ export default function Settings() {
   const [reducedMotion, setReducedMotion] = useState(user?.accessibility?.reduceMotion ?? false);
   const [dateFormat, setDateFormat] = useState(user?.accessibility?.dateFormat ?? 'DD / MM / YYYY');
   const [timezone, setTimezone] = useState(user?.accessibility?.timezone ?? 'CAT');
-  const [cookieAnalytics, setCookieAnalytics] = useState(localStorage.getItem('cookie_analytics') !== 'false');
+  const [cookieAnalytics, setCookieAnalytics] = useState(true);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
   const [savingKey, setSavingKey] = useState('');
@@ -203,7 +203,6 @@ export default function Settings() {
   const handleCookiePrefs = () => {
     const next = !cookieAnalytics;
     setCookieAnalytics(next);
-    localStorage.setItem('cookie_analytics', String(next));
     showMessage(next ? 'Analytics cookies enabled' : 'Analytics cookies disabled');
   };
 

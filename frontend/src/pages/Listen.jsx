@@ -4,6 +4,7 @@ import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useLocation } from 'react-router-dom';
 import './Listen.css';
 import RuganzuImg from '../assets/listen/ruganzu.png';
 import craneImg from '../assets/listen/crane-story.jpg';
@@ -19,6 +20,7 @@ import warDrumsImg from '../assets/home/intore.jpg';
 import farmingImg from '../assets/home/ubudehe.jpg';
 import nyamashekeImg from '../assets/safari.jpg';
 import byivugoImg from '../assets/home/intore.jpg';
+import { trackView } from '../utils/trackView';
 
 // Map audio title keywords / categories to local image imports
 const AUDIO_IMAGE_MAP = {
@@ -205,21 +207,23 @@ export default function Listen() {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5000);
       try {
-        const res = await fetch("http://localhost:5000/api/proverbs/featured?limit=50", {
+        const res = await fetch("http://localhost:5000/api/proverbs?limit=100", {
           signal: controller.signal,
         });
         const data = await res.json();
         if (data.proverbs && data.proverbs.length > 0) {
-          setProverbs(
-            data.proverbs.map((p) => ({
-              id: p.id || `api-${Math.random().toString(36).slice(2, 9)}`,
-              rw: p.text || p.rw || '',
-              en: p.translation || p.en || p.text || '',
-              fr: p.fr || p.translation || p.text || '',
-              meaning: p.meaning || '',
-              source: p.source || "Rwandan oral tradition",
-            }))
-          );
+          const dbProverbs = data.proverbs.map((p) => ({
+            id: p.id || `api-${Math.random().toString(36).slice(2, 9)}`,
+            rw: p.text || p.rw || '',
+            en: p.translation || p.en || p.text || '',
+            fr: p.fr || p.translation || p.text || '',
+            meaning: p.meaning || '',
+            source: p.source || "Rwandan oral tradition",
+          }));
+          // Merge DB proverbs with local ones, DB takes precedence for duplicates
+          const dbIds = new Set(dbProverbs.map(p => String(p.rw)));
+          const localOnly = proverbsData.proverbs.filter(p => !dbIds.has(String(p.rw)));
+          setProverbs([...dbProverbs, ...localOnly]);
           return;
         }
       } catch {
@@ -233,18 +237,7 @@ export default function Listen() {
     fetchProverbs();
   }, [t]);
 
-  useEffect(() => {
-    const pending = localStorage.getItem('pendingAudioPlay');
-    if (!pending || fables.length === 0) return;
-    try {
-      const payload = JSON.parse(pending);
-      localStorage.removeItem('pendingAudioPlay');
-      const track = fables.find(f => String(f.id) === String(payload.itemId));
-      if (track) playTrack(track);
-    } catch {
-      localStorage.removeItem('pendingAudioPlay');
-    }
-  }, [fables]);
+  const location = useLocation();
 
   const handleAddToLibrary = useCallback(async (track) => {
     if (!user) {
@@ -373,6 +366,14 @@ export default function Listen() {
     }
   }, [fetchNarration, speakNarration, stopProverbSpeech, stopSpeech]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const playId = params.get('play');
+    if (!playId || fables.length === 0) return;
+    const track = fables.find(f => String(f.id) === String(playId));
+    if (track) playTrack(track);
+  }, [location.search, fables, playTrack]);
+
   const togglePlayPause = useCallback(() => {
     if (!currentTrack) {
       const ruganzuTrack = fables.find(f => f.title.includes("Ruganzu")) || fables[0];
@@ -424,6 +425,13 @@ export default function Listen() {
 
   const handleFableClick = useCallback((fable) => {
     playTrack(fable);
+    trackView({
+      type: 'Audio',
+      itemId: fable.id,
+      title: fable.title,
+      image: fable.image || '',
+      category: fable.category || 'Fable',
+    });
     if (!awardedItems.has(fable.title)) {
       awardXP(15, `Listened to story: ${fable.title}`);
       setAwardedItems(prev => new Set([...prev, fable.title]));
@@ -459,6 +467,16 @@ export default function Listen() {
       } else {
         next.add(proverbId);
         trackActivity?.('proverb', String(proverbId), {});
+        // Find proverb details for history tracking
+        const proverb = proverbsData?.proverbs?.find?.(p => String(p.id) === String(proverbId));
+        if (proverb) {
+          trackView({
+            type: 'Place',
+            itemId: proverbId,
+            title: proverb.en || proverb.rw || `Proverb #${proverbId}`,
+            category: 'Proverb',
+          });
+        }
       }
       return next;
     });

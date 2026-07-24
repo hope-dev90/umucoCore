@@ -3,10 +3,12 @@ import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useLocation } from 'react-router-dom';
 import './Videos.css';
 import IntoreImg from '../assets/home/intore.jpg';
 import AgasekeImg from '../assets/explore/weaving_agaseke.jpg';
 import ImigongoImg from '../assets/explore/imigongo.jpg';
+import { trackView } from '../utils/trackView';
 
 const fallbackImages = [IntoreImg, AgasekeImg, ImigongoImg];
 
@@ -62,18 +64,15 @@ export default function Videos() {
     fetchVideos();
   }, [t]);
 
+  const location = useLocation();
+
   useEffect(() => {
-    const pending = localStorage.getItem('pendingVideoPlay');
-    if (!pending || videos.length === 0) return;
-    try {
-      const payload = JSON.parse(pending);
-      localStorage.removeItem('pendingVideoPlay');
-      const video = videos.find(v => String(v.id) === String(payload.itemId));
-      if (video) playVideo(video);
-    } catch {
-      localStorage.removeItem('pendingVideoPlay');
-    }
-  }, [videos]);
+    const params = new URLSearchParams(location.search);
+    const playId = params.get('play');
+    if (!playId || videos.length === 0) return;
+    const video = videos.find(v => String(v.id) === String(playId));
+    if (video) playVideo(video);
+  }, [location.search, videos, playVideo]);
 
   const playVideo = useCallback((video) => {
     if (!video.videoUrl) {
@@ -118,6 +117,13 @@ export default function Videos() {
 
   const handleVideoClick = useCallback((video) => {
     playVideo(video);
+    trackView({
+      type: 'Video',
+      itemId: video.id,
+      title: video.title,
+      image: video.image || '',
+      category: video.genre || '',
+    });
     if (!awardedItems.has(video.title)) {
       awardXP(25, `Watched video: ${video.title}`);
       setAwardedItems(prev => new Set([...prev, video.title]));
