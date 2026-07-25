@@ -2,11 +2,22 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import riddlesData from '../data/riddles.json';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
-import { useAuth } from '../contexts/AuthContext';
 import './RiddlePopup.css';
 
 const INTERVAL_MS = 30000;
+const PREF_KEY    = 'riddlePreference';   // 'yes' | 'no' | 'maybe'
+const SHOWN_KEY   = 'riddleShownIds';
+const PAUSED_KEY  = 'riddlePaused';       // 'true' | null
+const MAYBE_UNTIL_KEY = 'riddleMaybeUntil';
+const MAYBE_DELAY_MS = 24 * 60 * 60 * 1000;
 
+function loadShown() {
+  try { return new Set(JSON.parse(sessionStorage.getItem(SHOWN_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+function saveShown(set) {
+  sessionStorage.setItem(SHOWN_KEY, JSON.stringify([...set]));
+}
 function pickNext(shownIds, riddles) {
   const unseen = riddles.filter(r => !shownIds.has(r.id));
   const pool   = unseen.length > 0 ? unseen : riddles;
@@ -33,52 +44,45 @@ function i18n(language, en, fr, rw) {
 
 export default function RiddlePopup() {
   const { language } = useLanguage();
-  const { trackActivity, fetchUserActivityItems } = useGamificationContext();
-  const { user } = useAuth();
+  const { trackActivity } = useGamificationContext();
   const riddles = riddlesData.ibisakuzo;
 
   // 'ask' = preference prompt | 'riddle' = showing a riddle | 'hidden' = user said no
-  const [phase, setPhase]     = useState('hidden');
-  const [pref, setPref]       = useState(null);
+  const [phase, setPhase]     = useState(() => {
+    const saved = localStorage.getItem(PREF_KEY);
+    if (saved === 'no') return 'hidden';
+    return saved ? 'riddle' : 'hidden'; // will be triggered by timer
+  });
+  const [pref, setPref]       = useState(() => localStorage.getItem(PREF_KEY) || null);
   const [visible, setVisible] = useState(false);
   const [animating, setAnimating] = useState(false);
   const [current, setCurrent] = useState(null);
 
   // riddle interaction states
   const [userAnswer, setUserAnswer] = useState('');
-  const [verdict, setVerdict]       = useState(null); // null | 'correct' | 'wrong' | 'idk'
+  const [verdict, setVerdict]       = useState(null); // null | 'correct' | 'wrong'
   const [revealed, setRevealed]     = useState(false); // for 'maybe' mode
 
-  const timerRef        = useRef(null);
-  const shownRef        = useRef(new Set());
-  const showNextRef     = useRef(null); // filled after showNext is defined
-  const scheduleNextRef = useRef(null); // filled after scheduleNext is defined
-  const [paused, setPaused] = useState(false);
+  const timerRef    = useRef(null);
+  const shownRef    = useRef(loadShown());
+  const showNextRef = useRef(null); // filled after showNext is defined
+  const [paused, setPaused] = useState(() => localStorage.getItem(PAUSED_KEY) === 'true');
 
   const stopTimer = useCallback(() => {
     clearTimeout(timerRef.current);
     clearInterval(timerRef.current);
   }, []);
 
-  // Self-rescheduling timeout instead of setInterval: every time a riddle
-  // changes — whether the timer fired or the user clicked next/resume —
-  // this restarts the full INTERVAL_MS countdown from scratch, so riddles
-  // never fire early just because the user also advanced manually.
-  const scheduleNext = useCallback(() => {
-    stopTimer();
-    timerRef.current = setTimeout(() => {
-      showNextRef.current?.();
-      scheduleNextRef.current?.();
-    }, INTERVAL_MS);
-  }, [stopTimer]);
-
-  useEffect(() => { scheduleNextRef.current = scheduleNext; }, [scheduleNext]);
+  const isMaybeSnoozed = useCallback(() => {
+    const until = Number(localStorage.getItem(MAYBE_UNTIL_KEY) || 0);
+    return Number.isFinite(until) && until > Date.now();
+  }, []);
 
   const open = useCallback((newPhase) => {
     setAnimating(true);
     setPhase(newPhase);
     setVisible(true);
-    setTimeout(() => setAnimating(false), 5000);
+    setTimeout(() => setAnimating(false), 50);
   }, []);
 
   const dismiss = useCallback(() => {
@@ -88,6 +92,7 @@ export default function RiddlePopup() {
   const showNext = useCallback(() => {
     const next = pickNext(shownRef.current, riddles);
     shownRef.current = new Set([...shownRef.current, next.id]);
+    saveShown(shownRef.current);
     setCurrent(next);
     setUserAnswer('');
     setVerdict(null);
@@ -98,58 +103,63 @@ export default function RiddlePopup() {
   // Keep ref in sync so interval callbacks always call latest version
   useEffect(() => { showNextRef.current = showNext; }, [showNext]);
 
-  // Load shown riddles from backend when user changes
+  // Boot: ask preference after 4s if not yet set, else start cycling
   useEffect(() => {
-    if (!user?.id) return;
-    const loadShownRiddles = async () => {
-      const items = await fetchUserActivityItems('riddle');
-      shownRef.current = new Set(items);
-    };
-    loadShownRiddles();
-  }, [user?.id, fetchUserActivityItems]);
+    const saved    = localStorage.getItem(PREF_KEY);
+    const isPaused = localStorage.getItem(PAUSED_KEY) === 'true';
+    if (saved === 'no' || isPaused || (saved === 'maybe' && isMaybeSnoozed())) return;
 
-  // Boot: ask preference after 4s
-  useEffect(() => {
-    if (paused) return;
-    timerRef.current = setTimeout(() => open('ask'), 4000);
+    if (!saved) {
+      timerRef.current = setTimeout(() => open('ask'), 4000);
+    } else if (saved === 'maybe') {
+      timerRef.current = setTimeout(() => open('ask'), 4000);
+    } else {
+      timerRef.current = setTimeout(() => {
+        showNext();
+        timerRef.current = setInterval(() => showNextRef.current?.(), INTERVAL_MS);
+      }, 4000);
+    }
     return () => { clearTimeout(timerRef.current); clearInterval(timerRef.current); };
-  }, [open, paused]);
+  }, [isMaybeSnoozed, open, showNext]);
 
   const handlePrefYes = () => {
+    localStorage.setItem(PREF_KEY, 'yes');
+    localStorage.removeItem(MAYBE_UNTIL_KEY);
     setPref('yes');
     dismiss();
     setTimeout(() => {
       showNext();
-      scheduleNext();
+      timerRef.current = setInterval(() => showNextRef.current?.(), INTERVAL_MS);
     }, 400);
   };
 
   const handlePrefNo = () => {
+    localStorage.setItem(PREF_KEY, 'no');
+    localStorage.removeItem(MAYBE_UNTIL_KEY);
+    setPref('no');
     dismiss();
-    setTimeout(() => {
-      open('ask');
-    }, 10000);
   };
 
   const handlePrefMaybe = () => {
+    localStorage.setItem(PREF_KEY, 'maybe');
+    localStorage.setItem(MAYBE_UNTIL_KEY, String(Date.now() + MAYBE_DELAY_MS));
     setPref('maybe');
+    stopTimer();
     dismiss();
-    setTimeout(() => {
-      showNext();
-      scheduleNext();
-    }, 400);
   };
 
   const handlePause = () => {
+    localStorage.setItem(PAUSED_KEY, 'true');
     setPaused(true);
     stopTimer();
     dismiss();
   };
 
   const handleResume = () => {
+    localStorage.removeItem(PAUSED_KEY);
     setPaused(false);
     showNext();
-    scheduleNext();
+    timerRef.current = setInterval(() => showNextRef.current?.(), INTERVAL_MS);
   };
 
   // Answer submission
@@ -164,41 +174,29 @@ export default function RiddlePopup() {
 
   const handleNext = () => {
     dismiss();
-    setTimeout(() => {
-      showNext();
-      if (pref === 'yes' || pref === 'maybe') scheduleNext();
-    }, 400);
-  };
-
-  const handleIdk = () => {
-    setVerdict('idk');
-    trackActivity?.('riddle', current.id, { revealed: true });
+    setTimeout(showNext, 400);
   };
 
   // ── Labels ──
   const L = {
     badge:       i18n(language, 'Riddle', 'Devinette', 'Igissakuzo'),
-    askTitle:    i18n(language, 'Riddles await you!', 'Des devinettes vous attendent !', 'Ibisakuzo biraguteye !'),
-    askSub:      i18n(language, 'Are you in the mood for some Rwandan riddles?', 'Êtes-vous prêt pour des devinettes rwandaises ?', 'Urashaka gukina ibisakuzo byo mu Rwanda?'),
-    yes:         i18n(language, "Yes, let's go!", 'Oui, allons-y !', 'Yego, twagiye!'),
-    no:          i18n(language, 'Not now', 'Pas maintenant', 'Oya, nta byonshaka'),
-    maybe:       i18n(language, "I'm not sure — show me", "Je ne sais pas — montrez-moi", 'Simbizi — mbwira'),
+    askTitle:    i18n(language, 'Riddles await you!', 'Des devinettes vous attendent\u00a0!', 'Ibisakuzo biraguteye\u00a0!'),
+    askSub:      i18n(language, 'Are you in the mood for some Rwandan riddles?', 'Êtes-vous prêt pour des devinettes rwandaises\u00a0?', 'Urashaka gukina ibisakuzo byo u Rwanda?'),
+    yes:         i18n(language, "Yes, let's go!", 'Oui, allons-y\u00a0!', 'Yego, tugiye!'),
+    no:          i18n(language, 'Not now', 'Pas maintenant', 'Oya, nta bushake'),
+    maybe:       i18n(language, "I'm not sure — show me", "Je ne sais pas — montrez-moi", 'Simbizi — mbereke'),
     yourAnswer:  i18n(language, 'Your answer…', 'Votre réponse…', 'Igisubizo cyawe…'),
     submit:      i18n(language, 'Submit', 'Envoyer', 'Ohereza'),
-    hooray:      i18n(language, '🎉 Hooray! Correct!', '🎉 Bravo ! Bonne réponse !', '🎉 Yegoooo!'),
-    oops:        i18n(language, 'Oops! The answer is:', 'Oups ! La réponse est :', 'Igisubizo ni:'),
-    // Fixed label — "Ngicyo" is shown as-is in every language, with a translated
-    // tooltip/aria-label so screen readers and non-Kinyarwanda speakers still get the meaning.
-    idkLabel:    'Ngicyo',
-    idkTitle:    i18n(language, "I don't know", 'Je ne sais pas', 'Ngicyo'),
+    hooray:      i18n(language, '🎉 Hooray! Correct!', '🎉 Bravo\u00a0! Bonne réponse\u00a0!', '🎉 Ni byo! Neza cyane!'),
+    oops:        i18n(language, 'Oops! The answer is:', 'Oups\u00a0! La réponse est\u00a0:', 'Ntibyo! Igisubizo ni:'),
     adventure:   i18n(language, 'Continue adventuring →', 'Continuer l\'aventure →', 'Komeza urugendo →'),
     reveal:      i18n(language, 'Show me the answer', 'Me montrer la réponse', 'Mbwira igisubizo'),
     answer:      i18n(language, 'Answer', 'Réponse', 'Igisubizo'),
     close:       i18n(language, 'Dismiss', 'Fermer', 'Funga'),
     pause:       i18n(language, 'Pause riddles', 'Mettre en pause', 'Hagarika ibisakuzo'),
-    resume:      i18n(language, '▶ Resume riddles', '▶ Reprendre les devinettes', '▶ Subira mu bisakuzo'),
+    resume:      i18n(language, '▶ Resume riddles', '▶ Reprendre les devinettes', '▶ Subira ku bisakuzo'),
     paused:      i18n(language, 'Riddles paused', 'Devinettes en pause', 'Ibisakuzo byahagaritswe'),
-    next:        i18n(language, 'Next riddle', 'Devinette suivante', 'Igisakuzo gikurikira'),
+    next:        i18n(language, 'Next riddle', 'Devinette suivante', 'Igissakuzo gikurikira'),
     source:      `#${current?.source_no}`,
   };
 
@@ -206,6 +204,7 @@ export default function RiddlePopup() {
 
   const riddleText = current ? i18n(language, current.en, current.fr, current.rw) : '';
   const answerText = current ? i18n(language, current.answer_en, current.answer_fr, current.answer_rw) : '';
+
   return (
     <>
       <div
@@ -260,30 +259,20 @@ export default function RiddlePopup() {
               {language !== 'rw' && <p className="riddle-popup__gloss">"{riddleText}"</p>}
             </div>
 
-            {/* YES mode — type your answer, or click Ngicyo if you don't know */}
+            {/* YES mode — type your answer */}
             {pref === 'yes' && !verdict && (
-              <>
-                <div className="riddle-popup__input-row">
-                  <input
-                    className="riddle-popup__input"
-                    type="text"
-                    placeholder={L.yourAnswer}
-                    value={userAnswer}
-                    onChange={e => setUserAnswer(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-                    autoFocus
-                  />
-                  <button className="riddle-popup__submit" onClick={handleSubmit}>{L.submit}</button>
-                </div>
-                <button
-                  className="riddle-popup__idk-btn"
-                  onClick={handleIdk}
-                  title={L.idkTitle}
-                  aria-label={L.idkTitle}
-                >
-                  {L.idkLabel}
-                </button>
-              </>
+              <div className="riddle-popup__input-row">
+                <input
+                  className="riddle-popup__input"
+                  type="text"
+                  placeholder={L.yourAnswer}
+                  value={userAnswer}
+                  onChange={e => setUserAnswer(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+                  autoFocus
+                />
+                <button className="riddle-popup__submit" onClick={handleSubmit}>{L.submit}</button>
+              </div>
             )}
 
             {/* YES mode — verdict */}
@@ -296,15 +285,13 @@ export default function RiddlePopup() {
               </div>
             )}
 
-            {pref === 'yes' && (verdict === 'wrong' || verdict === 'idk') && (
+            {pref === 'yes' && verdict === 'wrong' && (
               <div className="riddle-popup__verdict riddle-popup__verdict--wrong">
-                <p className="riddle-popup__verdict-msg">{verdict === 'idk' ? L.oops : L.oops}</p>
+                <p className="riddle-popup__verdict-msg">{L.oops}</p>
                 <p className="riddle-popup__verdict-answer">{current.answer_rw}</p>
                 {language !== 'rw' && <p className="riddle-popup__verdict-gloss">{answerText}</p>}
                 <button className="riddle-popup__btn riddle-popup__btn--maybe" onClick={() => {
-                  if (verdict === 'wrong') {
-                    trackActivity?.('riddle', current.id, { correct: false, revealed: true });
-                  }
+                  trackActivity?.('riddle', current.id, { correct: false, revealed: true });
                   handleNext();
                 }}>{L.adventure}</button>
               </div>

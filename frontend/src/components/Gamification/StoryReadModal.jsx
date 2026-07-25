@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ReadingProgress } from './ReadingProgress';
 import { useGamificationContext } from '../../contexts/GamificationContext';
@@ -28,8 +28,16 @@ export function StoryReadModal({ story, onClose, onComplete }) {
   const [showCompletion, setShowCompletion] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
   const [sessionXP, setSessionXP] = useState(0);
+  const [compactReader, setCompactReader] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 760);
   const awardedRef = useRef(false); // prevent double XP award
   const completionNotifiedRef = useRef(false);
+
+  useEffect(() => {
+    const updateReaderSize = () => setCompactReader(window.innerWidth <= 760);
+    updateReaderSize();
+    window.addEventListener('resize', updateReaderSize);
+    return () => window.removeEventListener('resize', updateReaderSize);
+  }, []);
 
   // Estimate word count from available text
   const bodyText = localizedStory?.content || localizedStory?.desc || localizedStory?.description || '';
@@ -109,14 +117,18 @@ export function StoryReadModal({ story, onClose, onComplete }) {
 
         <motion.div
           key="story-modal-panel"
-          initial={{ opacity: 0, y: 60, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0,  scale: 1,    transition: { type: 'spring', stiffness: 320, damping: 30 } }}
-          exit={{    opacity: 0, y: 60, scale: 0.97, transition: { duration: 0.2 } }}
+          initial={{ opacity: 0, x: '-50%', y: 60, scale: 0.97 }}
+          animate={{ opacity: 1, x: '-50%', y: 0,  scale: 1,    transition: { type: 'spring', stiffness: 320, damping: 30 } }}
+          exit={{    opacity: 0, x: '-50%', y: 60, scale: 0.97, transition: { duration: 0.2 } }}
           style={{
-            position: 'fixed', top: '3vh', left: '50%', transform: 'translateX(-50%)',
-            width: '90%', maxWidth: 720, maxHeight: '94vh',
+            position: 'fixed',
+            top: compactReader ? '3vh' : '8vh',
+            left: '50%',
+            width: compactReader ? 'calc(100vw - 28px)' : 'min(600px, 52vw)',
+            maxWidth: compactReader ? 720 : 600,
+            maxHeight: compactReader ? '94vh' : '82vh',
             zIndex: 501, display: 'flex', flexDirection: 'column',
-            background: '#FDFBF7', borderRadius: 20,
+            background: '#FDFBF7', borderRadius: compactReader ? 18 : 16,
             boxShadow: '0 32px 80px rgba(44,26,20,0.35)',
             overflow: 'hidden',
           }}
@@ -140,7 +152,7 @@ export function StoryReadModal({ story, onClose, onComplete }) {
               >
                 {/* Hero image */}
                 {image && (
-                  <div style={{ height: 260, overflow: 'hidden', margin: '0.75rem 1.25rem 0', borderRadius: 12 }}>
+                  <div style={{ height: compactReader ? 220 : 190, overflow: 'hidden', margin: '0.75rem 1.25rem 0', borderRadius: 12 }}>
                     <img
                       src={image} alt={title}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}

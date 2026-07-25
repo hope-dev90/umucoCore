@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext, useMemo, useCallback } from 'react';
+import { apiUrl, assetUrl } from '../config/api';
 
 const AuthContext = createContext();
 
@@ -28,7 +29,7 @@ export function AuthProvider({ children }) {
       return;
     }
     // Always fetch fresh user from server
-    fetch('http://localhost:5000/auth/profile', {
+    fetch(apiUrl('/auth/profile'), {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => {
@@ -38,9 +39,7 @@ export function AuthProvider({ children }) {
       .then(data => {
         if (data.user) {
           // Prepend backend URL to avatar path if it's a relative path
-          const avatarUrl = data.user.avatar && !data.user.avatar.startsWith('http') 
-            ? `http://localhost:5000${data.user.avatar}` 
-            : data.user.avatar;
+          const avatarUrl = assetUrl(data.user.avatar);
           const merged = { 
             ...data.user, 
             profileImage: avatarUrl || null 
@@ -73,7 +72,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = useCallback(async (email, password) => {
-    const response = await fetch('http://localhost:5000/auth/login', {
+    const response = await fetch(apiUrl('/auth/login'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -87,9 +86,7 @@ export function AuthProvider({ children }) {
     }
 
     // Prepend backend URL to avatar path if it's a relative path
-    const avatarUrl = data.user.avatar && !data.user.avatar.startsWith('http') 
-      ? `http://localhost:5000${data.user.avatar}` 
-      : data.user.avatar;
+    const avatarUrl = assetUrl(data.user.avatar);
     const mergedUser = {
       ...data.user,
       profileImage: avatarUrl || null
@@ -101,7 +98,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const register = useCallback(async (name, email, password, explorerType) => {
-    const response = await fetch('http://localhost:5000/auth/register', {
+    const response = await fetch(apiUrl('/auth/register'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -118,7 +115,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   const googleLogin = useCallback(async (idToken) => {
-    const response = await fetch('http://localhost:5000/auth/google', {
+    const response = await fetch(apiUrl('/auth/google'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -132,9 +129,7 @@ export function AuthProvider({ children }) {
     }
 
     // Prepend backend URL to avatar path if it's a relative path
-    const avatarUrl = data.user.avatar && !data.user.avatar.startsWith('http') 
-      ? `http://localhost:5000${data.user.avatar}` 
-      : data.user.avatar;
+    const avatarUrl = assetUrl(data.user.avatar);
     const mergedUser = {
       ...data.user,
       profileImage: avatarUrl || null

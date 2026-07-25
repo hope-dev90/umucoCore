@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { apiUrl } from '../config/api';
 
 function normalizeBadge(badge) {
   return { ...badge, unlockedAt: badge.unlockedAt || badge.unlocked_at || null };
@@ -20,7 +21,7 @@ export function useGamification() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const apiBase = 'http://localhost:5000/api/gamification';
+  const apiBase = apiUrl('/api/gamification');
   const token = getToken();
   const headers = {
     'Content-Type': 'application/json',

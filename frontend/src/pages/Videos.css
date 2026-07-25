@@ -288,6 +288,13 @@
   object-fit: cover;
 }
 
+.video-empty-player {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
 .video-play-center {
   position: absolute;
   width: 64px;

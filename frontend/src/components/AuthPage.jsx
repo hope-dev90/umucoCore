@@ -7,6 +7,7 @@ import authLeftBg3 from '../assets/signup/tra3.jpg';
 import UmucoLogo from './UmucoLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { apiUrl } from '../config/api';
 import ExplorerTypeImage from './ExplorerTypeImage';
 import { UmucoGlyph } from './UmucoGlyphs';
 
@@ -403,7 +404,7 @@ function SignUpPage({ onNavigate }) {
     const code = verificationCode.join('');
 
     try {
-      const response = await fetch('http://localhost:5000/auth/verify-email', {
+      const response = await fetch(apiUrl('/auth/verify-email'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -438,7 +439,7 @@ function SignUpPage({ onNavigate }) {
     setResendLoading(true);
     setError('');
     try {
-      const response = await fetch('http://localhost:5000/auth/resend-otp', {
+      const response = await fetch(apiUrl('/auth/resend-otp'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email }),

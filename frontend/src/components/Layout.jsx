@@ -53,8 +53,17 @@ const Icons = {
   contribute:"M12 5v14 M5 12h14",
   saved:     "M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z",
   history:   "M12 2a10 10 0 100 20A10 10 0 0012 2z M12 6v6l4 2",
+  archive:   "M21 8v13H3V8 M1 3h22v5H1z M10 12h4",
+  book:      "M4 19.5A2.5 2.5 0 016.5 17H20 M4 4.5A2.5 2.5 0 016.5 2H20v20H6.5A2.5 2.5 0 014 19.5z",
+  layers:    "M12 2l9 5-9 5-9-5 9-5z M3 12l9 5 9-5 M3 17l9 5 9-5",
+  flag:      "M4 21V5a2 2 0 012-2h11l-1 5 1 5H6",
+  map:       "M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3-6 3z M9 3v15 M15 6v15",
+  community: "M21 15a4 4 0 01-4 4H7l-4 4V7a4 4 0 014-4h10a4 4 0 014 4z",
+  sparkles:  "M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z M5 3v4 M3 5h4 M19 17v4 M17 19h4",
+  chart:     "M3 3v18h18 M7 16V9 M12 16V5 M17 16v-7",
   profile:   "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 3a4 4 0 100 8 4 4 0 000-8z",
   settings:  "M12 15a3 3 0 100-6 3 3 0 000 6z M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06.06a2 2 0 012.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z",
+  admin:     "M12 2l7 4v6c0 5-3 8-7 10-4-2-7-5-7-10V6l7-4z M9 12l2 2 4-5",
   search:    "M11 17a6 6 0 100-12 6 6 0 000 12z M21 21l-4.35-4.35",
   bell:      "M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 01-3.46 0",
   moon:      "M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z",
@@ -63,7 +72,7 @@ const Icons = {
   menu:      "M3 12h18 M3 6h18 M3 18h18",
 };
 
-export default function Layout({ children, searchPlaceholder = 'search.placeholder', searchQuery = '', onSearchChange }) {
+export default function Layout({ children, searchPlaceholder = 'search.placeholder', searchQuery = '', onSearchChange, adminNavGroups: providedAdminNavGroups = [], adminTopbarTitle: providedAdminTopbarTitle = '' }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -71,6 +80,7 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
   const { xp, requiredXP, level, streak, bestStreak, leaderboard } = useGamificationContext();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const isAdmin = user?.role === 'admin';
 
   // Group 1: Discover (unlabeled)
   const discoverNav = [
@@ -93,8 +103,18 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
     { label: t('sidebar.history'),    path: '/history',    icon: 'history' },
   ];
 
+  const adminNavGroups = isAdmin ? providedAdminNavGroups : [];
+  const adminTopbarTitle = providedAdminTopbarTitle || 'Admin';
+
   // No longer treats '/' as special — just exact/startsWith matching
-  const isActive = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
+  const isActive = (path) => {
+    const [basePath, hash] = path.split('#');
+    if (hash) {
+      if (hash === 'metrics' && location.pathname === basePath && !location.hash) return true;
+      return location.pathname === basePath && location.hash === `#${hash}`;
+    }
+    return location.pathname === path || location.pathname.startsWith(path + '/');
+  };
 
   const goTo = (path) => {
     navigate(path);
@@ -110,7 +130,8 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
       <span className="sidebar-link-icon">
         {item.icon === 'kwibuka' ? <KwibukaNavIcon /> : <Icon d={Icons[item.icon]} size={15} />}
       </span>
-      {item.label}
+      <span className="sidebar-link-label">{item.label}</span>
+      {item.badge ? <span className="sidebar-link-badge">{item.badge}</span> : null}
     </div>
   );
 
@@ -120,7 +141,7 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
   };
 
   return (
-    <div className="layout">
+    <div className={`layout ${isAdmin ? 'admin-layout' : ''}`}>
       {/* Mobile nav drawer backdrop */}
       {mobileNavOpen && (
         <div
@@ -140,18 +161,30 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
         </div>
 
         <nav className="sidebar-nav">
-          <div className="sidebar-section-label">EXPLORE</div>
-          {discoverNav.map(item => <NavLink key={item.path} item={item} />)}
+          {!isAdmin && (
+            <>
+              <div className="sidebar-section-label">EXPLORE</div>
+              {discoverNav.map(item => <NavLink key={item.path} item={item} />)}
 
-          {/* Group 3: Contribute */}
-          <div className="sidebar-divider" />
-          <div className="sidebar-section-label">CONTRIBUTE</div>
-          {contributeNav.map(item => <NavLink key={item.path} item={item} />)}
+              {/* Group 3: Contribute */}
+              <div className="sidebar-divider" />
+              <div className="sidebar-section-label">CONTRIBUTE</div>
+              {contributeNav.map(item => <NavLink key={item.path} item={item} />)}
 
-          {/* Group 4: Personal */}
-          <div className="sidebar-divider" />
-          <div className="sidebar-section-label">PERSONAL</div>
-          {personalNav.map(item => <NavLink key={item.path} item={item} />)}
+              {/* Group 4: Personal */}
+              <div className="sidebar-divider" />
+              <div className="sidebar-section-label">PERSONAL</div>
+              {personalNav.map(item => <NavLink key={item.path} item={item} />)}
+            </>
+          )}
+
+          {adminNavGroups.map((group) => (
+            <React.Fragment key={group.label}>
+              <div className="sidebar-divider" />
+              <div className="sidebar-section-label">{group.label}</div>
+              {group.items.map(item => <NavLink key={item.path} item={item} />)}
+            </React.Fragment>
+          ))}
 
         </nav>
 
@@ -172,6 +205,7 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
         >
           <Icon d={Icons.menu} size={18} />
         </button>
+        {isAdmin && <div className="admin-topbar-title">{adminTopbarTitle}</div>}
         <div className="topbar-search">
           <span className="topbar-search-icon"><Icon d={Icons.search} size={14} /></span>
           <input type="text" placeholder={t(searchPlaceholder)} value={searchQuery} onChange={e => onSearchChange && onSearchChange(e.target.value)} />
@@ -228,6 +262,12 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
                   <Icon d={Icons.settings} size={14} />
                   {t('sidebar.settings')}
                 </button>
+                {isAdmin && (
+                  <button type="button" onClick={() => goTo('/admin')}>
+                    <Icon d={Icons.admin} size={14} />
+                    {t('sidebar.admin') || 'Admin'}
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -236,7 +276,7 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
 
         <div className="layout-content-wrapper">
           <main className="main-content">{children}</main>
-          {location.pathname === '/dashboard' && (
+          {location.pathname === '/dashboard' && !isAdmin && (
             <aside className="right-rail">
               <div className="right-rail-widget">
                 <XPBar currentXP={xp} requiredXP={requiredXP} level={level} />

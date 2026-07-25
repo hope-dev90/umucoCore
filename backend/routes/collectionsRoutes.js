@@ -6,6 +6,7 @@ import {
   updateCollection,
   deleteCollection
 } from '../controller/collectionsController.js';
+import { adminOnly, authMiddleware } from '../middleware/authMiddleWare.js';
 
 const router = Router();
 
@@ -16,12 +17,12 @@ router.get('/', getAllCollections);
 router.get('/:id', getCollectionById);
 
 // POST /api/collections
-router.post('/', createCollection);
+router.post('/', authMiddleware, adminOnly, createCollection);
 
 // PUT /api/collections/:id
-router.put('/:id', updateCollection);
+router.put('/:id', authMiddleware, adminOnly, updateCollection);
 
 // DELETE /api/collections/:id
-router.delete('/:id', deleteCollection);
+router.delete('/:id', authMiddleware, adminOnly, deleteCollection);
 
 export default router;

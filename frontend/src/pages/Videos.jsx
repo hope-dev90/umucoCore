@@ -3,14 +3,9 @@ import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
 import { useAuth } from '../contexts/AuthContext';
-import { useLocation } from 'react-router-dom';
+import { apiUrl, apiFetch } from '../config/api';
+import FlagControl from '../components/FlagControl';
 import './Videos.css';
-import IntoreImg from '../assets/home/intore.jpg';
-import AgasekeImg from '../assets/explore/weaving_agaseke.jpg';
-import ImigongoImg from '../assets/explore/imigongo.jpg';
-import { trackView } from '../utils/trackView';
-
-const fallbackImages = [IntoreImg, AgasekeImg, ImigongoImg];
 
 export default function Videos() {
   const { t } = useLanguage();
@@ -25,29 +20,22 @@ export default function Videos() {
   const videoRef = useRef(null);
   const [awardedItems, setAwardedItems] = useState(new Set());
   const [savingVideoId, setSavingVideoId] = useState(null);
-  const [topbarSearch, setTopbarSearch] = useState("");
-
-  const filteredVideos = videos.filter(video => {
-    const query = topbarSearch.toLowerCase();
-    return (video.title || "").toLowerCase().includes(query) ||
-           (video.narrator || "").toLowerCase().includes(query) ||
-           (video.genre || "").toLowerCase().includes(query);
-  });
+  const [reportMessage, setReportMessage] = useState('');
 
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/video');
+        const res = await fetch(apiUrl('/api/video'));
         const data = await res.json();
         if (data.video && data.video.length > 0) {
-          const mapped = data.video.map((v, i) => ({
+          const mapped = data.video.map((v) => ({
             id: v.id,
             genre: v.category,
             title: v.title,
             narrator: v.description,
             duration: v.duration ? `${Math.floor(v.duration / 60)}:${(v.duration % 60).toString().padStart(2, '0')}` : '00:00',
             durationSec: v.duration || 0,
-            image: v.thumbnail_url || fallbackImages[i % fallbackImages.length],
+            image: v.thumbnail_url || '',
             videoUrl: v.video_url || '',
           }));
           setVideos(mapped);
@@ -64,15 +52,18 @@ export default function Videos() {
     fetchVideos();
   }, [t]);
 
-  const location = useLocation();
-
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const playId = params.get('play');
-    if (!playId || videos.length === 0) return;
-    const video = videos.find(v => String(v.id) === String(playId));
-    if (video) playVideo(video);
-  }, [location.search, videos, playVideo]);
+    const pending = localStorage.getItem('pendingVideoPlay');
+    if (!pending || videos.length === 0) return;
+    try {
+      const payload = JSON.parse(pending);
+      localStorage.removeItem('pendingVideoPlay');
+      const video = videos.find(v => String(v.id) === String(payload.itemId));
+      if (video) playVideo(video);
+    } catch {
+      localStorage.removeItem('pendingVideoPlay');
+    }
+  }, [videos]);
 
   const playVideo = useCallback((video) => {
     if (!video.videoUrl) {
@@ -117,13 +108,6 @@ export default function Videos() {
 
   const handleVideoClick = useCallback((video) => {
     playVideo(video);
-    trackView({
-      type: 'Video',
-      itemId: video.id,
-      title: video.title,
-      image: video.image || '',
-      category: video.genre || '',
-    });
     if (!awardedItems.has(video.title)) {
       awardXP(25, `Watched video: ${video.title}`);
       setAwardedItems(prev => new Set([...prev, video.title]));
@@ -145,12 +129,8 @@ export default function Videos() {
         alert("Please sign in to save to your library.");
         return;
       }
-      const res = await fetch("http://localhost:5000/api/saved", {
+      const res = await apiFetch('/api/saved', {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           itemType: "video",
           itemId: Number(video.id),
@@ -182,7 +162,7 @@ export default function Videos() {
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <Layout searchPlaceholder={t('search.placeholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
+    <Layout searchPlaceholder={t('search.placeholder')}>
       <div className="videos-page">
         <div>
           <div className="featured-video">
@@ -193,11 +173,11 @@ export default function Videos() {
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
-                {currentVideo ? formatTime(duration) : "8 min"}
+                {currentVideo ? formatTime(duration) : '0:00'}
               </span>
             </div>
-            <h1>{currentVideo ? currentVideo.title : t('videos.intoreTitle')}</h1>
-            <p>{currentVideo ? currentVideo.narrator : t('videos.intoreDesc')}</p>
+            <h1>{currentVideo ? currentVideo.title : 'No video selected'}</h1>
+            <p>{currentVideo ? currentVideo.narrator : 'Add videos in the admin dashboard to publish them here.'}</p>
             <div className="featured-actions">
               <button className="play-btn" onClick={togglePlayPause}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
@@ -219,6 +199,14 @@ export default function Videos() {
               >
                 {savingVideoId === currentVideo?.id ? 'Saved ✓' : t('videos.addToLibrary')}
               </button>
+              {currentVideo && (
+                <FlagControl
+                  type="video"
+                  itemId={currentVideo.id}
+                  title={currentVideo.title}
+                  onToast={(text) => { setReportMessage(text); setTimeout(() => setReportMessage(''), 3000); }}
+                />
+              )}
             </div>
           </div>
 
@@ -230,13 +218,13 @@ export default function Videos() {
             <div className="video-cards">
               {loading ? (
                 <p>Loading videos...</p>
-              ) : filteredVideos.length === 0 ? (
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No videos match your search.</p>
+              ) : videos.length === 0 ? (
+                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No videos available yet.</p>
               ) : (
-                filteredVideos.map((video, i) => (
+                videos.map((video, i) => (
                   <div key={i} className="video-card" onClick={() => handleVideoClick(video)} style={{ cursor: 'pointer' }}>
                     <div className="video-thumb">
-                      <img src={video.image} alt={video.title} />
+                      {video.image ? <img src={video.image} alt={video.title} /> : null}
                       <div className="video-play-overlay" onClick={(e) => { e.stopPropagation(); handleVideoClick(video); }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                           <polygon points="5 3 19 12 5 21 5 3" />
@@ -248,6 +236,12 @@ export default function Videos() {
                       <div className="video-title">{video.title}</div>
                       <div className="video-narrator">{video.narrator}</div>
                       <div className="video-duration">{video.duration}</div>
+                      <FlagControl
+                        type="video"
+                        itemId={video.id}
+                        title={video.title}
+                        onToast={(text) => { setReportMessage(text); setTimeout(() => setReportMessage(''), 3000); }}
+                      />
                     </div>
                   </div>
                 ))
@@ -269,12 +263,12 @@ export default function Videos() {
                 preload="metadata"
               />
             ) : (
-              <img src={IntoreImg} alt="Intore Dance" />
+              <div className="video-empty-player">No video selected</div>
             )}
           </div>
           <div className="player-info">
-            <div className="player-title">{currentVideo ? currentVideo.title : t('videos.intoreTitle')}</div>
-            <div className="player-narrator">{currentVideo ? (currentVideo.narrator || currentVideo.genre) : "Traditional Performance • Rwanda"}</div>
+            <div className="player-title">{currentVideo ? currentVideo.title : 'No video selected'}</div>
+            <div className="player-narrator">{currentVideo ? (currentVideo.narrator || currentVideo.genre) : 'Use the admin dashboard to add videos.'}</div>
           </div>
           <div className="player-controls">
             <div className="player-progress">
@@ -335,6 +329,7 @@ export default function Videos() {
           </div>
         </div>
       </div>
+      {reportMessage && <div className="contribute-toast">{reportMessage}</div>}
     </Layout>
   );
 }

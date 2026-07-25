@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+﻿import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
-import { useGamificationContext } from '../contexts/GamificationContext';
 import { StoryReadModal } from '../components/Gamification/StoryReadModal';
 import './Explore.css';
 import HeritageMap, { hasValidCoordinates } from '../components/Map/HeritageMap';
 import MapDiscoveryHint from '../components/Map/MapDiscoveryHint';
 import { mapHeritageApiItem } from '../utils/heritageMapping';
-import commonsImagesCached from '../data/commonsImageCache.json';
-import { BookOpen, CheckCircle2, ChevronDown, Headphones, MapPinned, Play, RefreshCw, X } from 'lucide-react';
+import { getCommonsImage } from '../utils/getCommonsImage';
+import { BookOpen, CheckCircle2, ChevronDown, Headphones, MapPinned, Play, X } from 'lucide-react';
+import { apiUrl } from '../config/api';
+import FlagControl from '../components/FlagControl';
 import nyanzaImg from '../assets/explore/nyanza.jpg';
 import buhangaImg from '../assets/explore/buhanga.jpg';
 import intoreImg from '../assets/explore/intore2.jpg';
@@ -20,16 +21,16 @@ import safariImg from '../assets/safari.jpg';
 import craneStoryImg from '../assets/listen/crane-story.jpg';
 import moonStoryImg from '../assets/listen/moon-story.jpg';
 import ruganzuImg from '../assets/listen/ruganzu.png';
-import notFoundImg from '../assets/explore/notfound.png';
-import { trackView } from '../utils/trackView';
+
+const earthenwareImg = 'data:image/jpeg;base64,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';
 
 const fallbackImages = [nyanzaImg, buhangaImg, intoreImg, weavingImg, imigongoImg, artifactImg];
 
 // Specific image overrides for API items that need correct image URLs
 const IMAGE_OVERRIDES = {
-  'The Thousand Hills – Ibirunga': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mount_Karisimbi.jpg/800px-Mount_Karisimbi.jpg',
-  'Sacred Forests of Gishwati': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Gishwati_Forest.jpg/800px-Gishwati_Forest.jpg',
-  'Battle of Rucuncu': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Volcanoes_National_Park%2C_Rwanda.jpg/800px-Volcanoes_National_Park%2C_Rwanda.jpg',
+  'The Thousand Hills – Ibirunga': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR781_f6vFqZEveezxtFgrZbJ_POQYbWooR25GEAbgWiQ&s=10',
+  'Sacred Forests of Gishwati': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTify2NLcWEBb8g927UpyVaRA2YUV3JwS2OKCo61JB68Q&s=10',
+  'Battle of Rucuncu': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQmT58u4m8_6WvqcJHpwbz1yoTqeMld-HCKkaokKNn3-A&s=10',
 };
 const COMPLETED_STORIES_KEY = 'umuco_completed_story_ids';
 
@@ -169,167 +170,76 @@ const FALLBACK_ITEMS = [
     desc: "Abarinzi b'intwari b'ubwami barinzaga Umwami kandi bagacunga umutekano mu gihugu.",
     lat: -1.9346, lng: 30.0621, era: 'post-1994',
   },
-  {
-    // Card 16 -- Nyungwe Forest National Park
-    category: 'Ibyitangira Cyumweru', catKey: 'wildlife',
-    title: "Nyungwe Forest National Park", location: 'Rusizi', locationKey: 'Rusizi',
-    image: safariImg,
-    desc: "Ishyamba ritandukanye mu Rwanda, harimo inyamaswa n'inyamaswa z'ibihumbi byinshi, inyungura n'inzoka z'amakungu.",
-    lat: -2.47, lng: 29.24, era: 'pre-colonial',
-  },
-  {
-    // Card 17 -- Akagera National Park
-    category: 'Ibyitangira Cyumweru', catKey: 'wildlife',
-    title: "Akagera National Park", location: 'Kayonza', locationKey: 'Kayonza',
-    image: safariImg,
-    desc: "Pariki y'ibisura yabera mu bwongereza bw'u Rwanda, harimo ibisura nk'inyambo, imvura, amavumbi n'ibindi.",
-    lat: -1.65, lng: 30.75, era: 'pre-colonial',
-  },
-  {
-    // Card 18 -- Lake Kivu
-    category: 'Ibyitangira Cyumweru', catKey: 'lakes',
-    title: "Lake Kivu", location: 'Rubavu', locationKey: 'Rubavu',
-    image: safariImg,
-    desc: "Ikiyaga kigari cyo mu ruhande rwa burenga bw'u Rwanda, cyuzuye amateka y'ibihumbi n'ibintu bikomeye.",
-    lat: -1.66, lng: 29.22, era: 'pre-colonial',
-  },
-  {
-    // Card 19 -- Kigali Genocide Memorial Centre
-    category: 'Amateka', catKey: 'history',
-    title: "Kigali Genocide Memorial Centre", location: 'Kigali', locationKey: 'Kigali',
-    image: artifactImg,
-    desc: "Ihaha rya jenoside rya 1994 mu Rwanda, rihamagara abantu ku bikoreshwa by'ubwenge n'ubwumvikane.",
-    lat: -1.930, lng: 30.060, era: 'post-1994',
-  },
-  {
-    // Card 20 -- Butare National Museum of Rwanda
-    category: 'Ubwenge', catKey: 'artifacts',
-    title: "Butare National Museum of Rwanda", location: 'Huye', locationKey: 'Gitarama',
-    image: buhangaImg,
-    desc: "Ihaha ry'ibitekerezo ry'amateka y'u Rwanda, harimo ibintu byinshi by'umugambi n'amaherezo.",
-    lat: -2.59, lng: 29.74, era: 'colonial',
-  },
-  {
-    // Card 21 -- Murambi Genocide Memorial
-    category: 'Amateka', catKey: 'history',
-    title: "Murambi Genocide Memorial", location: 'Nyamagabe', locationKey: 'Gitarama',
-    image: artifactImg,
-    desc: "Ihaha rya jenoside rya 1994 mu Murambi, rishobora kumenya abantu kugira ngo babigire icyo ariyo.",
-    lat: -2.39, lng: 29.67, era: 'post-1994',
-  },
-  {
-    // Card 22 -- Nyarugenge Church
-    category: 'Ubwenge', catKey: 'architecture',
-    title: "Nyarugenge Church", location: 'Kigali', locationKey: 'Kigali',
-    image: nyanzaImg,
-    desc: "Itorero rya kera rya Nyarugenge, rikubiyemo ubwubatsi bw'ibihumbi.",
-    lat: -1.95, lng: 30.06, era: 'colonial',
-  },
-  {
-    // Card 23 -- Kibeho
-    category: 'Ubwenge', catKey: 'culture',
-    title: "Kibeho Shrine", location: 'Nyaruguru', locationKey: 'Gitarama',
-    image: buhangaImg,
-    desc: "Aho Maria yaboneje mu Rwanda, harimo itorero n'ibindi bikomeye.",
-    lat: -2.65, lng: 29.55, era: 'colonial',
-  },
-  {
-    // Card 24 -- Rwankeri Hill
-    category: 'Ibyitangira Cyumweru', catKey: 'wildlife',
-    title: "Rwankeri Hill", location: 'Rwamagana', locationKey: 'Kayonza',
-    image: imigongoImg,
-    desc: "Umusozi ukomeye mu Rwanda, harimo imirima y'amakungu n'ibintu bikomeye.",
-    lat: -1.95, lng: 30.35, era: 'pre-colonial',
-  },
-  {
-    // Card 25 -- Lake Muhazi
-    category: 'Ibyitangira Cyumweru', catKey: 'lakes',
-    title: "Lake Muhazi", location: 'Rwamagana', locationKey: 'Kayonza',
-    image: safariImg,
-    desc: "Ikiyaga kigari cyo mu Rwanda, cyuzuye amateka n'ibintu bikomeye.",
-    lat: -1.85, lng: 30.25, era: 'pre-colonial',
-  },
-  {
-    // Card 26 -- Bisesero Genocide Memorial
-    category: 'Amateka', catKey: 'history',
-    title: "Bisesero Genocide Memorial", location: 'Karongi', locationKey: 'Rubavu',
-    image: artifactImg,
-    desc: "Ihaha rya jenoside rya 1994 mu Bisesero.",
-    lat: -2.15, lng: 29.35, era: 'post-1994',
-  },
-  {
-    // Card 27 -- Mount Karisimbi
-    category: 'Ibyitangira Cyumweru', catKey: 'wildlife',
-    title: "Mount Karisimbi", location: 'Musanze', locationKey: 'Musanze',
-    image: imigongoImg,
-    desc: "Umusozi mukuru mu Virunga, harimo ibisura n'inyamaswa.",
-    lat: -1.50, lng: 29.45, era: 'pre-colonial',
-  },
-  {
-    // Card 28 -- Gishwati Forest
-    category: 'Ibyitangira Cyumweru', catKey: 'wildlife',
-    title: "Gishwati Forest", location: 'Ngororero', locationKey: 'Musanze',
-    image: safariImg,
-    desc: "Ishyamba rikubiyemo ibintu bikomeye cyane.",
-    lat: -1.75, lng: 29.55, era: 'pre-colonial',
-  },
-  {
-    // Card 29 -- Rugezi Marsh
-    category: 'Ibyitangira Cyumweru', catKey: 'lakes',
-    title: "Rugezi Marsh", location: 'Burera', locationKey: 'Musanze',
-    image: safariImg,
-    desc: "Akabiriziro kizwi cyane mu Rwanda, harimo inyamaswa.",
-    lat: -1.45, lng: 29.85, era: 'pre-colonial',
-  },
-  {
-    // Card 30 -- Gatagara Crafts Village
-    category: 'Rusange', catKey: 'crafts',
-    title: "Gatagara Crafts Village", location: 'Huye', locationKey: 'Gitarama',
-    image: weavingImg,
-    desc: "Umujyi w'ibintu byahindutse, harimo imigongo n'ibindi byanditswe.",
-    lat: -2.55, lng: 29.70, era: 'post-1994',
-  },
-  {
-    // Card 31 -- Huye Mountain
-    category: 'Ibyitangira Cyumweru', catKey: 'wildlife',
-    title: "Huye Mountain", location: 'Huye', locationKey: 'Gitarama',
-    image: imigongoImg,
-    desc: "Umusozi ukomeye mu Rwanda, harimo imirima.",
-    lat: -2.60, lng: 29.75, era: 'pre-colonial',
-  },
-  {
-    // Card 32 -- Rusumo Falls
-    category: 'Ibyitangira Cyumweru', catKey: 'lakes',
-    title: "Rusumo Falls", location: 'Rusumo', locationKey: 'Kayonza',
-    image: safariImg,
-    desc: "Imirima y'ibisura, yabera mu Rusumo.",
-    lat: -2.39, lng: 30.78, era: 'pre-colonial',
-  },
-  {
-    // Card 33 -- King's Palace Museum (Rukari)
-    category: 'Ubwami', catKey: 'architecture',
-    title: "King's Palace Museum (Rukari)", location: 'Nyanza', locationKey: 'Nyanza',
-    image: nyanzaImg,
-    desc: "Ingoro y'Ubwami ya Rukari, rikubiyemo ibintu by'Umwami.",
-    lat: -2.34, lng: 29.52, era: 'pre-colonial',
-  },
-  {
-    // Card 34 -- Amahoro National Stadium
-    category: 'Ubwenge', catKey: 'architecture',
-    title: "Amahoro National Stadium", location: 'Kigali', locationKey: 'Kigali',
-    image: imigongoImg,
-    desc: "Ikibuga kizwi cyane mu Rwanda, cyuzuye amateka n'ibintu bikomeye.",
-    lat: -1.94, lng: 30.07, era: 'post-1994',
-  },
-  {
-    // Card 35 -- Rwanda Art Museum
-    category: 'Ubwenge', catKey: 'art',
-    title: "Rwanda Art Museum", location: 'Kigali', locationKey: 'Kigali',
-    image: imigongoImg,
-    desc: "Ihaha ry'imigongo n'ibindi by'ubwenge.",
-    lat: -1.93, lng: 30.08, era: 'post-1994',
-  },
 ];
+
+const EXPLORE_FALLBACK_TRANSLATIONS = {
+  "Ingoro y'Ubwami ya Nyanza": {
+    en: { category: 'Royal', title: 'Royal Palace of Nyanza', desc: "A reconstructed royal palace showing Rwanda's architecture, ceremonies, and daily court life." },
+    fr: { category: 'Royal', title: 'Palais royal de Nyanza', desc: "Un palais royal reconstruit qui presente l'architecture, les ceremonies et la vie quotidienne de la cour rwandaise." },
+  },
+  "Intore – Umubyino w'Ubutwari": {
+    en: { category: 'Performance', title: 'Intore - Dance of Bravery', desc: 'A powerful Intore tradition of discipline, bravery, rhythm, and ceremonial movement.' },
+    fr: { category: 'Performance', title: 'Intore - danse de bravoure', desc: 'Une tradition intore de discipline, de bravoure, de rythme et de mouvement ceremonial.' },
+  },
+  "Inanga – Umutima w'Umuziki Nyarwanda": {
+    en: { category: 'Music', title: 'Inanga - Heart of Rwandan Music', desc: 'Hear inanga, ikembe, and drums as they carried memory through royal courts and villages.' },
+    fr: { category: 'Musique', title: "Inanga - coeur de la musique rwandaise", desc: "Ecoutez l'inanga, l'ikembe et les tambours qui portaient la memoire dans les cours royales et les villages." },
+  },
+  "Imigani – Inkuru zivugwa ku Muriro": {
+    en: { category: 'Folktales', title: 'Imigani - Fireside Stories', desc: 'Enter Rwanda’s oral tradition of proverbs, stories, and lessons shared across generations.' },
+    fr: { category: 'Contes', title: 'Imigani - recits du feu', desc: "Entrez dans la tradition orale rwandaise des proverbes, recits et lecons transmis de generation en generation." },
+  },
+  "Kigeli IV Rwabugiri – Umwami w'Intwari": {
+    en: { category: 'Royal', title: 'Kigeli IV Rwabugiri - Warrior King', desc: 'One of Rwanda’s strongest kings, remembered for expansion, military campaigns, and administrative reform.' },
+    fr: { category: 'Royal', title: 'Kigeli IV Rwabugiri - roi guerrier', desc: "L'un des rois les plus puissants du Rwanda, connu pour l'expansion, les campagnes militaires et les reformes." },
+  },
+  "Ubwiru – Imihango y'Urukiko rw'Ubwami": {
+    en: { category: 'Rituals', title: 'Ubwiru - Royal Court Rituals', desc: 'Sacred rituals and protected knowledge that guided the life of the royal court.' },
+    fr: { category: 'Rituels', title: 'Ubwiru - rituels de la cour royale', desc: 'Rituels sacres et savoir protege qui guidaient la vie de la cour royale.' },
+  },
+  "Imigani – Inkuru zo ku Muriro": {
+    en: { category: 'Folktales', title: 'Imigani - Stories by the Fire', desc: 'Oral stories elders used to teach children wisdom, humor, memory, and good conduct.' },
+    fr: { category: 'Contes', title: 'Imigani - histoires autour du feu', desc: 'Recits oraux que les anciens utilisaient pour transmettre sagesse, humour, memoire et conduite.' },
+  },
+  "Ibyivugo – Ibisigo by'Ubutwari": {
+    en: { category: 'Poetry', title: 'Ibyivugo - Warrior Praise Poetry', desc: 'Self-praise poems performed by warriors and hunters to celebrate courage and achievement.' },
+    fr: { category: 'Poesie', title: 'Ibyivugo - poesie de bravoure', desc: 'Poemes de louange personnelle declames par guerriers et chasseurs pour celebrer le courage.' },
+  },
+  "Inzira z'Ubwenge – Ibisakuzo n'Ubuhanga": {
+    en: { category: 'Wisdom', title: 'Paths of Wisdom - Riddles and Insight', desc: 'Traditional riddles and sayings used to sharpen memory, reasoning, and cultural knowledge.' },
+    fr: { category: 'Sagesse', title: 'Chemins de sagesse - devinettes et savoir', desc: 'Devinettes et proverbes traditionnels pour aiguiser la memoire, le raisonnement et la culture.' },
+  },
+  "Ingoma – Ingoma Zera z'Ubwami": {
+    en: { category: 'Music', title: 'Ingoma - Sacred Royal Drums', desc: 'Royal drums used in ceremonies, announcements, and celebrations at the heart of court life.' },
+    fr: { category: 'Musique', title: 'Ingoma - tambours royaux sacres', desc: 'Tambours royaux utilises dans les ceremonies, annonces et celebrations de la cour.' },
+  },
+  "Umuvugo – Indirimbo z'Ishimwe": {
+    en: { category: 'Music', title: 'Umuvugo - Songs of Praise', desc: 'Traditional songs praising kings, heroes, and meaningful events in community memory.' },
+    fr: { category: 'Musique', title: 'Umuvugo - chants de louange', desc: 'Chants traditionnels louant rois, heros et evenements marquants de la memoire collective.' },
+  },
+  "Ubudehe – Ubufatanye bw'Abaturage": {
+    en: { category: 'Community', title: 'Ubudehe - Community Cooperation', desc: 'An old practice of shared work and mutual help that shaped Rwandan community life.' },
+    fr: { category: 'Communaute', title: 'Ubudehe - cooperation communautaire', desc: "Ancienne pratique de travail partage et d'entraide qui a faconne la vie communautaire rwandaise." },
+  },
+  "Agaseke – Ibiseke by'Amahoro": {
+    en: { category: 'Crafts', title: 'Agaseke - Peace Baskets', desc: 'Carefully woven baskets rich in cultural meaning, used in ceremonies, gifts, and daily life.' },
+    fr: { category: 'Artisanat', title: 'Agaseke - paniers de paix', desc: 'Paniers finement tisses, riches de sens culturel, utilises dans les ceremonies, les cadeaux et la vie quotidienne.' },
+  },
+  "Inanga – Ikinanga cy'u Rwanda": {
+    en: { category: 'Music', title: 'Inanga - Rwanda’s String Instrument', desc: 'A signature traditional instrument played in royal courts and village ceremonies.' },
+    fr: { category: 'Musique', title: "Inanga - instrument a cordes du Rwanda", desc: 'Instrument traditionnel emblematique joue dans les cours royales et les ceremonies villageoises.' },
+  },
+  "Ingabo – Abarinzi b'Ubwami": {
+    en: { category: 'History', title: 'Ingabo - Guardians of the Kingdom', desc: 'Brave royal guards who protected the king and helped maintain security across the kingdom.' },
+    fr: { category: 'Histoire', title: 'Ingabo - gardiens du royaume', desc: 'Braves gardes royaux qui protegeaient le roi et contribuaient a la securite du royaume.' },
+  },
+};
+
+const localizeExploreFallbackItem = (item, language) => {
+  if (language === 'rw') return item;
+  const localized = EXPLORE_FALLBACK_TRANSLATIONS[item.title]?.[language];
+  return localized ? { ...item, ...localized, originalTitle: item.title } : item;
+};
 
 const toCoordinate = (value) => {
   if (value === null || value === undefined || value === '') return null;
@@ -348,9 +258,8 @@ const getStoryId = (item) => String(item?.id || item?.title || item?.location ||
 const normalizePlaceValue = (value) => String(value ?? '').trim().toLowerCase();
 
 export default function Explore() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { user } = useAuth();
-  const { fetchUserActivityItems, trackActivity } = useGamificationContext();
 
   // Some i18n setups return the key itself (e.g. "explore.clearFilters")
   // when a translation is missing, instead of '' or undefined. That makes
@@ -369,27 +278,25 @@ export default function Explore() {
   const [heritageItems, setHeritageItems] = useState(FALLBACK_ITEMS);
   const [audioItems, setAudioItems] = useState([]);
   const [selectedAudio, setSelectedAudio] = useState(null);
+  const [reportMessage, setReportMessage] = useState('');
   const [imageLoadErrors, setImageLoadErrors] = useState({});
-  const commonsImages = commonsImagesCached;
-  const [completedStoryIds, setCompletedStoryIds] = useState(new Set());
-
-  // Fetch completed story ids from backend
-  useEffect(() => {
-    if (!user?.id) {
-      setCompletedStoryIds(new Set());
-      return;
+  const [commonsImages, setCommonsImages] = useState({});
+  const [completedStoryIds, setCompletedStoryIds] = useState(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(COMPLETED_STORIES_KEY) || '[]'));
+    } catch {
+      return new Set();
     }
-    const loadCompleted = async () => {
-      const items = await fetchUserActivityItems('story');
-      setCompletedStoryIds(new Set(items.map(id => String(id))));
-    };
-    loadCompleted();
-  }, [user?.id, fetchUserActivityItems]);
+  });
 
   const activeExplorerType = user?.explorerType || user?.explorer_type;
   const isMusicExplorer = activeExplorerType === 'music-explorer';
 
   const [topbarSearch, setTopbarSearch] = useState('');
+  const localizedHeritageItems = useMemo(
+    () => heritageItems.map((item) => localizeExploreFallbackItem(item, language)),
+    [heritageItems, language]
+  );
 
   const regions = [
     t('explore.allRegions'),
@@ -418,37 +325,29 @@ export default function Explore() {
     { label: t('explore.kigali'), value: 'Kigali' },
   ];
 
-  // Background fetch — cards are already visible from FALLBACK_ITEMS.
-  // If the API responds in time, MERGE the real data in by title instead
-  // of replacing the whole list, so items the DB doesn't know about yet
-  // don't get wiped out.
   useEffect(() => {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000); // give up after 5s
+    const timeout = setTimeout(() => controller.abort(), 5000);
 
-    fetch('http://localhost:5000/api/heritage', { signal: controller.signal })
+    fetch(apiUrl('/api/heritage'), { signal: controller.signal })
       .then(r => r.json())
       .then(data => {
         if (data.items && data.items.length > 0) {
           const apiMapped = data.items.map((item, index) => {
             const mapped = mapHeritageApiItem(item, index, fallbackImages, withSafeCoordinates);
-            // First try commons cache, then overrides
-            if (commonsImagesCached[mapped.title]) {
-              mapped.image = commonsImagesCached[mapped.title];
-            } else if (IMAGE_OVERRIDES[mapped.title]) {
+            // Apply image overrides for known items with broken images
+            if (IMAGE_OVERRIDES[mapped.title]) {
               mapped.image = IMAGE_OVERRIDES[mapped.title];
             }
             return mapped;
           });
 
-          setHeritageItems(prev => {
-            const byKey = new Map(prev.map(item => [item.title, item]));
-            apiMapped.forEach(item => byKey.set(item.title, item));
-            return Array.from(byKey.values());
-          });
+          setHeritageItems(apiMapped);
+        } else {
+          setHeritageItems(FALLBACK_ITEMS);
         }
       })
-      .catch(() => {/* keep fallback */})
+      .catch(() => setHeritageItems(FALLBACK_ITEMS))
       .finally(() => clearTimeout(timeout));
 
     return () => { controller.abort(); clearTimeout(timeout); };
@@ -458,7 +357,7 @@ export default function Explore() {
   useEffect(() => {
     const fetchAudio = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/audio');
+        const res = await fetch(apiUrl('/api/audio'));
         const data = await res.json();
         if (data.audio && data.audio.length > 0) {
           setAudioItems(data.audio);
@@ -470,7 +369,40 @@ export default function Explore() {
     fetchAudio();
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      const resolved = {};
+      await Promise.all(
+        localizedHeritageItems.map(async (item) => {
+          if (item.image) return;
+          try {
+            const url = await getCommonsImage(item.title);
+            if (url && !cancelled) resolved[item.title] = url;
+          } catch { /* no image available */ }
+        })
+      );
+      if (!cancelled) setCommonsImages(resolved);
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [localizedHeritageItems]);
 
+  // Handle pending story read from Saved page
+  useEffect(() => {
+    const pending = localStorage.getItem('pendingStoryRead');
+    if (!pending) return;
+    try {
+      const payload = JSON.parse(pending);
+      localStorage.removeItem('pendingStoryRead');
+      const story = localizedHeritageItems.find(h => String(h.id) === String(payload.itemId));
+      if (story) {
+        setSelectedStory(story);
+      }
+    } catch {
+      localStorage.removeItem('pendingStoryRead');
+    }
+  }, [localizedHeritageItems]);
 
   const toggleEra = (era) => {
     setActiveEras(prev =>
@@ -511,7 +443,7 @@ export default function Explore() {
     setActivePlace('all');
   }, []);
 
-  const filteredHeritageItems = heritageItems.filter(item => {
+  const filteredHeritageItems = localizedHeritageItems.filter(item => {
     const regionMatch = activeRegion === t('explore.allRegions')
       || (REGION_LOCATION_MAP[activeRegion] || []).includes(item.locationKey);
     const eraMatch = activeEras.length === 0
@@ -540,31 +472,6 @@ export default function Explore() {
     setTopbarSearch('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t]);
-
-  // Reset filters when language changes to avoid mismatched translated values
-  useEffect(() => {
-    // If activeRegion is not in the new regions list (because language changed), reset all filters
-    const currentRegions = [
-      t('explore.allRegions'),
-      t('explore.north'),
-      t('explore.south'),
-      t('explore.east'),
-      t('explore.west'),
-      t('explore.kigali'),
-    ];
-    const currentEras = [
-      t('explore.preColonial'),
-      t('explore.colonial'),
-      t('explore.post1994'),
-    ];
-    const regionMismatch = !currentRegions.includes(activeRegion);
-    const eraMismatch = activeEras.some(era => !currentEras.includes(era));
-    if (regionMismatch || eraMismatch) {
-      clearAllFilters();
-    }
-  }, [t, activeRegion, activeEras, clearAllFilters]);
-
-  // Removed pendingStoryRead localStorage usage
 
   const audioForExplorer = useMemo(() => {
     if (!isMusicExplorer || !audioItems.length) return [];
@@ -632,14 +539,6 @@ export default function Explore() {
   const handleReadMore = useCallback((e, item) => {
     e.stopPropagation(); // don't trigger map logic
     setSelectedStory(item);
-    trackView({
-      type: 'Article',
-      itemId: item.id,
-      title: item.title,
-      image: commonsImagesCached[item.title] || item.image || '',
-      category: item.category || '',
-      location: item.location || '',
-    });
   }, []);
 
   const handleCardImageError = useCallback((title) => {
@@ -650,19 +549,13 @@ export default function Explore() {
     const storyId = getStoryId(story);
     if (!storyId) return;
 
-    // Call trackActivity to mark as completed in backend
-    trackActivity('story', storyId, { 
-      title: story.title,
-      category: story.category 
-    });
-
-    // Update local state
     setCompletedStoryIds(prev => {
       const next = new Set(prev);
       next.add(storyId);
+      localStorage.setItem(COMPLETED_STORIES_KEY, JSON.stringify([...next]));
       return next;
     });
-  }, [trackActivity]);
+  }, []);
 
   // Click-to-view: immediately show a loading popup, then fetch the
   // nearest location from the DB and replace its content.
@@ -671,7 +564,7 @@ export default function Explore() {
 
     const controller = new AbortController();
     fetch(
-      `http://localhost:5000/api/locations/nearest?lat=${lat}&lng=${lng}`,
+      apiUrl(`/api/locations/nearest?lat=${lat}&lng=${lng}`),
       { signal: controller.signal }
     )
       .then(async (res) => {
@@ -773,25 +666,9 @@ export default function Explore() {
         <div className="archive-grid">
           {sortedItems.length === 0 ? (
             <div className="archive-empty-state">
-              <img
-                src={notFoundImg}
-                alt=""
-                aria-hidden="true"
-                className="archive-empty-illustration"
-              />
-              <h3 className="archive-empty-title">
-                {tf('explore.noResultsTitle', 'No heritage sites match your search.')}
-              </h3>
-              <p className="archive-empty-desc">
-                {tf('explore.noResultsDescLine1', "We couldn't find any results for the selected filters.")}
-                <br />
-                {tf(
-                  'explore.noResultsDescLine2',
-                  "Try adjusting your filters or explore other stories from Rwanda's rich cultural heritage."
-                )}
-              </p>
-              <button type="button" className="archive-empty-clear-btn" onClick={clearAllFilters}>
-                <RefreshCw size={14} aria-hidden="true" />
+              <p>{tf('explore.noResults', 'No heritage sites match your current filters.')}</p>
+              <button type="button" className="heritage-action secondary" onClick={clearAllFilters}>
+                <X size={14} aria-hidden="true" />
                 {tf('explore.clearFilters', 'Clear filters')}
               </button>
             </div>
@@ -852,7 +729,7 @@ export default function Explore() {
                       </div>
                     ) : (
                       <img
-                        src={commonsImagesCached[item.title] || item.image}
+                        src={commonsImages[item.title] || item.image}
                         alt={item.title}
                         className="heritage-card-image"
                         onError={() => handleCardImageError(item.title)}
@@ -867,6 +744,12 @@ export default function Explore() {
                   </div>
                   <p className="heritage-card-desc">{item.desc}</p>
                   <div className="heritage-card-actions">
+                    <FlagControl
+                      type={isAudio ? 'audio' : 'heritage'}
+                      itemId={item.id}
+                      title={item.title}
+                      onToast={(text) => { setReportMessage(text); setTimeout(() => setReportMessage(''), 3000); }}
+                    />
                     {!isAudio ? (
                       <button
                         type="button"
@@ -920,7 +803,7 @@ export default function Explore() {
         {mapVisible && (
           <div id="explore-map-section" className="map-section">
             <HeritageMap
-              items={heritageItems}
+              items={localizedHeritageItems}
               selectedMarker={selectedMarker}
               onMarkerClick={(item) => setSelectedMarker(item)}
               clickPopup={clickPopup}
@@ -929,11 +812,12 @@ export default function Explore() {
                 setSelectedMarker(null);
                 setClickPopup(null);
               }}
-              showPanel={true}
+              showPanel={false}
             />
           </div>
         )}
       </div>
+      {reportMessage && <div className="contribute-toast">{reportMessage}</div>}
       {/* Story read modal */}
       {selectedStory && (
         <StoryReadModal
@@ -982,6 +866,12 @@ export default function Explore() {
                   {selectedAudio.description}
                 </p>
               )}
+              <FlagControl
+                type="audio"
+                itemId={selectedAudio.id}
+                title={selectedAudio.title}
+                onToast={(text) => { setReportMessage(text); setTimeout(() => setReportMessage(''), 3000); }}
+              />
               {selectedAudio.audio_url ? (
                 <audio
                   controls

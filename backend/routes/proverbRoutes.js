@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import ProverbModel from '../models/proverbModel.js';
+import ExerciseModel from '../models/exerciseModel.js';
 
 const router = Router();
 
@@ -22,6 +23,16 @@ router.get('/featured', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to fetch featured proverbs' });
+  }
+});
+
+router.get('/:id/exercises', async (req, res) => {
+  try {
+    const exercises = await ExerciseModel.getAll({ item_type: 'proverb', item_id: req.params.id });
+    res.json({ exercises, total: exercises.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch proverb exercises' });
   }
 });
 

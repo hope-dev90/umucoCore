@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { gamificationEvents, GE } from '../utils/gamificationEvents';
+import { apiUrl } from '../config/api';
 
 const GamificationContext = createContext(null);
 
-const API = 'http://localhost:5000/api/gamification';
+const API = apiUrl('/api/gamification');
 
 function getHeaders() {
   const token = localStorage.getItem('token');
@@ -44,7 +45,18 @@ export function GamificationProvider({ children }) {
     const r = await fetch(`${API}/xp`, { headers: getHeaders() });
     if (!r.ok) throw new Error('xp');
     const d = await r.json();
-    if (d.data) updateUser({ xp: d.data.xp, level: d.data.level });
+    if (d.data) {
+      const currentStreak = d.data.currentStreak ?? d.data.current_streak;
+      const nextBestStreak = d.data.bestStreak ?? d.data.best_streak;
+      updateUser({
+        xp: d.data.xp,
+        level: d.data.level,
+        ...(currentStreak !== undefined ? { currentStreak } : {}),
+        ...(nextBestStreak !== undefined ? { bestStreak: nextBestStreak } : {}),
+      });
+      if (currentStreak !== undefined) setStreak(currentStreak);
+      if (nextBestStreak !== undefined) setBestStreak(nextBestStreak);
+    }
   };
 
   const fetchBadges = async () => {
@@ -100,8 +112,8 @@ export function GamificationProvider({ children }) {
       if (!r.ok) return;
       const d = await r.json();
       setLastLoginDate(today);
-      const newStreak    = d.data?.currentStreak ?? d.data?.streak ?? 0;
-      const newBestStreak = d.data?.bestStreak ?? 0;
+      const newStreak    = d.data?.currentStreak ?? d.data?.streak ?? streak ?? user?.currentStreak ?? 0;
+      const newBestStreak = d.data?.bestStreak ?? bestStreak ?? user?.bestStreak ?? newStreak;
       setStreak(newStreak);
       setBestStreak(newBestStreak);
       updateUser({ currentStreak: newStreak, bestStreak: newBestStreak });

@@ -187,9 +187,61 @@ const STORY_TRANSLATIONS = {
   },
 };
 
+const QUIZ_TRANSLATIONS = {
+  'gihanga-ngomijana': {
+    fr: [
+      { question: "Que signifie le nom Gihanga ?", options: ["Celui qui descendit", "Creer", "Le forgeron", "Le guerrier"], correctIndex: 1, explanation: "Gihanga vient de guhanga, qui signifie creer." },
+      { question: "Quel savoir Gihanga aurait-il apporte a son peuple ?", options: ["Tissage et agriculture", "Forge du fer et travail du bois", "Construction de murs de pierre", "Ecriture"], correctIndex: 1, explanation: "La tradition lui attribue le fer, le bois, l'argile, le feu et l'elevage." },
+      { question: "Quelle etait la signification du feu de Gihanga ?", options: ["Forger des armes", "Ne jamais s'eteindre", "Avertir les ennemis", "Servir seulement aux fetes"], correctIndex: 1, explanation: "Le feu representait un lien continu entre le peuple et son commencement." },
+    ],
+    rw: [
+      { question: "Izina Gihanga risobanura iki?", options: ["Uwamanutse", "Guhanga", "Umucuzi", "Intwari"], correctIndex: 1, explanation: "Gihanga rifitanye isano n'ijambo guhanga." },
+      { question: "Ni ubuhe bumenyi Gihanga avugwaho ko yazaniye abantu?", options: ["Kuboha no guhinga", "Gucura ibyuma no kubaza imbaho", "Kubaka inkuta z'amabuye", "Kwandika"], correctIndex: 1, explanation: "Avugwaho gucura ibyuma, kubaza, kubumba, kubika umuriro no korora." },
+      { question: "Umuriro Gihanga yacanye wasobanuraga iki?", options: ["Gucura intwaro", "Kudazima", "Kuburira abanzi", "Kwaka mu minsi mikuru gusa"], correctIndex: 1, explanation: "Wari ikimenyetso cy'umurongo udacika uhuza abaturage n'inkomoko yabo." },
+    ],
+  },
+  nyirarucyaba: {
+    fr: [
+      { question: "Qui etait Nyirarucyaba ?", options: ["Une guerriere celebre", "La fille de Gihanga", "Une reine voisine", "La fondatrice du Rwanda"], correctIndex: 1, explanation: "Nyirarucyaba etait la fille du roi fondateur Gihanga." },
+      { question: "Que lui attribue la tradition rwandaise ?", options: ["La forge du fer", "Les premiers bovins et le lait", "Le tambour sacre", "De nouvelles techniques agricoles"], correctIndex: 1, explanation: "Elle est associee a l'arrivee des premiers bovins et du lait a la cour." },
+      { question: "Pourquoi quitta-t-elle sa maison d'enfance ?", options: ["Pour conquerir des terres", "A cause d'une dispute familiale", "Pour se marier", "Parce que son pere l'exila"], correctIndex: 1, explanation: "Elle partit apres une dispute entre sa mere et sa belle-mere." },
+    ],
+    rw: [
+      { question: "Nyirarucyaba yari nde?", options: ["Intwari izwi", "Umukobwa wa Gihanga", "Umwamikazi wo hanze", "Uwashinze u Rwanda"], correctIndex: 1, explanation: "Nyirarucyaba yari umukobwa wa Gihanga." },
+      { question: "Avugwaho kuzana iki mu Rwanda?", options: ["Gucura ibyuma", "Inka za mbere n'amata", "Ingoma ngabe", "Uburyo bushya bwo guhinga"], correctIndex: 1, explanation: "Avugwaho kuzana inka n'amata ku rugo rwa se." },
+      { question: "Kuki yavuye mu rugo yakuriyemo?", options: ["Kujya gutsinda ibihugu", "Kubera amakimbirane yo mu muryango", "Kujya gushaka", "Se yaramwirukanye"], correctIndex: 1, explanation: "Yahunze kubera amakimbirane hagati ya nyina na mukase." },
+    ],
+  },
+  'ruganzu-ii-ndoli': {
+    fr: [
+      { question: "Quelle riviere Ruganzu II Ndoli traversa-t-il ?", options: ["Akagera", "Nyabarongo", "Rusizi", "Sebeya"], correctIndex: 1, explanation: "Il traversa le Nyabarongo, frontiere symbolique entre l'exil et le retour." },
+      { question: "Comment repondit-il aux doutes de la cour ?", options: ["Par la guerre", "En fuyant", "Par sa presence et son ecoute", "En remplacant tout le monde"], correctIndex: 2, explanation: "Il resta, ecouta et montra une grande constance." },
+      { question: "Quelle lecon porte son histoire ?", options: ["Le doute est la defaite", "La maison perdue peut encore etre atteinte", "L'exil efface toujours", "Ne jamais faire confiance"], correctIndex: 1, explanation: "Le recit enseigne le retour, le courage et le refus de reculer." },
+    ],
+    rw: [
+      { question: "Ruganzu II Ndoli yambutse uwuhe mugezi?", options: ["Akagera", "Nyabarongo", "Rusizi", "Sebeya"], correctIndex: 1, explanation: "Yambutse Nyabarongo, wari umupaka w'ikigereranyo hagati y'ubuhungiro no kugaruka." },
+      { question: "Yasubije ate abamushidikanyaga i bwami?", options: ["Abatera intambara", "Arongera arahunga", "Aguma ahari kandi atega amatwi", "Abasimbuza bose"], correctIndex: 2, explanation: "Yagumye ahari, atega amatwi, agaragaza kudacika intege." },
+      { question: "Ni irihe somo rikomeye riri muri iyo nkuru?", options: ["Gushidikanya ni gutsindwa", "Aho wavanywe ushobora kuhagera", "Ubuhungiro busiba umuntu", "Ntukizere abantu"], correctIndex: 1, explanation: "Inkuru yigisha kugaruka, ubutwari no kudasubira inyuma." },
+    ],
+  },
+  'kigeli-iv-rwabugiri': {
+    fr: [
+      { question: "Qui etait le pere de Kigeli IV Rwabugiri ?", options: ["Gihanga Ngomijana", "Ruganzu II Ndoli", "Mutara II Rwogera", "Musinga"], correctIndex: 2, explanation: "Il naquit Sezisoni Rwabugiri, fils de Mutara II Rwogera." },
+      { question: "Que signifie Inkotanyi cyane ?", options: ["Le vraiment infatigable", "Le grand roi", "Le conquerant", "Le premier guerrier"], correctIndex: 0, explanation: "Ce titre rappelle son energie constante dans les campagnes." },
+      { question: "Comment reforma-t-il l'armee ?", options: ["Il la supprima", "Il crea des unites permanentes comme les Intore", "Il utilisa seulement des mercenaires", "Il crea une marine sur le Kivu"], correctIndex: 1, explanation: "Il reorganisa l'armee en unites permanentes, dont les Intore." },
+    ],
+    rw: [
+      { question: "Se wa Kigeli IV Rwabugiri yari nde?", options: ["Gihanga Ngomijana", "Ruganzu II Ndoli", "Mutara II Rwogera", "Musinga"], correctIndex: 2, explanation: "Yavutse yitwa Sezisoni Rwabugiri, umuhungu wa Mutara II Rwogera." },
+      { question: "Inkotanyi cyane bisobanura iki?", options: ["Udacika intege cyane", "Umwami ukomeye", "Uwigaruriye", "Intwari ya mbere"], correctIndex: 0, explanation: "Iryo zina rijyanye n'uko yahoraga mu bikorwa by'ingabo." },
+      { question: "Yavuguruye ate ingabo?", options: ["Yazivanyeho", "Yazishyize mu mitwe ihoraho nka Intore", "Yishingikirije abacancuro gusa", "Yashyizeho ingabo zo mu mazi kuri Kivu"], correctIndex: 1, explanation: "Yashyize ingabo mu mitwe ihoraho, harimo n'Intore." },
+    ],
+  },
+};
+
 export function localizeStory(story, language = 'en') {
   if (!story) return story;
   const localized = STORY_TRANSLATIONS[story.id]?.[language] || {};
+  const localizedQuiz = QUIZ_TRANSLATIONS[story.id]?.[language];
   return {
     ...story,
     title: localized.title || story.title,
@@ -198,7 +250,7 @@ export function localizeStory(story, language = 'en') {
     desc: localized.desc || story.desc,
     description: localized.desc || story.description,
     content: localized.content || story.content,
-    quiz: localized.quiz || story.quiz,
+    quiz: localized.quiz || localizedQuiz || story.quiz,
   };
 }
 

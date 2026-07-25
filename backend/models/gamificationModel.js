@@ -148,7 +148,7 @@ async function checkAndAwardBadgesForStreak(client, userId, currentStreak) {
 
 export const getUserXP = async (userId) => {
   const result = await pool.query(
-    `SELECT u.xp, u.level, l.name as level_name, l.required_xp, 
+    `SELECT u.xp, u.level, u.current_streak, u.best_streak, l.name as level_name, l.required_xp, 
      (SELECT required_xp FROM levels WHERE level = u.level + 1) as next_level_xp
      FROM users u JOIN levels l ON u.level = l.level
      WHERE u.id = $1`,
@@ -165,6 +165,40 @@ export const getXPLogs = async (userId) => {
   return result.rows;
 };
 
+const getStreakSnapshot = async (client, userId) => {
+  const streakResult = await client.query(
+    `WITH consecutive_dates AS (
+      SELECT login_date,
+             login_date - ROW_NUMBER() OVER (ORDER BY login_date)::integer AS group_id
+      FROM daily_streaks
+      WHERE user_id = $1
+    )
+    SELECT COUNT(*) AS current_streak
+    FROM consecutive_dates
+    WHERE group_id = (
+      SELECT group_id
+      FROM consecutive_dates
+      ORDER BY login_date DESC
+      LIMIT 1
+    )`,
+    [userId],
+  );
+
+  const currentStreak = parseInt(streakResult.rows[0]?.current_streak || 0, 10);
+  const userResult = await client.query(
+    `SELECT best_streak FROM users WHERE id = $1`,
+    [userId],
+  );
+
+  return {
+    currentStreak,
+    bestStreak: Math.max(
+      parseInt(userResult.rows[0]?.best_streak || 0, 10),
+      currentStreak,
+    ),
+  };
+};
+
 // Daily Login & Streaks
 export const recordDailyLogin = async (userId) => {
   const today = new Date().toISOString().split("T")[0];
@@ -179,8 +213,9 @@ export const recordDailyLogin = async (userId) => {
     );
 
     if (existingResult.rows.length > 0) {
+      const snapshot = await getStreakSnapshot(client, userId);
       await client.query("COMMIT");
-      return { streakAwarded: false };
+      return { streakAwarded: false, ...snapshot };
     }
 
     // Insert today's login
@@ -189,26 +224,7 @@ export const recordDailyLogin = async (userId) => {
       [userId, today],
     );
 
-    // Calculate streak
-    const streakResult = await client.query(
-      `WITH consecutive_dates AS (
-        SELECT login_date, 
-               login_date - ROW_NUMBER() OVER (ORDER BY login_date)::integer AS group_id
-        FROM daily_streaks
-        WHERE user_id = $1
-      )
-      SELECT COUNT(*) AS current_streak
-      FROM consecutive_dates
-      WHERE group_id = (
-        SELECT group_id 
-        FROM consecutive_dates 
-        ORDER BY login_date DESC 
-        LIMIT 1
-      )`,
-      [userId],
-    );
-
-    const currentStreak = parseInt(streakResult.rows[0].current_streak);
+    const { currentStreak } = await getStreakSnapshot(client, userId);
 
     // Update user
     await client.query(
@@ -229,7 +245,15 @@ export const recordDailyLogin = async (userId) => {
     await checkAndAwardBadgesForStreak(client, userId, currentStreak);
 
     await client.query("COMMIT");
-    return { streakAwarded: true, currentStreak };
+    const userResult = await pool.query(
+      `SELECT current_streak, best_streak FROM users WHERE id = $1`,
+      [userId],
+    );
+    return {
+      streakAwarded: true,
+      currentStreak: userResult.rows[0]?.current_streak ?? currentStreak,
+      bestStreak: userResult.rows[0]?.best_streak ?? currentStreak,
+    };
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;

@@ -1,3 +1,5 @@
+import { assetUrl } from '../config/api';
+
 const isRemoteImage = (value) => /^https?:\/\//i.test(value) || /^data:/i.test(value);
 const isBackendImagePath = (value) => /^(\/uploads\/|\/images\/|\/api\/)/i.test(value);
 const isLikelyLocalAssetPath = (value) => /^(\/assets\/|assets\/|\.\/|\.\.\/)/i.test(value) || /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(value);
@@ -11,7 +13,7 @@ export const mapHeritageApiItem = (item, index, fallbackImages = [], withSafeCoo
     if (isRemoteImage(trimmed)) {
       normalizedImage = trimmed;
     } else if (isBackendImagePath(trimmed)) {
-      normalizedImage = `http://localhost:5000${trimmed}`;
+      normalizedImage = assetUrl(trimmed);
     } else if (!isLikelyLocalAssetPath(trimmed)) {
       normalizedImage = trimmed;
     }

@@ -19,6 +19,7 @@ import insightInanga from '../assets/home/inanga.jpg';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { getLocalizedText } from '../utils/i18n';
+import { apiUrl } from '../config/api';
 
 const IMG = {
   insight1: insightWeaving,
@@ -135,6 +136,7 @@ export default function Contribute() {
       formPayload.append('contributor_name', formData.name);
       formPayload.append('contributor_email', formData.email);
       formPayload.append('description', formData.description);
+      formPayload.append('status', 'pending');
       if (selectedFile) {
         formPayload.append('file', selectedFile);
       }
@@ -142,7 +144,8 @@ export default function Contribute() {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      const res = await fetch(`http://localhost:5000${endpoint}`, {
+      // TODO(backend): POST /api/contributions/* should create pending review-queue rows, not live content.
+      const res = await fetch(apiUrl(endpoint), {
         method: 'POST',
         headers,
         body: formPayload,

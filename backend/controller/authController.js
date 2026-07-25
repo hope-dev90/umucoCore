@@ -272,22 +272,24 @@ export const login = async (req, res) => {
       dailyLoginResult = null;
     }
 
+    const refreshedUser = await findUserById(user.id);
+
     return res.status(200).json({
       success: true,
       message: "Login successful",
       token,
       user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        explorerType: user.explorer_type,
-        xp: user.xp,
-        level: user.level,
-        currentStreak: user.current_streak,
-        bestStreak: user.best_streak,
-        totalDays: user.total_days,
-        avatar: user.avatar,
+        id: refreshedUser.id,
+        name: refreshedUser.name,
+        email: refreshedUser.email,
+        role: refreshedUser.role,
+        explorerType: refreshedUser.explorer_type,
+        xp: refreshedUser.xp,
+        level: refreshedUser.level,
+        currentStreak: refreshedUser.current_streak,
+        bestStreak: refreshedUser.best_streak,
+        totalDays: refreshedUser.total_days,
+        avatar: refreshedUser.avatar,
       },
       dailyLogin: dailyLoginResult,
     });

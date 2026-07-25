@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { apiFetch } from '../config/api';
 import './Settings.css';
 import voicePhotoOne from '../assets/login/tra.png';
 import voicePhotoTwo from '../assets/login/tra2.png';
@@ -63,23 +64,13 @@ export default function Settings() {
     window.setTimeout(() => setMessage(''), 3000);
   };
 
-  const authedFetch = (url, options = {}) => {
-    const token = localStorage.getItem('token');
-    return fetch(url, {
-      ...options,
-      headers: {
-        ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
-        Authorization: `Bearer ${token}`,
-        ...(options.headers || {}),
-      },
-    });
-  };
+  const authedFetch = (url, options = {}) => apiFetch(url, options);
 
   const saveNotifications = async () => {
     setSavingKey('notifications');
     try {
       const notifications = { archiveUpdates: notifArchive, newsletter: notifNews, eventReminders: notifEvents };
-      const response = await authedFetch('http://localhost:5000/api/users/notifications', {
+      const response = await authedFetch('/api/users/notifications', {
         method: 'PUT',
         body: JSON.stringify(notifications),
       });
@@ -97,7 +88,7 @@ export default function Settings() {
     setSavingKey('accessibility');
     try {
       const accessibility = { fontSize: Number(fontSize), highContrast, reduceMotion: reducedMotion, voice: selectedVoice, dateFormat, timezone };
-      const response = await authedFetch('http://localhost:5000/api/users/accessibility', {
+      const response = await authedFetch('/api/users/accessibility', {
         method: 'PUT',
         body: JSON.stringify(accessibility),
       });
@@ -114,14 +105,14 @@ export default function Settings() {
   const saveDisplay = async () => {
     setSavingKey('display');
     try {
-      const profileResponse = await authedFetch('http://localhost:5000/api/users/profile', {
+      const profileResponse = await authedFetch('/api/users/profile', {
         method: 'PUT',
         body: JSON.stringify({ language: langCtx }),
       });
       if (!profileResponse.ok) throw new Error('Failed to save display settings');
 
       const accessibility = { fontSize: Number(fontSize), highContrast, reduceMotion: reducedMotion, voice: selectedVoice, dateFormat, timezone };
-      const accessibilityResponse = await authedFetch('http://localhost:5000/api/users/accessibility', {
+      const accessibilityResponse = await authedFetch('/api/users/accessibility', {
         method: 'PUT',
         body: JSON.stringify(accessibility),
       });
@@ -150,7 +141,7 @@ export default function Settings() {
     }
     setSavingKey('password');
     try {
-      const response = await authedFetch('http://localhost:5000/api/users/password', {
+      const response = await authedFetch('/api/users/password', {
         method: 'PUT',
         body: JSON.stringify(passwordForm),
       });
@@ -168,7 +159,7 @@ export default function Settings() {
   const handleActiveSessions = async () => {
     setSavingKey('sessions');
     try {
-      const response = await authedFetch('http://localhost:5000/api/users/sessions');
+      const response = await authedFetch('/api/users/sessions');
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to fetch sessions');
       showMessage(`${data.sessions?.length || 0} active server sessions found`);
@@ -182,7 +173,7 @@ export default function Settings() {
   const handleDataDownload = async () => {
     setSavingKey('export');
     try {
-      const response = await authedFetch('http://localhost:5000/api/users/export-data');
+      const response = await authedFetch('/api/users/export-data');
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Export failed');
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -209,7 +200,7 @@ export default function Settings() {
   const submitDeactivate = async () => {
     setSavingKey('deactivate');
     try {
-      const response = await authedFetch('http://localhost:5000/api/users/deactivate', { method: 'POST' });
+      const response = await authedFetch('/api/users/deactivate', { method: 'POST' });
       if (!response.ok) throw new Error('Deactivation failed');
       logout();
       navigate('/login');
@@ -227,7 +218,7 @@ export default function Settings() {
     }
     setSavingKey('delete');
     try {
-      const response = await authedFetch('http://localhost:5000/api/users/account', {
+      const response = await authedFetch('/api/users/account', {
         method: 'DELETE',
         body: JSON.stringify({ password: deletePassword }),
       });

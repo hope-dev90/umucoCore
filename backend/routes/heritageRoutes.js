@@ -6,6 +6,7 @@ import {
   updateHeritage,
   deleteHeritage
 } from '../controller/heritageController.js';
+import { adminOnly, authMiddleware } from '../middleware/authMiddleWare.js';
 
 const router = Router();
 
@@ -16,12 +17,12 @@ router.get('/', getAllHeritage);
 router.get('/:id', getHeritageById);
 
 // POST /api/heritage
-router.post('/', createHeritage);
+router.post('/', authMiddleware, adminOnly, createHeritage);
 
 // PUT /api/heritage/:id
-router.put('/:id', updateHeritage);
+router.put('/:id', authMiddleware, adminOnly, updateHeritage);
 
 // DELETE /api/heritage/:id
-router.delete('/:id', deleteHeritage);
+router.delete('/:id', authMiddleware, adminOnly, deleteHeritage);
 
 export default router;

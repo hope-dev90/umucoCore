@@ -4,7 +4,8 @@ import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
 import { useAuth } from '../contexts/AuthContext';
-import { useLocation } from 'react-router-dom';
+import { apiUrl, apiFetch } from '../config/api';
+import FlagControl from '../components/FlagControl';
 import './Listen.css';
 import RuganzuImg from '../assets/listen/ruganzu.png';
 import craneImg from '../assets/listen/crane-story.jpg';
@@ -20,7 +21,6 @@ import warDrumsImg from '../assets/home/intore.jpg';
 import farmingImg from '../assets/home/ubudehe.jpg';
 import nyamashekeImg from '../assets/safari.jpg';
 import byivugoImg from '../assets/home/intore.jpg';
-import { trackView } from '../utils/trackView';
 
 // Map audio title keywords / categories to local image imports
 const AUDIO_IMAGE_MAP = {
@@ -48,7 +48,58 @@ const AUDIO_IMAGE_MAP = {
 
 const ALL_AUDIO_IMAGES = Object.values(AUDIO_IMAGE_MAP);
 
+const FALLBACK_AUDIO_STORIES = [
+  {
+    genre: { en: 'Imigani', rw: 'Imigani', fr: 'Contes' },
+    title: {
+      en: 'The Crane and the Drum',
+      rw: "Umusambi n'Ingoma",
+      fr: 'La grue et le tambour',
+    },
+    narrator: {
+      en: "Narrated by Jean d'Amour",
+      rw: "Byavuzwe na Jean d'Amour",
+      fr: "Raconte par Jean d'Amour",
+    },
+    duration: '12:40',
+    durationSec: 760,
+    image: craneImg,
+    audioUrl: '',
+  },
+  {
+    genre: { en: 'Imigani', rw: 'Imigani', fr: 'Contes' },
+    title: {
+      en: 'The Moon That Borrowed a Cow',
+      rw: "Ukwezi Kwatije Inka",
+      fr: 'La lune qui emprunta une vache',
+    },
+    narrator: {
+      en: 'Narrated by Beatrice U.',
+      rw: 'Byavuzwe na Beatrice U.',
+      fr: 'Raconte par Beatrice U.',
+    },
+    duration: '15:15',
+    durationSec: 915,
+    image: moonImg,
+    audioUrl: '',
+  },
+];
+
+function localizeAudioFallback(language) {
+  return FALLBACK_AUDIO_STORIES.map((story, index) => ({
+    id: `fallback-audio-${index + 1}`,
+    genre: story.genre[language] || story.genre.en,
+    title: story.title[language] || story.title.en,
+    narrator: story.narrator[language] || story.narrator.en,
+    duration: story.duration,
+    durationSec: story.durationSec,
+    image: story.image,
+    audioUrl: story.audioUrl,
+  }));
+}
+
 const PROVERB_LANG_CONFIG = {
+  rw: { tag: 'rw-RW', label: 'RW', preferredVoiceHints: ['kinyarwanda', 'rwanda', 'rw'] },
   fr: { tag: 'fr-FR', label: 'FR', preferredVoiceHints: ['amelie', 'thomas', 'french'] },
   en: { tag: 'en-GB', label: 'EN', preferredVoiceHints: ['daniel', 'english'] },
 };
@@ -63,7 +114,7 @@ function resolveAudioImage(item, index) {
 
 export default function Listen() {
   const { t, language } = useLanguage();
-  const { awardXP, trackActivity, fetchUserActivityItems } = useGamificationContext();
+  const { awardXP, trackActivity } = useGamificationContext();
   const { user } = useAuth();
   const [fables, setFables] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -86,7 +137,7 @@ export default function Listen() {
   const [savingTrackId, setSavingTrackId] = useState(null);
   const [playbackMode, setPlaybackMode] = useState('audio');
   const [speechNarration, setSpeechNarration] = useState(null);
-  const [topbarSearch, setTopbarSearch] = useState('');
+  const [reportMessage, setReportMessage] = useState('');
 
   const getSelectedVoice = useCallback(() => Number(user?.accessibility?.voice ?? 0), [user]);
 
@@ -136,7 +187,7 @@ export default function Listen() {
   useEffect(() => {
     const fetchAudio = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/audio");
+        const res = await fetch(apiUrl('/api/audio'));
         const data = await res.json();
         if (data.audio && data.audio.length > 0) {
           const mapped = data.audio.map((item, i) => ({
@@ -155,49 +206,11 @@ export default function Listen() {
           }));
           setFables(mapped);
         } else {
-          setFables([
-            {
-              genre: t("listen.migani"),
-              title: t("listen.craneStory"),
-              narrator: t("listen.narratedBy") + " Jean d'Amour",
-              duration: "12:40",
-              durationSec: 760,
-              image: craneImg,
-              audioUrl: '',
-            },
-            {
-              genre: t("listen.migani"),
-              title: t("listen.moonStory"),
-              narrator: t("listen.narratedBy") + " Beatrice U.",
-              duration: "15:15",
-              durationSec: 915,
-              image: moonImg,
-              audioUrl: '',
-            },
-          ]);
+          setFables(localizeAudioFallback(language));
         }
       } catch (err) {
         console.error("Error fetching audio data:", err);
-        setFables([
-            {
-              genre: t("listen.migani"),
-              title: t("listen.craneStory"),
-              narrator: t("listen.narratedBy") + " Jean d'Amour",
-              duration: "12:40",
-              durationSec: 760,
-              image: craneImg,
-              audioUrl: '',
-            },
-            {
-              genre: t("listen.migani"),
-              title: t("listen.moonStory"),
-              narrator: t("listen.narratedBy") + " Beatrice U.",
-              duration: "15:15",
-              durationSec: 915,
-              image: moonImg,
-              audioUrl: '',
-            },
-          ]);
+        setFables(localizeAudioFallback(language));
       } finally {
         setLoading(false);
       }
@@ -207,23 +220,22 @@ export default function Listen() {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5000);
       try {
-        const res = await fetch("http://localhost:5000/api/proverbs?limit=100", {
+        const res = await fetch(apiUrl('/api/proverbs'), {
           signal: controller.signal,
         });
         const data = await res.json();
         if (data.proverbs && data.proverbs.length > 0) {
-          const dbProverbs = data.proverbs.map((p) => ({
-            id: p.id || `api-${Math.random().toString(36).slice(2, 9)}`,
-            rw: p.text || p.rw || '',
-            en: p.translation || p.en || p.text || '',
-            fr: p.fr || p.translation || p.text || '',
-            meaning: p.meaning || '',
-            source: p.source || "Rwandan oral tradition",
-          }));
-          // Merge DB proverbs with local ones, DB takes precedence for duplicates
-          const dbIds = new Set(dbProverbs.map(p => String(p.rw)));
-          const localOnly = proverbsData.proverbs.filter(p => !dbIds.has(String(p.rw)));
-          setProverbs([...dbProverbs, ...localOnly]);
+          const apiProverbs = data.proverbs.map((p) => ({
+              id: p.id || `api-${Math.random().toString(36).slice(2, 9)}`,
+              rw: p.text || p.rw || '',
+              en: p.translation || p.en || p.text || '',
+              fr: p.fr || p.translation || p.text || '',
+              meaning: p.meaning || '',
+              meaningRw: p.meaningRw || p.meaning_rw || '',
+              meaningFr: p.meaningFr || p.meaning_fr || '',
+              source: p.source || "Rwandan oral tradition",
+            }));
+          setProverbs(apiProverbs);
           return;
         }
       } catch {
@@ -235,9 +247,20 @@ export default function Listen() {
 
     fetchAudio();
     fetchProverbs();
-  }, [t]);
+  }, [t, language]);
 
-  const location = useLocation();
+  useEffect(() => {
+    const pending = localStorage.getItem('pendingAudioPlay');
+    if (!pending || fables.length === 0) return;
+    try {
+      const payload = JSON.parse(pending);
+      localStorage.removeItem('pendingAudioPlay');
+      const track = fables.find(f => String(f.id) === String(payload.itemId));
+      if (track) playTrack(track);
+    } catch {
+      localStorage.removeItem('pendingAudioPlay');
+    }
+  }, [fables]);
 
   const handleAddToLibrary = useCallback(async (track) => {
     if (!user) {
@@ -250,12 +273,8 @@ export default function Listen() {
         alert("Please sign in to save to your library.");
         return;
       }
-      const res = await fetch("http://localhost:5000/api/saved", {
+      const res = await apiFetch('/api/saved', {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         body: JSON.stringify({
           itemType: "audio",
           itemId: Number(track.id),
@@ -298,7 +317,7 @@ export default function Listen() {
   const fetchNarration = useCallback(async (track) => {
     if (!track.id) return getLocalNarration(track);
     try {
-      const response = await fetch(`http://localhost:5000/api/audio/${track.id}/narration?voice=${getSelectedVoice()}`);
+      const response = await fetch(apiUrl(`/api/audio/${track.id}/narration?voice=${getSelectedVoice()}`));
       if (response.status === 404) return getLocalNarration(track);
       const data = await response.json().catch(() => ({}));
       if (!response.ok) return getLocalNarration(track);
@@ -366,14 +385,6 @@ export default function Listen() {
     }
   }, [fetchNarration, speakNarration, stopProverbSpeech, stopSpeech]);
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const playId = params.get('play');
-    if (!playId || fables.length === 0) return;
-    const track = fables.find(f => String(f.id) === String(playId));
-    if (track) playTrack(track);
-  }, [location.search, fables, playTrack]);
-
   const togglePlayPause = useCallback(() => {
     if (!currentTrack) {
       const ruganzuTrack = fables.find(f => f.title.includes("Ruganzu")) || fables[0];
@@ -425,13 +436,6 @@ export default function Listen() {
 
   const handleFableClick = useCallback((fable) => {
     playTrack(fable);
-    trackView({
-      type: 'Audio',
-      itemId: fable.id,
-      title: fable.title,
-      image: fable.image || '',
-      category: fable.category || 'Fable',
-    });
     if (!awardedItems.has(fable.title)) {
       awardXP(15, `Listened to story: ${fable.title}`);
       setAwardedItems(prev => new Set([...prev, fable.title]));
@@ -449,15 +453,13 @@ export default function Listen() {
     }
   }, [fables, awardedItems, awardXP, playTrack]);
 
-  // Load read proverbs from backend
+  // Persist read proverbs to localStorage
   useEffect(() => {
-    if (!user?.id) return;
-    const loadReadProverbs = async () => {
-      const items = await fetchUserActivityItems('proverb');
-      setFlippedCards(new Set(items));
-    };
-    loadReadProverbs();
-  }, [user?.id, fetchUserActivityItems]);
+    const stored = localStorage.getItem('readProverbs');
+    if (stored) {
+      try { setFlippedCards(new Set(JSON.parse(stored))); } catch { /* ignore */ }
+    }
+  }, []);
 
   const handleFlipCard = useCallback((proverbId) => {
     setFlippedCards(prev => {
@@ -467,17 +469,8 @@ export default function Listen() {
       } else {
         next.add(proverbId);
         trackActivity?.('proverb', String(proverbId), {});
-        // Find proverb details for history tracking
-        const proverb = proverbsData?.proverbs?.find?.(p => String(p.id) === String(proverbId));
-        if (proverb) {
-          trackView({
-            type: 'Place',
-            itemId: proverbId,
-            title: proverb.en || proverb.rw || `Proverb #${proverbId}`,
-            category: 'Proverb',
-          });
-        }
       }
+      localStorage.setItem('readProverbs', JSON.stringify([...next]));
       return next;
     });
   }, [trackActivity]);
@@ -527,6 +520,30 @@ export default function Listen() {
   // Reset to page 1 when filter or sort changes
   useEffect(() => { setProverbPage(1); }, [proverbFilter, proverbSort]);
 
+  const visibleProverbs = useMemo(() => {
+    let result = [...proverbs];
+    // Filter
+    if (proverbFilter === 'read')   result = result.filter(p => flippedCards.has(p.id));
+    if (proverbFilter === 'unread') result = result.filter(p => !flippedCards.has(p.id));
+    // Sort
+    if (proverbSort === 'alphabetical') result.sort((a, b) => a.rw.localeCompare(b.rw));
+    if (proverbSort === 'read-first')   result.sort((a, b) => (flippedCards.has(b.id) ? 1 : 0) - (flippedCards.has(a.id) ? 1 : 0));
+    if (proverbSort === 'unread-first') result.sort((a, b) => (flippedCards.has(a.id) ? 1 : 0) - (flippedCards.has(b.id) ? 1 : 0));
+    return result.slice(0, proverbPage * PROVERBS_PER_PAGE);
+  }, [proverbs, proverbPage, proverbFilter, proverbSort, flippedCards]);
+
+  const filteredProverbCount = useMemo(() => {
+    if (proverbFilter === 'read')   return proverbs.filter(p => flippedCards.has(p.id)).length;
+    if (proverbFilter === 'unread') return proverbs.filter(p => !flippedCards.has(p.id)).length;
+    return proverbs.length;
+  }, [proverbs, proverbFilter, flippedCards]);
+
+  const getProverbMeaning = useCallback((proverb) => {
+    if (language === 'rw') return proverb.meaningRw || proverb.meaning;
+    if (language === 'fr') return proverb.meaningFr || proverb.meaning;
+    return proverb.meaning;
+  }, [language]);
+
   const formatTime = (secs) => {
     if (!secs || !Number.isFinite(secs)) return "0:00";
     const m = Math.floor(secs / 60);
@@ -536,47 +553,8 @@ export default function Listen() {
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  const filteredFables = useMemo(() => {
-    if (!topbarSearch.trim()) return fables;
-    const query = topbarSearch.toLowerCase();
-    return fables.filter(f => 
-      (f.title || '').toLowerCase().includes(query) || 
-      (f.narrator || '').toLowerCase().includes(query) || 
-      (f.genre || '').toLowerCase().includes(query)
-    );
-  }, [fables, topbarSearch]);
-
-  const filteredProverbs = useMemo(() => {
-    if (!topbarSearch.trim()) return proverbs;
-    const query = topbarSearch.toLowerCase();
-    return proverbs.filter(p => 
-      (p.rw || '').toLowerCase().includes(query) || 
-      (p.en || '').toLowerCase().includes(query) || 
-      (p.fr || '').toLowerCase().includes(query) || 
-      (p.meaning || '').toLowerCase().includes(query)
-    );
-  }, [proverbs, topbarSearch]);
-
-  const visibleProverbs = useMemo(() => {
-    let result = [...filteredProverbs];
-    // Filter
-    if (proverbFilter === 'read')   result = result.filter(p => flippedCards.has(p.id));
-    if (proverbFilter === 'unread') result = result.filter(p => !flippedCards.has(p.id));
-    // Sort
-    if (proverbSort === 'alphabetical') result.sort((a, b) => a.rw.localeCompare(b.rw));
-    if (proverbSort === 'read-first')   result.sort((a, b) => (flippedCards.has(b.id) ? 1 : 0) - (flippedCards.has(a.id) ? 1 : 0));
-    if (proverbSort === 'unread-first') result.sort((a, b) => (flippedCards.has(a.id) ? 1 : 0) - (flippedCards.has(b.id) ? 1 : 0));
-    return result.slice(0, proverbPage * PROVERBS_PER_PAGE);
-  }, [filteredProverbs, proverbPage, proverbFilter, proverbSort, flippedCards]);
-
-  const filteredProverbCount = useMemo(() => {
-    if (proverbFilter === 'read')   return filteredProverbs.filter(p => flippedCards.has(p.id)).length;
-    if (proverbFilter === 'unread') return filteredProverbs.filter(p => !flippedCards.has(p.id)).length;
-    return filteredProverbs.length;
-  }, [filteredProverbs, proverbFilter, flippedCards]);
-
   return (
-    <Layout searchPlaceholder={t('search.placeholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
+    <Layout searchPlaceholder={t('search.placeholder')}>
       <audio
         ref={audioRef}
         onTimeUpdate={handleTimeUpdate}
@@ -620,6 +598,14 @@ export default function Listen() {
               >
                 {savingTrackId === currentTrack?.id ? 'Saved ✓' : t('listen.addToLibrary')}
               </button>
+              {currentTrack && (
+                <FlagControl
+                  type="audio"
+                  itemId={currentTrack.id}
+                  title={currentTrack.title}
+                  onToast={(text) => { setReportMessage(text); setTimeout(() => setReportMessage(''), 3000); }}
+                />
+              )}
             </div>
           </div>
 
@@ -629,7 +615,7 @@ export default function Listen() {
               <span className="listen-view-all">{t('listen.viewAll')}</span>
             </div>
             <div className="fable-cards">
-              {filteredFables.map((fable, i) => (
+              {fables.map((fable, i) => (
                 <div key={i} className="fable-card" onClick={() => handleFableClick(fable)} style={{ cursor: 'pointer' }}>
                   <div className="fable-thumb">
                     <img src={fable.image} alt={fable.title} />
@@ -705,7 +691,7 @@ export default function Listen() {
                       {/* Front */}
                       <div className="proverb-flip-front">
                         <div className="proverb-audio-controls">
-                          {['fr', 'en'].map(lang => {
+                          {['rw', 'fr', 'en'].map(lang => {
                             const cfg = PROVERB_LANG_CONFIG[lang];
                             const isActive =
                               proverbAudioState.id === proverb.id &&
@@ -732,13 +718,19 @@ export default function Listen() {
                         <div className="proverb-card-label">{t('listen.proverbOf')}</div>
                         <p className="proverb-card-rw">"{frontText}"</p>
                         <span className="proverb-card-hint">{t('listen.tapToReveal')}</span>
+                        <FlagControl
+                          type="proverb"
+                          itemId={proverb.id}
+                          title={frontText}
+                          onToast={(text) => { setReportMessage(text); setTimeout(() => setReportMessage(''), 3000); }}
+                        />
                       </div>
                       {/* Back: translation + meaning */}
                       <div className="proverb-flip-back">
                         {isFlipped && <span className="proverb-read-badge">✓</span>}
                         <div className="proverb-card-label">{t('listen.meaning')}</div>
                         <p className="proverb-card-en">"{backText}"</p>
-                        <p className="proverb-card-meaning">{proverb.meaning}</p>
+                        <p className="proverb-card-meaning">{getProverbMeaning(proverb)}</p>
                         <span className="proverb-card-xp">{t('listen.xpEarned')}</span>
                       </div>
                     </div>
@@ -849,6 +841,7 @@ export default function Listen() {
           </div>
         </div>
       </div>
+      {reportMessage && <div className="contribute-toast">{reportMessage}</div>}
     </Layout>
   );
 }

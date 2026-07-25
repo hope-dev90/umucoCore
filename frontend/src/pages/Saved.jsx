@@ -4,6 +4,7 @@ import './Saved.css';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { apiFetch } from '../config/api';
 
 export default function Saved() {
   const { t, language } = useLanguage();
@@ -22,9 +23,7 @@ export default function Saved() {
           setLoading(false);
           return;
         }
-        const res = await fetch("http://localhost:5000/api/saved", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiFetch('/api/saved');
         if (!res.ok) throw new Error("Failed to fetch saved items");
         const data = await res.json();
         setItems(data.items || []);
@@ -40,10 +39,8 @@ export default function Saved() {
 
   const handleRemove = async (itemId) => {
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/saved/${itemId}`, {
+      const res = await apiFetch(`/api/saved/${itemId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to remove");
       setItems(prev => prev.filter(i => String(i.item_id) !== String(itemId)));

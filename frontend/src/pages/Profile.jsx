@@ -9,6 +9,7 @@ import { XPBar } from '../components/Gamification/XPBar';
 import { BadgeCard } from '../components/Gamification/BadgeCard';
 import { CollectibleCard } from '../components/Gamification/CollectibleCard';
 import { getRewardFeed, subscribeRewardFeed } from '../utils/rewardFeed';
+import { apiFetch, assetUrl } from '../config/api';
 import './Settings.css';
 import './Profile.css';
 
@@ -96,14 +97,14 @@ export default function Profile() {
       const formData = new FormData();
       formData.append('avatar', file);
       const token = getToken();
-      const response = await fetch('http://localhost:5000/api/users/avatar', {
+      const response = await apiFetch('/api/users/avatar', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
       if (!response.ok) throw new Error('Failed to upload avatar');
       const data = await response.json();
-      const fullAvatarUrl = data.avatar && !data.avatar.startsWith('http') ? `http://localhost:5000${data.avatar}` : data.avatar;
+      const fullAvatarUrl = assetUrl(data.avatar);
       setProfileImage(fullAvatarUrl);
       updateUser({ profileImage: fullAvatarUrl, avatar: fullAvatarUrl });
     } catch (err) {
@@ -125,7 +126,7 @@ export default function Profile() {
       if (!trimmedName) throw new Error('Name is required');
       if (!explorerType) throw new Error('Please choose an explorer type');
 
-      const profileResponse = await fetch('http://localhost:5000/api/users/profile', {
+      const profileResponse = await apiFetch('/api/users/profile', {
         method: 'PUT',
         headers,
         body: JSON.stringify({ fullName: trimmedName }),
@@ -136,7 +137,7 @@ export default function Profile() {
         throw new Error(data.error || 'Failed to save profile');
       }
 
-      const explorerResponse = await fetch('http://localhost:5000/api/users/explorer-type', {
+      const explorerResponse = await apiFetch('/api/users/explorer-type', {
         method: 'PUT',
         headers,
         body: JSON.stringify({ explorerType }),

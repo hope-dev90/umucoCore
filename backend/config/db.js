@@ -203,6 +203,27 @@ const ensureGamificationSchema = async (client) => {
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
 
+    -- Activity tracking for real usage, XP, and badge triggers
+    CREATE TABLE IF NOT EXISTS user_activity_log (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      activity_type VARCHAR(50) NOT NULL,
+      item_id VARCHAR(255) NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(user_id, activity_type, item_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS user_activity_counts (
+      user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      activity_type VARCHAR(50) NOT NULL,
+      count INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY(user_id, activity_type)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_user_activity_log_user ON user_activity_log(user_id);
+    CREATE INDEX IF NOT EXISTS idx_user_activity_log_type ON user_activity_log(activity_type);
+    CREATE INDEX IF NOT EXISTS idx_user_activity_log_created ON user_activity_log(created_at);
+
     -- Insert default levels
     INSERT INTO levels (level, name, required_xp) VALUES 
       (1, 'Village Child', 0),
@@ -319,12 +340,29 @@ const ensureHeritageSchema = async (client) => {
       updated_at TIMESTAMPTZ DEFAULT NOW()
     );
 
+    CREATE TABLE IF NOT EXISTS news_posts (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      summary TEXT,
+      body TEXT,
+      image_url VARCHAR(255),
+      category VARCHAR(100),
+      status VARCHAR(30) DEFAULT 'draft',
+      is_featured BOOLEAN DEFAULT false,
+      created_by INTEGER REFERENCES users(id),
+      published_at TIMESTAMPTZ,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
     CREATE INDEX IF NOT EXISTS idx_heritage_category ON heritage_items(category);
     CREATE INDEX IF NOT EXISTS idx_heritage_location ON heritage_items(location);
     CREATE INDEX IF NOT EXISTS idx_calendar_date ON calendar_events(event_date);
     CREATE INDEX IF NOT EXISTS idx_collections_category ON collections(category);
     CREATE INDEX IF NOT EXISTS idx_audio_category ON audio_content(category);
     CREATE INDEX IF NOT EXISTS idx_video_category ON video_content(category);
+    CREATE INDEX IF NOT EXISTS idx_news_status ON news_posts(status);
+    CREATE INDEX IF NOT EXISTS idx_news_category ON news_posts(category);
 
     CREATE TABLE IF NOT EXISTS saved_items (
       id SERIAL PRIMARY KEY,
@@ -353,6 +391,208 @@ const ensureHeritageSchema = async (client) => {
 
     CREATE INDEX IF NOT EXISTS idx_proverbs_language ON proverbs(language);
     CREATE INDEX IF NOT EXISTS idx_proverbs_category ON proverbs(category);
+
+    CREATE TABLE IF NOT EXISTS exercises (
+      id SERIAL PRIMARY KEY,
+      item_type VARCHAR(50) NOT NULL,
+      item_id INTEGER,
+      title VARCHAR(255) NOT NULL,
+      prompt TEXT NOT NULL,
+      choices JSONB DEFAULT '[]'::jsonb,
+      answer TEXT,
+      explanation TEXT,
+      translations JSONB DEFAULT '{}'::jsonb,
+      difficulty VARCHAR(50) DEFAULT 'Beginner',
+      is_active BOOLEAN DEFAULT true,
+      created_by INTEGER REFERENCES users(id),
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    ALTER TABLE exercises ADD COLUMN IF NOT EXISTS translations JSONB DEFAULT '{}'::jsonb;
+
+    CREATE INDEX IF NOT EXISTS idx_exercises_item ON exercises(item_type, item_id);
+    CREATE INDEX IF NOT EXISTS idx_exercises_active ON exercises(is_active);
+
+    INSERT INTO exercises (item_type, item_id, title, prompt, choices, answer, explanation, difficulty, is_active)
+    SELECT 'story', NULL, 'Gihanga Origin Check',
+           'What does the name Gihanga mean in Rwandan oral tradition?',
+           '["Founder or creator","Rain maker","Keeper of cattle","Royal drummer"]'::jsonb,
+           'Founder or creator',
+           'Gihanga is remembered as a founding figure connected with creation, crafts, and early kingdom memory.',
+           'Beginner',
+           true
+    WHERE NOT EXISTS (SELECT 1 FROM exercises WHERE title = 'Gihanga Origin Check');
+
+    INSERT INTO exercises (item_type, item_id, title, prompt, choices, answer, explanation, difficulty, is_active)
+    SELECT 'story', NULL, 'Ruganzu Return Question',
+           'What lesson is strongest in the story of Ruganzu II Ndoli?',
+           '["Courage and wise leadership","Avoiding community work","Forgetting oral history","Rejecting tradition"]'::jsonb,
+           'Courage and wise leadership',
+           'The story highlights resilience, strategy, and a leader returning to restore his people.',
+           'Beginner',
+           true
+    WHERE NOT EXISTS (SELECT 1 FROM exercises WHERE title = 'Ruganzu Return Question');
+
+    INSERT INTO exercises (item_type, item_id, title, prompt, choices, answer, explanation, difficulty, is_active)
+    SELECT 'proverb', NULL, 'Imigani Meaning Practice',
+           'Why are imigani important in Rwandan culture?',
+           '["They teach values through short sayings","They replace all songs","They are only used in markets","They are modern passwords"]'::jsonb,
+           'They teach values through short sayings',
+           'Imigani preserve wisdom, social values, humor, and memory in short memorable lines.',
+           'Beginner',
+           true
+    WHERE NOT EXISTS (SELECT 1 FROM exercises WHERE title = 'Imigani Meaning Practice');
+
+    INSERT INTO exercises (item_type, item_id, title, prompt, choices, answer, explanation, difficulty, is_active)
+    SELECT 'audio', NULL, 'Inanga Listening Check',
+           'Which instrument is closely connected with poetic storytelling in Rwanda?',
+           '["Inanga","Electric guitar","Saxophone","Trumpet"]'::jsonb,
+           'Inanga',
+           'The inanga is a traditional string instrument often associated with sung poetry and storytelling.',
+           'Beginner',
+           true
+    WHERE NOT EXISTS (SELECT 1 FROM exercises WHERE title = 'Inanga Listening Check');
+
+    INSERT INTO exercises (item_type, item_id, title, prompt, choices, answer, explanation, difficulty, is_active)
+    SELECT 'heritage', NULL, 'Royal Palace Heritage Check',
+           'What does the Nyanza royal palace help visitors understand?',
+           '["Royal life, ceremonies, and architecture","Only modern banking","Ocean trade routes","Computer programming"]'::jsonb,
+           'Royal life, ceremonies, and architecture',
+           'The palace is a heritage site connected to Rwanda''s monarchy, court culture, and traditional architecture.',
+           'Intermediate',
+           true
+    WHERE NOT EXISTS (SELECT 1 FROM exercises WHERE title = 'Royal Palace Heritage Check');
+
+    UPDATE exercises
+    SET translations = '{
+      "en": {
+        "title": "Gihanga Origin Check",
+        "prompt": "What does the name Gihanga mean in Rwandan oral tradition?",
+        "choices": ["Founder or creator", "Rain maker", "Keeper of cattle", "Royal drummer"],
+        "answer": "Founder or creator",
+        "explanation": "Gihanga is remembered as a founding figure connected with creation, crafts, and early kingdom memory."
+      },
+      "rw": {
+        "title": "Ikibazo ku nkomoko ya Gihanga",
+        "prompt": "Izina Gihanga risobanura iki mu muco wo mu Rwanda?",
+        "choices": ["Uwashinze cyangwa uwaremye", "Utera imvura", "Umutunzi w inka", "Umwiru w ingoma"],
+        "answer": "Uwashinze cyangwa uwaremye",
+        "explanation": "Gihanga yibukwa nk umuntu w inkomoko ufitanye isano no guhanga, ubukorikori n amateka ya mbere y ubwami."
+      },
+      "fr": {
+        "title": "Question sur l origine de Gihanga",
+        "prompt": "Que signifie le nom Gihanga dans la tradition orale rwandaise ?",
+        "choices": ["Fondateur ou createur", "Faiseur de pluie", "Gardien du betail", "Tambourinaire royal"],
+        "answer": "Fondateur ou createur",
+        "explanation": "Gihanga est garde en memoire comme une figure fondatrice liee a la creation, aux metiers et aux premieres memoires du royaume."
+      }
+    }'::jsonb
+    WHERE title = 'Gihanga Origin Check';
+
+    UPDATE exercises
+    SET translations = '{
+      "en": {
+        "title": "Ruganzu Return Question",
+        "prompt": "What lesson is strongest in the story of Ruganzu II Ndoli?",
+        "choices": ["Courage and wise leadership", "Avoiding community work", "Forgetting oral history", "Rejecting tradition"],
+        "answer": "Courage and wise leadership",
+        "explanation": "The story highlights resilience, strategy, and a leader returning to restore his people."
+      },
+      "rw": {
+        "title": "Ikibazo ku kugaruka kwa Ruganzu",
+        "prompt": "Ni irihe somo rikomeye mu nkuru ya Ruganzu II Ndoli?",
+        "choices": ["Ubutwari n ubuyobozi bwiza", "Kwirinda umuganda", "Kwibagirwa amateka yo mu mvugo", "Kwanga umuco"],
+        "answer": "Ubutwari n ubuyobozi bwiza",
+        "explanation": "Inkuru igaragaza kudacika intege, ubwenge n umuyobozi ugaruka kugarura abantu be."
+      },
+      "fr": {
+        "title": "Question sur le retour de Ruganzu",
+        "prompt": "Quelle lecon domine dans l histoire de Ruganzu II Ndoli ?",
+        "choices": ["Courage et leadership sage", "Eviter le travail communautaire", "Oublier l histoire orale", "Rejeter la tradition"],
+        "answer": "Courage et leadership sage",
+        "explanation": "Le recit met en avant la resilience, la strategie et le retour d un dirigeant pour restaurer son peuple."
+      }
+    }'::jsonb
+    WHERE title = 'Ruganzu Return Question';
+
+    UPDATE exercises
+    SET translations = '{
+      "en": {
+        "title": "Imigani Meaning Practice",
+        "prompt": "Why are imigani important in Rwandan culture?",
+        "choices": ["They teach values through short sayings", "They replace all songs", "They are only used in markets", "They are modern passwords"],
+        "answer": "They teach values through short sayings",
+        "explanation": "Imigani preserve wisdom, social values, humor, and memory in short memorable lines."
+      },
+      "rw": {
+        "title": "Umwitozo ku gisobanuro cy imigani",
+        "prompt": "Kuki imigani ari ingenzi mu muco nyarwanda?",
+        "choices": ["Yigisha indangagaciro mu magambo magufi", "Isimbura indirimbo zose", "Ikoreshwa mu masoko gusa", "Ni amagambo banga ya none"],
+        "answer": "Yigisha indangagaciro mu magambo magufi",
+        "explanation": "Imigani ibika ubwenge, indangagaciro, urwenya n ubwibuke mu magambo magufi yibukwa."
+      },
+      "fr": {
+        "title": "Exercice sur le sens des imigani",
+        "prompt": "Pourquoi les imigani sont-ils importants dans la culture rwandaise ?",
+        "choices": ["Ils enseignent des valeurs par de courts dictons", "Ils remplacent toutes les chansons", "Ils servent seulement aux marches", "Ce sont des mots de passe modernes"],
+        "answer": "Ils enseignent des valeurs par de courts dictons",
+        "explanation": "Les imigani conservent sagesse, valeurs sociales, humour et memoire dans des phrases courtes."
+      }
+    }'::jsonb
+    WHERE title = 'Imigani Meaning Practice';
+
+    UPDATE exercises
+    SET translations = '{
+      "en": {
+        "title": "Inanga Listening Check",
+        "prompt": "Which instrument is closely connected with poetic storytelling in Rwanda?",
+        "choices": ["Inanga", "Electric guitar", "Saxophone", "Trumpet"],
+        "answer": "Inanga",
+        "explanation": "The inanga is a traditional string instrument often associated with sung poetry and storytelling."
+      },
+      "rw": {
+        "title": "Ikibazo cyo kumva inanga",
+        "prompt": "Ni ikihe gikoresho gifitanye isano n ubusizi n inkuru mu Rwanda?",
+        "choices": ["Inanga", "Gitari y amashanyarazi", "Sakizofoni", "Tarumbeta"],
+        "answer": "Inanga",
+        "explanation": "Inanga ni igikoresho gakondo cy imirya gikunze guherekeza ibisigo n inkuru ziririmbwa."
+      },
+      "fr": {
+        "title": "Question d ecoute sur l inanga",
+        "prompt": "Quel instrument est fortement lie au recit poetique au Rwanda ?",
+        "choices": ["Inanga", "Guitare electrique", "Saxophone", "Trompette"],
+        "answer": "Inanga",
+        "explanation": "L inanga est un instrument traditionnel a cordes souvent associe a la poesie chantee et au recit."
+      }
+    }'::jsonb
+    WHERE title = 'Inanga Listening Check';
+
+    UPDATE exercises
+    SET translations = '{
+      "en": {
+        "title": "Royal Palace Heritage Check",
+        "prompt": "What does the Nyanza royal palace help visitors understand?",
+        "choices": ["Royal life, ceremonies, and architecture", "Only modern banking", "Ocean trade routes", "Computer programming"],
+        "answer": "Royal life, ceremonies, and architecture",
+        "explanation": "The palace is a heritage site connected to Rwanda s monarchy, court culture, and traditional architecture."
+      },
+      "rw": {
+        "title": "Ikibazo ku ngoro y ubwami",
+        "prompt": "Ingoro y Ubwami ya Nyanza ifasha abashyitsi kumva iki?",
+        "choices": ["Ubuzima bw ibwami, imihango n ubwubatsi", "Banki zo muri iki gihe gusa", "Ubucuruzi bwo mu nyanja", "Porogaramu za mudasobwa"],
+        "answer": "Ubuzima bw ibwami, imihango n ubwubatsi",
+        "explanation": "Iyo ngoro ni ahantu h umurage hafitanye isano n ubwami bw u Rwanda, umuco w ibwami n ubwubatsi gakondo."
+      },
+      "fr": {
+        "title": "Question sur le palais royal",
+        "prompt": "Que permet de comprendre le palais royal de Nyanza ?",
+        "choices": ["La vie royale, les ceremonies et l architecture", "Seulement la banque moderne", "Les routes commerciales maritimes", "La programmation informatique"],
+        "answer": "La vie royale, les ceremonies et l architecture",
+        "explanation": "Le palais est un site patrimonial lie a la monarchie rwandaise, a la culture de cour et a l architecture traditionnelle."
+      }
+    }'::jsonb
+    WHERE title = 'Royal Palace Heritage Check';
 
     CREATE TABLE IF NOT EXISTS contributions (
       id SERIAL PRIMARY KEY,

@@ -27,12 +27,13 @@ import Saved       from './pages/Saved';
 import Settings    from './pages/Settings';
 import Profile     from './pages/Profile';
 import History     from './pages/History';
+import Admin       from './pages/admin/Admin';
 
 // Redirect logged-in users away from public-only routes - NO LOADING SCREEN
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return children; // Show landing page immediately instead of loading
-  return user ? <Navigate to="/dashboard" replace /> : children;
+  return user ? <Navigate to={user.role === 'admin' ? '/admin' : '/dashboard'} replace /> : children;
 }
 
 // Redirect logged-out users away from protected routes
@@ -64,16 +65,30 @@ function PrivateRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />;
 }
 
+function DashboardRoute() {
+  const { user, loading } = useAuth();
+  if (loading) return <PrivateRoute><Home /></PrivateRoute>;
+  if (!user) return <Navigate to="/login" replace />;
+  return user.role === 'admin' ? <Navigate to="/admin" replace /> : <Home />;
+}
+
+function AdminRoute({ children }) {
+  const { user, loading } = useAuth();
+  if (loading) return <PrivateRoute>{children}</PrivateRoute>;
+  if (!user) return <Navigate to="/login" replace />;
+  return user.role === 'admin' ? children : <Navigate to="/dashboard" replace />;
+}
+
 // Only render the chat widget when a user is logged in
 function ChatWidgetGate() {
   const { user } = useAuth();
-  return user ? <ChatWidget /> : null;
+  return user && user.role !== 'admin' ? <ChatWidget /> : null;
 }
 
 // Only render the riddle popup when a user is logged in
 function RiddlePopupGate() {
   const { user } = useAuth();
-  return user ? <RiddlePopup /> : null;
+  return user && user.role !== 'admin' ? <RiddlePopup /> : null;
 }
 
 export default function App() {
@@ -92,7 +107,7 @@ export default function App() {
                 <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
 
                 {/* Protected */}
-                <Route path="/dashboard"   element={<PrivateRoute><Home /></PrivateRoute>} />
+                <Route path="/dashboard"   element={<DashboardRoute />} />
                 <Route path="/explore"     element={<PrivateRoute><Explore /></PrivateRoute>} />
                 <Route path="/listen"      element={<PrivateRoute><Listen /></PrivateRoute>} />
                 <Route path="/videos"      element={<PrivateRoute><Videos /></PrivateRoute>} />
@@ -104,6 +119,7 @@ export default function App() {
                 <Route path="/history"     element={<PrivateRoute><History /></PrivateRoute>} />
                 <Route path="/settings"    element={<PrivateRoute><Settings /></PrivateRoute>} />
                 <Route path="/profile"     element={<PrivateRoute><Profile /></PrivateRoute>} />
+                <Route path="/admin"       element={<AdminRoute><Admin /></AdminRoute>} />
 
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

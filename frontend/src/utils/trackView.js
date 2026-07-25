@@ -4,12 +4,12 @@
  *
  * @param {{ type: string, itemId?: string|number, title: string, image?: string, category?: string, location?: string }} item
  */
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { apiFetch } from '../config/api';
 
 export function trackView({ type, itemId, title, image, category, location, token }) {
   if (!token || !title) return;
 
-  fetch(`${API_BASE}/api/history`, {
+  apiFetch('/api/history', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
