@@ -94,7 +94,7 @@ export function AuthProvider({ children }) {
 
     localStorage.setItem('token', data.token);
     setUser(mergedUser);
-    return data;
+    return { success: true, user: mergedUser };
   }, []);
 
   const register = useCallback(async (name, email, password, explorerType) => {
@@ -137,7 +137,7 @@ export function AuthProvider({ children }) {
 
     localStorage.setItem('token', data.token);
     setUser(mergedUser);
-    return data;
+    return { success: true, user: mergedUser };
   }, []);
 
   const logout = useCallback(() => {

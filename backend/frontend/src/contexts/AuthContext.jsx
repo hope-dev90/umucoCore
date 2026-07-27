@@ -1,0 +1,172 @@
+import React, { createContext, useState, useEffect, useContext, useMemo, useCallback } from 'react';
+import { apiUrl, assetUrl } from '../config/api';
+
+const AuthContext = createContext();
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Clear localStorage on initial load to remove all old data
+  useEffect(() => {
+    // Keep the token if it exists, but clear everything else
+    const token = localStorage.getItem('token');
+    localStorage.clear();
+    if (token) {
+      localStorage.setItem('token', token);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setLoading(false); // Ensure loading ends after 1 second max
+    }, 1000);
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      clearTimeout(timeoutId); // Clear timeout if no token, we don't need to wait
+      setLoading(false);
+      return;
+    }
+    // Always fetch fresh user from server
+    fetch(apiUrl('/auth/profile'), {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => {
+        if (r.status === 401) return Promise.reject('unauthorized');
+        return r.ok ? r.json() : Promise.reject('server_error');
+      })
+      .then(data => {
+        if (data.user) {
+          // Prepend backend URL to avatar path if it's a relative path
+          const avatarUrl = assetUrl(data.user.avatar);
+          const merged = { 
+            ...data.user, 
+            profileImage: avatarUrl || null 
+          };
+          setUser(merged);
+        } else {
+          localStorage.removeItem('token');
+        }
+      })
+      .catch((reason) => {
+        if (reason === 'unauthorized') {
+          localStorage.removeItem('token');
+        }
+      })
+      .finally(() => {
+        clearTimeout(timeoutId);
+        setLoading(false);
+      });
+  }, []);
+
+  const updateUser = useCallback((newUser) => {
+    setUser(prevUser => {
+      const updatedUser = { ...prevUser, ...newUser };
+      return updatedUser;
+    });
+  }, []);
+
+  const getToken = useCallback(() => {
+    return localStorage.getItem('token');
+  }, []);
+
+  const login = useCallback(async (email, password) => {
+    const response = await fetch(apiUrl('/auth/login'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Login failed');
+    }
+
+    // Prepend backend URL to avatar path if it's a relative path
+    const avatarUrl = assetUrl(data.user.avatar);
+    const mergedUser = {
+      ...data.user,
+      profileImage: avatarUrl || null
+    };
+
+    localStorage.setItem('token', data.token);
+    setUser(mergedUser);
+    return data;
+  }, []);
+
+  const register = useCallback(async (name, email, password, explorerType) => {
+    const response = await fetch(apiUrl('/auth/register'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, email, password, explorerType }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Registration failed');
+    }
+
+    return data;
+  }, []);
+
+  const googleLogin = useCallback(async (idToken) => {
+    const response = await fetch(apiUrl('/auth/google'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ idToken }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Google login failed');
+    }
+
+    // Prepend backend URL to avatar path if it's a relative path
+    const avatarUrl = assetUrl(data.user.avatar);
+    const mergedUser = {
+      ...data.user,
+      profileImage: avatarUrl || null
+    };
+
+    localStorage.setItem('token', data.token);
+    setUser(mergedUser);
+    return data;
+  }, []);
+
+  const logout = useCallback(() => {
+    localStorage.clear();
+    setUser(null);
+  }, []);
+
+  const value = useMemo(() => ({
+    user,
+    loading,
+    login,
+    register,
+    googleLogin,
+    logout,
+    updateUser,
+    getToken,
+  }), [user, loading, login, register, googleLogin, logout, updateUser, getToken]);
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within a AuthProvider');
+  }
+  return context;
+}

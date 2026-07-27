@@ -68,6 +68,14 @@ const ContributionsModel = {
       FROM contributions
     `);
     return result.rows[0];
+  },
+
+  async checkSubscription(email) {
+    const result = await pool.query(
+      `SELECT id FROM contributions WHERE contributor_email = $1 AND type = 'subscription' AND status = 'active' LIMIT 1`,
+      [email]
+    );
+    return result.rows.length > 0;
   }
 };
 

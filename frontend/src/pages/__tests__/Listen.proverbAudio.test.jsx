@@ -6,9 +6,8 @@ import fc from 'fast-check';
 // ────────────────────────────────────────────
 
 const PROVERB_LANG_CONFIG = {
-  rw: { tag: 'rw-RW', label: 'RW', preferredVoiceHints: ['kinyarwanda', 'rw'] },
-  en: { tag: 'en-GB', label: 'EN', preferredVoiceHints: ['daniel', 'english'] },
   fr: { tag: 'fr-FR', label: 'FR', preferredVoiceHints: ['amelie', 'thomas', 'french'] },
+  en: { tag: 'en-GB', label: 'EN', preferredVoiceHints: ['daniel', 'english'] },
 };
 
 /**

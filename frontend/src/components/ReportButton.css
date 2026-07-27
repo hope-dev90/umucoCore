@@ -1,0 +1,130 @@
+.report-button-container {
+  position: relative;
+  display: inline-block;
+}
+
+.report-button {
+  background: rgba(141, 73, 58, 0.1);
+  border: 1px solid rgba(141, 73, 58, 0.2);
+  color: #8D493A;
+  padding: 0.15rem 0.3rem;
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 0.65rem;
+  line-height: 1;
+  min-width: auto;
+  font-weight: 600;
+}
+
+.report-button:hover {
+  background: rgba(141, 73, 58, 0.2);
+  transform: scale(1.1);
+}
+
+.report-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1rem;
+}
+
+.report-modal-content {
+  background: #FDFBF7;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.report-modal-content h3 {
+  margin: 0 0 1rem 0;
+  color: #1a1a1a;
+  font-size: 1.25rem;
+}
+
+.report-modal-content textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #EADBC8;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.report-modal-content textarea:focus {
+  outline: none;
+  border-color: #8D493A;
+}
+
+.report-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.report-modal-actions button[type="button"] {
+  padding: 0.6rem 1.2rem;
+  border: 1px solid #EADBC8;
+  background: white;
+  color: #666;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.report-modal-actions .submit-btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  background: #8D493A;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.report-modal-actions .submit-btn:hover {
+  background: #6d3a2e;
+}
+
+.report-success {
+  background: #4CAF50;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.topbar-report {
+  display: flex;
+  align-items: center;
+  margin-right: 0.75rem;
+}
+
+.topbar-report .report-button {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* Compact style for cards (riddles, heritage cards, collections) */
+.proverb-flip-front .report-button,
+.heritage-card-actions .report-button,
+.coll-card-actions .report-button {
+  padding: 0.15rem 0.35rem;
+  font-size: 0.65rem;
+  border-radius: 3px;
+}

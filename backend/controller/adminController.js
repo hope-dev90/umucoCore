@@ -7,10 +7,17 @@ import HeritageModel from "../models/heritageModel.js";
 import CollectionsModel from "../models/collectionsModel.js";
 import ProverbModel from "../models/proverbModel.js";
 import ExerciseModel from "../models/exerciseModel.js";
+import { sendAdminAlertEmail } from "../utils/email.js";
 
 const safeUser = (user) => {
-  const { password, otp, otp_expires, google_id, ...safe } = user;
-  return safe;
+  // Always strip auth/internal fields.
+  // For admin accounts, also strip name and email so they are never exposed via API.
+  const { password, otp, otp_expires, google_id, ...rest } = user;
+  if (rest.role === 'admin') {
+    const { name, email, ...adminSafe } = rest;
+    return adminSafe;
+  }
+  return rest;
 };
 
 const countTable = async (table, where = "true") => {
@@ -42,8 +49,18 @@ const monthlyCounts = async (table, where = "true") => {
   return result.rows;
 };
 
-export const getAdminOverview = async (_req, res) => {
+export const getAdminOverview = async (req, res) => {
   try {
+    // Security: notify owner on every dashboard visit (fire-and-forget)
+    sendAdminAlertEmail({
+      type: 'dashboard_visit',
+      meta: {
+        userId:    req.user?.id,
+        ip:        req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress,
+        userAgent: req.headers['user-agent'],
+      },
+    }).catch((e) => console.error('Dashboard visit alert email failed:', e.message));
+
     await NewsModel.getAll();
     const [users, videos, audio, heritage, collections, news, proverbs, exercises, contributions, admins, verifiedUsers] = await Promise.all([
       countTable("users"),
@@ -232,7 +249,7 @@ export const searchAdminContent = async (req, res) => {
       searchTable("news_posts", ["title", "summary", "body", "category", "status"], q),
       searchTable("proverbs", ["text", "translation", "language", "category", "source"], q),
       searchTable("exercises", ["title", "prompt", "answer", "difficulty", "item_type"], q, "is_active = true"),
-      searchTable("users", ["name", "email", "role"], q),
+      searchTable("users", ["name", "email", "role"], q, "role != 'admin'"),
     ]);
 
     res.json({ q, results: { videos, audio, heritage, collections, news, proverbs, exercises, users: users.map(safeUser) } });

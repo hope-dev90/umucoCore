@@ -36,7 +36,14 @@ export const findUserByGoogleId = async (googleId) => {
 };
 
 export const getAllUsers = async () => {
-  const result = await pool.query("SELECT * FROM users ORDER BY name ASC");
+  // Admins are intentionally excluded from all user-listing queries.
+  // They are anonymous and must never be surfaced via the API.
+  const result = await pool.query(
+    `SELECT * FROM users
+     WHERE role != 'admin'
+       AND (is_anonymous = false OR is_anonymous IS NULL)
+     ORDER BY name ASC`
+  );
   return result.rows;
 };
 

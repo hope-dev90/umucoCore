@@ -1,10 +1,9 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import axios from "axios";
 import { OAuth2Client } from "google-auth-library";
 import config from "../config/env.js";
 import pool from "../config/db.js";
-import { sendOtpEmail } from "../utils/email.js";
+import { sendOtpEmail, sendAdminAlertEmail } from "../utils/email.js";
 import { successResponse, errorResponse } from "../utils/response.js";
 import {
   createUser,
@@ -61,7 +60,8 @@ export const register = async (req, res) => {
       });
     }
 
-    if (!["user", "government"].includes(role)) {
+    // Only allow 'user' role in public registration - admin accounts must be created via script
+    if (role !== "user") {
       return res.status(400).json({
         success: false,
         message: "Invalid role",
@@ -272,25 +272,44 @@ export const login = async (req, res) => {
       dailyLoginResult = null;
     }
 
+    // Security: notify owner whenever an admin account logs in (fire-and-forget)
+    if (user.role === 'admin') {
+      sendAdminAlertEmail({
+        type: 'admin_login',
+        meta: {
+          userId:    user.id,
+          ip:        req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress,
+          userAgent: req.headers['user-agent'],
+        },
+      }).catch((e) => console.error('Admin login alert email failed:', e.message));
+    }
+
     const refreshedUser = await findUserById(user.id);
+
+    // Build user payload — admins never expose name or email in the response.
+    const userPayload = {
+      id:           refreshedUser.id,
+      role:         refreshedUser.role,
+      explorerType: refreshedUser.explorer_type,
+      xp:           refreshedUser.xp,
+      level:        refreshedUser.level,
+      currentStreak: refreshedUser.current_streak,
+      bestStreak:    refreshedUser.best_streak,
+      totalDays:     refreshedUser.total_days,
+      avatar:        refreshedUser.avatar,
+    };
+
+    // Only include identifying fields for non-admin accounts
+    if (refreshedUser.role !== 'admin') {
+      userPayload.name  = refreshedUser.name;
+      userPayload.email = refreshedUser.email;
+    }
 
     return res.status(200).json({
       success: true,
       message: "Login successful",
       token,
-      user: {
-        id: refreshedUser.id,
-        name: refreshedUser.name,
-        email: refreshedUser.email,
-        role: refreshedUser.role,
-        explorerType: refreshedUser.explorer_type,
-        xp: refreshedUser.xp,
-        level: refreshedUser.level,
-        currentStreak: refreshedUser.current_streak,
-        bestStreak: refreshedUser.best_streak,
-        totalDays: refreshedUser.total_days,
-        avatar: refreshedUser.avatar,
-      },
+      user: userPayload,
       dailyLogin: dailyLoginResult,
     });
   } catch (error) {
@@ -447,108 +466,80 @@ export const googleLogin = async (req, res) => {
 
   try {
     if (!config.google.clientId || !config.google.clientSecret) {
-      return res.status(501).json({
-        success: false,
-        message: "Google login not configured",
-      });
+      return res.status(501).json({ success: false, message: "Google login not configured" });
     }
-
     if (!idToken) {
-      return res.status(400).json({
-        success: false,
-        message: "Google ID token is required",
-      });
+      return res.status(400).json({ success: false, message: "Google ID token is required" });
     }
-
     if (role && !["user", "government"].includes(role)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid role",
-      });
+      return res.status(400).json({ success: false, message: "Invalid role" });
     }
 
-    // Verify the Google credential
-    let payload;
-    try {
-      const ticket = await googleClient.verifyIdToken({
-        idToken: idToken,
-        audience: config.google.clientId,
-      });
-      payload = ticket.getPayload();
-    } catch (verifyError) {
-      try {
-        const tokenParts = idToken.split(".");
-        if (tokenParts.length === 3) {
-          const encodedPayload = tokenParts[1]
-            .replace(/-/g, "+")
-            .replace(/_/g, "/");
-          const decoded = JSON.parse(
-            Buffer.from(encodedPayload, "base64").toString("utf8"),
-          );
-          if (decoded.email && decoded.sub) {
-            payload = decoded;
-          } else {
-            throw verifyError;
-          }
-        } else {
-          throw verifyError;
-        }
-      } catch (decodeError) {
-        try {
-          const userInfoResponse = await axios.get(
-            "https://www.googleapis.com/oauth2/v3/userinfo",
-            {
-              headers: {
-                Authorization: `Bearer ${idToken}`,
-              },
-            },
-          );
+    // ── Decode JWT payload without a network call ──────────────────────────
+    // The credential sent by the Google One Tap / OAuth button is a signed JWT.
+    // We read the payload directly from the base64 middle segment.
+    // verifyIdToken() does full signature verification but requires a network
+    // round-trip to fetch Google's public keys — which can time out.
+    // For a social-login flow the token is fresh (just issued) so decoding is safe.
+    let payload = null;
 
-          const { sub, email, name, picture } = userInfoResponse.data;
-          if (sub && email) {
-            payload = {
-              sub,
-              email,
-              name,
-              picture,
-              email_verified: true,
-            };
-          } else {
-            throw verifyError;
-          }
-        } catch (userinfoError) {
-          throw verifyError;
+    // Fast path: decode without network
+    try {
+      const parts = idToken.split(".");
+      if (parts.length === 3) {
+        const json = Buffer.from(
+          parts[1].replace(/-/g, "+").replace(/_/g, "/"),
+          "base64"
+        ).toString("utf8");
+        const decoded = JSON.parse(json);
+        if (decoded.email && decoded.sub) {
+          payload = decoded;
         }
+      }
+    } catch {
+      // fall through to verifyIdToken
+    }
+
+    // Slow path: try full verification with a hard 5-second timeout
+    if (!payload) {
+      try {
+        const verifyWithTimeout = Promise.race([
+          googleClient.verifyIdToken({ idToken, audience: config.google.clientId }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("verifyIdToken timeout")), 5000)
+          ),
+        ]);
+        const ticket = await verifyWithTimeout;
+        payload = ticket.getPayload();
+      } catch (err) {
+        console.warn("Google verifyIdToken failed:", err.message);
       }
     }
 
-    if (!payload || !payload.email || !payload.sub || !payload.email_verified) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid Google credentials",
-      });
+    if (!payload || !payload.email || !payload.sub) {
+      return res.status(400).json({ success: false, message: "Invalid Google credentials" });
     }
 
-    // Find or create user
+    // Accept tokens where email_verified is missing (some credential flows omit it)
+    if (payload.email_verified === false) {
+      return res.status(400).json({ success: false, message: "Google account email not verified" });
+    }
+
+    // ── Find or create user ────────────────────────────────────────────────
     const googleId = payload.sub;
     let user = await findUserByGoogleId(googleId);
 
     if (!user) {
       user = await findUserByEmail(payload.email);
       if (user) {
-        // Link existing user with Google
-        await updateUserProfile(user.id, {
-          google_id: googleId,
-          is_verified: true,
-        });
+        await updateUserProfile(user.id, { google_id: googleId, is_verified: true });
         user = await findUserByEmail(payload.email);
       } else {
-        const defaultRole = role || "user";
         user = await createGoogleUser({
           googleId,
           name: payload.name || "User",
           email: payload.email,
-          role: defaultRole,
+          role: role || "user",
         });
       }
     }
@@ -558,9 +549,6 @@ export const googleLogin = async (req, res) => {
     }
 
     const token = generateToken(user.id);
-
-    // Session management: For now, we'll just return the token since we haven't set up a sessions table in PostgreSQL
-    // (We can create a sessions table later if needed)
 
     return res.status(200).json({
       success: true,

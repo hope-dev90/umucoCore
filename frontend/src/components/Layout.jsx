@@ -7,7 +7,9 @@ import { XPBar } from './Gamification/XPBar';
 import { DailyStreakWidget } from './Gamification/DailyStreakWidget';
 import { LeaderboardWidget } from './Gamification/LeaderboardWidget';
 import './Layout.css';
+import './ReportButton.css';
 import UmucoLogo from './UmucoLogo';
+import ReportButton from './ReportButton';
 
 const Icon = ({ d, size = 16, strokeWidth = 1.8 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -206,6 +208,15 @@ export default function Layout({ children, searchPlaceholder = 'search.placehold
           <Icon d={Icons.menu} size={18} />
         </button>
         {isAdmin && <div className="admin-topbar-title">{adminTopbarTitle}</div>}
+        {!isAdmin && (
+          <div className="topbar-report">
+            <ReportButton 
+              itemType="page" 
+              itemId={location.pathname}
+              itemTitle={location.pathname}
+            />
+          </div>
+        )}
         <div className="topbar-search">
           <span className="topbar-search-icon"><Icon d={Icons.search} size={14} /></span>
           <input type="text" placeholder={t(searchPlaceholder)} value={searchQuery} onChange={e => onSearchChange && onSearchChange(e.target.value)} />

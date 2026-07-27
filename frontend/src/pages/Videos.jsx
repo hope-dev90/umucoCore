@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { apiUrl, apiFetch } from '../config/api';
 import FlagControl from '../components/FlagControl';
 import './Videos.css';
+import { localizeItem } from '../utils/contentLocale';
 
 export default function Videos() {
   const { t } = useLanguage();
@@ -160,6 +161,18 @@ export default function Videos() {
   };
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+
+  // Translate video card text based on active language
+  const localizedVideos = useMemo(() =>
+    videos.map(v => localizeItem(v, language)),
+    [videos, language]
+  );
+
+  // Translate the currently-playing video title/desc too
+  const localizedCurrentVideo = useMemo(() =>
+    currentVideo ? localizeItem(currentVideo, language) : null,
+    [currentVideo, language]
+  );
 
   return (
     <Layout searchPlaceholder={t('search.placeholder')}>

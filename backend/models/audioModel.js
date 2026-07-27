@@ -23,9 +23,15 @@ const AudioModel = {
   },
 
   async getById(id) {
+    // Handle string IDs (e.g., "fallback-audio-1") that don't exist in DB
+    const numericId = Number(id);
+    if (Number.isNaN(numericId) || numericId <= 0) {
+      return null;
+    }
+    
     const result = await pool.query(
       `SELECT * FROM audio_content WHERE id = $1`,
-      [id]
+      [numericId]
     );
     return result.rows[0];
   },

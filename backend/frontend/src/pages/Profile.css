@@ -1,0 +1,522 @@
+/* ============================================================
+   Profile.css
+   Scoped styles for the redesigned Profile page.
+   Loaded alongside Settings.css (which still supplies the shared
+   .settings-page / .settings-header / .form-* page chrome).
+   ============================================================ */
+
+/* ---------- Keyframes ---------- */
+
+@keyframes pf-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pf-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pf-scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pf-band-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes pf-xp-fill {
+  from { width: 0 !important; }
+}
+
+@keyframes pf-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.12); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+:root {
+  --pf-cream: #FDFBF7;
+  --pf-surface: #FFFFFF;
+  --pf-border: #EADBC8;
+  --pf-ink: #2C1A14;
+  --pf-muted: #6F5B55;
+  --pf-brand: #8D493A;
+  --pf-brand-dark: #3E2723;
+  --pf-brand-tint: rgba(141, 73, 58, 0.08);
+}
+
+/* ---------- Explorer ID card (signature element) ---------- */
+
+.pf-id-card {
+  position: relative;
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(44, 26, 20, 0.04);
+  animation: pf-fade-up 0.45s ease both;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.pf-id-card:hover {
+  box-shadow: 0 6px 24px rgba(44, 26, 20, 0.10);
+  transform: translateY(-2px);
+}
+
+.pf-id-card__band {
+  height: 84px;
+  background: linear-gradient(
+    135deg,
+    var(--accent, var(--pf-brand)) 0%,
+    var(--accent-dark, var(--pf-brand-dark)) 50%,
+    var(--accent, var(--pf-brand)) 100%
+  );
+  background-size: 200% auto;
+  animation: pf-band-shimmer 4s linear infinite;
+  position: relative;
+}
+
+.pf-id-card__body {
+  padding: 0 1.75rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.pf-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 4px solid var(--pf-surface);
+  background: var(--pf-brand-tint);
+  margin-top: -48px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(44, 26, 20, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: pf-scale-in 0.5s 0.15s ease both;
+}
+
+.pf-avatar:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(44, 26, 20, 0.20);
+}
+
+.pf-avatar:active {
+  transform: scale(0.97);
+}
+
+.pf-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pf-avatar-placeholder {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--pf-brand);
+}
+
+.pf-avatar-hint {
+  font-size: 0.65rem;
+  color: var(--pf-muted);
+  margin-top: 0.4rem;
+  letter-spacing: 0.02em;
+}
+
+.pf-name {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--pf-ink);
+  margin-top: 0.75rem;
+  animation: pf-fade-up 0.4s 0.25s ease both;
+}
+
+.pf-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: var(--accent-tint, var(--pf-brand-tint));
+  color: var(--accent, var(--pf-brand));
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  animation: pf-fade-up 0.4s 0.32s ease both;
+}
+
+.pf-xp-wrap {
+  width: 100%;
+  margin-top: 1.5rem;
+  animation: pf-fade-in 0.5s 0.4s ease both;
+}
+
+/* XP bar fill animation — targets the inner progress bar rendered by XPBar */
+.pf-xp-wrap [role="progressbar"] > *,
+.pf-xp-wrap .xp-bar__fill,
+.pf-xp-wrap [class*="fill"],
+.pf-xp-wrap [class*="progress"] > span,
+.pf-xp-wrap [style*="width"] {
+  animation: pf-xp-fill 1.2s 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---------- Stat tiles ---------- */
+
+.pf-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 1.25rem;
+}
+
+.pf-stat {
+  background: var(--pf-cream);
+  border: 1px solid var(--pf-border);
+  border-radius: 12px;
+  padding: 0.75rem 0.5rem;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  animation: pf-fade-up 0.4s ease both;
+  cursor: default;
+}
+
+.pf-stat:nth-child(1) { animation-delay: 0.45s; }
+.pf-stat:nth-child(2) { animation-delay: 0.52s; }
+.pf-stat:nth-child(3) { animation-delay: 0.59s; }
+
+.pf-stat:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 4px 14px rgba(44, 26, 20, 0.10);
+  background: var(--pf-surface);
+}
+
+.pf-stat:hover .pf-stat__icon {
+  animation: pf-pop 0.35s ease;
+}
+
+.pf-stat__icon {
+  font-size: 1.1rem;
+  line-height: 1;
+  margin-bottom: 0.35rem;
+  display: inline-block;
+}
+
+.pf-stat__value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--pf-ink);
+}
+
+.pf-stat__label {
+  font-size: 0.65rem;
+  color: var(--pf-muted);
+  margin-top: 0.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ---------- Details card (name/email form) ---------- */
+
+.pf-details-card {
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  border-radius: 20px;
+  padding: 1.5rem 1.75rem;
+  margin-top: 1rem;
+  animation: pf-fade-up 0.45s 0.15s ease both;
+  transition: box-shadow 0.25s ease;
+}
+
+.pf-details-card:hover {
+  box-shadow: 0 4px 16px rgba(44, 26, 20, 0.07);
+}
+
+.pf-details-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--pf-ink);
+  margin-bottom: 1rem;
+}
+
+/* ---------- Right column sections ---------- */
+
+.pf-section {
+  background: var(--pf-surface);
+  border: 1px solid var(--pf-border);
+  border-radius: 20px;
+  padding: 1.5rem 1.75rem;
+  animation: pf-fade-up 0.45s ease both;
+  transition: box-shadow 0.25s ease;
+}
+
+.pf-section:nth-child(1) { animation-delay: 0.1s; }
+.pf-section:nth-child(2) { animation-delay: 0.2s; }
+
+.pf-section:hover {
+  box-shadow: 0 4px 16px rgba(44, 26, 20, 0.07);
+}
+
+.pf-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1.1rem;
+}
+
+.pf-section__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--pf-ink);
+}
+
+.pf-section__count {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--pf-muted);
+  background: var(--pf-cream);
+  border: 1px solid var(--pf-border);
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+}
+
+.pf-section__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.85rem;
+}
+
+/* Stagger each grid item's entrance */
+.pf-section__grid > * {
+  animation: pf-fade-up 0.35s ease both;
+}
+
+.pf-section__grid > *:nth-child(1)  { animation-delay: 0.05s; }
+.pf-section__grid > *:nth-child(2)  { animation-delay: 0.10s; }
+.pf-section__grid > *:nth-child(3)  { animation-delay: 0.15s; }
+.pf-section__grid > *:nth-child(4)  { animation-delay: 0.20s; }
+.pf-section__grid > *:nth-child(5)  { animation-delay: 0.25s; }
+.pf-section__grid > *:nth-child(6)  { animation-delay: 0.30s; }
+.pf-section__grid > *:nth-child(7)  { animation-delay: 0.35s; }
+.pf-section__grid > *:nth-child(8)  { animation-delay: 0.40s; }
+.pf-section__grid > *:nth-child(n+9){ animation-delay: 0.45s; }
+
+/* Hover lift for individual badge/collectible cards */
+.pf-section__grid > * {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.pf-section__grid > *:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 6px 18px rgba(44, 26, 20, 0.12);
+  z-index: 1;
+}
+
+.pf-marks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.pf-mark-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 0.95rem;
+  border-radius: 16px;
+  background: var(--pf-cream);
+  border: 1px solid var(--pf-border);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.pf-mark-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(44, 26, 20, 0.08);
+}
+
+.pf-mark-item__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  background: var(--pf-brand-tint);
+}
+
+.pf-mark-item__body {
+  min-width: 0;
+}
+
+.pf-mark-item__title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--pf-ink);
+}
+
+.pf-mark-item__subtitle {
+  font-size: 0.78rem;
+  color: var(--pf-muted);
+  margin-top: 0.18rem;
+}
+
+.pf-empty {
+  font-size: 0.85rem;
+  color: var(--pf-muted);
+  text-align: center;
+  padding: 1.5rem 0;
+}
+
+/* ---------- Layout ---------- */
+
+.pf-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.pf-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (max-width: 860px) {
+  .pf-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.profile-page {
+  max-width: 1180px;
+}
+
+.pf-avatar {
+  border: 4px solid var(--pf-surface);
+  padding: 0;
+  font: inherit;
+}
+
+.pf-stat__icon {
+  color: var(--accent, var(--pf-brand));
+}
+
+.pf-explorer-picker {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+.pf-explorer-option {
+  width: 100%;
+  min-height: 62px;
+  padding: 0.65rem;
+  border: 1px solid rgba(141, 73, 58, 0.16);
+  border-radius: 12px;
+  background: #FDFBF7;
+  color: var(--pf-ink);
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+}
+
+.pf-explorer-option:hover {
+  transform: translateY(-1px);
+  border-color: rgba(141, 73, 58, 0.34);
+  box-shadow: 0 10px 24px rgba(44, 26, 20, 0.08);
+}
+
+.pf-explorer-option.selected {
+  background: rgba(141, 73, 58, 0.08);
+  border-color: var(--accent, var(--pf-brand));
+  color: var(--accent, var(--pf-brand));
+}
+
+.pf-explorer-option__text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.pf-explorer-option__text span {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: inherit;
+}
+
+.pf-explorer-option__text small {
+  color: var(--pf-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.pf-button-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.pf-button-row .btn-update:only-child {
+  grid-column: 1 / -1;
+}
+
+.btn-update.btn-muted {
+  background: #FFF8EF;
+  color: var(--pf-brand);
+  border: 1px solid rgba(141, 73, 58, 0.2);
+}
+
+.btn-update.btn-muted:hover {
+  background: #F5E7DA;
+}
+
+.pf-error {
+  margin: 0 0 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 10px;
+  background: #FFF1F0;
+  color: #991B1B;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+@media (max-width: 520px) {
+  .pf-id-card__body,
+  .pf-details-card,
+  .pf-section {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .pf-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-button-row {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-section__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

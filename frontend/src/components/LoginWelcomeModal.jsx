@@ -12,7 +12,7 @@ export default function LoginWelcomeModal({
       onMaybeLater={onMaybeLater}
       onCreateAccount={onLogin}
       onSecondaryAction={onCreateAccount}
-      heroImageSrc={nyanzaImage}
+      heroImageSrc={commonsImagesCached['Ingoro y\'Ubwami ya Nyanza'] || commonsImagesCached['The Royal Palace of Nyanza']}
       heroImageAlt="A view of Rwanda's cultural heritage"
       heading="Welcome back to Umuco Core"
       description="Log in to continue your journey through Rwanda's stories, traditions, and living heritage."

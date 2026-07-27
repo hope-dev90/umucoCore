@@ -7,6 +7,7 @@ import UmucoLogo from './UmucoLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getLocalizedText } from '../utils/i18n';
+import { apiUrl } from '../config/api';
 import { UmucoGlyph } from './UmucoGlyphs';
 
 function getSlides(t) {
@@ -131,7 +132,7 @@ function LeftSlideshow({ t, language }) {
   );
 }
 
-function LoginPage({ onNavigate }) {
+function LoginPage({ onNavigate, onLoginSuccess, isGovLogin = false }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [verificationStep, setVerificationStep] = useState('email');
@@ -167,8 +168,12 @@ function LoginPage({ onNavigate }) {
     setError('');
 
     try {
-      await login(formData.email, formData.password);
-      onNavigate('dashboard');
+      const result = await login(formData.email, formData.password);
+      if (onLoginSuccess) {
+        onLoginSuccess(result.user);
+      } else {
+        onNavigate('dashboard');
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -181,8 +186,12 @@ function LoginPage({ onNavigate }) {
     setError('');
 
     try {
-      await googleLogin(response.credential);
-      onNavigate('dashboard');
+      const result = await googleLogin(response.credential);
+      if (onLoginSuccess) {
+        onLoginSuccess(result.user);
+      } else {
+        onNavigate('dashboard');
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -194,9 +203,33 @@ function LoginPage({ onNavigate }) {
     setError(t('auth.googleError'));
   };
 
-  const handleEmailSubmit = (e) => {
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
-    if (resetEmail) setVerificationStep('code');
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(apiUrl('/auth/forgot-password'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: resetEmail }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to send reset code');
+      }
+
+      // Move to code verification step
+      setVerificationStep('code');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCodeSubmit = (e) => {
@@ -227,8 +260,24 @@ function LoginPage({ onNavigate }) {
             {!isForgotPassword ? (
               <>
                 <div className="text-left mb-8">
-                  <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">{t('auth.welcomeBack')}</h1>
-                  <p className="text-xs md:text-sm text-[#6F5B55]">{t('auth.readyToAccess')}</p>
+                  <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">
+                    {isGovLogin
+                      ? (language === 'rw'
+                          ? 'Murakaza neza, Abakozi ba Leta'
+                          : language === 'fr'
+                          ? 'Bienvenue, personnel gouvernemental'
+                          : 'Welcome, Government Staff')
+                      : t('auth.welcomeBack')}
+                  </h1>
+                  <p className="text-xs md:text-sm text-[#6F5B55]">
+                    {isGovLogin
+                      ? (language === 'rw'
+                          ? "Injira ukoresheje konti yawe yemewe ya Leta."
+                          : language === 'fr'
+                          ? 'Connectez-vous avec vos identifiants gouvernementaux autorisés.'
+                          : 'Sign in with your authorized government credentials.')
+                      : t('auth.readyToAccess')}
+                  </p>
                 </div>
 
                 {error && (
@@ -331,30 +380,34 @@ function LoginPage({ onNavigate }) {
                   </button>
                 </form>
 
-                <div className="flex items-center my-6">
-                  <div className="flex-grow border-t border-[#EADBC8]" />
-                  <span className="mx-4 text-xs text-[#6F5B55]">{t('auth.orContinueWith')}</span>
-                  <div className="flex-grow border-t border-[#EADBC8]" />
-                </div>
+                {!isGovLogin && (
+                  <>
+                    <div className="flex items-center my-6">
+                      <div className="flex-grow border-t border-[#EADBC8]" />
+                      <span className="mx-4 text-xs text-[#6F5B55]">{t('auth.orContinueWith')}</span>
+                      <div className="flex-grow border-t border-[#EADBC8]" />
+                    </div>
 
-                <div className="w-full">
-                  <GoogleLogin
-                    onSuccess={handleGoogleSuccess}
-                    onError={handleGoogleFailure}
-                    useOneTap
-                    theme="outline"
-                    shape="pill"
-                    size="large"
-                    width="100%"
-                  />
-                </div>
+                    <div className="w-full">
+                      <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleFailure}
+                        useOneTap
+                        theme="outline"
+                        shape="pill"
+                        size="large"
+                        width="100%"
+                      />
+                    </div>
 
-                <p className="text-xs text-[#6F5B55] mt-6">
-                  {t('auth.noAccount')}{' '}
-                  <button onClick={() => onNavigate('signup')} className="font-bold text-[#8D493A] hover:underline bg-transparent border-none p-0 cursor-pointer">
-                    {t('auth.signUp')}
-                  </button>
-                </p>
+                    <p className="text-xs text-[#6F5B55] mt-6">
+                      {t('auth.noAccount')}{' '}
+                      <button onClick={() => onNavigate('signup')} className="font-bold text-[#8D493A] hover:underline bg-transparent border-none p-0 cursor-pointer">
+                        {t('auth.signUp')}
+                      </button>
+                    </p>
+                  </>
+                )}
               </>
             ) : (
               <>

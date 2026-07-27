@@ -305,19 +305,20 @@
 
 .riddle-popup__input {
   flex: 1;
-  padding: 10px 14px;
+  min-width: 0;
+  padding: 10px 12px;
   font-size: 13px;
   border: 1.5px solid var(--border-light, #E8DCC8);
   border-radius: 10px;
   background: var(--bg-primary, #FDFBF7);
-  color: var(--text-primary, #2C2416);
+  color: var(--text-primary, #2C1A14);
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .riddle-popup__input:focus {
-  border-color: var(--primary, #C88542);
-  box-shadow: 0 0 0 3px rgba(200, 133, 66, 0.12);
+  border-color: var(--primary, #8D493A);
+  box-shadow: 0 0 0 3px rgba(141, 73, 58, 0.12);
 }
 
 .riddle-popup__input::placeholder {
@@ -325,16 +326,19 @@
 }
 
 .riddle-popup__submit {
-  padding: 10px 16px;
+  padding: 10px 14px;
   background: var(--primary, #C88542);
   color: white;
   border: none;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 70px;
+  text-align: center;
 }
 
 .riddle-popup__submit:hover {

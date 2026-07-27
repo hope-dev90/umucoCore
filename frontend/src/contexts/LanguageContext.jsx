@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { translations } from '../translations';
 import { useAuth } from './AuthContext';
-import { apiFetch } from '../config/api';
 
 const LanguageContext = createContext();
 
@@ -40,10 +39,12 @@ export function LanguageProvider({ children }) {
     if (user?.id) {
       setIsSaving(true);
       try {
-        await apiFetch('/api/users/profile', {
+        const token = localStorage.getItem('token');
+        await fetch('http://localhost:5000/api/users/profile', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
             language: mapLanguageCode(newLang)

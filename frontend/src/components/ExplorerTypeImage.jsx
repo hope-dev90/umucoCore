@@ -1,16 +1,12 @@
 import React from 'react';
-import warriorImage from '../assets/login/tra.png';
-import natureImage from '../assets/home/nyanza.jpg';
-import royalImage from '../assets/explore/buhanga.jpg';
-import folktaleImage from '../assets/collections/imigongo.jpg';
-import musicImage from '../assets/home/intore.jpg';
+import commonsImagesCached from '../data/commonsImageCache.json';
 
 export const EXPLORER_IMAGES = {
-  warrior: warriorImage,
-  'nature-lover': natureImage,
-  'royal-historian': royalImage,
-  'folktale-hunter': folktaleImage,
-  'music-explorer': musicImage,
+  warrior: commonsImagesCached['Intore – Umubyino w\'Ubutwari'] || commonsImagesCached['Intore Warriors – The Dance of Courage'],
+  'nature-lover': commonsImagesCached['Nyungwe Ancient Rainforest'] || commonsImagesCached['Sacred Forests of Gishwati'],
+  'royal-historian': commonsImagesCached['Ingoro y\'Ubwami ya Nyanza'] || commonsImagesCached['The Royal Palace of Nyanza'],
+  'folktale-hunter': commonsImagesCached['Imigani – Inkuru zivugwa ku Muriro'] || commonsImagesCached['Imigani – Stories by the Fire'],
+  'music-explorer': commonsImagesCached['Inanga – Umutima w\'Umuziki Nyarwanda'] || commonsImagesCached['Inanga – The Soul of Rwandan Music'],
 };
 
 export function getExplorerImage(type) {

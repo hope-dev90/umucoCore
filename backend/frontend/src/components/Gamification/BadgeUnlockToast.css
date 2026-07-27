@@ -1,0 +1,89 @@
+.badge-toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 9999;
+  background: linear-gradient(145deg, #FDFBF7 0%, #FFF5E6 100%);
+  border: 2px solid var(--primary, #C88542);
+  border-radius: 20px;
+  padding: 20px 24px;
+  min-width: 280px;
+  max-width: 340px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.18), 0 4px 12px rgba(200,133,66,0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  text-align: center;
+}
+
+.badge-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: all;
+}
+
+.badge-toast__subtitle {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--primary, #C88542);
+  margin: 0 0 10px;
+}
+
+.badge-toast__icon {
+  font-size: 44px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.badge-toast__name {
+  font-family: var(--font-display, 'Newsreader', serif);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary, #2C2416);
+  margin: 0 0 4px;
+}
+
+.badge-toast__xp {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary, #C88542);
+  margin: 0 0 14px;
+}
+
+.badge-toast__progress {
+  height: 4px;
+  background: rgba(200,133,66,0.15);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.badge-toast__progress-fill {
+  height: 100%;
+  background: var(--primary, #C88542);
+  border-radius: 2px;
+  transition: width 0.1s linear;
+}
+
+.badge-toast__close {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: var(--text-muted, #A39280);
+  cursor: pointer;
+  padding: 0;
+}
+
+.badge-toast__close:hover {
+  color: var(--text-secondary, #6E6555);
+}
+
+@media (max-width: 480px) {
+  .badge-toast {
+    bottom: 80px;
+    min-width: 240px;
+  }
+}

@@ -764,7 +764,7 @@
   border-radius: 14px;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .explore-page {
     padding: 16px 12px 88px;
   }
@@ -793,7 +793,7 @@
   }
 
   .archive-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 
   .heritage-card-heading {
@@ -807,6 +807,20 @@
 
   .heritage-card-actions {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .archive-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .heritage-card-image {
+    height: 200px;
+  }
+
+  .explore-page h1 {
+    font-size: 2rem;
   }
 }
 /* Add this to Explore.css — styles for the "no results" empty state */

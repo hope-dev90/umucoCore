@@ -14,12 +14,18 @@ const SavedModel = {
 
   async create(data) {
     const { userId, itemType, itemId, itemTitle, itemSubtitle, itemImage, itemMeta } = data;
+
+    // Truncate fields that were formerly varchar(255) — now text, but guard anyway
+    const safeTitle    = itemTitle    ? String(itemTitle).slice(0, 500)    : null;
+    const safeSubtitle = itemSubtitle ? String(itemSubtitle).slice(0, 500) : null;
+    const safeImage    = itemImage    ? String(itemImage).slice(0, 2000)   : null;
+
     const result = await pool.query(
       `INSERT INTO saved_items (user_id, item_type, item_id, item_title, item_subtitle, item_image, item_meta)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        ON CONFLICT (user_id, item_type, item_id) DO UPDATE SET created_at = NOW()
        RETURNING *`,
-      [userId, itemType, itemId, itemTitle, itemSubtitle, itemImage, itemMeta]
+      [userId, itemType, itemId, safeTitle, safeSubtitle, safeImage, itemMeta]
     );
     return result.rows[0];
   },

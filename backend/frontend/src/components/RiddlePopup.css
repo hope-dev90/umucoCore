@@ -1,0 +1,474 @@
+/* ── RIDDLE POPUP BACKDROP ── */
+.riddle-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 9997;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.riddle-popup-backdrop--visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ── RIDDLE POPUP ── */
+.riddle-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 380px;
+  max-width: calc(100vw - 40px);
+  background: linear-gradient(145deg, #FDFBF7 0%, #FFF5E6 100%);
+  border: 2px solid var(--border-light, #E8DCC8);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18), 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  z-index: 9998;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.92);
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.riddle-popup--visible {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+  pointer-events: all;
+}
+
+.riddle-popup--enter {
+  animation: riddleBounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes riddleBounce {
+  0%   { transform: translate(-50%, -50%) scale(0.85); opacity: 0; }
+  60%  { transform: translate(-50%, -50%) scale(1.03); }
+  100% { transform: translate(-50%, -50%) scale(1);    opacity: 1; }
+}
+
+/* ── HEADER ── */
+.riddle-popup__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.riddle-popup__badge {
+  background: var(--primary, #C88542);
+  color: white;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: 12px;
+}
+
+.riddle-popup__close {
+  background: none;
+  border: none;
+  color: var(--text-muted, #A39280);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.riddle-popup__close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary, #2C2416);
+}
+
+/* ── BODY ── */
+.riddle-popup__body {
+  margin-bottom: 14px;
+}
+
+.riddle-popup__rw {
+  font-family: var(--font-display, 'Newsreader', serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary, #2C2416);
+  line-height: 1.5;
+  margin: 0 0 6px;
+}
+
+.riddle-popup__gloss {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-secondary, #6E6555);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* ── REVEAL BUTTON ── */
+.riddle-popup__reveal {
+  width: 100%;
+  background: var(--primary, #C88542);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  margin-bottom: 12px;
+}
+
+.riddle-popup__reveal:hover {
+  background: var(--primary-dark, #A76D30);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(200, 133, 66, 0.3);
+}
+
+.riddle-popup__reveal:active {
+  transform: translateY(0);
+}
+
+/* ── ANSWER SECTION ── */
+.riddle-popup__answer {
+  background: linear-gradient(145deg, rgba(200, 133, 66, 0.08) 0%, rgba(200, 133, 66, 0.04) 100%);
+  border: 1.5px dashed var(--primary, #C88542);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.riddle-popup__answer-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--primary, #C88542);
+  margin-bottom: 6px;
+}
+
+.riddle-popup__answer-rw {
+  font-family: var(--font-display, 'Newsreader', serif);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #2C2416);
+  margin: 0 0 4px;
+}
+
+.riddle-popup__answer-gloss {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-secondary, #6E6555);
+  margin: 0;
+}
+
+/* ── FOOTER ── */
+.riddle-popup__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-light, #E8DCC8);
+}
+
+.riddle-popup__source {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted, #A39280);
+}
+
+.riddle-popup__next {
+  background: none;
+  border: 1.5px solid var(--border-light, #E8DCC8);
+  color: var(--text-muted, #A39280);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.riddle-popup__next:hover {
+  border-color: var(--primary, #C88542);
+  color: var(--primary, #C88542);
+  background: var(--primary-soft, #FDF6EE);
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .riddle-popup {
+    width: calc(100vw - 40px);
+  }
+}
+
+/* ── PREFERENCE ASK SCREEN ── */
+.riddle-popup__ask {
+  text-align: center;
+  padding: 8px 0 4px;
+}
+
+.riddle-popup__ask-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.riddle-popup__ask-title {
+  font-family: var(--font-display, 'Newsreader', serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary, #2C2416);
+  margin: 0 0 8px;
+}
+
+.riddle-popup__ask-sub {
+  font-size: 13px;
+  color: var(--text-secondary, #6E6555);
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+
+.riddle-popup__ask-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── SHARED BUTTON ── */
+.riddle-popup__btn {
+  width: 100%;
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.riddle-popup__btn--yes {
+  background: var(--primary, #C88542);
+  color: white;
+}
+
+.riddle-popup__btn--yes:hover {
+  background: var(--primary-dark, #A76D30);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(200, 133, 66, 0.3);
+}
+
+.riddle-popup__btn--maybe {
+  background: var(--bg-card, #F5EFE5);
+  color: var(--text-primary, #2C2416);
+  border: 1.5px solid var(--border-light, #E8DCC8);
+}
+
+.riddle-popup__btn--maybe:hover {
+  background: var(--primary-soft, #FDF6EE);
+  border-color: var(--primary, #C88542);
+}
+
+.riddle-popup__btn--no {
+  background: none;
+  color: var(--text-muted, #A39280);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.riddle-popup__btn--no:hover {
+  color: var(--text-secondary, #6E6555);
+}
+
+/* ── INPUT ROW ── */
+.riddle-popup__input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.riddle-popup__input {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 13px;
+  border: 1.5px solid var(--border-light, #E8DCC8);
+  border-radius: 10px;
+  background: var(--bg-primary, #FDFBF7);
+  color: var(--text-primary, #2C2416);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.riddle-popup__input:focus {
+  border-color: var(--primary, #C88542);
+  box-shadow: 0 0 0 3px rgba(200, 133, 66, 0.12);
+}
+
+.riddle-popup__input::placeholder {
+  color: var(--text-muted, #A39280);
+}
+
+.riddle-popup__submit {
+  padding: 10px 16px;
+  background: var(--primary, #C88542);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.riddle-popup__submit:hover {
+  background: var(--primary-dark, #A76D30);
+}
+
+.riddle-popup__idk-btn {
+  width: 100%;
+  background: var(--bg-card, #F5EFE5);
+  color: var(--text-primary, #2C2416);
+  border: 1.5px solid var(--border-light, #E8DCC8);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  margin-top: 10px;
+}
+
+.riddle-popup__idk-btn:hover {
+  background: var(--primary-soft, #FDF6EE);
+  border-color: var(--primary, #C88542);
+}
+
+/* ── VERDICT ── */
+.riddle-popup__verdict {
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  text-align: center;
+  animation: fadeIn 0.35s ease;
+}
+
+.riddle-popup__verdict--correct {
+  background: linear-gradient(135deg, #E8F5E9 0%, #F1FBF2 100%);
+  border: 1.5px solid #81C784;
+}
+
+.riddle-popup__verdict--wrong {
+  background: linear-gradient(135deg, #FFF3E0 0%, #FFF8F0 100%);
+  border: 1.5px solid var(--primary, #C88542);
+}
+
+.riddle-popup__verdict-msg {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: var(--text-primary, #2C2416);
+}
+
+.riddle-popup__verdict-answer {
+  font-family: var(--font-display, 'Newsreader', serif);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary, #2C2416);
+  margin: 0 0 4px;
+}
+
+.riddle-popup__verdict-gloss {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-secondary, #6E6555);
+  margin: 0 0 14px;
+}
+
+/* ── FOOTER ACTIONS ── */
+.riddle-popup__footer-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.riddle-popup__pause-btn {
+  background: none;
+  border: 1.5px solid var(--border-light, #E8DCC8);
+  color: var(--text-muted, #A39280);
+  border-radius: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.riddle-popup__pause-btn:hover {
+  border-color: var(--primary, #C88542);
+  color: var(--primary, #C88542);
+  background: var(--primary-soft, #FDF6EE);
+}
+
+/* ── RESUME PILL ── */
+.riddle-resume-pill {
+  position: fixed;
+  bottom: 24px;
+  left: calc(var(--sidebar-width, 280px) + 24px);
+  background: var(--primary, #C88542);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 6px 16px rgba(200, 133, 66, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 9997;
+  transition: all 0.25s ease;
+  animation: resumePulse 2s ease-in-out infinite;
+}
+
+.riddle-resume-pill:hover {
+  background: var(--primary-dark, #A76D30);
+  box-shadow: 0 8px 20px rgba(200, 133, 66, 0.4);
+  transform: translateY(-2px);
+}
+
+@keyframes resumePulse {
+  0%, 100% { transform: translateY(0); box-shadow: 0 6px 16px rgba(200, 133, 66, 0.3); }
+  50%      { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(200, 133, 66, 0.35); }
+}
+
+@media (max-width: 980px) {
+  .riddle-resume-pill {
+    bottom: 16px;
+    left: 16px;
+    font-size: 12px;
+    padding: 10px 16px;
+  }
+}

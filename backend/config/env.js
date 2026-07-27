@@ -41,8 +41,8 @@ const config = {
   email: {
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.EMAIL_PORT, 10) || 587,
-    user: (process.env.EMAIL_USER || '').replace(/\s/g, ''),
-    pass: (process.env.EMAIL_PASS || '').replace(/\s/g, ''),
+    user: (process.env.EMAIL_USER || '').trim(),
+    pass: (process.env.EMAIL_PASS || '').trim(),
     from: process.env.EMAIL_FROM || process.env.EMAIL_USER || '',
   },
   google: {

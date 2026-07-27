@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { apiUrl } from '../config/api';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import { apiUrl } from '../config/api.js';
 
 function normalizeBadge(badge) {
   return { ...badge, unlockedAt: badge.unlockedAt || badge.unlocked_at || null };

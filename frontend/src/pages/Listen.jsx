@@ -99,7 +99,6 @@ function localizeAudioFallback(language) {
 }
 
 const PROVERB_LANG_CONFIG = {
-  rw: { tag: 'rw-RW', label: 'RW', preferredVoiceHints: ['kinyarwanda', 'rwanda', 'rw'] },
   fr: { tag: 'fr-FR', label: 'FR', preferredVoiceHints: ['amelie', 'thomas', 'french'] },
   en: { tag: 'en-GB', label: 'EN', preferredVoiceHints: ['daniel', 'english'] },
 };
@@ -267,6 +266,12 @@ export default function Listen() {
       alert("Please sign in to save to your library.");
       return;
     }
+    // item_id in the DB is an integer — validate before sending
+    const itemId = Number(track?.id);
+    if (!track?.id || !Number.isFinite(itemId) || itemId <= 0) {
+      alert("This track cannot be saved yet — it has no archive entry.");
+      return;
+    }
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -277,7 +282,7 @@ export default function Listen() {
         method: "POST",
         body: JSON.stringify({
           itemType: "audio",
-          itemId: Number(track.id),
+          itemId,
           itemTitle: track.title,
           itemSubtitle: track.narrator,
           itemImage: track.image || "",
@@ -590,14 +595,15 @@ export default function Listen() {
                 </svg>
                 {isPlaying ? t('listen.pause') : (currentTrack ? t('listen.listenNow') : t('listen.listenNow'))}
               </button>
+              {currentTrack && Number.isFinite(Number(currentTrack.id)) && Number(currentTrack.id) > 0 && (
               <button
                 className="library-btn"
-                onClick={() => currentTrack && handleAddToLibrary(currentTrack)}
+                onClick={() => handleAddToLibrary(currentTrack)}
                 disabled={savingTrackId === currentTrack?.id}
-                style={{ opacity: currentTrack ? 1 : 0.6, cursor: currentTrack ? 'pointer' : 'not-allowed' }}
               >
                 {savingTrackId === currentTrack?.id ? 'Saved ✓' : t('listen.addToLibrary')}
               </button>
+              )}
               {currentTrack && (
                 <FlagControl
                   type="audio"
@@ -691,7 +697,7 @@ export default function Listen() {
                       {/* Front */}
                       <div className="proverb-flip-front">
                         <div className="proverb-audio-controls">
-                          {['rw', 'fr', 'en'].map(lang => {
+                          {['fr', 'en'].map(lang => {
                             const cfg = PROVERB_LANG_CONFIG[lang];
                             const isActive =
                               proverbAudioState.id === proverb.id &&

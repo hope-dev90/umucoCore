@@ -212,7 +212,7 @@ const getSlides = (t) => [
     accent: t('auth.signup.slide.accent2'),
     quote: t('auth.signup.slide.quote2'),
   },
-    {
+  {
     src: authLeftBg3,
     heading: t('auth.signup.slide.heading3'),
     accent: t('auth.signup.slide.accent3'),

@@ -66,18 +66,18 @@ export default function Saved() {
 
   const getTypeLabel = (type) => {
     const t_type = (type || '').toLowerCase();
-    if (t_type === 'audio') return language === 'rw' ? 'Umva' : 'Audio';
+    if (t_type === 'audio') return language === 'rw' ? 'Umva' : language === 'fr' ? 'Audio' : 'Audio';
     if (t_type === 'video') return language === 'rw' ? 'Video' : 'Video';
-    if (t_type === 'collection') return language === 'rw' ? 'Amakusanyirizo' : 'Collection';
-    return language === 'rw' ? 'Inkuru' : 'Story';
+    if (t_type === 'collection') return language === 'rw' ? 'Amakusanyirizo' : language === 'fr' ? 'Collection' : 'Collection';
+    return language === 'rw' ? 'Inkuru' : language === 'fr' ? 'Récit' : 'Story';
   };
 
   const getActionLabel = (type) => {
     const t_type = (type || '').toLowerCase();
-    if (t_type === 'audio') return language === 'rw' ? 'Umva' : 'Listen';
-    if (t_type === 'video') return language === 'rw' ? 'Reba' : 'Watch';
-    if (t_type === 'collection') return language === 'rw' ? 'Reba' : 'View';
-    return language === 'rw' ? 'Soma' : 'Read';
+    if (t_type === 'audio') return language === 'rw' ? 'Umva' : language === 'fr' ? 'Écouter' : 'Listen';
+    if (t_type === 'video') return language === 'rw' ? 'Reba' : language === 'fr' ? 'Regarder' : 'Watch';
+    if (t_type === 'collection') return language === 'rw' ? 'Reba' : language === 'fr' ? 'Voir' : 'View';
+    return language === 'rw' ? 'Soma' : language === 'fr' ? 'Lire' : 'Read';
   };
 
   const getTypeIcon = (type) => {
@@ -129,13 +129,19 @@ export default function Saved() {
 
         <div className="saved-grid">
           <div className="recent-saves" style={{ gridColumn: '1 / -1' }}>
-            <h3>
-              {t('saved.recentSavesHeader')}
-            </h3>
+            <h3>{t('saved.recentSavesHeader')}</h3>
             {loading ? (
-              <p style={{ color: 'var(--text-muted)' }}>Loading saved items...</p>
+              <p style={{ color: 'var(--text-muted)' }}>
+                {language === 'fr' ? 'Chargement...' : language === 'rw' ? 'Birimo gufungurwa...' : 'Loading saved items...'}
+              </p>
             ) : items.length === 0 ? (
-              <div className="pf-empty">Your saved audio, videos, and stories will appear here.</div>
+              <div className="pf-empty">
+                {language === 'fr'
+                  ? 'Vos audio, vidéos et récits enregistrés apparaîtront ici.'
+                  : language === 'rw'
+                  ? 'Amajwi, video n\'inkuru wabitse bizagaragara hano.'
+                  : 'Your saved audio, videos, and stories will appear here.'}
+              </div>
             ) : (
               <div className="saves-grid">
                 {filteredItems.map((s, i) => (
@@ -159,10 +165,18 @@ export default function Saved() {
                       </div>
                       <div className="save-card-title">{s.item_title}</div>
                       <div className="save-card-actions">
-                        <button className="save-card-action-btn" onClick={(e) => { e.stopPropagation(); handlePlay(s); }}>
+                        <button
+                          className="save-card-action-btn"
+                          onClick={(e) => { e.stopPropagation(); handlePlay(s); }}
+                        >
                           {getActionLabel(s.item_type)}
                         </button>
-                        <button className="save-card-delete" onClick={(e) => { e.stopPropagation(); handleRemove(s.item_id); }}>🗑</button>
+                        <button
+                          className="save-card-delete"
+                          onClick={(e) => { e.stopPropagation(); handleRemove(s.item_id); }}
+                        >
+                          🗑
+                        </button>
                       </div>
                     </div>
                   </div>

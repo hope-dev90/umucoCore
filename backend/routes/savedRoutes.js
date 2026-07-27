@@ -24,13 +24,18 @@ router.get('/', authMiddleware, async (req, res) => {
 router.post('/', authMiddleware, async (req, res) => {
   try {
     const { itemType, itemId, itemTitle, itemSubtitle, itemImage, itemMeta } = req.body;
-    if (!itemType || !itemId) {
+    if (!itemType || itemId == null) {
       return res.status(400).json({ error: 'itemType and itemId are required' });
+    }
+    // item_id column is integer — coerce and validate
+    const parsedItemId = Number(itemId);
+    if (!Number.isFinite(parsedItemId) || parsedItemId <= 0) {
+      return res.status(400).json({ error: 'itemId must be a valid positive integer' });
     }
     const saved = await SavedModel.create({
       userId: req.user.id,
       itemType,
-      itemId,
+      itemId: parsedItemId,
       itemTitle,
       itemSubtitle,
       itemImage,
