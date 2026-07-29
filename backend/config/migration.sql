@@ -3,6 +3,7 @@ ALTER TABLE users
 ADD COLUMN IF NOT EXISTS bio TEXT,
 ADD COLUMN IF NOT EXISTS interests JSONB DEFAULT '[]',
 ADD COLUMN IF NOT EXISTS language VARCHAR(50) DEFAULT 'English (UK)',
+ADD COLUMN IF NOT EXISTS explorer_type VARCHAR(50),
 ADD COLUMN IF NOT EXISTS avatar VARCHAR(255),
 ADD COLUMN IF NOT EXISTS notifications JSONB DEFAULT '{"archiveUpdates": true, "newsletter": true, "eventReminders": true}',
 ADD COLUMN IF NOT EXISTS accessibility JSONB DEFAULT '{"fontSize": "medium", "highContrast": false, "reduceMotion": false}',
