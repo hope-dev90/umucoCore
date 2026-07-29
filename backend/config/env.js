@@ -23,17 +23,32 @@ if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
   console.warn('Warning: EMAIL_USER / EMAIL_PASS not set. OTP emails will not send until configured.');
 }
 
-const config = {
-  port: parseInt(process.env.PORT, 10) || 5000,
-  nodeEnv: process.env.NODE_ENV || 'development',
-  isProduction: process.env.NODE_ENV === 'production',
-  db: {
+// Parse DATABASE_URL if provided (e.g., from Neon, Supabase, or other cloud databases)
+let dbConfig;
+if (process.env.DATABASE_URL) {
+  const url = new URL(process.env.DATABASE_URL);
+  dbConfig = {
+    host: url.hostname,
+    port: parseInt(url.port) || 5432,
+    database: url.pathname.slice(1), // Remove leading slash
+    user: url.username,
+    password: url.password,
+  };
+} else {
+  dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT, 10) || 5432,
     database: process.env.DB_NAME || 'umuco_core',
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'password',
-  },
+  };
+}
+
+const config = {
+  port: parseInt(process.env.PORT, 10) || 5000,
+  nodeEnv: process.env.NODE_ENV || 'development',
+  isProduction: process.env.NODE_ENV === 'production',
+  db: dbConfig,
   jwt: {
     secret: process.env.JWT_SECRET,
     expiresIn: '7d'

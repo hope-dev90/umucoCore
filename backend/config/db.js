@@ -11,7 +11,7 @@ const pool = new Pool({
   password: config.db.password,
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000, // Increased to 10 seconds for cloud databases
 });
 
 pool.on("error", (err) => {
@@ -618,17 +618,47 @@ const ensureHeritageSchema = async (client) => {
 };
 
 export const connectDB = async () => {
-  try {
-    const client = await pool.connect();
-    console.log(`Connected to PostgreSQL database: ${config.db.database}`);
-    // Run schema setups in parallel — they touch different tables
-    await ensureAuthSchema(client);
-    await ensureHeritageSchema(client);
-    await ensureGamificationSchema(client);
-    client.release();
-  } catch (error) {
-    console.error("Failed to connect to database:", error.message);
-    process.exit(1);
+  const maxRetries = 3;
+  const retryDelay = 2000; // 2 seconds
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`Attempting to connect to database... (attempt ${attempt}/${maxRetries})`);
+      console.log('Database config:', {
+        host: config.db.host,
+        port: config.db.port,
+        database: config.db.database,
+        user: config.db.user,
+        password: config.db.password ? '***' : 'undefined'
+      });
+      
+      const client = await pool.connect();
+      console.log(`✓ Connected to PostgreSQL database: ${config.db.database}`);
+      // Run schema setups in parallel — they touch different tables
+      await ensureAuthSchema(client);
+      await ensureHeritageSchema(client);
+      await ensureGamificationSchema(client);
+      client.release();
+      return; // Success, exit the function
+    } catch (error) {
+      console.error(`✗ Attempt ${attempt}/${maxRetries} failed:`);
+      console.error("Error message:", error.message);
+      console.error("Error code:", error.code);
+      
+      if (attempt < maxRetries) {
+        console.log(`Retrying in ${retryDelay/1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+      } else {
+        console.error("✗ Failed to connect to database after all retries:");
+        console.error("Full error:", error);
+        console.error("\nPossible solutions:");
+        console.error("1. Check if your Neon database is active (not paused)");
+        console.error("2. Verify the DATABASE_URL in .env is correct");
+        console.error("3. Check your network connection");
+        console.error("4. Try connecting via psql to verify credentials");
+        process.exit(1);
+      }
+    }
   }
 };
 
