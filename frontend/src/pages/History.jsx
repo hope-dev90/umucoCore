@@ -49,8 +49,8 @@ export default function History() {
     const headers = { Authorization: `Bearer ${token}` };
 
     Promise.all([
-      fetch(`${API_BASE}/api/history`, { headers }).then(r => r.json()),
-      fetch(`${API_BASE}/api/history/stats`, { headers }).then(r => r.json()),
+      fetch(apiUrl('/api/history'), { headers }).then(r => r.json()),
+      fetch(apiUrl('/api/history/stats'), { headers }).then(r => r.json()),
     ])
       .then(([historyData, statsData]) => {
         setItems(historyData.items || []);

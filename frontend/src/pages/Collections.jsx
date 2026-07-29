@@ -73,7 +73,7 @@ export default function Collections() {
       const token = localStorage.getItem('token');
       if (!token) return;
       try {
-        const res = await fetch(`${API_BASE}/api/saved`, {
+        const res = await fetch(apiUrl('/api/saved'), {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -126,7 +126,7 @@ export default function Collections() {
 
     setSavingId(c.id);
     try {
-      const res = await fetch(`${API_BASE}/api/saved`, {
+      const res = await fetch(apiUrl('/api/saved'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({

@@ -399,7 +399,7 @@ export default function Explore() {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000); // give up after 5s
 
-    fetch(`${API_BASE}/api/heritage`, { signal: controller.signal })
+    fetch(apiUrl('/api/heritage'), { signal: controller.signal })
       .then(r => r.json())
       .then(data => {
         if (data.items && data.items.length > 0) {
@@ -431,7 +431,7 @@ export default function Explore() {
   useEffect(() => {
     const fetchAudio = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/audio`);
+        const res = await fetch(apiUrl('/api/audio'));
         const data = await res.json();
         if (data.audio && data.audio.length > 0) {
           setAudioItems(data.audio);
@@ -653,7 +653,7 @@ export default function Explore() {
 
     const controller = new AbortController();
     fetch(
-      `${API_BASE}/api/locations/nearest?lat=${lat}&lng=${lng}`,
+      apiUrl(`/api/locations/nearest?lat=${lat}&lng=${lng}`),
       { signal: controller.signal }
     )
       .then(async (res) => {

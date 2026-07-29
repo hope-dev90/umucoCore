@@ -37,7 +37,7 @@ function ExplorerPickerModal({ onSave }) {
     const timeoutId = setTimeout(() => controller.abort(), 10000);
     try {
       const token = getToken();
-      const response = await fetch(`${API_BASE}/api/users/explorer-type`, {
+      const response = await fetch(apiUrl('/api/users/explorer-type'), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ explorerType: selected }),
@@ -188,7 +188,7 @@ export default function Home() {
     // while the (currently nonexistent) backend request resolves.
     setHighlight(localHighlight);
 
-    fetch(`${API_BASE}/api/heritage?category=${category}`)
+    fetch(apiUrl(`/api/heritage?category=${category}`))
       .then(r => r.json())
       .then(data => {
         const items = Array.isArray(data) ? data : data.items || [];
@@ -204,7 +204,7 @@ export default function Home() {
   // For music explorers, fetch a featured audio track for the highlight
   useEffect(() => {
     if (activeExplorerType !== 'music-explorer') return;
-    fetch(`${API_BASE}/api/audio/featured`)
+    fetch(apiUrl('/api/audio/featured'))
       .then(r => r.json())
       .then(data => {
         const items = Array.isArray(data) ? data : data.items || [];
@@ -273,7 +273,7 @@ export default function Home() {
   useEffect(() => {
     const token = getToken();
     if (!token || !user) return;
-    fetch(`${API_BASE}/api/history?limit=5`, {
+    fetch(apiUrl('/api/history?limit=5'), {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.json())
