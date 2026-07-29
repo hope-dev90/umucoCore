@@ -2,7 +2,13 @@ export const API_BASE = import.meta.env.VITE_API_BASE || 'https://umucocore.onre
 
 export function apiUrl(path = '') {
   if (/^https?:\/\//i.test(path)) return path;
-  return `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+  
+  // Ensure API_BASE doesn't have trailing slash
+  const base = API_BASE.replace(/\/$/, '');
+  // Remove leading slash from path if present
+  const normalizedPath = path.replace(/^\//, '');
+  
+  return `${base}/${normalizedPath}`;
 }
 
 export function assetUrl(path = '') {

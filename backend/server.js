@@ -13,9 +13,9 @@ const startServer = async () => {
     app.listen(PORT, HOST, () => {
       const ip = getLocalIp();
       console.log(`\n  ✅ Umuco Core Backend running!`);
-      console.log(`     Local:   http://localhost:${PORT}`);
+      console.log(`     Local:   http://${ip}:${PORT}`);
       console.log(`     Network: http://${ip}:${PORT}`);
-      console.log(`     API URL: ${process.env.NODE_ENV === 'production' ? 'https://umucocore.onrender.com' : `http://localhost:${PORT}`}\n`);
+      console.log(`     API URL: ${process.env.NODE_ENV === 'production' ? 'https://umucocore.onrender.com' : `http://${ip}:${PORT}`}\n`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
@@ -32,5 +32,5 @@ function getLocalIp() {
       if (net.family === "IPv4" && !net.internal) return net.address;
     }
   }
-  return process.env.NODE_ENV === 'production' ? 'umucocore.onrender.com' : "localhost";
+  return process.env.NODE_ENV === 'production' ? 'umucocore.onrender.com' : "127.0.0.1";
 }
