@@ -34,15 +34,15 @@ if (process.env.DATABASE_URL) {
     user: url.username,
     password: url.password,
   };
-} else {
-  dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT, 10) || 5432,
-    database: process.env.DB_NAME || 'umuco_core',
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'password',
-  };
-}
+  } else {
+    dbConfig = {
+      host: process.env.DB_HOST || 'db.bkecbauzqmmpuflqgxej.supabase.co',
+      port: parseInt(process.env.DB_PORT, 10) || 5432,
+      database: process.env.DB_NAME || 'postgres',
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD || 'h1o2p3e4%402010',
+    };
+  }
 
 const config = {
   port: parseInt(process.env.PORT, 10) || 5000,

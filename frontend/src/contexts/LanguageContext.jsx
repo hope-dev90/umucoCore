@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { translations } from '../translations';
 import { useAuth } from './AuthContext';
+import { API_BASE } from '../config/api';
 
 const LanguageContext = createContext();
 
@@ -40,7 +41,7 @@ export function LanguageProvider({ children }) {
       setIsSaving(true);
       try {
         const token = localStorage.getItem('token');
-        await fetch('http://localhost:5000/api/users/profile', {
+        await fetch(`${API_BASE}/api/users/profile`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

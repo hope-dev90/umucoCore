@@ -9,6 +9,7 @@ import MuseumGallery from '../components/MuseumGallery';
 import { trackView } from '../utils/trackView';
 import ReportButton from '../components/ReportButton';
 import './Collections.css';
+import { API_BASE } from '../config/api';
 import inanga from '../assets/collections/inanga (2).jpg';
 import royalCourt from '../assets/collections/royal-court.jpg';
 import imigongo from '../assets/collections/imigongo.jpg';
@@ -31,7 +32,6 @@ export default function Collections() {
   const { user } = useAuth();
   const { fetchUserActivityItems } = useGamificationContext();
   const location = useLocation();
-  const API = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const [message, setMessage] = useState("");
   const [topbarSearch, setTopbarSearch] = useState("");
@@ -73,7 +73,7 @@ export default function Collections() {
       const token = localStorage.getItem('token');
       if (!token) return;
       try {
-        const res = await fetch(`${API}/api/saved`, {
+        const res = await fetch(`${API_BASE}/api/saved`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -126,7 +126,7 @@ export default function Collections() {
 
     setSavingId(c.id);
     try {
-      const res = await fetch(`${API}/api/saved`, {
+      const res = await fetch(`${API_BASE}/api/saved`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
