@@ -320,7 +320,7 @@ export default function Listen() {
   }, [getSelectedVoice]);
 
   const fetchNarration = useCallback(async (track) => {
-    if (!track.id) return getLocalNarration(track);
+    if (!track.id || String(track.id).startsWith('fallback-')) return getLocalNarration(track);
     try {
       const response = await fetch(apiUrl(`/api/audio/${track.id}/narration?voice=${getSelectedVoice()}`));
       if (response.status === 404) return getLocalNarration(track);

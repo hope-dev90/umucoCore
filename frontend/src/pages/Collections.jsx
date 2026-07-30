@@ -88,7 +88,7 @@ export default function Collections() {
       }
     };
     loadSaved();
-  }, [user?.id, API]);
+  }, [user?.id]);
 
   const markViewed = useCallback((id) => {
     setViewedIds(prev => {
@@ -151,7 +151,7 @@ export default function Collections() {
       setSavingId(null);
       setTimeout(() => setMessage(''), 2500);
     }
-  }, [user, savedIds, API]);
+  }, [user, savedIds]);
 
   const [showContact, setShowContact] = useState(false);
   const [contactForm, setContactForm] = useState({ name: '', email: '', subject: '', message: '' });
