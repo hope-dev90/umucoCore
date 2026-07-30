@@ -615,11 +615,12 @@ export default function Explore() {
     e.stopPropagation(); // don't trigger map logic
     setSelectedStory(item);
     const stableKey = item.originalTitle || item.title;
+    const cachedImage = commonsImagesCached[item.title] || commonsImagesCached[stableKey];
     trackView({
       type: 'Article',
       itemId: item.id,
       title: item.title,
-      image: commonsImagesCached[stableKey] || item.image || '',
+      image: cachedImage || item.image || '',
       category: item.category || '',
       location: item.location || '',
     });
@@ -816,6 +817,10 @@ export default function Explore() {
                     // Use stable originalTitle as key so images survive language switches
                     (() => {
                       const stableKey = item.originalTitle || item.title;
+                      // Try translated title first (cache is keyed by English title),
+                      // then original Kinyarwanda title, then fall back to local image
+                      const cachedImage = commonsImagesCached[item.title]
+                        || commonsImagesCached[stableKey];
                       return imageLoadErrors[stableKey] ? (
                         <div
                           className="heritage-card-image"
@@ -837,7 +842,7 @@ export default function Explore() {
                         </div>
                       ) : (
                         <img
-                          src={commonsImagesCached[stableKey] || item.image}
+                          src={cachedImage || item.image}
                           alt={item.title}
                           className="heritage-card-image"
                           onError={() => handleCardImageError(stableKey)}
