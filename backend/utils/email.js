@@ -25,9 +25,9 @@ const createTransporter = async () => {
     port: config.email.port,
     secure: config.email.port === 465,
     requireTLS: config.email.port !== 465,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
     tls: {
       minVersion: "TLSv1.2",
       servername: config.email.host, // SNI must match original hostname, not IP
@@ -40,22 +40,48 @@ const createTransporter = async () => {
 };
 
 export const sendEmail = async ({ to, subject, text, html }) => {
+  console.log(`[EMAIL] Attempting to send email to: ${to}, subject: ${subject}`);
+  console.log(`[EMAIL] Using SMTP: ${config.email.host}:${config.email.port}`);
+  console.log(`[EMAIL] From: ${config.email.from}`);
+  console.log(`[EMAIL] User configured: ${config.email.user ? 'Yes' : 'No'}`);
+  console.log(`[EMAIL] Pass configured: ${config.email.pass ? 'Yes' : 'No'}`);
+
+  if (!config.email.user || !config.email.pass) {
+    throw new Error("Email credentials not configured. Set EMAIL_USER and EMAIL_PASS environment variables.");
+  }
+
   const transport = await createTransporter();
-  await transport.sendMail({
-    from: config.email.from,
-    to,
-    subject,
-    text,
-    html,
-  });
+  console.log(`[EMAIL] Transporter created successfully`);
+
+  try {
+    const result = await transport.sendMail({
+      from: config.email.from,
+      to,
+      subject,
+      text,
+      html,
+    });
+    console.log(`[EMAIL] Sent successfully! MessageId: ${result.messageId}`);
+    return result;
+  } catch (error) {
+    console.error(`[EMAIL] Failed to send:`, error.message);
+    if (error.code) console.error(`[EMAIL] Error code: ${error.code}`);
+    throw error;
+  }
 };
 
 export const sendOtpEmail = async ({ to, otp, purpose, name }) => {
-  await sendEmail({
-    to,
-    subject: "Verification Code",
-    text: `Hello ${name || "there"}, your verification code is ${otp}. It expires in 10 minutes.`,
-    html: `
+  // Retry logic for email sending
+  const maxRetries = 2;
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      await sendEmail({
+        to,
+        subject: "Verification Code",
+        text: `Hello ${name || "there"}, your verification code is ${otp}. It expires in 10 minutes.`,
+        html: `
 <div style="background:#f4f4f4; padding:40px 0; font-family: Arial, sans-serif;">
   <div style="max-width:420px; margin:0 auto; background:#ffffff; border-radius:12px; padding:28px 26px; border:1px solid #eaeaea;">
     <div style="text-align:center; margin-bottom:20px;">
@@ -76,9 +102,26 @@ export const sendOtpEmail = async ({ to, otp, purpose, name }) => {
     </div>
   </div>
 </div>`,
-  });
+      });
 
-  return { sent: true };
+      if (attempt > 1) {
+        console.log(`Email sent successfully on attempt ${attempt}`);
+      }
+
+      return { sent: true };
+    } catch (error) {
+      lastError = error;
+      console.error(`Email sending attempt ${attempt} failed:`, error.message);
+
+      if (attempt < maxRetries) {
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+  }
+
+  // All retries failed
+  throw lastError || new Error("Failed to send email after retries");
 };
 
 /**
