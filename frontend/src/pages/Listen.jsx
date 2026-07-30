@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import proverbsData from '../data/proverbs.json';
 import audioData from '../data/audio.json';
+import { gihangaStory } from '../data/stories/gihanga';
+import { nyirarucyabaStory } from '../data/stories/nyirarucyaba';
+import { ruganzuStory } from '../data/stories/ruganzu';
+import { kigeliStory } from '../data/stories/kigeli';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
@@ -75,18 +79,49 @@ const IMAGE_KEY_MAP = {
 const ALL_AUDIO_IMAGES = Object.values(AUDIO_IMAGE_MAP);
 
 function localizeAudioFallback(language) {
-  return audioData.map((song) => ({
-    id: song.id,
-    genre: song.genre[language] || song.genre.en,
-    title: song.title[language] || song.title.en,
-    narrator: song.narrator[language] || song.narrator.en,
-    description: song.description ? (song.description[language] || song.description.en) : '',
-    duration: song.duration,
-    durationSec: song.durationSec,
-    image: IMAGE_KEY_MAP[song.imageKey] || ALL_AUDIO_IMAGES[0],
-    audioUrl: song.audioUrl || '',
-    youtubeRef: song.youtubeRef || '',
-  }));
+  // Use story files as the primary content for the Listen page
+  const stories = [gihangaStory, nyirarucyabaStory, ruganzuStory, kigeliStory];
+  
+  return stories.map((story, index) => {
+    const storyImages = {
+      'gihanga-ngomijana': royalCourtImg,
+      'nyirarucyaba': royalCourtImg,
+      'ruganzu-ii-ndoli': RuganzuImg,
+      'kigeli-iv-rwabugiri': mwamiImg,
+    };
+    
+    return {
+      id: story.id,
+      genre: { 
+        en: story.category, 
+        rw: story.category, 
+        fr: story.category 
+      },
+      title: {
+        en: story.title,
+        rw: story.title,
+        fr: story.title
+      },
+      narrator: {
+        en: 'Rwandan Oral Tradition',
+        rw: 'Umurage w\'Abakurambere',
+        fr: 'Tradition Orale Rwandaise'
+      },
+      description: {
+        en: story.desc,
+        rw: story.desc,
+        fr: story.desc
+      },
+      duration: `${Math.max(5, Math.round(story.content.join(' ').split(/\s+/).length / 150))} min read`,
+      durationSec: Math.max(300, story.content.join(' ').split(/\s+/).length * 0.4),
+      image: storyImages[story.id] || ALL_AUDIO_IMAGES[index % ALL_AUDIO_IMAGES.length],
+      audioUrl: '',
+      youtubeRef: '',
+      storyId: story.id,
+      isStory: true,
+      storyContent: story.content.join('\n\n'),
+    };
+  });
 }
 
 const PROVERB_LANG_CONFIG = {
@@ -294,11 +329,19 @@ export default function Listen() {
 
   const getLocalNarration = useCallback((track) => {
     const selectedVoice = getSelectedVoice();
+    // For stories, use the full story content as the narration text
+    const narrationText = track.isStory && track.storyContent 
+      ? `${track.title}. ${track.storyContent}`
+      : `${track.title}. ${track.narrator || track.genre || 'A story from Rwanda cultural heritage.'}`;
+    
+    const wordCount = narrationText.split(/\s+/).length;
+    const estimatedDuration = Math.max(30, Math.round(wordCount / 2.5)); // ~150 words per minute
+    
     return {
       mode: 'speech-synthesis',
       title: track.title,
-      text: `${track.title}. ${track.narrator || track.genre || 'A story from Rwanda cultural heritage.'}`,
-      estimatedDuration: Math.max(20, Math.round(`${track.title} ${track.narrator || ''}`.split(/\s+/).length / 2.4)),
+      text: narrationText,
+      estimatedDuration: estimatedDuration,
       voice: {
         id: selectedVoice,
         name: selectedVoice === 1 ? 'Kamanzi' : selectedVoice === 2 ? 'Ineza' : 'Umutoni',
