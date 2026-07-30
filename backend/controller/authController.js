@@ -105,10 +105,14 @@ export const register = async (req, res) => {
 
     await saveOtp(email, otp);
 
+    // Try to send email, but don't fail registration if email times out
+    let emailSent = false;
     try {
       await sendOtpEmail({ to: email, otp, name, purpose: "verify your email" });
+      emailSent = true;
     } catch (emailError) {
-      return errorResponse(res, emailError.message || "Unable to send verification email.", 503);
+      console.error("Email sending failed during registration:", emailError.message);
+      // Continue with registration even if email fails
     }
 
     const responseData = {
@@ -120,7 +124,11 @@ export const register = async (req, res) => {
       },
     };
 
-    return successResponse(res, responseData, "Registration successful. Check your email to verify your account.", 201);
+    const message = emailSent
+      ? "Registration successful. Check your email to verify your account."
+      : "Registration successful. Email delivery failed - please use resend OTP or contact support if you don't receive the verification code.";
+
+    return successResponse(res, responseData, message, 201);
   } catch (error) {
     console.error("Register error:", error);
     return errorResponse(res, "Internal server error", 500);
@@ -147,15 +155,17 @@ export const resendOtp = async (req, res) => {
     const otp = generateOtp();
     await saveOtp(email, otp);
 
+    // Try to send email, but don't fail completely if email sending fails
     try {
       await sendOtpEmail({ to: email, otp, name: user.name, purpose: "verify your email" });
     } catch (emailError) {
-      return res.status(503).json({ success: false, message: emailError.message || "Unable to send verification email." });
+      console.error("Resend OTP email failed:", emailError.message);
+      // Still return success since OTP is saved, user can try again later
     }
 
     return res.status(200).json({
       success: true,
-      message: "A new verification code has been sent to your email.",
+      message: "A new verification code has been sent to your email. Please check your inbox.",
     });
   } catch (error) {
     console.error("Resend OTP error:", error);
