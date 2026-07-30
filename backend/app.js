@@ -50,10 +50,6 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Serve frontend build (if exists)
-const frontendBuildPath = path.join(__dirname, "frontend", "dist");
-app.use(express.static(frontendBuildPath));
-
 // Auth routes (PostgreSQL)
 app.use("/auth", authRouter);
 
@@ -89,6 +85,10 @@ app.get("/api/health", (req, res) => {
     environment: process.env.NODE_ENV || "development",
   });
 });
+
+// Serve frontend build AFTER all API routes (so API routes always take priority)
+const frontendBuildPath = path.join(__dirname, "frontend", "dist");
+app.use(express.static(frontendBuildPath));
 
 // SPA fallback: serve index.html for all non-API routes so React Router works
 const indexPath = path.join(__dirname, "frontend", "dist", "index.html");
