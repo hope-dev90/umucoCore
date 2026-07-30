@@ -612,10 +612,10 @@ export default function Explore() {
   }, []);
 
   const handleReadMore = useCallback((e, item) => {
-    e.stopPropagation(); // don't trigger map logic
+    e.stopPropagation();
     setSelectedStory(item);
     const stableKey = item.originalTitle || item.title;
-    const cachedImage = commonsImagesCached[item.title] || commonsImagesCached[stableKey];
+    const cachedImage = commonsImagesCached[stableKey] || commonsImagesCached[item.title];
     trackView({
       type: 'Article',
       itemId: item.id,
@@ -814,13 +814,12 @@ export default function Explore() {
                       <Headphones size={52} aria-hidden="true" />
                     </div>
                   ) : (
-                    // Use stable originalTitle as key so images survive language switches
+                    // Always key by originalTitle (Kinyarwanda) so the same image
+                    // is used regardless of which language is active
                     (() => {
                       const stableKey = item.originalTitle || item.title;
-                      // Try translated title first (cache is keyed by English title),
-                      // then original Kinyarwanda title, then fall back to local image
-                      const cachedImage = commonsImagesCached[item.title]
-                        || commonsImagesCached[stableKey];
+                      const cachedImage = commonsImagesCached[stableKey]
+                        || commonsImagesCached[item.title];
                       return imageLoadErrors[stableKey] ? (
                         <div
                           className="heritage-card-image"
