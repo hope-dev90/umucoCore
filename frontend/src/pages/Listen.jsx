@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import proverbsData from '../data/proverbs.json';
+import audioData from '../data/audio.json';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
@@ -24,77 +25,67 @@ import byivugoImg from '../assets/home/intore.jpg';
 
 // Map audio title keywords / categories to local image imports
 const AUDIO_IMAGE_MAP = {
-  byivugo:      byivugoImg,
-  ibyivugo:     byivugoImg,
-  crane:        craneImg,
-  drums:        drumsImg,
-  drum:         drumsImg,
-  ingoma:       drumsImg,
-  farming:      farmingImg,
-  ubudehe:      farmingImg,
-  inanga:       inangaImg,
-  intore:       intoreImg,
-  moon:         moonImg,
-  mwami:        mwamiImg,
-  nyamasheke:   nyamashekeImg,
-  rain:         rainImg,
+  byivugo:       byivugoImg,
+  ibyivugo:      byivugoImg,
+  crane:         craneImg,
+  drums:         drumsImg,
+  drum:          drumsImg,
+  ingoma:        drumsImg,
+  farming:       farmingImg,
+  ubudehe:       farmingImg,
+  inanga:        inangaImg,
+  intore:        intoreImg,
+  moon:          moonImg,
+  mwami:         mwamiImg,
+  nyamasheke:    nyamashekeImg,
+  rain:          rainImg,
   'royal-court': royalCourtImg,
-  royal:        royalCourtImg,
-  court:        royalCourtImg,
-  ruganzu:      RuganzuImg,
-  'war-drums':  warDrumsImg,
-  war:          warDrumsImg,
+  royal:         royalCourtImg,
+  court:         royalCourtImg,
+  ruganzu:       RuganzuImg,
+  'war-drums':   warDrumsImg,
+  war:           warDrumsImg,
+  mama:          ubudeheImg,
+  karahanyuze:   inangaImg,
+  arihehe:       intoreImg,
+  kantengwa:     RuganzuImg,
+  ganyobwe:      nyamashekeImg,
+  umurage:       royalCourtImg,
+};
+
+// Map imageKey field in audio.json to local image imports
+const IMAGE_KEY_MAP = {
+  ruganzu:    RuganzuImg,
+  crane:      craneImg,
+  moon:       moonImg,
+  intore:     intoreImg,
+  ubudehe:    ubudeheImg,
+  inanga:     inangaImg,
+  royal:      royalCourtImg,
+  drums:      drumsImg,
+  ingoma:     drumsImg,
+  mwami:      mwamiImg,
+  rain:       rainImg,
+  nyamasheke: nyamashekeImg,
+  byivugo:    byivugoImg,
+  farming:    farmingImg,
+  mama:       ubudeheImg,
 };
 
 const ALL_AUDIO_IMAGES = Object.values(AUDIO_IMAGE_MAP);
 
-const FALLBACK_AUDIO_STORIES = [
-  {
-    genre: { en: 'Imigani', rw: 'Imigani', fr: 'Contes' },
-    title: {
-      en: 'The Crane and the Drum',
-      rw: "Umusambi n'Ingoma",
-      fr: 'La grue et le tambour',
-    },
-    narrator: {
-      en: "Narrated by Jean d'Amour",
-      rw: "Byavuzwe na Jean d'Amour",
-      fr: "Raconte par Jean d'Amour",
-    },
-    duration: '12:40',
-    durationSec: 760,
-    image: craneImg,
-    audioUrl: '',
-  },
-  {
-    genre: { en: 'Imigani', rw: 'Imigani', fr: 'Contes' },
-    title: {
-      en: 'The Moon That Borrowed a Cow',
-      rw: "Ukwezi Kwatije Inka",
-      fr: 'La lune qui emprunta une vache',
-    },
-    narrator: {
-      en: 'Narrated by Beatrice U.',
-      rw: 'Byavuzwe na Beatrice U.',
-      fr: 'Raconte par Beatrice U.',
-    },
-    duration: '15:15',
-    durationSec: 915,
-    image: moonImg,
-    audioUrl: '',
-  },
-];
-
 function localizeAudioFallback(language) {
-  return FALLBACK_AUDIO_STORIES.map((story, index) => ({
-    id: `fallback-audio-${index + 1}`,
-    genre: story.genre[language] || story.genre.en,
-    title: story.title[language] || story.title.en,
-    narrator: story.narrator[language] || story.narrator.en,
-    duration: story.duration,
-    durationSec: story.durationSec,
-    image: story.image,
-    audioUrl: story.audioUrl,
+  return audioData.map((song) => ({
+    id: song.id,
+    genre: song.genre[language] || song.genre.en,
+    title: song.title[language] || song.title.en,
+    narrator: song.narrator[language] || song.narrator.en,
+    description: song.description ? (song.description[language] || song.description.en) : '',
+    duration: song.duration,
+    durationSec: song.durationSec,
+    image: IMAGE_KEY_MAP[song.imageKey] || ALL_AUDIO_IMAGES[0],
+    audioUrl: song.audioUrl || '',
+    youtubeRef: song.youtubeRef || '',
   }));
 }
 

@@ -483,6 +483,9 @@ export function localizeItem(item, lang) {
 
   return {
     ...item,
+    // Always stamp the original (Kinyarwanda) title so image keys stay stable
+    // across language switches — commonsImages and imageLoadErrors key off this.
+    originalTitle: item.originalTitle || item.title,
     title:       overrides.title       || item.title,
     desc:        overrides.desc        || item.desc,
     description: overrides.desc        || item.description,

@@ -614,11 +614,12 @@ export default function Explore() {
   const handleReadMore = useCallback((e, item) => {
     e.stopPropagation(); // don't trigger map logic
     setSelectedStory(item);
+    const stableKey = item.originalTitle || item.title;
     trackView({
       type: 'Article',
       itemId: item.id,
       title: item.title,
-      image: commonsImagesCached[item.title] || item.image || '',
+      image: commonsImagesCached[stableKey] || item.image || '',
       category: item.category || '',
       location: item.location || '',
     });
@@ -812,34 +813,37 @@ export default function Explore() {
                       <Headphones size={52} aria-hidden="true" />
                     </div>
                   ) : (
-                    // Task 2: prefer Commons image, then local asset, then brown placeholder
-                    imageLoadErrors[item.title] ? (
-                      <div
-                        className="heritage-card-image"
-                        style={{
-                          height: 230,
-                          background: 'linear-gradient(135deg, #6B4226 0%, #3E2723 100%)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                        role="img"
-                        aria-label={item.title}
-                      >
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,235,224,0.5)" strokeWidth="1.5" aria-hidden="true">
-                          <rect x="3" y="3" width="18" height="18" rx="2" />
-                          <circle cx="8.5" cy="8.5" r="1.5" />
-                          <polyline points="21 15 16 10 5 21" />
-                        </svg>
-                      </div>
-                    ) : (
-                      <img
-                        src={commonsImagesCached[item.title] || item.image}
-                        alt={item.title}
-                        className="heritage-card-image"
-                        onError={() => handleCardImageError(item.title)}
-                      />
-                    )
+                    // Use stable originalTitle as key so images survive language switches
+                    (() => {
+                      const stableKey = item.originalTitle || item.title;
+                      return imageLoadErrors[stableKey] ? (
+                        <div
+                          className="heritage-card-image"
+                          style={{
+                            height: 230,
+                            background: 'linear-gradient(135deg, #6B4226 0%, #3E2723 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                          role="img"
+                          aria-label={item.title}
+                        >
+                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,235,224,0.5)" strokeWidth="1.5" aria-hidden="true">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                          </svg>
+                        </div>
+                      ) : (
+                        <img
+                          src={commonsImagesCached[stableKey] || item.image}
+                          alt={item.title}
+                          className="heritage-card-image"
+                          onError={() => handleCardImageError(stableKey)}
+                        />
+                      );
+                    })()
                   )}
                 </div>
                 <div className="heritage-card-body">

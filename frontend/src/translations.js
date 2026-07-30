@@ -743,7 +743,7 @@ export const translations = {
 
     // Layout / Sidebar
     "sidebar.appName": "Umuco Core",
-    "sidebar.tagline": "Ibubiko ry'Umuco w'u Rwanda",
+    "sidebar.tagline": "Ububiko bwfini'Umuco w'u Rwanda",
     "sidebar.home": "Ahabanza",
     "sidebar.explore": "Sura",
     "sidebar.listen": "Umva",

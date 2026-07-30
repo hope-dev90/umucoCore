@@ -236,9 +236,11 @@ const EXPLORE_FALLBACK_TRANSLATIONS = {
 };
 
 const localizeExploreFallbackItem = (item, language) => {
-  if (language === 'rw') return item;
+  // Always stamp originalTitle so image keys are stable across language changes
+  const withOriginal = item.originalTitle ? item : { ...item, originalTitle: item.title };
+  if (language === 'rw') return withOriginal;
   const localized = EXPLORE_FALLBACK_TRANSLATIONS[item.title]?.[language];
-  return localized ? { ...item, ...localized, originalTitle: item.title } : item;
+  return localized ? { ...withOriginal, ...localized } : withOriginal;
 };
 
 const toCoordinate = (value) => {
@@ -375,10 +377,11 @@ export default function Explore() {
       const resolved = {};
       await Promise.all(
         localizedHeritageItems.map(async (item) => {
+          const stableKey = item.originalTitle || item.title;
           if (item.image) return;
           try {
-            const url = await getCommonsImage(item.title);
-            if (url && !cancelled) resolved[item.title] = url;
+            const url = await getCommonsImage(stableKey);
+            if (url && !cancelled) resolved[stableKey] = url;
           } catch { /* no image available */ }
         })
       );
@@ -707,34 +710,37 @@ export default function Explore() {
                       <Headphones size={52} aria-hidden="true" />
                     </div>
                   ) : (
-                    // Task 2: prefer Commons image, then local asset, then brown placeholder
-                    imageLoadErrors[item.title] ? (
-                      <div
-                        className="heritage-card-image"
-                        style={{
-                          height: 230,
-                          background: 'linear-gradient(135deg, #6B4226 0%, #3E2723 100%)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                        role="img"
-                        aria-label={item.title}
-                      >
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,235,224,0.5)" strokeWidth="1.5" aria-hidden="true">
-                          <rect x="3" y="3" width="18" height="18" rx="2" />
-                          <circle cx="8.5" cy="8.5" r="1.5" />
-                          <polyline points="21 15 16 10 5 21" />
-                        </svg>
-                      </div>
-                    ) : (
-                      <img
-                        src={commonsImages[item.title] || item.image}
-                        alt={item.title}
-                        className="heritage-card-image"
-                        onError={() => handleCardImageError(item.title)}
-                      />
-                    )
+                    // Use stable originalTitle as key so images survive language switches
+                    (() => {
+                      const stableKey = item.originalTitle || item.title;
+                      return imageLoadErrors[stableKey] ? (
+                        <div
+                          className="heritage-card-image"
+                          style={{
+                            height: 230,
+                            background: 'linear-gradient(135deg, #6B4226 0%, #3E2723 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                          role="img"
+                          aria-label={item.title}
+                        >
+                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,235,224,0.5)" strokeWidth="1.5" aria-hidden="true">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21 15 16 10 5 21" />
+                          </svg>
+                        </div>
+                      ) : (
+                        <img
+                          src={commonsImages[stableKey] || item.image}
+                          alt={item.title}
+                          className="heritage-card-image"
+                          onError={() => handleCardImageError(stableKey)}
+                        />
+                      );
+                    })()
                   )}
                 </div>
                 <div className="heritage-card-body">

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MemoryRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import './styles/global.css';
 import './styles/publicJourney.css';
@@ -14,6 +14,7 @@ import RiddlePopup from './components/RiddlePopup';
 
 import Landing     from './pages/Landing';
 import Login       from './pages/Login';
+import GovLogin    from './pages/GovLogin';
 import Signup      from './pages/Signup';
 import Home        from './pages/Home';
 import Explore     from './pages/Explore';
@@ -105,6 +106,9 @@ export default function App() {
                 <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
                 <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
                 <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+
+                {/* Gov login — handles its own auth redirects */}
+                <Route path="/gov" element={<GovLogin />} />
 
                 {/* Protected */}
                 <Route path="/dashboard"   element={<DashboardRoute />} />
