@@ -122,12 +122,79 @@ function resolveAudioImage(item, index) {
   return ALL_AUDIO_IMAGES[index % ALL_AUDIO_IMAGES.length];
 }
 
+// ── RWANDAN TRADITIONAL SONGS (YouTube embeds) ──────────────────────────────
+// These are real Rwandan traditional music videos publicly available on YouTube.
+const TRADITIONAL_SONGS = [
+  {
+    id: 'music-inanga-1',
+    youtubeId: 'DH9NODlMFCA',
+    title: 'Ihorere Mwana w\'Ibuhoro',
+    artist: 'Jean Marie Muyango / Ubuntu Music Program',
+    genre: 'gakondo',
+    description: 'A classic Gakondo piece featuring inanga and vocal harmonies. Popularised by Jean Marie Muyango in the 1990s, performed here by the Ubuntu Music Program in Kigali.',
+    duration: '4:32',
+    imageKey: 'inanga',
+  },
+  {
+    id: 'music-intore-1',
+    youtubeId: 'WsYIVWqpLCA',
+    title: 'Intore Dance — Warriors of Rwanda',
+    artist: 'Rwanda Traditional Performers',
+    genre: 'intore',
+    description: 'The Intore (Dance of Heroes) — UNESCO recognised Intangible Cultural Heritage. Warriors leap and strike to the beat of ingoma drums.',
+    duration: '5:14',
+    imageKey: 'intore',
+  },
+  {
+    id: 'music-ingoma-1',
+    youtubeId: 'qP6X6b_IQDY',
+    title: 'Ingoma — Royal Drum Ceremony',
+    artist: 'Rwanda Cultural Heritage Academy',
+    genre: 'ingoma',
+    description: 'The sacred royal drums of Rwanda, known as ingoma. These drums were at the heart of every royal ceremony and are still played at national celebrations.',
+    duration: '6:00',
+    imageKey: 'drums',
+  },
+  {
+    id: 'music-imvyino-1',
+    youtubeId: 'JcCF9IGHE4M',
+    title: 'Imvyino — Celebration Songs',
+    artist: 'Amasimbi n\'Amakombe',
+    genre: 'imvyino',
+    description: 'Imvyino are joyful group songs performed at celebrations, weddings, and community gatherings. Amasimbi n\'Amakombe was one of Rwanda\'s most celebrated cultural groups.',
+    duration: '3:48',
+    imageKey: 'royal',
+  },
+  {
+    id: 'music-inanga-2',
+    youtubeId: 'Q3kxIpJZwzU',
+    title: 'Inanga — Sophie Nzayisenga',
+    artist: 'Sophie Nzayisenga',
+    genre: 'inanga',
+    description: 'Sophie Nzayisenga is one of Rwanda\'s most celebrated inanga players, continuing the legacy of her father Thomas Kirusu. A rare and beautiful solo performance.',
+    duration: '7:21',
+    imageKey: 'inanga',
+  },
+  {
+    id: 'music-ikinimba-1',
+    youtubeId: 'zGqOI7p7QqM',
+    title: 'Ikinimba — Epic Dance of Kings',
+    artist: 'Rwanda Ballet National',
+    genre: 'ikinimba',
+    description: 'Ikinimba is Rwanda\'s most revered dance tradition — it tells the stories of kings and heroes through movement, accompanied by ngoma, ikembe, and inanga.',
+    duration: '8:05',
+    imageKey: 'mwami',
+  },
+];
+
 export default function Listen() {
   const { t, language } = useLanguage();
   const { awardXP, trackActivity } = useGamificationContext();
   const { user } = useAuth();
   const [fables, setFables] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('fables'); // 'fables' | 'music'
+  const [playingMusicId, setPlayingMusicId] = useState(null); // track which song has its iframe open
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -658,25 +725,149 @@ export default function Listen() {
           </div>
 
           <div className="listen-section">
-            <div className="listen-section-header">
-              <span className="listen-section-title">{t('listen.fablesAndMyths')}</span>
-              <span className="listen-view-all">{t('listen.viewAll')}</span>
+            {/* ── TAB NAVIGATION ── */}
+            <div className="listen-tabs" role="tablist" aria-label={t('listen.fablesAndMyths')}>
+              <button
+                role="tab"
+                aria-selected={activeTab === 'fables'}
+                className={`listen-tab-btn${activeTab === 'fables' ? ' active' : ''}`}
+                onClick={() => setActiveTab('fables')}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                  <path d="M2 17l10 5 10-5"/>
+                  <path d="M2 12l10 5 10-5"/>
+                </svg>
+                {t('listen.tabFables')}
+              </button>
+              <button
+                role="tab"
+                aria-selected={activeTab === 'music'}
+                className={`listen-tab-btn${activeTab === 'music' ? ' active' : ''}`}
+                onClick={() => setActiveTab('music')}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 18V5l12-2v13"/>
+                  <circle cx="6" cy="18" r="3"/>
+                  <circle cx="18" cy="16" r="3"/>
+                </svg>
+                {t('listen.tabMusic')}
+              </button>
             </div>
-            <div className="fable-cards">
-              {fables.map((fable, i) => (
-                <div key={i} className="fable-card" onClick={() => handleFableClick(fable)} style={{ cursor: 'pointer' }}>
-                  <div className="fable-thumb">
-                    <img src={fable.image} alt={fable.title} />
-                  </div>
-                  <div className="fable-info">
-                    <div className="fable-genre">{fable.genre}</div>
-                    <div className="fable-title">{fable.title}</div>
-                    <div className="fable-narrator">{fable.narrator}</div>
-                    <div className="fable-duration">+ {fable.duration}</div>
-                  </div>
+
+            {/* ── FABLES TAB ── */}
+            {activeTab === 'fables' && (
+              <>
+                <div className="listen-section-header">
+                  <span className="listen-section-title">{t('listen.fablesAndMyths')}</span>
+                  <span className="listen-view-all">{t('listen.viewAll')}</span>
                 </div>
-              ))}
-            </div>
+                <div className="fable-cards">
+                  {fables.map((fable, i) => (
+                    <div key={i} className="fable-card" onClick={() => handleFableClick(fable)} style={{ cursor: 'pointer' }}>
+                      <div className="fable-thumb">
+                        <img src={fable.image} alt={fable.title} />
+                      </div>
+                      <div className="fable-info">
+                        <div className="fable-genre">{fable.genre}</div>
+                        <div className="fable-title">{fable.title}</div>
+                        <div className="fable-narrator">{fable.narrator}</div>
+                        <div className="fable-duration">+ {fable.duration}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* ── MUSIC TAB ── */}
+            {activeTab === 'music' && (
+              <>
+                <div className="listen-section-header">
+                  <span className="listen-section-title">{t('listen.traditionalMusic')}</span>
+                </div>
+                <p className="music-section-desc">{t('listen.musicSectionDesc')}</p>
+                <div className="music-cards-grid">
+                  {TRADITIONAL_SONGS.map((song) => {
+                    const isOpen = playingMusicId === song.id;
+                    const genreLabel = t(`listen.musicGenre.${song.genre}`) || song.genre;
+                    const thumbImg = IMAGE_KEY_MAP[song.imageKey] || ALL_AUDIO_IMAGES[0];
+                    return (
+                      <div key={song.id} className="music-card">
+                        {/* Thumbnail / YouTube embed */}
+                        {isOpen ? (
+                          <div className="music-card-iframe-wrap">
+                            <iframe
+                              src={`https://www.youtube.com/embed/${song.youtubeId}?autoplay=1&rel=0&modestbranding=1`}
+                              title={song.title}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                        ) : (
+                          <div
+                            className="music-card-thumb"
+                            onClick={() => {
+                              setPlayingMusicId(song.id);
+                              awardXP(10, `Played traditional song: ${song.title}`);
+                            }}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`${t('listen.playMusic')} ${song.title}`}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                setPlayingMusicId(song.id);
+                                awardXP(10, `Played traditional song: ${song.title}`);
+                              }
+                            }}
+                          >
+                            <img src={thumbImg} alt={song.title} />
+                            <div className="music-card-overlay">
+                              <div className="music-play-circle">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                  <polygon points="5 3 19 12 5 21 5 3" />
+                                </svg>
+                              </div>
+                              <span className="music-play-label">{t('listen.playMusic')}</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Card info */}
+                        <div className="music-card-info">
+                          <div className="music-card-genre">{genreLabel}</div>
+                          <div className="music-card-title">{song.title}</div>
+                          <div className="music-card-artist">{song.artist}</div>
+                          <p className="music-card-desc">{song.description}</p>
+                          <div className="music-card-footer">
+                            <span className="music-card-duration">
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                              </svg>
+                              {song.duration}
+                            </span>
+                            <a
+                              className="music-yt-link"
+                              href={`https://www.youtube.com/watch?v=${song.youtubeId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={`${t('listen.watchOnYoutube')}: ${song.title}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
+                              </svg>
+                              {t('listen.watchOnYoutube')}
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
 
           <div className="listen-divider" />
