@@ -411,7 +411,9 @@ export default function Listen() {
     
     if (story && story.content) {
       // Use full story content from local story file
-      narrationText = `${track.title}. ${story.content.join(' ')}`;
+      // content can be a string (from audio.json) or array (from story files)
+      const storyText = Array.isArray(story.content) ? story.content.join(' ') : story.content;
+      narrationText = `${track.title}. ${storyText}`;
     } else if (track.content) {
       // Fall back to content string baked directly into the track (from audio.json)
       narrationText = `${track.title}. ${track.content}`;
@@ -440,7 +442,12 @@ export default function Listen() {
   }, [getSelectedVoice]);
 
   const fetchNarration = useCallback(async (track) => {
-    if (!track.id || String(track.id).startsWith('fallback-')) return getLocalNarration(track);
+    // Skip API call for non-numeric IDs (audio.json items use string IDs like "story-gihanga")
+    // These don't exist in the database, so use local narration directly
+    const numericId = Number(track.id);
+    if (!track.id || !Number.isFinite(numericId) || numericId <= 0 || String(track.id).startsWith('fallback-')) {
+      return getLocalNarration(track);
+    }
     try {
       const response = await fetch(apiUrl(`/api/audio/${track.id}/narration?voice=${getSelectedVoice()}`));
       if (response.status === 404) return getLocalNarration(track);
