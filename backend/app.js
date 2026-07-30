@@ -20,6 +20,7 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,7 +31,7 @@ const app = express();
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
-    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+    crossOriginOpenerPolicy: { policy: "unsafe-none" },
     contentSecurityPolicy: false,
   }),
 );
@@ -48,6 +49,10 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Serve frontend build (if exists)
+const frontendBuildPath = path.join(__dirname, "frontend", "dist");
+app.use(express.static(frontendBuildPath));
 
 // Auth routes (PostgreSQL)
 app.use("/auth", authRouter);
@@ -85,11 +90,16 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// SPA fallback: serve index.html for all non-API routes so React Router works
+const indexPath = path.join(__dirname, "frontend", "dist", "index.html");
 app.use("*", (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Route not found",
-  });
+  if (req.originalUrl.startsWith("/api") || req.originalUrl.startsWith("/auth") || req.originalUrl.startsWith("/uploads")) {
+    return res.status(404).json({ success: false, message: "Route not found" });
+  }
+  if (fs.existsSync(indexPath)) {
+    return res.sendFile(indexPath);
+  }
+  res.status(404).json({ success: false, message: "Route not found" });
 });
 
 app.use((err, req, res, next) => {

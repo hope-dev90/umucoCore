@@ -9,7 +9,7 @@ import MuseumGallery from '../components/MuseumGallery';
 import { trackView } from '../utils/trackView';
 import ReportButton from '../components/ReportButton';
 import './Collections.css';
-import { API_BASE } from '../config/api';
+import { apiUrl } from '../config/api';
 import inanga from '../assets/collections/inanga (2).jpg';
 import royalCourt from '../assets/collections/royal-court.jpg';
 import imigongo from '../assets/collections/imigongo.jpg';

@@ -4,7 +4,7 @@ import './History.css';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import commonsImageCache from '../data/commonsImageCache.json';
-import { API_BASE } from '../config/api';
+import { apiUrl } from '../config/api';
 
 const Icon = ({ d, size = 18, strokeWidth = 1.8 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none"

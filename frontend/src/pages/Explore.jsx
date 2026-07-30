@@ -11,7 +11,7 @@ import { mapHeritageApiItem } from '../utils/heritageMapping';
 import { localizeItem } from '../utils/contentLocale';
 import commonsImagesCached from '../data/commonsImageCache.json';
 import { BookOpen, CheckCircle2, ChevronDown, Flag, Headphones, MapPinned, Play, RefreshCw, X } from 'lucide-react';
-import { API_BASE } from '../config/api';
+import { apiUrl } from '../config/api';
 import nyanzaImg from '../assets/explore/nyanza.jpg';
 import buhangaImg from '../assets/explore/buhanga.jpg';
 import intoreImg from '../assets/explore/intore2.jpg';

@@ -12,7 +12,7 @@ import { getHighlightForCategory, ALL_STORIES } from '../data/stories';
 import { DashboardStoryView } from '../components/Gamification/DashboardStoryView';
 import { UmucoGlyph } from '../components/UmucoGlyphs';
 import { trackView } from '../utils/trackView';
-import { API_BASE } from '../config/api';
+import { apiUrl } from '../config/api';
 
 const EXPLORER_TYPES = [
   { id: 'warrior',         label: 'Warrior',          tagline: 'Battles, legends & brave deeds'   },
