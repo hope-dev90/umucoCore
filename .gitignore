@@ -9,3 +9,4 @@ backend/.env
 .kilo/
 .vscode/
 .agents/
+frontend/dist/
