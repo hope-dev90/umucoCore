@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import Layout from '../components/Layout';
-import './IntlDays.css';
+import './Intldays.css';
 import themeImg from '../assets/international/imigongo.jpg';
 import spotlightImg from '../assets/international/nyanza.jpg';
 import harvestImg from '../assets/international/umuganura.jpg';
