@@ -7,7 +7,6 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "build": "cd frontend && npm install && VITE_API_BASE=https://umucocore.onrender.com npm run build",
     "create-admin": "node scripts/create-admin.js"
   },
   "dependencies": {

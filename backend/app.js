@@ -1,3 +1,8 @@
+import express from "express";
+import helmet from "helmet";
+import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import heritageRouter from "./routes/heritageRoutes.js";
@@ -16,21 +21,21 @@ import exerciseRouter from "./routes/exerciseRoutes.js";
 import locationsRouter from "./routes/locationsRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
 import newsRouter from "./routes/newsRoutes.js";
-import express from "express";
-import helmet from "helmet";
-import cors from "cors";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Trust the first proxy — required on Render/Heroku/etc where X-Forwarded-For is set
-// This lets express-rate-limit correctly identify client IPs
+// Trust the first proxy — required on Render where X-Forwarded-For is set
 app.set('trust proxy', 1);
+
+// Allow requests from Vercel frontend + localhost dev
+const ALLOWED_ORIGINS = [
+  'https://umucocore.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
 
 app.use(
   helmet({
@@ -42,7 +47,18 @@ app.use(
 
 app.use(
   cors({
-    origin: true,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Render health checks)
+      if (!origin) return callback(null, true);
+      // Allow any Vercel preview deployment for this project
+      if (
+        ALLOWED_ORIGINS.includes(origin) ||
+        /^https:\/\/umucocore.*\.vercel\.app$/.test(origin)
+      ) {
+        return callback(null, true);
+      }
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -51,16 +67,15 @@ app.use(
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Auth routes (PostgreSQL)
+// Auth routes
 app.use("/auth", authRouter);
 
-// User routes (NeDB)
+// User routes
 app.use("/api/users", userRouter);
 
-// Heritage & Content API routes (NeDB)
+// Content API routes
 app.use("/api/heritage", heritageRouter);
 app.use("/api/saved", savedRouter);
 app.use("/api/history", historyRouter);
@@ -90,19 +105,8 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Serve frontend build AFTER all API routes (so API routes always take priority)
-const frontendBuildPath = path.join(__dirname, "frontend", "dist");
-app.use(express.static(frontendBuildPath));
-
-// SPA fallback: serve index.html for all non-API routes so React Router works
-const indexPath = path.join(__dirname, "frontend", "dist", "index.html");
+// All other routes → 404 JSON (frontend is on Vercel, not served here)
 app.use("*", (req, res) => {
-  if (req.originalUrl.startsWith("/api") || req.originalUrl.startsWith("/auth") || req.originalUrl.startsWith("/uploads")) {
-    return res.status(404).json({ success: false, message: "Route not found" });
-  }
-  if (fs.existsSync(indexPath)) {
-    return res.sendFile(indexPath);
-  }
   res.status(404).json({ success: false, message: "Route not found" });
 });
 
@@ -111,10 +115,7 @@ app.use((err, req, res, next) => {
   if (err.code === "LIMIT_FILE_SIZE") {
     return res.status(413).json({ error: "File too large (max 50MB)" });
   }
-  res.status(500).json({
-    success: false,
-    message: "Internal server error",
-  });
+  res.status(500).json({ success: false, message: "Internal server error" });
 });
 
 export default app;
