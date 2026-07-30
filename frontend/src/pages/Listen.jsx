@@ -79,50 +79,35 @@ const IMAGE_KEY_MAP = {
 const ALL_AUDIO_IMAGES = Object.values(AUDIO_IMAGE_MAP);
 
 function localizeAudioFallback(language) {
-  // Use story files as the primary content for the Listen page
-  const stories = [gihangaStory, nyirarucyabaStory, ruganzuStory, kigeliStory];
-  
-  return stories.map((story, index) => {
-    const storyImages = {
-      'gihanga-ngomijana': royalCourtImg,
-      'nyirarucyaba': royalCourtImg,
-      'ruganzu-ii-ndoli': RuganzuImg,
-      'kigeli-iv-rwabugiri': mwamiImg,
-    };
-    
-    return {
-      id: story.id,
-      genre: { 
-        en: story.category, 
-        rw: story.category, 
-        fr: story.category 
-      },
-      title: {
-        en: story.title,
-        rw: story.title,
-        fr: story.title
-      },
-      narrator: {
-        en: 'Rwandan Oral Tradition',
-        rw: 'Umurage w\'Abakurambere',
-        fr: 'Tradition Orale Rwandaise'
-      },
-      description: {
-        en: story.desc,
-        rw: story.desc,
-        fr: story.desc
-      },
-      duration: `${Math.max(5, Math.round(story.content.join(' ').split(/\s+/).length / 150))} min read`,
-      durationSec: Math.max(300, story.content.join(' ').split(/\s+/).length * 0.4),
-      image: storyImages[story.id] || ALL_AUDIO_IMAGES[index % ALL_AUDIO_IMAGES.length],
-      audioUrl: '',
-      youtubeRef: '',
-      storyId: story.id,
-      isStory: true,
-      storyContent: story.content.join('\n\n'),
-    };
-  });
+  return audioData.map((song) => ({
+    id: song.id,
+    genre: song.genre[language] || song.genre.en,
+    title: song.title[language] || song.title.en,
+    narrator: song.narrator[language] || song.narrator.en,
+    description: song.description ? (song.description[language] || song.description.en) : '',
+    duration: song.duration,
+    durationSec: song.durationSec,
+    image: IMAGE_KEY_MAP[song.imageKey] || ALL_AUDIO_IMAGES[0],
+    audioUrl: song.audioUrl || '',
+    youtubeRef: song.youtubeRef || '',
+  }));
 }
+
+// Map story IDs to local story files for full content
+const STORY_CONTENT_MAP = {
+  'gihanga-ngomijana': gihangaStory,
+  'nyirarucyaba': nyirarucyabaStory,
+  'ruganzu-ii-ndoli': ruganzuStory,
+  'kigeli-iv-rwabugiri': kigeliStory,
+};
+
+// Map database IDs to story IDs (based on seed order)
+const DB_ID_TO_STORY_ID = {
+  1: 'gihanga-ngomijana',
+  2: 'nyirarucyaba',
+  3: 'ruganzu-ii-ndoli',
+  4: 'kigeli-iv-rwabugiri',
+};
 
 const PROVERB_LANG_CONFIG = {
   fr: { tag: 'fr-FR', label: 'FR', preferredVoiceHints: ['amelie', 'thomas', 'french'] },
@@ -215,20 +200,30 @@ export default function Listen() {
         const res = await fetch(apiUrl('/api/audio'));
         const data = await res.json();
         if (data.audio && data.audio.length > 0) {
-          const mapped = data.audio.map((item, i) => ({
-            id: item.id,
-            genre: item.category,
-            title: item.title,
-            narrator: item.description,
-            duration: item.duration
-              ? `${Math.floor(item.duration / 60)}:${String(
-                  item.duration % 60
-                ).padStart(2, "0")}`
-              : "0:00",
-            durationSec: item.duration || 0,
-            image: item.thumbnail_url || resolveAudioImage(item, i),
-            audioUrl: item.audio_url || '',
-          }));
+          const mapped = data.audio.map((item, i) => {
+            // Match API items with local story files based on title
+            let storyId = null;
+            if (item.title.includes('Gihanga')) storyId = 'gihanga-ngomijana';
+            else if (item.title.includes('Nyirarucyaba')) storyId = 'nyirarucyaba';
+            else if (item.title.includes('Ruganzu')) storyId = 'ruganzu-ii-ndoli';
+            else if (item.title.includes('Kigeli')) storyId = 'kigeli-iv-rwabugiri';
+            
+            return {
+              id: item.id,
+              genre: item.category,
+              title: item.title,
+              narrator: item.description,
+              duration: item.duration
+                ? `${Math.floor(item.duration / 60)}:${String(
+                    item.duration % 60
+                  ).padStart(2, "0")}`
+                : "0:00",
+              durationSec: item.duration || 0,
+              image: item.thumbnail_url || resolveAudioImage(item, i),
+              audioUrl: item.audio_url || '',
+              storyId: storyId, // Link to local story file
+            };
+          });
           setFables(mapped);
         } else {
           setFables(localizeAudioFallback(language));
@@ -329,10 +324,23 @@ export default function Listen() {
 
   const getLocalNarration = useCallback((track) => {
     const selectedVoice = getSelectedVoice();
-    // For stories, use the full story content as the narration text
-    const narrationText = track.isStory && track.storyContent 
-      ? `${track.title}. ${track.storyContent}`
-      : `${track.title}. ${track.narrator || track.genre || 'A story from Rwanda cultural heritage.'}`;
+    
+    // Try to get story content - first by storyId, then by database ID mapping
+    let story = STORY_CONTENT_MAP[track.storyId];
+    if (!story && track.id) {
+      const storyIdFromDb = DB_ID_TO_STORY_ID[Number(track.id)];
+      if (storyIdFromDb) story = STORY_CONTENT_MAP[storyIdFromDb];
+    }
+    
+    let narrationText;
+    
+    if (story && story.content) {
+      // Use full story content
+      narrationText = `${track.title}. ${story.content.join(' ')}`;
+    } else {
+      // Fallback to title and description
+      narrationText = `${track.title}. ${track.narrator || track.genre || 'A story from Rwanda cultural heritage.'}`;
+    }
     
     const wordCount = narrationText.split(/\s+/).length;
     const estimatedDuration = Math.max(30, Math.round(wordCount / 2.5)); // ~150 words per minute

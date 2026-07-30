@@ -4,37 +4,47 @@
 -- First, clear existing invalid audio data (optional - comment out if you want to keep existing data)
 -- DELETE FROM audio_content;
 
--- Insert 3 valid Rwanda audio entries
+-- Insert 4 featured story entries
 INSERT INTO audio_content (title, description, audio_url, thumbnail_url, duration, category, is_featured, created_at)
 VALUES
 (
-  'Inanga — The Royal Zither of Rwanda',
-  'A masterful performance of the Inanga, Rwanda''s traditional plucked zither, with vocals in the royal court style of Nyanza.',
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-  '/images/audio/inanga.jpg',
-  482,
-  'Traditional Music',
+  'Gihanga Ngomijana',
+  'The founder-king said to have descended from the sky, and the fire he lit that was meant to never go out. The story of how Rwanda became a kingdom.',
+  '',
+  '/images/collections/royal-court.jpg',
+  480,
+  'Founding History',
   true,
   NOW()
 ),
 (
-  'Ibyivugo — Warrior Self-Praise Poetry',
-  'A powerful recitation of Ibyivugo, the ancient Rwandan warrior self-praise poetry celebrating bravery and lineage.',
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-  '/images/audio/ibyivugo.jpg',
-  367,
-  'Oral Tradition',
+  'Nyirarucyaba',
+  'Gihanga''s daughter, and the woman said to have brought the first cattle to the Kingdom of Rwanda. A story of curiosity, generosity, and the origins of Rwanda''s most treasured tradition.',
+  '',
+  '/images/collections/royal-court.jpg',
+  360,
+  'Founding History',
   true,
   NOW()
 ),
 (
-  'Ingoma — The Sacred Royal Drums',
-  'A ceremonial drumming performance featuring the Ingoma, the sacred royal drums historically restricted to royal ceremonies.',
-  'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
-  '/images/audio/ingoma.jpg',
-  541,
-  'Traditional Music',
-  false,
+  'King Ruganzu II Ndoli',
+  'The exiled prince who crossed the Nyabarongo and returned to reclaim a kingdom that had almost forgotten him. A tale of courage, patience, and the power of returning home.',
+  '',
+  '/images/listen/ruganzu.png',
+  420,
+  'Royal History',
+  true,
+  NOW()
+),
+(
+  'Kigeli IV Rwabugiri',
+  'The last great warrior king of Rwanda, whose conquests carried the kingdom to the largest borders it would ever hold. A story of expansion, reform, and the complex legacy of a nation-builder.',
+  '',
+  '/images/home/kigeli.jpg',
+  540,
+  'Royal History',
+  true,
   NOW()
 );
 
