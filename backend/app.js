@@ -28,6 +28,10 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Trust the first proxy — required on Render/Heroku/etc where X-Forwarded-For is set
+// This lets express-rate-limit correctly identify client IPs
+app.set('trust proxy', 1);
+
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
