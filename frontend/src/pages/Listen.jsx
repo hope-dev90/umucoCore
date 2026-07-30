@@ -5,6 +5,8 @@ import { gihangaStory } from '../data/stories/gihanga';
 import { nyirarucyabaStory } from '../data/stories/nyirarucyaba';
 import { ruganzuStory } from '../data/stories/ruganzu';
 import { kigeliStory } from '../data/stories/kigeli';
+import { inangaStory } from '../data/stories/inanga';
+import { ryangombeStory } from '../data/stories/ryangombe';
 import Layout from '../components/Layout';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
@@ -90,6 +92,8 @@ function localizeAudioFallback(language) {
     image: IMAGE_KEY_MAP[song.imageKey] || ALL_AUDIO_IMAGES[0],
     audioUrl: song.audioUrl || '',
     youtubeRef: song.youtubeRef || '',
+    storyId: song.storyId || '',       // ← pass through so narration can find content
+    content: song.content || '',       // ← pass full content directly from audio.json
   }));
 }
 
@@ -99,6 +103,8 @@ const STORY_CONTENT_MAP = {
   'nyirarucyaba': nyirarucyabaStory,
   'ruganzu-ii-ndoli': ruganzuStory,
   'kigeli-iv-rwabugiri': kigeliStory,
+  'inanga-mazimpaka': inangaStory,   // ← was missing
+  'ryangombe': ryangombeStory,       // ← was missing
 };
 
 // Map database IDs to story IDs (based on seed order)
@@ -122,67 +128,68 @@ function resolveAudioImage(item, index) {
   return ALL_AUDIO_IMAGES[index % ALL_AUDIO_IMAGES.length];
 }
 
-// ── RWANDAN TRADITIONAL SONGS (YouTube embeds) ──────────────────────────────
-// These are real Rwandan traditional music videos publicly available on YouTube.
+// ── RWANDAN TRADITIONAL SONGS ────────────────────────────────────────────────
+// Each entry links to a real YouTube search query for that song/artist.
+// Clicking "Play" opens the YouTube search so the user always finds real videos.
 const TRADITIONAL_SONGS = [
   {
-    id: 'music-inanga-1',
-    youtubeId: 'DH9NODlMFCA',
-    title: 'Ihorere Mwana w\'Ibuhoro',
-    artist: 'Jean Marie Muyango / Ubuntu Music Program',
+    id: 'music-inanga-gakondo',
+    youtubeSearch: 'Ihorere+Mwana+w%27Ibuhoro+Rwanda+inanga+Gakondo',
+    title: "Ihorere Mwana w'Ibuhoro",
+    artist: 'Jean Marie Muyango / Gakondo Tradition',
     genre: 'gakondo',
-    description: 'A classic Gakondo piece featuring inanga and vocal harmonies. Popularised by Jean Marie Muyango in the 1990s, performed here by the Ubuntu Music Program in Kigali.',
-    duration: '4:32',
+    description: "A classic Gakondo piece featuring inanga and vocal harmonies. Popularised by Jean Marie Muyango in the 1990s and still performed across Rwanda today.",
+    duration: '~4 min',
     imageKey: 'inanga',
   },
   {
-    id: 'music-intore-1',
-    youtubeId: 'WsYIVWqpLCA',
-    title: 'Intore Dance — Warriors of Rwanda',
+    id: 'music-intore',
+    youtubeSearch: 'Rwanda+Intore+dance+traditional+warriors+UNESCO',
+    title: 'Intore — Dance of Heroes',
     artist: 'Rwanda Traditional Performers',
     genre: 'intore',
-    description: 'The Intore (Dance of Heroes) — UNESCO recognised Intangible Cultural Heritage. Warriors leap and strike to the beat of ingoma drums.',
-    duration: '5:14',
+    description: 'The Intore (Dance of Heroes) — inscribed by UNESCO as Intangible Cultural Heritage in 2024. Warriors leap and strike to the beat of ingoma drums.',
+    duration: '~5 min',
     imageKey: 'intore',
   },
   {
-    id: 'music-ingoma-1',
-    youtubeId: 'qP6X6b_IQDY',
+    id: 'music-ingoma',
+    youtubeSearch: 'Rwanda+ingoma+royal+drums+traditional+ceremony',
     title: 'Ingoma — Royal Drum Ceremony',
-    artist: 'Rwanda Cultural Heritage Academy',
+    artist: 'Rwanda Cultural Heritage',
     genre: 'ingoma',
-    description: 'The sacred royal drums of Rwanda, known as ingoma. These drums were at the heart of every royal ceremony and are still played at national celebrations.',
-    duration: '6:00',
+    description: 'The sacred royal drums of Rwanda — ingoma were at the heart of every royal ceremony and are still played at national celebrations today.',
+    duration: '~6 min',
     imageKey: 'drums',
   },
   {
-    id: 'music-imvyino-1',
-    youtubeId: 'JcCF9IGHE4M',
-    title: 'Imvyino — Celebration Songs',
-    artist: 'Amasimbi n\'Amakombe',
+    id: 'music-imvyino',
+    youtubeSearch: 'Rwanda+imvyino+traditional+celebration+songs+Amasimbi',
+    title: "Imvyino — Celebration Songs",
+    artist: "Amasimbi n'Amakombe",
     genre: 'imvyino',
-    description: 'Imvyino are joyful group songs performed at celebrations, weddings, and community gatherings. Amasimbi n\'Amakombe was one of Rwanda\'s most celebrated cultural groups.',
-    duration: '3:48',
+    description: "Imvyino are joyful group songs for celebrations, weddings, and community gatherings. Amasimbi n'Amakombe was one of Rwanda's most celebrated cultural groups.",
+    duration: '~4 min',
     imageKey: 'royal',
   },
   {
-    id: 'music-inanga-2',
-    youtubeId: 'Q3kxIpJZwzU',
-    title: 'Inanga — Sophie Nzayisenga',
+    id: 'music-sophie-inanga',
+    youtubeSearch: 'Sophie+Nzayisenga+inanga+Rwanda+traditional',
+    title: 'Inanga — Solo Performance',
     artist: 'Sophie Nzayisenga',
     genre: 'inanga',
-    description: 'Sophie Nzayisenga is one of Rwanda\'s most celebrated inanga players, continuing the legacy of her father Thomas Kirusu. A rare and beautiful solo performance.',
-    duration: '7:21',
+    description: "Sophie Nzayisenga is one of Rwanda's most celebrated inanga players, continuing the legacy of her father Thomas Kirusu. A rare and beautiful solo performance.",
+    duration: '~7 min',
     imageKey: 'inanga',
   },
   {
-    id: 'music-ikinimba-1',
-    youtubeId: 'zGqOI7p7QqM',
+    id: 'music-ikinimba',
+    youtubeSearch: 'Rwanda+ikinimba+traditional+dance+kings+epic',
     title: 'Ikinimba — Epic Dance of Kings',
     artist: 'Rwanda Ballet National',
     genre: 'ikinimba',
-    description: 'Ikinimba is Rwanda\'s most revered dance tradition — it tells the stories of kings and heroes through movement, accompanied by ngoma, ikembe, and inanga.',
-    duration: '8:05',
+    description: "Ikinimba is Rwanda's most revered dance tradition — it tells the stories of kings and heroes through movement, accompanied by ngoma, ikembe, and inanga.",
+    duration: '~8 min',
     imageKey: 'mwami',
   },
 ];
@@ -194,7 +201,6 @@ export default function Listen() {
   const [fables, setFables] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('fables'); // 'fables' | 'music'
-  const [playingMusicId, setPlayingMusicId] = useState(null); // track which song has its iframe open
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -274,6 +280,8 @@ export default function Listen() {
             else if (item.title.includes('Nyirarucyaba')) storyId = 'nyirarucyaba';
             else if (item.title.includes('Ruganzu')) storyId = 'ruganzu-ii-ndoli';
             else if (item.title.includes('Kigeli')) storyId = 'kigeli-iv-rwabugiri';
+            else if (item.title.toLowerCase().includes('inanga')) storyId = 'inanga-mazimpaka';
+            else if (item.title.toLowerCase().includes('ryangombe')) storyId = 'ryangombe';
             
             return {
               id: item.id,
@@ -402,10 +410,13 @@ export default function Listen() {
     let narrationText;
     
     if (story && story.content) {
-      // Use full story content
+      // Use full story content from local story file
       narrationText = `${track.title}. ${story.content.join(' ')}`;
+    } else if (track.content) {
+      // Fall back to content string baked directly into the track (from audio.json)
+      narrationText = `${track.title}. ${track.content}`;
     } else {
-      // Fallback to title and description
+      // Last resort: title + short description
       narrationText = `${track.title}. ${track.narrator || track.genre || 'A story from Rwanda cultural heritage.'}`;
     }
     
@@ -789,49 +800,30 @@ export default function Listen() {
                 <p className="music-section-desc">{t('listen.musicSectionDesc')}</p>
                 <div className="music-cards-grid">
                   {TRADITIONAL_SONGS.map((song) => {
-                    const isOpen = playingMusicId === song.id;
                     const genreLabel = t(`listen.musicGenre.${song.genre}`) || song.genre;
                     const thumbImg = IMAGE_KEY_MAP[song.imageKey] || ALL_AUDIO_IMAGES[0];
+                    const ytSearchUrl = `https://www.youtube.com/results?search_query=${song.youtubeSearch}`;
                     return (
                       <div key={song.id} className="music-card">
-                        {/* Thumbnail / YouTube embed */}
-                        {isOpen ? (
-                          <div className="music-card-iframe-wrap">
-                            <iframe
-                              src={`https://www.youtube.com/embed/${song.youtubeId}?autoplay=1&rel=0&modestbranding=1`}
-                              title={song.title}
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          </div>
-                        ) : (
-                          <div
-                            className="music-card-thumb"
-                            onClick={() => {
-                              setPlayingMusicId(song.id);
-                              awardXP(10, `Played traditional song: ${song.title}`);
-                            }}
-                            role="button"
-                            tabIndex={0}
-                            aria-label={`${t('listen.playMusic')} ${song.title}`}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' || e.key === ' ') {
-                                setPlayingMusicId(song.id);
-                                awardXP(10, `Played traditional song: ${song.title}`);
-                              }
-                            }}
-                          >
-                            <img src={thumbImg} alt={song.title} />
-                            <div className="music-card-overlay">
-                              <div className="music-play-circle">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                  <polygon points="5 3 19 12 5 21 5 3" />
-                                </svg>
-                              </div>
-                              <span className="music-play-label">{t('listen.playMusic')}</span>
+                        {/* Thumbnail with play overlay — opens YouTube search */}
+                        <a
+                          className="music-card-thumb"
+                          href={ytSearchUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${t('listen.playMusic')} ${song.title} on YouTube`}
+                          onClick={() => awardXP(10, `Opened traditional song: ${song.title}`)}
+                        >
+                          <img src={thumbImg} alt={song.title} />
+                          <div className="music-card-overlay">
+                            <div className="music-play-circle">
+                              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <polygon points="5 3 19 12 5 21 5 3" />
+                              </svg>
                             </div>
+                            <span className="music-play-label">{t('listen.playMusic')}</span>
                           </div>
-                        )}
+                        </a>
 
                         {/* Card info */}
                         <div className="music-card-info">
@@ -849,11 +841,10 @@ export default function Listen() {
                             </span>
                             <a
                               className="music-yt-link"
-                              href={`https://www.youtube.com/watch?v=${song.youtubeId}`}
+                              href={ytSearchUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               aria-label={`${t('listen.watchOnYoutube')}: ${song.title}`}
-                              onClick={(e) => e.stopPropagation()}
                             >
                               <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
