@@ -1,242 +1,110 @@
 [
   {
-    "id": "local-audio-1",
-    "genre": { "en": "Traditional", "rw": "Gakondo", "fr": "Traditionnel" },
+    "id": "story-gihanga",
+    "genre": { "en": "Founding History", "rw": "Amateka y'Intangiriro", "fr": "Histoire des Origines" },
     "title": {
-      "en": "Ngwino Mama (Mwana Urira)",
-      "rw": "Ngwino Mama (Mwana Urira)",
-      "fr": "Ngwino Mama (Mwana Urira)"
+      "en": "Gihanga Ngomijana",
+      "rw": "Gihanga Ngomijana",
+      "fr": "Gihanga Ngomijana"
     },
     "narrator": {
-      "en": "By Yvan Muziki",
-      "rw": "Na Yvan Muziki",
-      "fr": "Par Yvan Muziki"
-    },
-    "description": {
-      "en": "A traditional Rwandan lullaby about a mother comforting her crying child, written by Nyiringango Gilbert.",
-      "rw": "Indirimbo gakondo y'Umuryango w'u Rwanda ivuga umubyeyi wikinira umwana we urarira, yanditswe na Nyiringango Gilbert.",
-      "fr": "Une berceuse traditionnelle rwandaise sur une mere reconfortant son enfant qui pleure, ecrite par Nyiringango Gilbert."
-    },
-    "duration": "4:44",
-    "durationSec": 284,
-    "imageKey": "mama",
-    "audioUrl": "",
-    "youtubeRef": "https://www.youtube.com/watch?v=ngwino-mama"
-  },
-  {
-    "id": "local-audio-2",
-    "genre": { "en": "Gakondo Mix", "rw": "Karahanyuze", "fr": "Mix Gakondo" },
-    "title": {
-      "en": "Karahanyuze za Burakeye Vol. 2",
-      "rw": "Karahanyuze za Burakeye Vol. 2",
-      "fr": "Karahanyuze za Burakeye Vol. 2"
-    },
-    "narrator": {
-      "en": "HIGHBORN TV SHOW — Best of Traditional",
-      "rw": "HIGHBORN TV SHOW — Indirimbo Nyarwanda Gakondo",
-      "fr": "HIGHBORN TV SHOW — Meilleur du Traditionnel"
-    },
-    "description": {
-      "en": "A curated selection of traditional Rwandan songs showcasing the artistry of Rwandan culture — about life, love, and devotion.",
-      "rw": "Indirimbo Nyarwanda Gakondo zitoranyijwe zigaragaza ubuhanga n'umwihariko by'umuco nyarwanda. Zivuga ku buzima, urukundo, ubwitange.",
-      "fr": "Une selection de chants rwandais traditionnels mettant en valeur l'art de la culture rwandaise — sur la vie, l'amour et le devouement."
-    },
-    "duration": "26:50",
-    "durationSec": 1610,
-    "imageKey": "ingoma",
-    "audioUrl": "",
-    "youtubeRef": "https://www.youtube.com/watch?v=karahanyuze-vol2"
-  },
-  {
-    "id": "local-audio-3",
-    "genre": { "en": "Intore Songs", "rw": "Indirimbo z'Intore", "fr": "Chants Intore" },
-    "title": {
-      "en": "Arihehe",
-      "rw": "Arihehe",
-      "fr": "Arihehe"
-    },
-    "narrator": {
-      "en": "By Masamba Intore",
-      "rw": "Na Masamba Intore",
-      "fr": "Par Masamba Intore"
-    },
-    "description": {
-      "en": "A traditional Rwandan warrior song performed by Masamba Intore, celebrating bravery and ceremonial dance.",
-      "rw": "Indirimbo y'intore y'ubutwari yatanzwe na Masamba Intore, ishimira ubutwari n'imbyino z'imihango.",
-      "fr": "Un chant de guerrier rwandais traditionnel execute par Masamba Intore, celebrant la bravoure et la danse ceremonielle."
-    },
-    "duration": "5:34",
-    "durationSec": 334,
-    "imageKey": "intore",
-    "audioUrl": "",
-    "youtubeRef": "https://www.youtube.com/watch?v=arihehe-masamba"
-  },
-  {
-    "id": "local-audio-4",
-    "genre": { "en": "Playlist", "rw": "Urutonde", "fr": "Playlist" },
-    "title": {
-      "en": "Old Rwandan Music Playlist (2007–2013)",
-      "rw": "Indirimbo z'Kera z'u Rwanda (2007–2013)",
-      "fr": "Playlist Musique Rwandaise Ancienne (2007–2013)"
-    },
-    "narrator": {
-      "en": "Meddy, The Ben, Tom Close, King James, Urban Boyz, Jay Polly",
-      "rw": "Meddy, The Ben, Tom Close, King James, Urban Boyz, Jay Polly",
-      "fr": "Meddy, The Ben, Tom Close, King James, Urban Boyz, Jay Polly"
-    },
-    "description": {
-      "en": "A nostalgic playlist of golden-era Rwandan music from 2007 to 2013 featuring iconic artists.",
-      "rw": "Urutonde rw'indirimbo z'inzobere z'u Rwanda kuva 2007 kugeza 2013 rugaragaza indirimbo zikomeye.",
-      "fr": "Une playlist nostalgique de la musique rwandaise de l'age d'or de 2007 a 2013 avec des artistes iconiques."
-    },
-    "duration": "1:17:46",
-    "durationSec": 4666,
-    "imageKey": "royal",
-    "audioUrl": "",
-    "youtubeRef": "https://www.youtube.com/watch?v=old-rwandan-playlist"
-  },
-  {
-    "id": "local-audio-5",
-    "genre": { "en": "Folk", "rw": "Indirimbo Gakondo", "fr": "Musique Folklorique" },
-    "title": {
-      "en": "Umurage w'Abakurambere",
+      "en": "Rwandan Oral Tradition",
       "rw": "Umurage w'Abakurambere",
-      "fr": "L'heritage des ancetres"
-    },
-    "narrator": {
-      "en": "Blazan Music Box — Ceremonial Folk Melody",
-      "rw": "Blazan Music Box — Indirimbo y'Imihango Gakondo",
-      "fr": "Blazan Music Box — Melodie Folklorique Ceremonielle"
+      "fr": "Tradition Orale Rwandaise"
     },
     "description": {
-      "en": "A ceremonial Rwandan folk melody honoring ancestry, unity, and cultural heritage. Features inanga, traditional drums, and layered group vocals.",
-      "rw": "Indirimbo y'imihango gakondo ishimira ba sogokuruza, ubumwe n'umurage w'umuco. Harimo inanga, ingoma gakondo n'amajwi y'itsinda.",
-      "fr": "Une melodie folklorique rwandaise ceremonielle honorant les ancetres, l'unite et le patrimoine culturel. Avec inanga, tambours traditionnels et voix en couches."
+      "en": "The founder-king said to have descended from the sky, and the fire he lit that was meant to never go out. The story of how Rwanda became a kingdom.",
+      "rw": "Umwami w'ishingiro uvuga ko yamanutse mu ijuru, n'umuriro yazimye utazima. Inkuru y'uko Rwanda yabaye ubwami.",
+      "fr": "Le roi fondateur qui serait descendu du ciel, et le feu qu'il a allumé qui ne devait jamais s'éteindre. L'histoire de la façon dont le Rwanda est devenu un royaume."
     },
-    "duration": "2:41",
-    "durationSec": 161,
-    "imageKey": "inanga",
+    "duration": "8 min read",
+    "durationSec": 480,
+    "imageKey": "royal-court",
     "audioUrl": "",
-    "youtubeRef": "https://www.youtube.com/watch?v=umurage-abakurambere"
+    "youtubeRef": "",
+    "storyId": "gihanga-ngomijana",
+    "category": "Founding history",
+    "explorerCategory": "royal-historian"
   },
   {
-    "id": "local-audio-6",
-    "genre": { "en": "Traditional Melody", "rw": "Indirimbo Gakondo", "fr": "Melodie Traditionnelle" },
+    "id": "story-nyirarucyaba",
+    "genre": { "en": "Founding History", "rw": "Amateka y'Intangiriro", "fr": "Histoire des Origines" },
     "title": {
-      "en": "Rwandan Traditional Melody",
-      "rw": "Indirimbo Nyarwanda Gakondo",
-      "fr": "Melodie Traditionnelle Rwandaise"
+      "en": "Nyirarucyaba",
+      "rw": "Nyirarucyaba",
+      "fr": "Nyirarucyaba"
     },
     "narrator": {
-      "en": "Performed by Allia Baraka",
-      "rw": "Yatanzwe na Allia Baraka",
-      "fr": "Interprete par Allia Baraka"
+      "en": "Rwandan Oral Tradition",
+      "rw": "Umurage w'Abakurambere",
+      "fr": "Tradition Orale Rwandaise"
     },
     "description": {
-      "en": "A gentle traditional Rwandan melody capturing the warmth of village life and oral memory.",
-      "rw": "Indirimbo yoroheje gakondo y'u Rwanda igaragaza ubushyuhe bw'ubuzima bw'umudugudu n'inkuru zo mu mvugo.",
-      "fr": "Une douce melodie rwandaise traditionnelle captant la chaleur de la vie villageoise et la memoire orale."
+      "en": "Gihanga's daughter, and the woman said to have brought the first cattle to the Kingdom of Rwanda. A story of curiosity, generosity, and the origins of Rwanda's most treasured tradition.",
+      "rw": "Umukobwa wa Gihanga, n'umugore uvugwa ko yazanye inka za mbere mu Bwami bw'u Rwanda. Inkuru y'ubushishozi, ubutanga, n'iby'umurage w'u Rwanda.",
+      "fr": "La fille de Gihanga, et la femme qui aurait apporté les premiers bovins au Royaume du Rwanda. Une histoire de curiosité, de générosité et des origines de la tradition la plus précieuse du Rwanda."
     },
-    "duration": "3:43",
-    "durationSec": 223,
-    "imageKey": "ubudehe",
+    "duration": "6 min read",
+    "durationSec": 360,
+    "imageKey": "umuganura",
     "audioUrl": "",
-    "youtubeRef": "https://www.youtube.com/watch?v=rwandan-traditional-melody"
+    "youtubeRef": "",
+    "storyId": "nyirarucyaba",
+    "category": "Founding history",
+    "explorerCategory": "folktale-hunter"
   },
   {
-    "id": "local-audio-7",
-    "genre": { "en": "Dance & Song", "rw": "Imbyino n'Indirimbo", "fr": "Danse et Chanson" },
+    "id": "story-ruganzu",
+    "genre": { "en": "Royal History", "rw": "Amateka y'Ubwami", "fr": "Histoire Royale" },
     "title": {
-      "en": "Traditional Dance Performance — Kigali",
-      "rw": "Imbyino Gakondo — Kigali",
-      "fr": "Spectacle de Danse Traditionnelle — Kigali"
+      "en": "King Ruganzu II Ndoli",
+      "rw": "Umwami Ruganzu II Ndoli",
+      "fr": "Le Roi Ruganzu II Ndoli"
     },
     "narrator": {
-      "en": "Ubuntu Music Program, Kigali — Playing for Change",
-      "rw": "Ubuntu Music Program, Kigali — Playing for Change",
-      "fr": "Ubuntu Music Program, Kigali — Playing for Change"
+      "en": "Rwandan Oral Tradition",
+      "rw": "Umurage w'Abakurambere",
+      "fr": "Tradition Orale Rwandaise"
     },
     "description": {
-      "en": "A traditional dance performance by students at the Ubuntu Music Program in Kigali, accompanied by traditional percussions.",
-      "rw": "Imbyino gakondo yatanzwe n'abanyeshuri ba Ubuntu Music Program i Kigali, ikigaragarizwa n'ingoma gakondo.",
-      "fr": "Un spectacle de danse traditionnelle par les etudiants du Programme de Musique Ubuntu a Kigali, accompagne de percussions traditionnelles."
+      "en": "The exiled prince who crossed the Nyabarongo and returned to reclaim a kingdom that had almost forgotten him. A tale of courage, patience, and the power of returning home.",
+      "rw": "Umuhungu w'ubwoko wacitse ku icumu, wambukiye Nyabarongo akagaruka kwigarurira ubwami bwari bumwibagiwe. Inkuru y'ubutwari, kwihangana, n'imbaraga zo kugaruka iwabo.",
+      "fr": "Le prince exilé qui a traversé le Nyabarongo et est revenu pour reprendre un royaume qui l'avait presque oublié. Un récit de courage, de patience et du pouvoir de retourner chez soi."
     },
-    "duration": "3:03",
-    "durationSec": 183,
-    "imageKey": "drums",
-    "audioUrl": "",
-    "youtubeRef": "https://www.youtube.com/watch?v=kigali-dance-performance"
-  },
-  {
-    "id": "local-audio-8",
-    "genre": { "en": "Cultural Songs", "rw": "Indirimbo z'Umuco", "fr": "Chants Culturels" },
-    "title": {
-      "en": "Cultural Songs of Rwanda",
-      "rw": "Indirimbo z'Umuco w'u Rwanda",
-      "fr": "Chants Culturels du Rwanda"
-    },
-    "narrator": {
-      "en": "Falisha Culture Troupe",
-      "rw": "Itsinda rya Falisha Culture",
-      "fr": "Troupe Culturelle Falisha"
-    },
-    "description": {
-      "en": "A vibrant performance showcasing the rich Kinyarwanda traditional culture through engaging dance and song.",
-      "rw": "Igikorwa gishimishije kigaragaza ubutagatifu bw'umuco nyarwanda binyuze mu myino n'indirimbo.",
-      "fr": "Une performance vibrante mettant en valeur la riche culture kinyarwanda traditionnelle a travers la danse et le chant."
-    },
-    "duration": "0:53",
-    "durationSec": 53,
-    "imageKey": "intore",
-    "audioUrl": "",
-    "youtubeRef": "https://www.tiktok.com/@falishaculturetroupe"
-  },
-  {
-    "id": "local-audio-9",
-    "genre": { "en": "Ganyobwe Dance", "rw": "Ganyobwe", "fr": "Danse Ganyobwe" },
-    "title": {
-      "en": "Ganyobwe — Traditional Dance and Music",
-      "rw": "Ganyobwe — Imbyino n'Indirimbo Gakondo",
-      "fr": "Ganyobwe — Danse et Musique Traditionnelle"
-    },
-    "narrator": {
-      "en": "Falisha Culture Troupe",
-      "rw": "Itsinda rya Falisha Culture",
-      "fr": "Troupe Culturelle Falisha"
-    },
-    "description": {
-      "en": "Discover the beauty of Ganyobwe, a traditional Rwandan dance and music performance celebrating cultural heritage.",
-      "rw": "Menya ubwiza bwa Ganyobwe, imbyino n'indirimbo gakondo y'u Rwanda ishimira umurage w'umuco.",
-      "fr": "Decouvrez la beaute de Ganyobwe, un spectacle de danse et de musique rwandais traditionnel celebrant le patrimoine culturel."
-    },
-    "duration": "0:28",
-    "durationSec": 28,
-    "imageKey": "nyamasheke",
-    "audioUrl": "",
-    "youtubeRef": "https://www.tiktok.com/@falishaculturetroupe/ganyobwe"
-  },
-  {
-    "id": "local-audio-10",
-    "genre": { "en": "Traditional", "rw": "Gakondo", "fr": "Traditionnel" },
-    "title": {
-      "en": "Kantengwa",
-      "rw": "Kantengwa",
-      "fr": "Kantengwa"
-    },
-    "narrator": {
-      "en": "Sudi Mavenge — Singing Wells",
-      "rw": "Sudi Mavenge — Singing Wells",
-      "fr": "Sudi Mavenge — Singing Wells"
-    },
-    "description": {
-      "en": "Agasaza (Old Man) — a traditional Rwandan song captured by Singing Wells, featuring vocals-only field recording.",
-      "rw": "Agasaza (Umusaza) — indirimbo gakondo y'u Rwanda yafashwe na Singing Wells, igaragaza amajwi gusa.",
-      "fr": "Agasaza (Vieil Homme) — un chant rwandais traditionnel capture par Singing Wells, avec un enregistrement de terrain voix seules."
-    },
-    "duration": "4:48",
-    "durationSec": 288,
+    "duration": "7 min read",
+    "durationSec": 420,
     "imageKey": "ruganzu",
     "audioUrl": "",
-    "youtubeRef": "https://www.youtube.com/watch?v=kantengwa-sudi"
+    "youtubeRef": "",
+    "storyId": "ruganzu-ii-ndoli",
+    "category": "Royal history",
+    "explorerCategory": "warrior"
+  },
+  {
+    "id": "story-kigeli",
+    "genre": { "en": "Royal History", "rw": "Amateka y'Ubwami", "fr": "Histoire Royale" },
+    "title": {
+      "en": "Kigeli IV Rwabugiri",
+      "rw": "Kigeli IV Rwabugiri",
+      "fr": "Kigeli IV Rwabugiri"
+    },
+    "narrator": {
+      "en": "Rwandan Oral Tradition",
+      "rw": "Umurage w'Abakurambere",
+      "fr": "Tradition Orale Rwandaise"
+    },
+    "description": {
+      "en": "The last great warrior king of Rwanda, whose conquests carried the kingdom to the largest borders it would ever hold. A story of expansion, reform, and the complex legacy of a nation-builder.",
+      "rw": "Umwami w'intwari wa nyuma w'u Rwanda, watsinze ibihugu byinshi akagira ubwami bunini. Inkuru y'kwaguka, impinduka, n'umurage w'umwami wubatshe igihugu.",
+      "fr": "Le dernier grand roi guerrier du Rwanda, dont les conquêtes portèrent le royaume aux frontières les plus larges qu'il n'ait jamais eues. Une histoire d'expansion, de réforme et de l'héritage complexe d'un bâtisseur de nation."
+    },
+    "duration": "9 min read",
+    "durationSec": 540,
+    "imageKey": "kigeli",
+    "audioUrl": "",
+    "youtubeRef": "",
+    "storyId": "kigeli-iv-rwabugiri",
+    "category": "Royal history",
+    "explorerCategory": "warrior"
   }
 ]
