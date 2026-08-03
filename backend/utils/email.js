@@ -1,46 +1,55 @@
 /**
- * email.js — sends via Resend HTTP API (port 443, never blocked by Render).
+ * email.js — sends via Brevo (Sendinblue) HTTP API (port 443).
  *
- * Setup:
- *  1. Sign up free at https://resend.com
- *  2. Create an API key (Dashboard → API Keys → Add)
- *  3. Add RESEND_API_KEY to Render environment variables
- *
- * Free tier: 3,000 emails/month, 100/day.
- * From address: use onboarding@resend.dev until you verify your own domain.
+ * Setup (one-time, 2 minutes):
+ *  1. Sign up free at https://app.brevo.com  (300 emails/day free, no domain needed)
+ *  2. Go to https://app.brevo.com/settings/keys/api → Generate a new API key
+ *  3. Add BREVO_API_KEY to Render environment variables
+ *  4. Add BREVO_FROM_EMAIL  (e.g. mutimahope8@gmail.com — must be a verified sender)
+ *     Go to https://app.brevo.com/senders → Add & verify your Gmail address
  */
-import { Resend } from "resend";
-import config from "../config/env.js";
 
-const getClient = () => {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) throw new Error("RESEND_API_KEY environment variable is not set.");
-  return new Resend(key);
+const BREVO_API = "https://api.brevo.com/v3/smtp/email";
+const OWNER_EMAIL = "mutimutujehope90@gmail.com";
+
+const getKey = () => {
+  const key = process.env.BREVO_API_KEY;
+  if (!key) throw new Error("BREVO_API_KEY environment variable is not set.");
+  return key;
 };
 
-// Use verified sender — onboarding@resend.dev works on free tier without domain setup.
-// Once you verify a domain on Resend, change this to e.g. noreply@yourdomain.com
-const FROM_ADDRESS = process.env.RESEND_FROM || "Umuco Core <onboarding@resend.dev>";
-const OWNER_EMAIL  = "mutimutujehope90@gmail.com";
+const getFrom = () => ({
+  name: "Umuco Core",
+  email: process.env.BREVO_FROM_EMAIL || "mutimahope8@gmail.com",
+});
 
 export const sendEmail = async ({ to, subject, text, html }) => {
   console.log(`[EMAIL] Sending to: ${to} | Subject: ${subject}`);
 
-  const resend = getClient();
-  const { data, error } = await resend.emails.send({
-    from: FROM_ADDRESS,
-    to,
-    subject,
-    text,
-    html,
+  const res = await fetch(BREVO_API, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "api-key": getKey(),
+    },
+    body: JSON.stringify({
+      sender: getFrom(),
+      to: [{ email: to }],
+      subject,
+      textContent: text,
+      htmlContent: html,
+    }),
   });
 
-  if (error) {
-    console.error("[EMAIL] Resend error:", error);
-    throw new Error(error.message || "Failed to send email via Resend");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    const msg = err.message || `Brevo API error ${res.status}`;
+    console.error("[EMAIL] Brevo error:", err);
+    throw new Error(msg);
   }
 
-  console.log(`[EMAIL] Sent successfully! id: ${data?.id}`);
+  const data = await res.json().catch(() => ({}));
+  console.log(`[EMAIL] Sent successfully! messageId: ${data.messageId}`);
   return data;
 };
 
@@ -114,8 +123,8 @@ export const sendAdminAlertEmail = async ({ type, meta = {} }) => {
     <table style="width:100%;font-size:13px;color:#444;border-collapse:collapse;">
       <tr><td style="padding:6px 0;width:110px;color:#888;font-weight:600;">Time</td><td>${now}</td></tr>
       <tr><td style="padding:6px 0;color:#888;font-weight:600;">Event</td><td>${type}</td></tr>
-      ${meta.userId   ? `<tr><td style="padding:6px 0;color:#888;font-weight:600;">User ID</td><td>${meta.userId}</td></tr>` : ''}
-      ${meta.ip       ? `<tr><td style="padding:6px 0;color:#888;font-weight:600;">IP</td><td>${meta.ip}</td></tr>` : ''}
+      ${meta.userId    ? `<tr><td style="padding:6px 0;color:#888;font-weight:600;">User ID</td><td>${meta.userId}</td></tr>` : ''}
+      ${meta.ip        ? `<tr><td style="padding:6px 0;color:#888;font-weight:600;">IP</td><td>${meta.ip}</td></tr>` : ''}
       ${meta.userAgent ? `<tr><td style="padding:6px 0;color:#888;font-weight:600;">User-Agent</td><td style="word-break:break-all;">${meta.userAgent.slice(0, 120)}</td></tr>` : ''}
     </table>
     <p style="font-size:12px;color:#aaa;margin-top:20px;border-top:1px solid #eee;padding-top:10px;">
