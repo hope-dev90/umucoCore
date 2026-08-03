@@ -1,46 +1,47 @@
-import nodemailer from "nodemailer";
+/**
+ * email.js — sends via Resend HTTP API (port 443, never blocked by Render).
+ *
+ * Setup:
+ *  1. Sign up free at https://resend.com
+ *  2. Create an API key (Dashboard → API Keys → Add)
+ *  3. Add RESEND_API_KEY to Render environment variables
+ *
+ * Free tier: 3,000 emails/month, 100/day.
+ * From address: use onboarding@resend.dev until you verify your own domain.
+ */
+import { Resend } from "resend";
 import config from "../config/env.js";
 
-/**
- * Creates a nodemailer transporter using Gmail.
- * Uses `service: 'gmail'` which nodemailer resolves to the correct
- * host/port/TLS settings automatically — avoids manual DNS resolution
- * issues on Render's network.
- */
-const createTransporter = () => {
-  return nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: config.email.user,
-      pass: config.email.pass,
-    },
-    connectionTimeout: 20000,
-    greetingTimeout: 20000,
-    socketTimeout: 30000,
-  });
+const getClient = () => {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) throw new Error("RESEND_API_KEY environment variable is not set.");
+  return new Resend(key);
 };
+
+// Use verified sender — onboarding@resend.dev works on free tier without domain setup.
+// Once you verify a domain on Resend, change this to e.g. noreply@yourdomain.com
+const FROM_ADDRESS = process.env.RESEND_FROM || "Umuco Core <onboarding@resend.dev>";
+const OWNER_EMAIL  = "mutimutujehope90@gmail.com";
 
 export const sendEmail = async ({ to, subject, text, html }) => {
   console.log(`[EMAIL] Sending to: ${to} | Subject: ${subject}`);
-  console.log(`[EMAIL] User configured: ${config.email.user ? 'Yes' : 'No'}`);
-  console.log(`[EMAIL] Pass configured: ${config.email.pass ? 'Yes' : 'No'}`);
 
-  if (!config.email.user || !config.email.pass) {
-    throw new Error("Email credentials not configured. Set EMAIL_USER and EMAIL_PASS.");
-  }
-
-  const transport = createTransporter();
-
-  const result = await transport.sendMail({
-    from: config.email.from || `Umuco Core <${config.email.user}>`,
+  const resend = getClient();
+  const { data, error } = await resend.emails.send({
+    from: FROM_ADDRESS,
     to,
     subject,
     text,
     html,
   });
 
-  console.log(`[EMAIL] Sent successfully! MessageId: ${result.messageId}`);
-  return result;
+  if (error) {
+    console.error("[EMAIL] Resend error:", error);
+    throw new Error(error.message || "Failed to send email via Resend");
+  }
+
+  console.log(`[EMAIL] Sent successfully! id: ${data?.id}`);
+  return data;
 };
 
 export const sendOtpEmail = async ({ to, otp, purpose, name }) => {
@@ -75,28 +76,20 @@ export const sendOtpEmail = async ({ to, otp, purpose, name }) => {
   </div>
 </div>`,
       });
-
       if (attempt > 1) console.log(`[EMAIL] Sent on attempt ${attempt}`);
       return { sent: true };
     } catch (error) {
       lastError = error;
       console.error(`[EMAIL] Attempt ${attempt} failed: ${error.message}`);
-      if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      }
+      if (attempt < maxRetries) await new Promise(r => setTimeout(r, 2000));
     }
   }
 
   throw lastError || new Error("Failed to send email after retries");
 };
 
-/**
- * Security alert to site owner on admin login or dashboard visit.
- */
 export const sendAdminAlertEmail = async ({ type, meta = {} }) => {
-  const OWNER_EMAIL = "mutimutujehope90@gmail.com";
   const now = new Date().toUTCString();
-
   const subjects = {
     admin_login:     "🔐 Admin Login Detected — Umuco Core",
     dashboard_visit: "👀 Admin Dashboard Visit — Umuco Core",
@@ -109,7 +102,11 @@ export const sendAdminAlertEmail = async ({ type, meta = {} }) => {
   const subject = subjects[type] || "Security Alert — Umuco Core";
   const title   = titles[type]   || "Security event";
 
-  const html = `
+  await sendEmail({
+    to: OWNER_EMAIL,
+    subject,
+    text: `${title} at ${now}. Event: ${type}. IP: ${meta.ip || "unknown"}. User ID: ${meta.userId || "unknown"}.`,
+    html: `
 <div style="background:#f4f4f4;padding:40px 0;font-family:Arial,sans-serif;">
   <div style="max-width:460px;margin:0 auto;background:#fff;border-radius:12px;
               padding:28px 26px;border:1px solid #eaeaea;border-left:4px solid #c46a4b;">
@@ -117,20 +114,14 @@ export const sendAdminAlertEmail = async ({ type, meta = {} }) => {
     <table style="width:100%;font-size:13px;color:#444;border-collapse:collapse;">
       <tr><td style="padding:6px 0;width:110px;color:#888;font-weight:600;">Time</td><td>${now}</td></tr>
       <tr><td style="padding:6px 0;color:#888;font-weight:600;">Event</td><td>${type}</td></tr>
-      ${meta.userId ? `<tr><td style="padding:6px 0;color:#888;font-weight:600;">User ID</td><td>${meta.userId}</td></tr>` : ''}
-      ${meta.ip     ? `<tr><td style="padding:6px 0;color:#888;font-weight:600;">IP</td><td>${meta.ip}</td></tr>` : ''}
+      ${meta.userId   ? `<tr><td style="padding:6px 0;color:#888;font-weight:600;">User ID</td><td>${meta.userId}</td></tr>` : ''}
+      ${meta.ip       ? `<tr><td style="padding:6px 0;color:#888;font-weight:600;">IP</td><td>${meta.ip}</td></tr>` : ''}
       ${meta.userAgent ? `<tr><td style="padding:6px 0;color:#888;font-weight:600;">User-Agent</td><td style="word-break:break-all;">${meta.userAgent.slice(0, 120)}</td></tr>` : ''}
     </table>
     <p style="font-size:12px;color:#aaa;margin-top:20px;border-top:1px solid #eee;padding-top:10px;">
-      If this was unexpected, review your admin credentials immediately.<br/>Umuco Core · Security Notification
+      Umuco Core · Security Notification
     </p>
   </div>
-</div>`;
-
-  await sendEmail({
-    to:      OWNER_EMAIL,
-    subject,
-    text:    `${title} at ${now}. Event: ${type}. IP: ${meta.ip || "unknown"}. User ID: ${meta.userId || "unknown"}.`,
-    html,
+</div>`,
   });
 };
