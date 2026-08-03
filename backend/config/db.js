@@ -9,9 +9,9 @@ const pool = new Pool({
   database: config.db.database,
   user: config.db.user,
   password: config.db.password,
-  max: 20,
+  max: 10,                        // Stay under Supabase session pooler limit of 15
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000, // Increased to 10 seconds for cloud databases
+  connectionTimeoutMillis: 10000,
 });
 
 pool.on("error", (err) => {

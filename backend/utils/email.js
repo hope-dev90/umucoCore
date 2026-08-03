@@ -20,17 +20,18 @@ const createTransporter = async () => {
     cachedHost = await resolveHost();
   }
 
+  // Port 465 (SMTPS / implicit TLS) works on Render.
+  // Port 587 (STARTTLS) is blocked by Render's outbound firewall.
   return nodemailer.createTransport({
     host: cachedHost,
-    port: config.email.port,
-    secure: config.email.port === 465,
-    requireTLS: config.email.port !== 465,
+    port: 465,
+    secure: true,               // implicit TLS on 465
     connectionTimeout: 15000,
     greetingTimeout: 15000,
     socketTimeout: 20000,
     tls: {
       minVersion: "TLSv1.2",
-      servername: config.email.host, // SNI must match original hostname, not IP
+      servername: config.email.host,
     },
     auth: {
       user: config.email.user,
