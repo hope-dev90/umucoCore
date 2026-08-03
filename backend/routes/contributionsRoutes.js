@@ -35,6 +35,8 @@ const upload = multer({
   }
 });
 
+const OWNER_EMAIL = 'mutimutujehope90@gmail.com';
+
 // Helper to save contribution to DB
 const saveContribution = async (req, res, type) => {
   try {
@@ -61,6 +63,29 @@ const saveContribution = async (req, res, type) => {
     }
 
     const contribution = await ContributionsModel.create(data);
+
+    // Notify admin (fire-and-forget)
+    sendEmail({
+      to: OWNER_EMAIL,
+      subject: `📥 New ${type} contribution — Umuco Core`,
+      text: `New contribution submitted.\n\nType: ${type}\nTitle: ${data.title}\nFrom: ${contributor_name} <${contributor_email}>\nDescription: ${description}\n${file ? `File: ${file.originalname} (${(file.size / 1024).toFixed(1)} KB)` : ''}`,
+      html: `
+<div style="background:#f4f4f4;padding:40px 0;font-family:Arial,sans-serif;">
+  <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:12px;padding:28px 26px;border:1px solid #eaeaea;border-left:4px solid #c46a4b;">
+    <h2 style="font-size:17px;color:#111;margin:0 0 14px;">📥 New contribution: ${type}</h2>
+    <table style="width:100%;font-size:13px;color:#444;border-collapse:collapse;">
+      <tr><td style="padding:6px 0;width:110px;color:#888;font-weight:600;">Type</td><td>${type}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-weight:600;">Title</td><td>${data.title}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-weight:600;">Contributor</td><td>${contributor_name}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-weight:600;">Email</td><td>${contributor_email}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-weight:600;">Description</td><td>${description}</td></tr>
+      ${file ? `<tr><td style="padding:6px 0;color:#888;font-weight:600;">File</td><td>${file.originalname} (${(file.size / 1024).toFixed(1)} KB)</td></tr>` : ''}
+    </table>
+    <p style="font-size:12px;color:#aaa;margin-top:20px;border-top:1px solid #eee;padding-top:10px;">Review it in the admin dashboard → Review Queue</p>
+  </div>
+</div>`,
+    }).catch(e => console.error('Admin contribution alert failed:', e.message));
+
     res.status(201).json({ success: true, contribution });
   } catch (err) {
     console.error(err);
@@ -135,6 +160,25 @@ router.post('/subscribe', async (req, res) => {
     };
 
     const contribution = await ContributionsModel.create(data);
+
+    // Notify admin of new subscriber (fire-and-forget)
+    sendEmail({
+      to: OWNER_EMAIL,
+      subject: '🔔 New Newsletter Subscriber — Umuco Core',
+      text: `New subscriber!\n\nName: ${contributor_name || contributor_email.split('@')[0]}\nEmail: ${contributor_email}\nTime: ${new Date().toUTCString()}`,
+      html: `
+<div style="background:#f4f4f4;padding:40px 0;font-family:Arial,sans-serif;">
+  <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:12px;padding:28px 26px;border:1px solid #eaeaea;border-left:4px solid #4b8bc4;">
+    <h2 style="font-size:17px;color:#111;margin:0 0 14px;">🔔 New newsletter subscriber</h2>
+    <table style="width:100%;font-size:13px;color:#444;border-collapse:collapse;">
+      <tr><td style="padding:6px 0;width:80px;color:#888;font-weight:600;">Name</td><td>${contributor_name || contributor_email.split('@')[0]}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-weight:600;">Email</td><td>${contributor_email}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-weight:600;">Time</td><td>${new Date().toUTCString()}</td></tr>
+    </table>
+    <p style="font-size:12px;color:#aaa;margin-top:20px;border-top:1px solid #eee;padding-top:10px;">Umuco Core · Subscriber notification</p>
+  </div>
+</div>`,
+    }).catch(e => console.error('Admin subscriber alert failed:', e.message));
 
     // Send confirmation email to the subscriber (don't wait for it)
     sendEmail({
@@ -225,6 +269,30 @@ router.post('/report', async (req, res) => {
     };
 
     const contribution = await ContributionsModel.create(data);
+
+    // Notify admin of new report (fire-and-forget)
+    sendEmail({
+      to: OWNER_EMAIL,
+      subject: '🚩 New Content Report — Umuco Core',
+      text: `A user submitted a content report.\n\nItem type: ${item_type}\nItem ID: ${item_id}\nTitle: ${title || 'N/A'}\nDescription: ${description || 'N/A'}\nReported by: ${contributor_name || 'Anonymous'} <${contributor_email || 'anonymous@system'}>\nTime: ${new Date().toUTCString()}`,
+      html: `
+<div style="background:#f4f4f4;padding:40px 0;font-family:Arial,sans-serif;">
+  <div style="max-width:480px;margin:0 auto;background:#fff;border-radius:12px;padding:28px 26px;border:1px solid #eaeaea;border-left:4px solid #e05050;">
+    <h2 style="font-size:17px;color:#111;margin:0 0 14px;">🚩 Content flagged for review</h2>
+    <table style="width:100%;font-size:13px;color:#444;border-collapse:collapse;">
+      <tr><td style="padding:6px 0;width:110px;color:#888;font-weight:600;">Item type</td><td>${item_type}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-weight:600;">Item ID</td><td>${item_id}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-weight:600;">Title</td><td>${title || 'N/A'}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-weight:600;">Reason</td><td>${description || 'No reason given'}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-weight:600;">Reported by</td><td>${contributor_name || 'Anonymous'}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-weight:600;">Reporter email</td><td>${contributor_email || 'anonymous@system'}</td></tr>
+      <tr><td style="padding:6px 0;color:#888;font-weight:600;">Time</td><td>${new Date().toUTCString()}</td></tr>
+    </table>
+    <p style="font-size:12px;color:#aaa;margin-top:20px;border-top:1px solid #eee;padding-top:10px;">Review it in admin dashboard → Review Queue</p>
+  </div>
+</div>`,
+    }).catch(e => console.error('Admin report alert failed:', e.message));
+
     res.status(201).json({ success: true, contribution });
   } catch (err) {
     console.error(err);

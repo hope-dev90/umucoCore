@@ -323,6 +323,77 @@ export const deleteExercise = async (req, res) => {
   }
 };
 
+// ── Review Queue ─────────────────────────────────────────────────────────────
+
+export const getReviewQueue = async (_req, res) => {
+  try {
+    const [pending, flagged] = await Promise.all([
+      pool.query(
+        `SELECT c.*, u.name AS submitter_name, u.email AS submitter_email
+         FROM contributions c
+         LEFT JOIN users u ON u.id = c.user_id
+         WHERE c.type IN ('audio','video','photo','oral_history','heritage','collection','proverb','exercise','news')
+           AND c.status = 'pending'
+         ORDER BY c.created_at ASC`
+      ),
+      pool.query(
+        `SELECT c.*, u.name AS submitter_name, u.email AS submitter_email
+         FROM contributions c
+         LEFT JOIN users u ON u.id = c.user_id
+         WHERE c.type = 'report'
+           AND c.status IN ('pending','active')
+         ORDER BY c.created_at ASC`
+      ),
+    ]);
+    res.json({ pending: pending.rows, flagged: flagged.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load review queue' });
+  }
+};
+
+export const approveReviewItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { edits } = req.body || {};
+
+    const item = await pool.query(`SELECT * FROM contributions WHERE id = $1`, [id]);
+    if (!item.rows[0]) return res.status(404).json({ error: 'Item not found' });
+
+    await pool.query(
+      `UPDATE contributions SET status = 'verified', updated_at = NOW() WHERE id = $1`,
+      [id]
+    );
+
+    res.json({ success: true, message: 'Item approved' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to approve item' });
+  }
+};
+
+export const rejectReviewItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body || {};
+
+    const item = await pool.query(`SELECT * FROM contributions WHERE id = $1`, [id]);
+    if (!item.rows[0]) return res.status(404).json({ error: 'Item not found' });
+
+    await pool.query(
+      `UPDATE contributions
+       SET status = 'rejected', description = COALESCE(description,'') || $1, updated_at = NOW()
+       WHERE id = $2`,
+      [reason ? `\n\n[Rejected: ${reason}]` : '', id]
+    );
+
+    res.json({ success: true, message: 'Item rejected' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to reject item' });
+  }
+};
+
 export const getNews = async (_req, res) => {
   try {
     const news = await NewsModel.getPublished();

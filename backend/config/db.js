@@ -601,6 +601,8 @@ const ensureHeritageSchema = async (client) => {
       contributor_email VARCHAR(255) NOT NULL,
       type VARCHAR(50) NOT NULL,
       title VARCHAR(255),
+      item_type VARCHAR(50),
+      item_id INTEGER,
       file_url VARCHAR(255),
       file_name VARCHAR(255),
       file_size INTEGER,
@@ -610,6 +612,9 @@ const ensureHeritageSchema = async (client) => {
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     );
+
+    ALTER TABLE contributions ADD COLUMN IF NOT EXISTS item_type VARCHAR(50);
+    ALTER TABLE contributions ADD COLUMN IF NOT EXISTS item_id INTEGER;
 
     CREATE INDEX IF NOT EXISTS idx_contributions_type ON contributions(type);
     CREATE INDEX IF NOT EXISTS idx_contributions_status ON contributions(status);

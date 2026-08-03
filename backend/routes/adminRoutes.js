@@ -10,6 +10,9 @@ import {
   getAdminContent,
   getAdminOverview,
   getAdminUsers,
+  getReviewQueue,
+  approveReviewItem,
+  rejectReviewItem,
   searchAdminContent,
   updateExercise,
   updateAdminUser,
@@ -28,6 +31,12 @@ router.get("/users", getAdminUsers);
 router.patch("/users/:id", updateAdminUser);
 router.delete("/users/:id", deleteAdminUser);
 router.get("/content", getAdminContent);
+
+// Review queue
+router.get("/review-queue", getReviewQueue);
+router.post("/review-queue/:id/approve", approveReviewItem);
+router.post("/review-queue/:id/reject", rejectReviewItem);
+
 router.post("/proverbs", createProverb);
 router.put("/proverbs/:id", updateProverb);
 router.delete("/proverbs/:id", deleteProverb);
