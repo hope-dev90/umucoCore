@@ -434,6 +434,162 @@ export const translations = {
     "explore.mapShortcutTitle": "View Heritage Map",
     "explore.mapShortcutLabel": "View Heritage Map — explore cultural sites by location",
 
+    // Explore Cards - Heritage Items
+    "explore.card1.title": "The Royal Palace of Nyanza",
+    "explore.card1.desc": "A newly reconstructed palace showcasing traditional architecture, ceremonies, and daily life in Rwanda's royal court.",
+    "explore.card1.category": "Ubwami",
+    "explore.card1.location": "Nyanza",
+    
+    "explore.card2.title": "Intore – The Dance of Warriors",
+    "explore.card2.desc": "The powerful Intore tradition, Rwanda's famous warrior dance, born from the kingdom's battlefields and passed down through generations.",
+    "explore.card2.category": "Ubutwari",
+    "explore.card2.location": "Nyanza",
+    
+    "explore.card3.title": "Inanga – The Heart of Rwandan Music",
+    "explore.card3.desc": "Experience the inanga, kembe, and ingoma as they were played centuries ago in royal camps and village gatherings across Rwanda.",
+    "explore.card3.category": "Umuziki",
+    "explore.card3.location": "Nationwide",
+    
+    "explore.card4.title": "Imigani – Fireside Stories",
+    "explore.card4.desc": "Enter Rwandan oral culture passed from ancestors: proverbs, stories, and wisdom taught around the evening fire, from generation to generation.",
+    "explore.card4.category": "Imigani",
+    "explore.card4.location": "Nationwide",
+    
+    "explore.card5.title": "Kigeli IV Rwabugiri – The Warrior King",
+    "explore.card5.desc": "One of Rwanda's most powerful kings, who expanded the country's territory through wars and governance reforms.",
+    "explore.card5.category": "Ubwami",
+    "explore.card5.location": "Kigali",
+    
+    "explore.card6.title": "Ubwiru – Royal Court Ceremonies",
+    "explore.card6.desc": "Sacred ceremonies and secret knowledge that governed royal court life, passed only to those authorized to know.",
+    "explore.card6.category": "Imigani",
+    "explore.card6.location": "Nyanza",
+    
+    "explore.card7.title": "Ibyivugo – Warrior Praise Poetry",
+    "explore.card7.desc": "Self-praise poetry composed and recited by warriors, praising their bravery and personal achievements.",
+    "explore.card7.category": "Imigani",
+    "explore.card7.location": "Nationwide",
+    
+    "explore.card8.title": "Inzira z'Ubwenge – Riddles and Wisdom",
+    "explore.card8.desc": "Riddles and traditional proverbs used to teach wisdom and critical thinking across generations.",
+    "explore.card8.category": "Imigani",
+    "explore.card8.location": "Nationwide",
+    
+    "explore.card9.title": "Ingoma – The Sacred Royal Drums",
+    "explore.card9.desc": "Drums that were the heartbeat of the royal court, used in ceremonies, announcements, and celebrations.",
+    "explore.card9.category": "Umuziki",
+    "explore.card9.location": "Nyanza",
+    
+    "explore.card10.title": "Umuvugo – Praise Songs",
+    "explore.card10.desc": "Traditional songs that praised kings, warriors, and important things, performed to celebrate and honor.",
+    "explore.card10.category": "Umuziki",
+    "explore.card10.location": "Nationwide",
+    
+    "explore.card11.title": "Ubudehe – Community Cooperation",
+    "explore.card11.desc": "The ancient tradition of communal work and mutual assistance, demonstrating Rwandan community life across centuries.",
+    "explore.card11.category": "Rusange",
+    "explore.card11.location": "Nationwide",
+    
+    "explore.card12.title": "Agaseke – Baskets of Peace",
+    "explore.card12.desc": "Artistically woven baskets with deep cultural meaning, used in ceremonies, as gifts, and in daily life.",
+    "explore.card12.category": "Rusange",
+    "explore.card12.location": "Nationwide",
+    
+    "explore.card13.title": "Ingabo – The Royal Guard",
+    "explore.card13.desc": "The kingdom's heroic guards who protected the King and maintained security throughout the nation.",
+    "explore.card13.category": "Ubutwari",
+    "explore.card13.location": "Kigali",
+    
+    "explore.card14.title": "Nyungwe Forest National Park",
+    "explore.card14.desc": "Rwanda's diverse rainforest, home to thousands of wildlife species, birds, and rare primates.",
+    "explore.card14.category": "Ibyitangira Cyumweru",
+    "explore.card14.location": "Rusizi",
+    
+    "explore.card15.title": "Akagera National Park",
+    "explore.card15.desc": "A savanna park in eastern Rwanda, home to the Big Five and diverse wildlife species.",
+    "explore.card15.category": "Ibyitangira Cyumweru",
+    "explore.card15.location": "Kayonza",
+    
+    "explore.card16.title": "Lake Kivu",
+    "explore.card16.desc": "One of Rwanda's great lakes on the western border, filled with thousands of years of history and significance.",
+    "explore.card16.category": "Ibyitangira Cyumweru",
+    "explore.card16.location": "Rubavu",
+    
+    "explore.card18.title": "Butare National Museum of Rwanda",
+    "explore.card18.desc": "Rwanda's premier museum of history and culture, containing many artifacts and archaeological treasures.",
+    "explore.card18.category": "Ubwenge",
+    "explore.card18.location": "Huye",
+    
+    "explore.card19.title": "Murambi Genocide Memorial",
+    "explore.card19.desc": "The 1994 genocide memorial at Murambi, educating visitors about the tragic events.",
+    "explore.card19.category": "Amateka",
+    "explore.card19.location": "Nyamagabe",
+    
+    "explore.card20.title": "Nyarugenge Church",
+    "explore.card20.desc": "The historic Nyarugenge Church, featuring architecture spanning centuries.",
+    "explore.card20.category": "Ubwenge",
+    "explore.card20.location": "Kigali",
+    
+    "explore.card21.title": "Kibeho Shrine",
+    "explore.card21.desc": "The site of Marian apparitions in Rwanda, containing a church and other significant religious structures.",
+    "explore.card21.category": "Ubwenge",
+    "explore.card21.location": "Nyaruguru",
+    
+    "explore.card22.title": "Rwankeri Hill",
+    "explore.card22.desc": "An important hill in Rwanda, featuring beautiful landscapes and significant cultural sites.",
+    "explore.card22.category": "Ibyitangira Cyumweru",
+    "explore.card22.location": "Rwamagana",
+    
+    "explore.card23.title": "Lake Muhazi",
+    "explore.card23.desc": "One of Rwanda's largest lakes, rich in history and cultural significance.",
+    "explore.card23.category": "Ibyitangira Cyumweru",
+    "explore.card23.location": "Rwamagana",
+    
+    "explore.card24.title": "Bisesero Genocide Memorial",
+    "explore.card24.desc": "The 1994 genocide memorial at Bisesero, honoring those who resisted the genocide.",
+    "explore.card24.category": "Amateka",
+    "explore.card24.location": "Karongi",
+    
+    "explore.card25.title": "Mount Karisimbi",
+    "explore.card25.desc": "The highest peak in the Virunga mountains, featuring stunning views and diverse wildlife.",
+    "explore.card25.category": "Ibyitangira Cyumweru",
+    "explore.card25.location": "Musanze",
+    
+    "explore.card26.title": "Gishwati Forest",
+    "explore.card26.desc": "A forest reserve of great biodiversity and ecological importance.",
+    "explore.card26.category": "Ibyitangira Cyumweru",
+    "explore.card26.location": "Ngororero",
+    
+    "explore.card27.title": "Rugezi Marsh",
+    "explore.card27.desc": "A famous marshland in Rwanda, home to diverse wildlife and bird species.",
+    "explore.card27.category": "Ibyitangira Cyumweru",
+    "explore.card27.location": "Burera",
+    
+    "explore.card28.title": "Gatagara Crafts Village",
+    "explore.card28.desc": "A village of transformed artisans, featuring traditional crafts and artwork.",
+    "explore.card28.category": "Rusange",
+    "explore.card28.location": "Huye",
+    
+    "explore.card29.title": "Huye Mountain",
+    "explore.card29.desc": "An important mountain in Rwanda, featuring beautiful landscapes and hiking trails.",
+    "explore.card29.category": "Ibyitangira Cyumweru",
+    "explore.card29.location": "Huye",
+    
+    "explore.card30.title": "Rusumo Falls",
+    "explore.card30.desc": "Magnificent waterfalls on the border between Rwanda and Tanzania, historically significant.",
+    "explore.card30.category": "Ibyitangira Cyumweru",
+    "explore.card30.location": "Rusumo",
+    
+    "explore.card31.title": "Amahoro National Stadium",
+    "explore.card31.desc": "Rwanda's famous national stadium, rich in history and cultural significance.",
+    "explore.card31.category": "Ubwenge",
+    "explore.card31.location": "Kigali",
+    
+    "explore.card32.title": "Rwanda Art Museum",
+    "explore.card32.desc": "A museum featuring traditional and contemporary Rwandan art and cultural artifacts.",
+    "explore.card32.category": "Ubwenge",
+    "explore.card32.location": "Kigali",
+
     // Collections page
     "collections.title": "Curated Collections",
     "collections.subtitle":
@@ -875,8 +1031,8 @@ export const translations = {
     "profile.save": "Bika Impinduka",
     "profile.accountDetails": "Amakuru ya konti",
     "profile.tapToChangePhoto": "Kanda uhindure ifoto",
-    "profile.explorerType": "Ubwoko bw'umusura",
-    "profile.selectExplorerType": "Hitamo ubwoko bw'umusura",
+    "profile.explorerType": "Ubwoko bw'ibyo mwifuza kubona",
+    "profile.selectExplorerType": "Hitamo ubwoko bw'ibyo mwifuza kubona",
     "profile.badges": "Imidari",
     "profile.collectibles": "Ibyakusanyijwe",
     "profile.loadingBadges": "Imidari irimo gufungurwa...",
@@ -886,11 +1042,11 @@ export const translations = {
     "profile.streak": "Iminsi ikurikiranye",
     "profile.best": "Icyiza",
     "profile.days": "Iminsi",
-    "profile.explorer.warrior": "Umusura w'Intwari",
+    "profile.explorer.warrior": "ibyo mwifuza kubona w'Intwari",
     "profile.explorer.nature-lover": "Umukunzi w'Ibidukikije",
-    "profile.explorer.royal-historian": "Umusura w'Amateka y'Ubwami",
+    "profile.explorer.royal-historian": "ibyo mwifuza kubona w'Amateka y'Ubwami",
     "profile.explorer.folktale-hunter": "Umuhigi w'Imigani",
-    "profile.explorer.music-explorer": "Umusura w'Umuziki",
+    "profile.explorer.music-explorer": "ibyo mwifuza kubona w'Umuziki",
 
     // Gamification
     "gamification.dayStreak": "Iminsi Ikurikiranye",
@@ -899,7 +1055,7 @@ export const translations = {
     "gamification.noLeaderboard": "Nta makuru y'urutonde arahari.",
     "gamification.leaderboard": "Urutonde rw'abayoboye",
     "gamification.top": "Aba mbere",
-    "gamification.explorer": "Umusura",
+    "gamification.explorer": "ibyo mwifuza kubona",
     "gamification.level": "Urwego",
     "gamification.levelShort": "Urw",
     "gamification.unlocked": "Rufunguwe!",
@@ -953,7 +1109,7 @@ export const translations = {
       "Wibumbire mu mateka avugwa, ingoma zirimo umuziki, n'ubuhanzi.",
 
     // Digital Archive
-    "archive.title": "Ibubiko rya Ikoranabuhanga",
+    "archive.title": "Ububiko bw'Umurage wacu",
     "archive.description":
       "Amakusanyirizo arimo ubwenge bw'ibinyejana byinshi, bugenewe abantu bose.",
     "archive.viewAll": "Reba Amakusanyirizo Yose",
@@ -969,7 +1125,7 @@ export const translations = {
 
     // Community Guardian
     "community.proverbTranslation":
-      "Abantu benshi bafatanya, umurimo ubagoye uworoha. Reka dubungabunge hamwe.",
+      "Abantu benshi bishyize hamwe, ntakibananira . Mucyo tuwubungabunge.",
     "community.exploreWisdom": "Sura ubwenge bwimbitse bw'umuco w'u Rwanda.",
     "community.createAccount": "Fungura Konti Yawe",
     "community.becomeGuardian": "Ba Umurinzi w'Umuco.",
@@ -1018,11 +1174,11 @@ export const translations = {
     "explorer.warrior.tagline": "Intambara, imigani n'ibikorwa by'ubutwari",
     "explorer.nature-lover.label": "Umukunzi w'Ibidukikije",
     "explorer.nature-lover.tagline": "Amashyamba, imisozi n'ahantu nyaburanga",
-    "explorer.royal-historian.label": "Umusura w'Amateka y'Ubwami",
+    "explorer.royal-historian.label": "ibyo mwifuza kubona w'Amateka y'Ubwami",
     "explorer.royal-historian.tagline": "Abami, ingoro n'ingoma za kera",
     "explorer.folktale-hunter.label": "Umuhigi w'Imigani",
     "explorer.folktale-hunter.tagline": "Imigani, ibisakuzo n'inkuru zo ku ziko",
-    "explorer.music-explorer.label": "Umusura w'Umuziki",
+    "explorer.music-explorer.label": "ibyo mwifuza kubona w'Umuziki",
     "explorer.music-explorer.tagline": "Injyana, indirimbo n'ibikoresho by'umuziki",
     "adventure.maybeLater": "Wenda nyuma",
     "adventure.warrior.title": "Witeguye kumenya byinshi ku ntwari zo mu Rwanda rwa kera?",
@@ -1379,7 +1535,7 @@ Object.assign(translations.rw, {
   "auth.agreeAnd": "na",
   "auth.explorer.kicker": "Hitamo urugendo rwawe",
   "auth.explorer.subtitle": "Tuzakugira inama z'inkuru zihuye n'umutima wawe.",
-  "auth.explorerUnlocked": "+50 XP - Umusura yafunguwe!",
+  "auth.explorerUnlocked": "+50 XP - ibyo mwifuza kubona yafunguwe!",
   "auth.signup.slide.heading3": "Sura buri",
   "auth.signup.slide.accent3": "Mugenzo.",
   "auth.signup.slide.quote3": "\"Menya buri gice cy'umuco w'u Rwanda ukiriho.\"",
