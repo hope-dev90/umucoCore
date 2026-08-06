@@ -356,7 +356,7 @@ export const translations = {
       "Receive monthly cultural insights directly to your inbox.",
     "footer.emailPlaceholder": "Email address",
     "footer.send": "Send",
-    "footer.copyright": "© 2026 Umuco Hub.",
+    "footer.copyright": "© 2026 UmucoCore",
     "footer.privacyPolicy": "Privacy Policy",
     "footer.termsOfUse": "Terms of Use",
     "footer.helpCenter": "Help Center",
@@ -1092,7 +1092,7 @@ export const translations = {
     "hero.title1": "Irembo ry'",
     "hero.title2": "Umurage Wacu .",
     "hero.description":
-      "Kuzahura umutima w’igihugu binyuze mu muco no gukomeza umurage w’izina n’impanuro z’abakurambere, ku bw’isezerano dusangiye.",
+      "Kwita ku busugire bw'Igihugu tuzirikanan iyo tuva ,dusigasira umuco twarazwe n'abakurambere .",
     "hero.getInvolved": "Ngwino dufatanye",
     "hero.exploreMore": "Sura Byinshi",
     "hero.stats.oralStories": "INKURU ZIRYOHEYE AMATWI",
@@ -1111,14 +1111,14 @@ export const translations = {
     // Digital Archive
     "archive.title": "Ububiko bw'Umurage wacu",
     "archive.description":
-      "Amakusanyirizo arimo ubwenge bw'ibinyejana byinshi, bugenewe abantu bose.",
+      "Imikino inogeye ijisho y'umuco w'u Rwanda, byose biri hamwe mu bubiko bwacu bw'ikoranabuhanga haba amajwi cyangwa mu nyandiko mu buryo bunogeye ijisho.",
     "archive.viewAll": "Reba Amakusanyirizo Yose",
     "archive.collection1.title": "Amateka Avugwa",
     "archive.collection1.desc":
       "Amajwi asobanutse neza y'inkuru z'abakurambere, abitswe burundu mu bubiko bwacu bw'ikoranabuhanga bwizewe.",
     "archive.collection2.title": "Inzu Ndangamurage Yikoranabuhanga",
     "archive.collection2.desc":
-      "Amashusho ya 3D y'ibintu byera, agufasha kureba buri kintu cyose uhereye kuri mudasobwa yawe.",
+      "Amashusho ya 3D y'ibintu byakera, agufasha kureba buri kintu cyose kuri mudasobwa yawe.",
     "archive.collection3.title": "Umuziki Gakondo",
     "archive.collection3.desc":
       "Indirimbo z'Inanga n'Umuduri, zongeye gutunganywa kugira ngo zigire ijwi ryiza cyane.",

@@ -29,6 +29,7 @@ import Settings    from './pages/Settings';
 import Profile     from './pages/Profile';
 import History     from './pages/History';
 import Admin       from './pages/admin/Admin';
+import About       from './pages/About';
 
 // Redirect logged-in users away from public-only routes - NO LOADING SCREEN
 function PublicRoute({ children }) {
@@ -109,6 +110,9 @@ export default function App() {
                 
                 {/* Gov login - handles its own auth redirects */}
                 <Route path="/gov" element={<GovLogin />} />
+
+                {/* Public */}
+                <Route path="/about"       element={<PublicRoute><About /></PublicRoute>} />
 
                 {/* Protected */}
                 <Route path="/dashboard"   element={<DashboardRoute />} />

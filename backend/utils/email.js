@@ -1,56 +1,56 @@
 /**
- * email.js — sends via Brevo (Sendinblue) HTTP API (port 443).
+ * email.js — sends via Gmail SMTP using Nodemailer.
  *
- * Setup (one-time, 2 minutes):
- *  1. Sign up free at https://app.brevo.com  (300 emails/day free, no domain needed)
- *  2. Go to https://app.brevo.com/settings/keys/api → Generate a new API key
- *  3. Add BREVO_API_KEY to Render environment variables
- *  4. Add BREVO_FROM_EMAIL  (e.g. mutimahope8@gmail.com — must be a verified sender)
- *     Go to https://app.brevo.com/senders → Add & verify your Gmail address
+ * Setup:
+ *  1. Enable 2-Step Verification on your Google account
+ *  2. Create an App Password: Google Account > Security > App passwords
+ *  3. Set EMAIL_USER and EMAIL_PASS in .env
  */
 
-const BREVO_API = "https://api.brevo.com/v3/smtp/email";
+import nodemailer from 'nodemailer';
+
 const OWNER_EMAIL = "mutimutujehope90@gmail.com";
 
-const getKey = () => {
-  const key = process.env.BREVO_API_KEY;
-  if (!key) throw new Error("BREVO_API_KEY environment variable is not set.");
-  return key;
-};
+let transporter = null;
 
-const getFrom = () => ({
-  name: "Umuco Core",
-  email: process.env.BREVO_FROM_EMAIL || "mutimahope8@gmail.com",
-});
+const getTransporter = () => {
+  if (transporter) return transporter;
+
+  const host = process.env.EMAIL_HOST || 'smtp.gmail.com';
+  const port = parseInt(process.env.EMAIL_PORT, 10) || 587;
+  const user = (process.env.EMAIL_USER || '').trim();
+  const pass = (process.env.EMAIL_PASS || '').trim();
+
+  if (!user || !pass) {
+    throw new Error("EMAIL_USER and EMAIL_PASS environment variables are not set.");
+  }
+
+  transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: { user, pass },
+  });
+
+  return transporter;
+};
 
 export const sendEmail = async ({ to, subject, text, html }) => {
   console.log(`[EMAIL] Sending to: ${to} | Subject: ${subject}`);
 
-  const res = await fetch(BREVO_API, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "api-key": getKey(),
-    },
-    body: JSON.stringify({
-      sender: getFrom(),
-      to: [{ email: to }],
-      subject,
-      textContent: text,
-      htmlContent: html,
-    }),
+  const from = process.env.EMAIL_FROM || process.env.EMAIL_USER || 'Umuco Core <noreply@umucocore.com>';
+  const transport = getTransporter();
+
+  const info = await transport.sendMail({
+    from,
+    to,
+    subject,
+    text,
+    html,
   });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    const msg = err.message || `Brevo API error ${res.status}`;
-    console.error("[EMAIL] Brevo error:", err);
-    throw new Error(msg);
-  }
-
-  const data = await res.json().catch(() => ({}));
-  console.log(`[EMAIL] Sent successfully! messageId: ${data.messageId}`);
-  return data;
+  console.log(`[EMAIL] Sent successfully! messageId: ${info.messageId}`);
+  return info;
 };
 
 export const sendOtpEmail = async ({ to, otp, purpose, name }) => {
