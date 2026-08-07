@@ -117,6 +117,7 @@ const DB_ID_TO_STORY_ID = {
 
 const PROVERB_LANG_CONFIG = {
   fr: { tag: 'fr-FR', label: 'FR', preferredVoiceHints: ['amelie', 'thomas', 'french'] },
+  rw: { tag: 'rw-RW', label: 'RW', preferredVoiceHints: ['rwanda', 'kinyarwanda', 'ikinyarwanda'] },
   en: { tag: 'en-GB', label: 'EN', preferredVoiceHints: ['daniel', 'english'] },
 };
 
@@ -435,12 +436,9 @@ export default function Listen() {
     const wordCount = narrationText.split(/\s+/).length;
     const estimatedDuration = Math.max(30, Math.round(wordCount / 2.5)); // ~150 words per minute
     
-    return {
-      mode: 'speech-synthesis',
-      title: track.title,
-      text: narrationText,
-      estimatedDuration: estimatedDuration,
-      voice: {
+    // Voice configuration based on selected language
+    const voiceConfig = {
+      en: {
         id: selectedVoice,
         name: selectedVoice === 1 ? 'Kamanzi' : selectedVoice === 2 ? 'Ineza' : 'Umutoni',
         preferredVoiceHints: selectedVoice === 1 ? ['male', 'daniel', 'david'] : ['female', 'samantha', 'zira'],
@@ -448,6 +446,30 @@ export default function Listen() {
         pitch: selectedVoice === 1 ? 0.82 : selectedVoice === 2 ? 1 : 1.08,
         lang: 'en-GB',
       },
+      fr: {
+        id: selectedVoice,
+        name: selectedVoice === 1 ? 'Kamanzi' : selectedVoice === 2 ? 'Ineza' : 'Umutoni',
+        preferredVoiceHints: selectedVoice === 1 ? ['male', 'daniel', 'david'] : ['amelie', 'thomas', 'french'],
+        rate: selectedVoice === 1 ? 0.88 : selectedVoice === 2 ? 1 : 0.92,
+        pitch: selectedVoice === 1 ? 0.82 : selectedVoice === 2 ? 1 : 1.08,
+        lang: 'fr-FR',
+      },
+      rw: {
+        id: selectedVoice,
+        name: selectedVoice === 1 ? 'Kamanzi' : selectedVoice === 2 ? 'Ineza' : 'Umutoni',
+        preferredVoiceHints: selectedVoice === 1 ? ['male', 'daniel', 'david'] : ['female', 'samantha', 'zira', 'rwanda', 'kinyarwanda'],
+        rate: selectedVoice === 1 ? 0.88 : selectedVoice === 2 ? 1 : 0.92,
+        pitch: selectedVoice === 1 ? 0.82 : selectedVoice === 2 ? 1 : 1.08,
+        lang: 'rw-RW',
+      },
+    };
+    
+    return {
+      mode: 'speech-synthesis',
+      title: track.title,
+      text: narrationText,
+      estimatedDuration: estimatedDuration,
+      voice: voiceConfig[language] || voiceConfig.en,
     };
   }, [getSelectedVoice, language]);
 
