@@ -32,6 +32,7 @@ app.set('trust proxy', 1);
 
 // Allow requests from Vercel frontend + localhost dev
 const ALLOWED_ORIGINS = [
+  'https://umucocore.vercel.app',
   'https://umuco-core.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000',
