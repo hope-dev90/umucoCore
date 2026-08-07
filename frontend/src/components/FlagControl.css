@@ -31,11 +31,12 @@
   display: grid;
   gap: 10px;
   min-width: 240px;
+  max-width: calc(100vw - 2rem);
   padding: 12px;
   position: fixed;
-  right: 1rem;
+  left: 50%;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
   z-index: 10000;
   max-height: 90vh;
   overflow-y: auto;
