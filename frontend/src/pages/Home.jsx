@@ -116,7 +116,7 @@ const EXPLORER_CATEGORY = {
 
 export default function Home() {
   const { user, updateUser, getToken } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [topbarSearch, setTopbarSearch] = useState("");
   const {
@@ -310,10 +310,10 @@ export default function Home() {
           setRecentItems(data.items.slice(0, 5).map(item => ({
             icon: TYPE_ICON_MAP[item.type] || <FileText size={16} />,
             type: item.type === 'Audio' ? 'audio' : item.type === 'Video' ? 'video' : 'doc',
-            title: item.title,
+            title: typeof item.title === 'object' ? (item.title[language] || item.title.en || item.title.rw || '') : (item.title || ''),
             date: new Date(item.viewedAt).toLocaleDateString(),
             image: item.image || '',
-            category: item.category || item.type,
+            category: typeof item.category === 'object' ? (item.category[language] || item.category.en || '') : (item.category || item.type),
             id: item.itemId,
           })));
         }
@@ -450,8 +450,17 @@ export default function Home() {
 
   // Highlight image: use DB url if available, else fallback to Commons image
   const highlightSrc = highlight?.image_url || commonsImagesCached['Ingoro y\'Ubwami ya Nyanza'] || commonsImagesCached['The Royal Palace of Nyanza'];
-  const highlightTitle = highlight?.title || t('home.highlight.title');
-  const highlightDesc  = highlight?.description || t('home.highlight.desc');
+
+  // API may return title/description as {en, rw, fr} objects — extract the right string
+  const extractText = (val, fallback) => {
+    if (!val) return fallback;
+    if (typeof val === 'string') return val;
+    if (typeof val === 'object') return val[language] || val.en || val.rw || val.fr || fallback;
+    return fallback;
+  };
+
+  const highlightTitle = extractText(highlight?.title, t('home.highlight.title'));
+  const highlightDesc  = extractText(highlight?.description, t('home.highlight.desc'));
 
   return (
     <>
@@ -497,22 +506,22 @@ export default function Home() {
             <div className="highlight-image">
               <img
                 src={audioHighlight ? (audioHighlight.thumbnail_url || highlightSrc) : highlightSrc}
-                alt={audioHighlight ? audioHighlight.title : highlightTitle}
+                alt={audioHighlight ? extractText(audioHighlight.title, '') : highlightTitle}
                 className="highlight-img"
                 onError={e => { e.target.src = nyanzeImage; }}
               />
             </div>
             <div className="highlight-content">
               <div>
-                <h2>{audioHighlight ? audioHighlight.title : highlightTitle}</h2>
+                <h2>{audioHighlight ? extractText(audioHighlight.title, highlightTitle) : highlightTitle}</h2>
                 <p style={{ color: 'var(--text-secondary)' }}>
-                  {audioHighlight ? audioHighlight.description : highlightDesc}
+                  {audioHighlight ? extractText(audioHighlight.description, highlightDesc) : highlightDesc}
                 </p>
                 {audioHighlight?.audio_url && (
                   <audio
                     controls
                     style={{ width: '100%', marginTop: 12, borderRadius: 8 }}
-                    aria-label={`Play ${audioHighlight.title}`}
+                    aria-label={`Play ${extractText(audioHighlight.title, '')}`}
                   >
                     <source src={audioHighlight.audio_url} />
                     Your browser does not support audio playback.
