@@ -222,6 +222,7 @@ export default function Listen() {
   const [playbackMode, setPlaybackMode] = useState('audio');
   const [speechNarration, setSpeechNarration] = useState(null);
   const [reportMessage, setReportMessage] = useState('');
+  const [isSpeechPaused, setIsSpeechPaused] = useState(false);
 
   const getSelectedVoice = useCallback(() => Number(user?.accessibility?.voice ?? 0), [user]);
 
@@ -558,16 +559,22 @@ export default function Listen() {
 
     if (playbackMode === 'speech-synthesis') {
       if (!window.speechSynthesis) return;
-      if (isPlaying) {
+      
+      if (isPlaying && !isSpeechPaused) {
+        // Pause the speech
         window.speechSynthesis.pause();
         clearSpeechTimer();
-      } else if (window.speechSynthesis.paused) {
+        setIsSpeechPaused(true);
+      } else if (isPlaying && isSpeechPaused) {
+        // Resume the speech
         window.speechSynthesis.resume();
         startSpeechProgress(duration || speechNarration?.estimatedDuration || 30);
-      } else if (speechNarration) {
+        setIsSpeechPaused(false);
+      } else if (!isPlaying && speechNarration) {
+        // Start new speech
         speakNarration(speechNarration);
+        setIsSpeechPaused(false);
       }
-      setIsPlaying(p => !p);
       return;
     }
 
@@ -578,7 +585,7 @@ export default function Listen() {
       audioRef.current.play().catch(e => console.error("Playback failed:", e));
     }
     setIsPlaying(p => !p);
-  }, [clearSpeechTimer, currentTrack, duration, fables, isPlaying, playTrack, playbackMode, speakNarration, speechNarration, startSpeechProgress]);
+  }, [clearSpeechTimer, currentTrack, duration, isPlaying, isSpeechPaused, playbackMode, speakNarration, speechNarration, startSpeechProgress]);
 
   const handleTimeUpdate = useCallback(() => {
     if (audioRef.current) {
