@@ -242,14 +242,25 @@ export function localizeStory(story, language = 'en') {
   if (!story) return story;
   const localized = STORY_TRANSLATIONS[story.id]?.[language] || {};
   const localizedQuiz = QUIZ_TRANSLATIONS[story.id]?.[language];
+  
+  // Handle stories with language-specific content objects (e.g., ruganzu.js)
+  let localizedContent = story.content;
+  if (story.content && typeof story.content === 'object' && !Array.isArray(story.content)) {
+    localizedContent = story.content[language] || story.content.en || story.content;
+  }
+  
+  // Handle stories with language-specific title/desc objects
+  const localizedTitle = typeof story.title === 'object' ? (story.title[language] || story.title.en || story.title) : (localized.title || story.title);
+  const localizedDesc = typeof story.desc === 'object' ? (story.desc[language] || story.desc.en || story.desc) : (localized.desc || story.desc);
+  
   return {
     ...story,
-    title: localized.title || story.title,
+    title: localizedTitle,
     category: localized.category || story.category,
     location: localized.location || story.location,
-    desc: localized.desc || story.desc,
-    description: localized.desc || story.description,
-    content: localized.content || story.content,
+    desc: localizedDesc,
+    description: localizedDesc || story.description,
+    content: localizedContent,
     quiz: localized.quiz || localizedQuiz || story.quiz,
   };
 }
