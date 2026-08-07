@@ -1,0 +1,134 @@
+[
+  {
+    "id": "music-inanga-gakondo",
+    "youtubeSearch": "Ihorere+Mwana+w%27Ibuhoro+Rwanda+inanga+Gakondo",
+    "imageKey": "inanga",
+    "duration": "~4 min",
+    "genre": "gakondo",
+    "title": {
+      "en": "Ihorere Mwana w'Ibuhoro",
+      "fr": "Ihorere Mwana w'Ibuhoro",
+      "rw": "Ihorere Mwana w'Ibuhoro"
+    },
+    "artist": {
+      "en": "Jean Marie Muyango / Gakondo Tradition",
+      "fr": "Jean Marie Muyango / Tradition Gakondo",
+      "rw": "Jean Marie Muyango / Umuco Gakondo"
+    },
+    "description": {
+      "en": "A classic Gakondo piece featuring inanga and vocal harmonies. Popularised by Jean Marie Muyango in the 1990s and still performed across Rwanda today.",
+      "fr": "Un classique Gakondo mettant en vedette l'inanga et des harmonies vocales. Popularisé par Jean Marie Muyango dans les années 1990 et encore joué partout au Rwanda aujourd'hui.",
+      "rw": "Indirimbo ya Gakondo yuzuye inanga n'amajwi ahuje. Yamamajwe na Jean Marie Muyango mu myaka ya 1990 kandi irakomeza kuririmbwa mu Rwanda hose."
+    }
+  },
+  {
+    "id": "music-intore",
+    "youtubeSearch": "Rwanda+Intore+dance+traditional+warriors+UNESCO",
+    "imageKey": "intore",
+    "duration": "~5 min",
+    "genre": "intore",
+    "title": {
+      "en": "Intore — Dance of Heroes",
+      "fr": "Intore — Danse des héros",
+      "rw": "Intore — Umubyino w'Intwari"
+    },
+    "artist": {
+      "en": "Rwanda Traditional Performers",
+      "fr": "Artistes traditionnels du Rwanda",
+      "rw": "Abakinnyi b'Umuco Gakondo w'u Rwanda"
+    },
+    "description": {
+      "en": "The Intore (Dance of Heroes) — inscribed by UNESCO as Intangible Cultural Heritage in 2024. Warriors leap and strike to the beat of ingoma drums.",
+      "fr": "L'Intore (Danse des Héros) — inscrit par l'UNESCO comme patrimoine culturel immatériel en 2024. Les guerriers sautent et frappent au rythme des tambours ingoma.",
+      "rw": "Intore (Umubyino w'Intwari) — yanditswe na UNESCO nk'umurage w'umuco utangirwa mu 2024. Abasirikare basirika maze batere ku bwato bw'ingoma."
+    }
+  },
+  {
+    "id": "music-ingoma",
+    "youtubeSearch": "Rwanda+ingoma+royal+drums+traditional+ceremony",
+    "imageKey": "drums",
+    "duration": "~6 min",
+    "genre": "ingoma",
+    "title": {
+      "en": "Ingoma — Royal Drum Ceremony",
+      "fr": "Ingoma — Cérémonie des tambours royaux",
+      "rw": "Ingoma — Imihango y'Ingoma z'Ubwami"
+    },
+    "artist": {
+      "en": "Rwanda Cultural Heritage",
+      "fr": "Patrimoine culturel du Rwanda",
+      "rw": "Umurage w'Umuco w'u Rwanda"
+    },
+    "description": {
+      "en": "The sacred royal drums of Rwanda — ingoma were at the heart of every royal ceremony and are still played at national celebrations today.",
+      "fr": "Les tambours royaux sacrés du Rwanda — les ingoma étaient au cœur de chaque cérémonie royale et sont encore joués lors des célébrations nationales aujourd'hui.",
+      "rw": "Ingoma zera z'ubwami bw'u Rwanda — ingoma zari umutima w'imihango yose y'ubwami kandi irakomeza kuvuzwa mu birori by'igihugu."
+    }
+  },
+  {
+    "id": "music-imvyino",
+    "youtubeSearch": "Rwanda+imvyino+traditional+celebration+songs+Amasimbi",
+    "imageKey": "royal",
+    "duration": "~4 min",
+    "genre": "imvyino",
+    "title": {
+      "en": "Imvyino — Celebration Songs",
+      "fr": "Imvyino — Chants de célébration",
+      "rw": "Imvyino — Indirimbo z'Ibyishimo"
+    },
+    "artist": {
+      "en": "Amasimbi n'Amakombe",
+      "fr": "Amasimbi n'Amakombe",
+      "rw": "Amasimbi n'Amakombe"
+    },
+    "description": {
+      "en": "Imvyino are joyful group songs for celebrations, weddings, and community gatherings. Amasimbi n'Amakombe was one of Rwanda's most celebrated cultural groups.",
+      "fr": "Les Imvyino sont des chants de groupe joyeux pour les célébrations, mariages et rassemblements communautaires. Amasimbi n'Amakombe était l'un des groupes culturels les plus célèbres du Rwanda.",
+      "rw": "Imvyino ni indirimbo z'ibyishimo zaririmbwa hamwe mu birori, imihango y'ubukwe no mu makusanyiro y'abaturage. Amasimbi n'Amakombe yari kimwe mu matsinda y'umuco azwi cyane mu Rwanda."
+    }
+  },
+  {
+    "id": "music-sophie-inanga",
+    "youtubeSearch": "Sophie+Nzayisenga+inanga+Rwanda+traditional",
+    "imageKey": "inanga",
+    "duration": "~7 min",
+    "genre": "inanga",
+    "title": {
+      "en": "Inanga — Solo Performance",
+      "fr": "Inanga — Spectacle en solo",
+      "rw": "Inanga — Gukina Wenyine"
+    },
+    "artist": {
+      "en": "Sophie Nzayisenga",
+      "fr": "Sophie Nzayisenga",
+      "rw": "Sophie Nzayisenga"
+    },
+    "description": {
+      "en": "Sophie Nzayisenga is one of Rwanda's most celebrated inanga players, continuing the legacy of her father Thomas Kirusu. A rare and beautiful solo performance.",
+      "fr": "Sophie Nzayisenga est l'une des joueuses d'inanga les plus célèbres du Rwanda, perpétuant l'héritage de son père Thomas Kirusu. Une performance en solo rare et magnifique.",
+      "rw": "Sophie Nzayisenga ni umwe mu bakinnyi b'inanga bazwi cyane mu Rwanda, akomeza umurage wa se Thomas Kirusu. Igikinisho cy'inanga gikinnwa wenyine mu buryo bwihariye kandi bugaragaza ubuhanga."
+    }
+  },
+  {
+    "id": "music-ikinimba",
+    "youtubeSearch": "Rwanda+ikinimba+traditional+dance+kings+epic",
+    "imageKey": "mwami",
+    "duration": "~8 min",
+    "genre": "ikinimba",
+    "title": {
+      "en": "Ikinimba — Epic Dance of Kings",
+      "fr": "Ikinimba — Danse épique des rois",
+      "rw": "Ikinimba — Indirimbo y'Imbyino y'Abami"
+    },
+    "artist": {
+      "en": "Rwanda Ballet National",
+      "fr": "Ballet National du Rwanda",
+      "rw": "Ballet Nasiyonale y'u Rwanda"
+    },
+    "description": {
+      "en": "Ikinimba is Rwanda's most revered dance tradition — it tells the stories of kings and heroes through movement, accompanied by ngoma, ikembe, and inanga.",
+      "fr": "Ikinimba est la tradition de danse la plus vénérée du Rwanda — elle raconte les histoires des rois et des héros à travers le mouvement, accompagnée de ngoma, ikembe et inanga.",
+      "rw": "Ikinimba ni imigenzo y'imbyino ikuze cyane mu Rwanda — ivuga inkuru z'abami n'intwari binyuze mu imyivumbagatanyo, ikurikirana na ngoma, ikembe, n'inanga."
+    }
+  }
+]
