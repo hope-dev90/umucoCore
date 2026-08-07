@@ -1946,7 +1946,7 @@ Object.assign(translations.rw, {
   "landing.quest.earn": "Higanwa n'abandi ubone umudari n'amanota",
   "discover.kicker": "Urugendo rw'inkuru",
   "discover.title": "Inkuru ikwiye kwibukwa",
-  "discover.subtitle": "Injira mu mateka avugwa yagiye ahererekanywa. Soma aho atangirira, ukomeze urugendo umaze kwiyandikisha.",
+  "discover.subtitle": "Imenyere amateka yagiye ahererekanywa. Soma aho atangirira, dusigasire ibyo abatubanjirije badusigiye.",
   "discover.featuredStory": "Inkuru yatoranyijwe",
   "discover.continue": "Komeza gusoma",
   "discover.joinToEarn": "Iyandikishe ku buntu urangize inkuru kandi utangire kubona XP",
