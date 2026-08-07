@@ -15,11 +15,11 @@ import { trackView } from '../utils/trackView';
 import { apiUrl } from '../config/api';
 
 const EXPLORER_TYPES = [
-  { id: 'warrior',         label: 'Warrior',          tagline: 'Battles, legends & brave deeds'   },
-  { id: 'nature-lover',    label: 'Nature Lover',      tagline: 'Forests, hills & wild places'     },
-  { id: 'royal-historian', label: 'Royal Historian',   tagline: 'Kings, courts & old dynasties'    },
-  { id: 'folktale-hunter', label: 'Folktale Hunter',   tagline: 'Myths, proverbs & fireside tales' },
-  { id: 'music-explorer',  label: 'Music Explorer',    tagline: 'Rhythms, songs & instruments'     },
+  { id: 'warrior',         labelKey: 'explorer.warrior.label',         taglineKey: 'explorer.warrior.tagline'   },
+  { id: 'nature-lover',    labelKey: 'explorer.nature-lover.label',    taglineKey: 'explorer.nature-lover.tagline'     },
+  { id: 'royal-historian', labelKey: 'explorer.royal-historian.label', taglineKey: 'explorer.royal-historian.tagline'    },
+  { id: 'folktale-hunter', labelKey: 'explorer.folktale-hunter.label', taglineKey: 'explorer.folktale-hunter.tagline' },
+  { id: 'music-explorer',  labelKey: 'explorer.music-explorer.label',  taglineKey: 'explorer.music-explorer.tagline'     },
 ];
 
 function ExplorerPickerModal({ onSave }) {
@@ -223,34 +223,61 @@ export default function Home() {
   // Adjust these tags to match your content taxonomy as needed.
   const exploreItems = [
     {
-      title: 'Intore Culture', category: 'Royal', xp: 25,
-      meta: 'History • 12 mins left', 
+      titleKey: 'home.explore.intore',
+      titleFallback: 'Intore Culture',
+      categoryKey: 'explore.card1.category',
+      categoryFallback: 'Royal',
+      xp: 25,
+      metaKey: 'home.explore.intoreMeta',
+      metaFallback: 'History • 12 mins left',
       image: commonsImagesCached['Intore – Umubyino w\'Ubutwari'] || commonsImagesCached['Intore Warriors – The Dance of Courage'],
       route: '/explore',
       explorerTypes: ['warrior', 'royal-historian'],
     },
     {
-      title: 'Kigeli IV Rwabugiri', category: 'Legends', xp: 30,
-      meta: 'Linkage • New Activity', 
+      titleKey: 'home.explore.kigeli',
+      titleFallback: 'Kigeli IV Rwabugiri',
+      categoryKey: 'explore.card5.category',
+      categoryFallback: 'Legends',
+      xp: 30,
+      metaKey: 'home.explore.kigeliMeta',
+      metaFallback: 'Linkage • New Activity',
       image: commonsImagesCached['Kigeli IV Rwabugiri – Umwami w\'Intwari'] || commonsImagesCached['Kigeli IV Rwabugiri – The Warrior King'],
       route: '/collections',
       explorerTypes: ['warrior', 'royal-historian'],
     },
     {
-      title: 'Traditional Music', category: 'Audio', xp: 20,
-      meta: 'Audio • 4 Stories', 
+      titleKey: 'home.explore.music',
+      titleFallback: 'Traditional Music',
+      categoryKey: 'explore.card3.category',
+      categoryFallback: 'Audio',
+      xp: 20,
+      metaKey: 'home.explore.musicMeta',
+      metaFallback: 'Audio • 4 Stories',
       image: commonsImagesCached['Inanga – Umutima w\'Umuziki Nyarwanda'] || commonsImagesCached['Inanga – The Soul of Rwandan Music'] || commonsImagesCached['Inanga – The Rwandan Trough Zither'],
       route: '/listen',
       explorerTypes: ['music-explorer'],
     },
     {
-      title: 'Ubudehe', category: 'Values', xp: 15,
-      meta: 'Values • Updated', 
+      titleKey: 'home.explore.ubudehe',
+      titleFallback: 'Ubudehe',
+      categoryKey: 'explore.card11.category',
+      categoryFallback: 'Values',
+      xp: 15,
+      metaKey: 'home.explore.ubudeheMeta',
+      metaFallback: 'Values • Updated',
       image: commonsImagesCached['Ubudehe – Ubufatanye bw\'Abaturage'] || commonsImagesCached['Ubudehe – Community Solidarity'],
       route: '/collections',
       explorerTypes: ['nature-lover', 'folktale-hunter'],
     },
   ];
+
+  const translatedExploreItems = exploreItems.map(item => ({
+    ...item,
+    title: t(item.titleKey) || item.titleFallback,
+    category: t(item.categoryKey) || item.categoryFallback,
+    meta: t(item.metaKey) || item.metaFallback,
+  }));
 
   // Sort so items matching the user's active explorer type float to the
   // top; ties keep their original relative order (stable sort).
@@ -260,7 +287,7 @@ export default function Home() {
     return aMatch - bMatch;
   });
 
-  const filteredSortedExploreItems = sortedExploreItems.filter(item => {
+  const filteredSortedExploreItems = translatedExploreItems.filter(item => {
     const query = topbarSearch.toLowerCase();
     return item.title.toLowerCase().includes(query) || 
            item.category.toLowerCase().includes(query) ||
@@ -321,6 +348,8 @@ export default function Home() {
 
   const greeting   = explorerGreetings[activeExplorerType];
   const activeExplorer = EXPLORER_TYPES.find(type => type.id === activeExplorerType);
+  const activeExplorerLabel = activeExplorer ? t(activeExplorer.labelKey) : '';
+  const activeExplorerTagline = activeExplorer ? t(activeExplorer.taglineKey) : '';
   const firstName  = user?.name?.split(' ')[0] || 'Explorer';
 
   const welcomeHeading = greeting
@@ -442,7 +471,7 @@ export default function Home() {
           {activeExplorer && (
             <ExplorerTypeImage
               type={activeExplorer.id}
-              label={activeExplorer.label}
+              label={activeExplorerLabel}
               size={34}
               style={{ marginLeft: 10, verticalAlign: 'middle' }}
             />
@@ -510,8 +539,8 @@ export default function Home() {
           <div className="explore-cards">
             {filteredSortedExploreItems.map((item) => (
               <div key={item.title} className="explore-thumb" role="button" tabIndex={0}
-                onClick={() => openDashboardStory(item, 'continue')}
-                onKeyDown={(e) => { if (e.key === 'Enter') openDashboardStory(item, 'continue'); }}>
+                onClick={() => openDashboardStory({ ...item, title: item.title }, 'continue')}
+                onKeyDown={(e) => { if (e.key === 'Enter') openDashboardStory({ ...item, title: item.title }, 'continue'); }}>
                 <div className="explore-thumb-img">
                   <img src={item.image} alt={item.title} />
                 </div>
