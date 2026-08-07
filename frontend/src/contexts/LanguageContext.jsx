@@ -61,7 +61,10 @@ export function LanguageProvider({ children }) {
   }, [user, updateUser]);
 
   const t = (key) => {
-    return translations[language]?.[key] || translations.en?.[key] || key;
+    const val = translations[language]?.[key] ?? translations.en?.[key] ?? key;
+    // Guard: never return an object to React — fall back to key string
+    if (val !== null && typeof val === 'object') return key;
+    return val;
   };
 
   return (
