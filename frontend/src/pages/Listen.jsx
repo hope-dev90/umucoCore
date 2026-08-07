@@ -449,7 +449,7 @@ export default function Listen() {
         lang: 'en-GB',
       },
     };
-  }, [getSelectedVoice]);
+  }, [getSelectedVoice, language]);
 
   const fetchNarration = useCallback(async (track) => {
     // Skip API call for non-numeric IDs (audio.json items use string IDs like "story-gihanga")
