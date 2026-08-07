@@ -736,6 +736,11 @@ export const translations = {
     "kwibuka.typeAudioTestimony": "Audio Testimony",
     "kwibuka.typeWrittenArchive": "Written Archive",
     "kwibuka.typeVideoInterview": "Video Interview",
+    "kwibuka.galleryTitle": "Kwibuka Gallery",
+    "kwibuka.gallerySubtitle": "Videos and songs of remembrance",
+    "kwibuka.videosTitle": "Videos",
+    "kwibuka.songsTitle": "Songs of Remembrance",
+    "kwibuka.hideGalleryBtn": "Hide Gallery",
 
     // Intl Days Page
     "intl.searchPlaceholder": "Search archive...",
@@ -1384,6 +1389,11 @@ export const translations = {
     "kwibuka.typeAudioTestimony": "Ubuhamya mu Ijwi",
     "kwibuka.typeWrittenArchive": "Ibubiko ry'Inyandiko",
     "kwibuka.typeVideoInterview": "Ikiganiro cya Video",
+    "kwibuka.galleryTitle": "Ibeto bya Kwibuka",
+    "kwibuka.gallerySubtitle": "Amashusho n'indirimbo zo kwibuka",
+    "kwibuka.videosTitle": "Amashusho",
+    "kwibuka.songsTitle": "Indirimbo zo Kwibuka",
+    "kwibuka.hideGalleryBtn": "Hisha Ibeto",
 
     // Intl Days Page (rw)
     "intl.searchPlaceholder": "Shakisha mu bubiko...",
