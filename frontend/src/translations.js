@@ -743,6 +743,38 @@ export const translations = {
     "kwibuka.songsTitle": "Songs of Remembrance",
     "kwibuka.hideGalleryBtn": "Hide Gallery",
 
+    // Kwibuka voices
+    "kwibuka.voice1.type": "Audio Testimony",
+    "kwibuka.voice1.title": "The Hill of Bisesero",
+    "kwibuka.voice1.excerpt": "\"We stood together on those slopes for weeks. Our unity...\"",
+    "kwibuka.voice2.type": "Written Archive",
+    "kwibuka.voice2.title": "Letters from Nyamata",
+    "kwibuka.voice2.excerpt": "A collection of recovered letters documenting the final...",
+    "kwibuka.voice3.type": "Video Interview",
+    "kwibuka.voice3.title": "Finding Forgiveness",
+    "kwibuka.voice3.excerpt": "Jean-Claude reflects on 30 years of reconciliation and...",
+
+    // Kwibuka events
+    "kwibuka.event1.date": "April 7",
+    "kwibuka.event1.title": "Lighting of the Flame of Remembrance",
+    "kwibuka.event1.desc": "The national commemoration period begins with the lighting of the eternal flame at the Kigali Genocide Memorial.",
+    "kwibuka.event2.date": "April 13",
+    "kwibuka.event2.title": "National Dialogue on Reconstruction",
+    "kwibuka.event2.desc": "A youth-led forum discussing the progress of Rwanda's social fabric and economic transformation over three decades.",
+    "kwibuka.event3.date": "May 20",
+    "kwibuka.event3.title": "The International Symposium of Memory",
+    "kwibuka.event3.desc": "Global scholars and survivors convene to share insights on genocide prevention and archival technologies.",
+
+    // Kwibuka videos
+    "kwibuka.video1.title": "Kwibuka 30: Remembering the Genocide",
+    "kwibuka.video2.title": "Rwanda's Journey of Reconciliation",
+    "kwibuka.video3.title": "The Genocide Against the Tutsi",
+    "kwibuka.video4.title": "Kwibuka: Never Again",
+
+    // Kwibuka songs
+    "kwibuka.song1.title": "Kwibuka Song - Remember",
+    "kwibuka.song2.title": "Tribute to the Victims",
+
     // Intl Days Page
     "intl.searchPlaceholder": "Search archive...",
     "intl.title": "National Cultural Calendar",
@@ -1395,6 +1427,38 @@ export const translations = {
     "kwibuka.videosTitle": "Amashusho",
     "kwibuka.songsTitle": "Indirimbo zo Kwibuka",
     "kwibuka.hideGalleryBtn": "Hisha Ibeto",
+
+    // Kwibuka voices (rw)
+    "kwibuka.voice1.type": "Ubuhamya bw'Amajwi",
+    "kwibuka.voice1.title": "Umusozi wa Bisesero",
+    "kwibuka.voice1.excerpt": "\"Turahagaze hamwe mu misozi imwe ku magoroba...\"",
+    "kwibuka.voice2.type": "Isoko y'Ibinyandiko",
+    "kwibuka.voice2.title": "Amabaruva avya Nyamata",
+    "kwibuka.voice2.excerpt": "Ibikoresho by'amabaruva byasibwe byanditswe ibyo byagenze...",
+    "kwibuka.voice3.type": "Ibishushanyo by'Interviwe",
+    "kwibuka.voice3.title": "Kumenya Imbabazi",
+    "kwibuka.voice3.excerpt": "Jean-Claude yigishije imyaka 30 y'ubumwe n'...",
+
+    // Kwibuka events (rw)
+    "kwibuka.event1.date": "Mata 7",
+    "kwibuka.event1.title": "Gushisha Urumuri rw'Urwibutso",
+    "kwibuka.event1.desc": "Igihe cyo kwibuka cy'igihugu gitangira hagashishwa urumuri rw'iteka muri Kigali Genocide Memorial.",
+    "kwibuka.event2.date": "Mata 13",
+    "kwibuka.event2.title": "Iganiro ry'Igihugu ry'Ubwubatsi",
+    "kwibuka.event2.desc": "Umukumanuro w'abatoza wibabara ibintu by'ubumwe bw'igihugu n'ubuyobozi bw'imari mu myaka 30.",
+    "kwibuka.event3.date": "Gicurasi 20",
+    "kwibuka.event3.title": "Symposiyumu Mpuzamahanga y'Ibibazo by'Amateka",
+    "kwibuka.event3.desc": "Abanyamabare b'umahanga n'abarokotse bakoranira kugira ngo basangire ubwenge ku buzimire bwa jenoside n'ikoranabuhanga ry'ubitswe.",
+
+    // Kwibuka videos (rw)
+    "kwibuka.video1.title": "Kwibuka 30: Kwibuka Jenoside",
+    "kwibuka.video2.title": "Urugendo rw'Ubumwe n'Ubwiyunge mu Rwanda",
+    "kwibuka.video3.title": "Jenoside yakorewe Abatutsi",
+    "kwibuka.video4.title": "Kwibuka: Ntabwo Bizongera",
+
+    // Kwibuka songs (rw)
+    "kwibuka.song1.title": "Indirimbo ya Kwibuka",
+    "kwibuka.song2.title": "Ishimwe ry'Abahitanywe",
 
     // Intl Days Page (rw)
     "intl.searchPlaceholder": "Shakisha mu bubiko...",
@@ -2410,6 +2474,38 @@ Object.assign(translations.fr, {
   "kwibuka.typeAudioTestimony": "Témoignage audio",
   "kwibuka.typeWrittenArchive": "Archive écrite",
   "kwibuka.typeVideoInterview": "Interview vidéo",
+
+  // Kwibuka voices (fr)
+  "kwibuka.voice1.type": "Témoignage audio",
+  "kwibuka.voice1.title": "La colline de Bisesero",
+  "kwibuka.voice1.excerpt": "\"Nous nous sommes tenus ensemble sur ces pentes pendant des semaines. Notre unité...\"",
+  "kwibuka.voice2.type": "Archive écrite",
+  "kwibuka.voice2.title": "Lettres de Nyamata",
+  "kwibuka.voice2.excerpt": "Une collection de lettres retrouvées documentant les derniers...",
+  "kwibuka.voice3.type": "Interview vidéo",
+  "kwibuka.voice3.title": "Trouver le pardon",
+  "kwibuka.voice3.excerpt": "Jean-Claude réfléchit à 30 ans de réconciliation et...",
+
+  // Kwibuka events (fr)
+  "kwibuka.event1.date": "7 avril",
+  "kwibuka.event1.title": "Allumage de la flamme du souvenir",
+  "kwibuka.event1.desc": "La période nationale de commémoration commence par l'allumage de la flamme éternelle au Mémorial du génocide de Kigali.",
+  "kwibuka.event2.date": "13 avril",
+  "kwibuka.event2.title": "Dialogue national sur la reconstruction",
+  "kwibuka.event2.desc": "Un forum dirigé par des jeunes discutant des progrès du tissu social et de la transformation économique du Rwanda sur trois décennies.",
+  "kwibuka.event3.date": "20 mai",
+  "kwibuka.event3.title": "Symposium international de la mémoire",
+  "kwibuka.event3.desc": "Des chercheurs mondiaux et des survivants se réunissent pour partager des connaissances sur la prévention du génocide et les technologies d'archivage.",
+
+  // Kwibuka videos (fr)
+  "kwibuka.video1.title": "Kwibuka 30 : Se souvenir du génocide",
+  "kwibuka.video2.title": "Le chemin de la réconciliation au Rwanda",
+  "kwibuka.video3.title": "Le génocide contre les Tutsi",
+  "kwibuka.video4.title": "Kwibuka : Plus jamais",
+
+  // Kwibuka songs (fr)
+  "kwibuka.song1.title": "Chanson Kwibuka - Se souvenir",
+  "kwibuka.song2.title": "Hommage aux victimes",
 
   // International / National Days
   "intl.searchPlaceholder": "Rechercher dans les archives...",

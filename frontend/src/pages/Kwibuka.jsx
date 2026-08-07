@@ -5,7 +5,6 @@ import ReflectionImg from '../assets/kwibuka/reflection.jpg';
 import Memorial1Img from '../assets/kwibuka/memorial1.jpg';
 import Memorial2Img from '../assets/kwibuka/memorial2.jpg';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getLocalizedText } from '../utils/i18n';
 import KwibukaGallery from '../components/KwibukaGallery';
 
 const IMG = {
@@ -49,70 +48,72 @@ function KwibukaFlameLogo({ className = '' }) {
   );
 }
 
-const voices = [
-  { 
-    type: { en: 'Audio Testimony', rw: 'Ubutumwa bw\'Umva' }, 
-    title: { en: 'The Hill of Bisesero', rw: 'Umusozi wa Bisesero' }, 
-    excerpt: { en: '"We stood together on those slopes for weeks. Our unity..."', rw: '"Turahagaze hamwe mu misozi imwe ku magoroba..."' } 
-  },
-  { 
-    type: { en: 'Written Archive', rw: 'Isoko y\'Ibinyandiko' }, 
-    title: { en: 'Letters from Nyamata', rw: 'Amabaruva avya Nyamata' }, 
-    excerpt: { en: 'A collection of recovered letters documenting the final...', rw: 'Ibikoresho by\'amabaruva byasibwe byanditswe ibyo byagenze...' } 
-  },
-  { 
-    type: { en: 'Video Interview', rw: 'Ibishushanyo by\'Interviwe' }, 
-    title: { en: 'Finding Forgiveness', rw: 'Kumenya Ubusa' }, 
-    excerpt: { en: 'Jean-Claude reflects on 30 years of reconciliation and...', rw: 'Jean-Claude yigishije imyaka 30 y\'ubumwe n\'...' } 
-  },
-];
-
-const events = [
-  { 
-    dot: 'active', 
-    date: { en: 'April 7', rw: 'Mata 7' }, 
-    title: { en: 'Lighting of the Flame of Remembrance', rw: 'Gushisha Ijwi ry\'Kwibuka' }, 
-    desc: { en: 'The national commemoration period begins with the lighting of the eternal flame at the Kigali Genocide Memorial.', rw: 'Igihe cyo kwibuka cyigihugu cyatanga kugira icyo gushisha ijwi ry\'umuhigo muri Kigali Genocide Memorial.' } 
-  },
-  { 
-    dot: 'past', 
-    date: { en: 'April 13', rw: 'Mata 13' }, 
-    title: { en: 'National Dialogue on Reconstruction', rw: 'Iganwa ry\'Igihugu ry\'Ubunyanzi' }, 
-    desc: { en: 'A youth-led forum discussing the progress of Rwanda\'s social fabric and economic transformation over three decades.', rw: 'Umukumanuro w\'abatoza wibabara ibintu by\'ubumwe bw\'igihugu n\'ubuyobozi bw\'imari mu myaka 30.' } 
-  },
-  { 
-    dot: 'future', 
-    date: { en: 'May 20', rw: 'Mugarura 20' }, 
-    title: { en: 'The International Symposium of Memory', rw: 'Umukumanuro w\'Umahanga w\'Ibiharuro' }, 
-    desc: { en: 'Global scholars and survivors convene to share insights on genocide prevention and archival technologies.', rw: 'Abanyamabare b\'umahanga n\'abahungiye bararangiye kugira ngo bange ibintu byo kubera abantu n\'ubwenge bw\'ibitondozo.' } 
-  },
-];
+// voices and events are built inside the component so t() is available
 
 export default function Kwibuka() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const [topbarSearch, setTopbarSearch] = React.useState('');
   const [galleryOpen, setGalleryOpen] = React.useState(false);
+
+  const voices = [
+    {
+      type: t('kwibuka.voice1.type'),
+      title: t('kwibuka.voice1.title'),
+      excerpt: t('kwibuka.voice1.excerpt'),
+    },
+    {
+      type: t('kwibuka.voice2.type'),
+      title: t('kwibuka.voice2.title'),
+      excerpt: t('kwibuka.voice2.excerpt'),
+    },
+    {
+      type: t('kwibuka.voice3.type'),
+      title: t('kwibuka.voice3.title'),
+      excerpt: t('kwibuka.voice3.excerpt'),
+    },
+  ];
+
+  const events = [
+    {
+      dot: 'active',
+      date: t('kwibuka.event1.date'),
+      title: t('kwibuka.event1.title'),
+      desc: t('kwibuka.event1.desc'),
+    },
+    {
+      dot: 'past',
+      date: t('kwibuka.event2.date'),
+      title: t('kwibuka.event2.title'),
+      desc: t('kwibuka.event2.desc'),
+    },
+    {
+      dot: 'future',
+      date: t('kwibuka.event3.date'),
+      title: t('kwibuka.event3.title'),
+      desc: t('kwibuka.event3.desc'),
+    },
+  ];
+
+  const videos = [
+    { id: 'ww2ycQpsk-k', title: t('kwibuka.video1.title') },
+    { id: 'hON_Xls2_F8', title: t('kwibuka.video2.title') },
+    { id: 'vVfbRNpgSiY', title: t('kwibuka.video3.title') },
+    { id: '-q6Og4qTiRE', title: t('kwibuka.video4.title') },
+  ];
+
+  const songs = [
+    { id: 'mX9C47nqQvk', title: t('kwibuka.song1.title') },
+    { id: 'nQ_EGsniRC4', title: t('kwibuka.song2.title') },
+  ];
 
   const filteredVoices = topbarSearch.trim()
     ? voices.filter(v => {
         const q = topbarSearch.toLowerCase();
-        return (v.title.en || '').toLowerCase().includes(q)
-          || (v.title.rw || '').toLowerCase().includes(q)
-          || (v.excerpt.en || '').toLowerCase().includes(q);
+        return v.title.toLowerCase().includes(q)
+          || v.excerpt.toLowerCase().includes(q)
+          || v.type.toLowerCase().includes(q);
       })
     : voices;
-
-  const videos = [
-    { id: 'ww2ycQpsk-k', title: { en: 'Kwibuka 30: Remembering the Genocide', rw: 'Kwibuka 30: Kwibuka Jenoside' } },
-    { id: 'hON_Xls2_F8', title: { en: 'Rwanda\'s Journey of Reconciliation', rw: 'Urugendo rw\'Ubumwe n\'Ubwiyunge mu Rwanda' } },
-    { id: 'vVfbRNpgSiY', title: { en: 'The Genocide Against the Tutsi', rw: 'Jenoside yakorewe Abatutsi' } },
-    { id: '-q6Og4qTiRE', title: { en: 'Kwibuka: Never Again', rw: 'Kwibuka: Ntabwo Bizongera' } },
-  ];
-
-  const songs = [
-    { id: 'mX9C47nqQvk', title: { en: 'Kwibuka Song - Remember', rw: 'Indirimbo ya Kwibuka' } },
-    { id: 'nQ_EGsniRC4', title: { en: 'Tribute to the Victims', rw: 'Ishimwe ry\'Abahitanywe' } },
-  ];
 
   return (
     <Layout searchPlaceholder={t('kwibuka.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
@@ -177,9 +178,9 @@ export default function Kwibuka() {
             <div className="voices-title">{t('kwibuka.voicesTitle')}</div>
             {filteredVoices.map((v, i) => (
               <div key={i} className="voice-item">
-                <div className="voice-type">{getLocalizedText(v.type, language)}</div>
-                <div className="voice-title">{getLocalizedText(v.title, language)}</div>
-                <div className="voice-excerpt">{getLocalizedText(v.excerpt, language)}</div>
+                <div className="voice-type">{v.type}</div>
+                <div className="voice-title">{v.title}</div>
+                <div className="voice-excerpt">{v.excerpt}</div>
               </div>
             ))}
             <button className="explore-repo-btn" onClick={() => setGalleryOpen(true)}>
@@ -206,9 +207,9 @@ export default function Kwibuka() {
             <div key={i} className="event-item">
               <div className={`event-dot ${ev.dot}`} />
               <div className="event-info">
-                <div className="event-date">{getLocalizedText(ev.date, language)}</div>
-                <div className="event-title">{getLocalizedText(ev.title, language)}</div>
-                <div className="event-desc">{getLocalizedText(ev.desc, language)}</div>
+                <div className="event-date">{ev.date}</div>
+                <div className="event-title">{ev.title}</div>
+                <div className="event-desc">{ev.desc}</div>
               </div>
             </div>
           ))}
