@@ -726,6 +726,7 @@ export const translations = {
     "kwibuka.reflectionQuote":
       '"Memory is not just about the past; it is the seed of our future peace."',
     "kwibuka.reflectionAuthor": "— Honorine U., Survivor Testimony, 2024",
+    "kwibuka.markLabel": "Kwibuka 31",
     "kwibuka.readTestimonyBtn": "Read Full Testimony",
     "kwibuka.shareReflectionBtn": "Share Reflection",
     "kwibuka.memorialTitle": "Virtual Memorial Visits",
