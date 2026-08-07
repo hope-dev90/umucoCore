@@ -100,9 +100,77 @@ export default function Kwibuka() {
       })
     : voices;
 
+  const videos = [
+    { id: 'ww2ycQpsk-k', title: { en: 'Kwibuka 30: Remembering the Genocide', rw: 'Kwibuka 30: Kwibuka Jenoside' } },
+    { id: 'hON_Xls2_F8', title: { en: 'Rwanda\'s Journey of Reconciliation', rw: 'Urugendo rw\'Ubumwe n\'Ubwiyunge mu Rwanda' } },
+    { id: 'vVfbRNpgSiY', title: { en: 'The Genocide Against the Tutsi', rw: 'Jenoside yakorewe Abatutsi' } },
+    { id: '-q6Og4qTiRE', title: { en: 'Kwibuka: Never Again', rw: 'Kwibuka: Ntabwo Bizongera' } },
+  ];
+
+  const songs = [
+    { id: 'mX9C47nqQvk', title: { en: 'Kwibuka Song - Remember', rw: 'Indirimbo ya Kwibuka' } },
+    { id: 'nQ_EGsniRC4', title: { en: 'Tribute to the Victims', rw: 'Ishimwe ry\'Abahitanywe' } },
+  ];
+
   return (
     <Layout searchPlaceholder={t('kwibuka.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="kwibuka-page">
+
+        {/* Gallery Section */}
+        <div className="kwibuka-gallery-section">
+          <div className="gallery-header">
+            <h2 className="gallery-title">{t('kwibuka.galleryTitle') || 'Kwibuka Gallery'}</h2>
+            <p className="gallery-subtitle">{t('kwibuka.gallerySubtitle') || 'Videos and songs of remembrance'}</p>
+          </div>
+
+          {/* Videos Grid */}
+          <div className="gallery-videos">
+            <h3 className="gallery-section-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              {t('kwibuka.videosTitle') || 'Videos'}
+            </h3>
+            <div className="video-grid">
+              {videos.map((video, i) => (
+                <div key={i} className="video-card">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${video.id}`}
+                    title={getLocalizedText(video.title, language)}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                  <div className="video-card-title">{getLocalizedText(video.title, language)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Songs Grid */}
+          <div className="gallery-songs">
+            <h3 className="gallery-section-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9 18V5l12-2v13" />
+                <circle cx="6" cy="18" r="3" />
+                <circle cx="18" cy="16" r="3" />
+              </svg>
+              {t('kwibuka.songsTitle') || 'Songs of Remembrance'}
+            </h3>
+            <div className="songs-grid">
+              {songs.map((song, i) => (
+                <div key={i} className="song-card">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${song.id}`}
+                    title={getLocalizedText(song.title, language)}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                  <div className="song-card-title">{getLocalizedText(song.title, language)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
         {/* Today's Reflection hero */}
         <div className="reflection-hero">
