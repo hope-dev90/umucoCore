@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { Flag } from 'lucide-react';
 import { apiJson } from '../config/api';
 import './FlagControl.css';
@@ -55,24 +56,42 @@ export default function FlagControl({ type, itemId, title, onToast }) {
         <Flag size={14} aria-hidden="true" />
         <span>{flagged ? 'Reported' : 'Report'}</span>
       </button>
-      {open && !flagged && (
-        <form className="flag-popover" onClick={(e) => e.stopPropagation()} onSubmit={submitFlag}>
-          <label>
-            <span>Reason</span>
-            <select value={reason} onChange={(e) => setReason(e.target.value)}>
-              {REASONS.map((item) => <option key={item}>{item}</option>)}
-            </select>
-          </label>
-          <label>
-            <span>Note</span>
-            <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add a short note" />
-          </label>
-          {error && <p className="flag-error">{error}</p>}
-          <div className="flag-actions">
-            <button type="button" onClick={() => setOpen(false)}>Cancel</button>
-            <button type="submit" disabled={submitting}>{submitting ? 'Sending...' : 'Send'}</button>
-          </div>
-        </form>
+      {open && !flagged && ReactDOM.createPortal(
+        <>
+          {/* Backdrop — clicking it closes the form */}
+          <div
+            className="flag-backdrop"
+            onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+            aria-hidden="true"
+          />
+          <form className="flag-popover" onClick={(e) => e.stopPropagation()} onSubmit={submitFlag}>
+            <div className="flag-popover-header">
+              <span className="flag-popover-title">Report content</span>
+              <button
+                type="button"
+                className="flag-close-btn"
+                onClick={() => setOpen(false)}
+                aria-label="Close report form"
+              >✕</button>
+            </div>
+            <label>
+              <span>Reason</span>
+              <select value={reason} onChange={(e) => setReason(e.target.value)}>
+                {REASONS.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label>
+              <span>Note</span>
+              <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Add a short note" />
+            </label>
+            {error && <p className="flag-error">{error}</p>}
+            <div className="flag-actions">
+              <button type="button" onClick={() => setOpen(false)}>Cancel</button>
+              <button type="submit" disabled={submitting}>{submitting ? 'Sending...' : 'Send'}</button>
+            </div>
+          </form>
+        </>,
+        document.body
       )}
     </div>
   );

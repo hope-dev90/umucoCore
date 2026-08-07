@@ -450,7 +450,10 @@ export default function Listen() {
       fr: {
         id: selectedVoice,
         name: selectedVoice === 1 ? 'Kamanzi' : selectedVoice === 2 ? 'Ineza' : 'Umutoni',
-        preferredVoiceHints: selectedVoice === 1 ? ['male', 'daniel', 'david'] : ['amelie', 'thomas', 'french'],
+        // Always use French voice hints when language is French
+        preferredVoiceHints: selectedVoice === 1
+          ? ['thomas', 'nicolas', 'french', 'fr-fr', 'fr_fr']
+          : ['amelie', 'thomas', 'french', 'fr-fr', 'fr_fr'],
         rate: selectedVoice === 1 ? 0.88 : selectedVoice === 2 ? 1 : 0.92,
         pitch: selectedVoice === 1 ? 0.82 : selectedVoice === 2 ? 1 : 1.08,
         lang: 'fr-FR',
