@@ -144,9 +144,9 @@ function Footer() {
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[var(--text-muted)]/60 font-normal">
           <p>{t('footer.copyright')}</p>
           <div className="flex items-center space-x-6">
-            <a href="/about" className="hover:text-white transition-colors duration-200">{t('footer.privacyPolicy')}</a>
-            <a href="/about" className="hover:text-white transition-colors duration-200">{t('footer.termsOfUse')}</a>
-            <a href="/about" className="hover:text-white transition-colors duration-200">{t('footer.helpCenter')}</a>
+            <a href="/login" className="hover:text-white transition-colors duration-200">{t('footer.privacyPolicy')}</a>
+            <a href="/login" className="hover:text-white transition-colors duration-200">{t('footer.termsOfUse')}</a>
+            <a href="/login" className="hover:text-white transition-colors duration-200">{t('footer.helpCenter')}</a>
           </div>
         </div>
 

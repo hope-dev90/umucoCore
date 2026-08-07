@@ -1092,7 +1092,7 @@ export const translations = {
     "hero.title1": "Irembo ry'",
     "hero.title2": "Umurage Wacu .",
     "hero.description":
-      "Kwita ku busugire bw'Igihugu tuzirikanan iyo tuva ,dusigasira umuco twarazwe n'abakurambere .",
+      "Kwita ku busugire bw'Igihugu tuzirikana iyo tuva ,dusigasira umuco twarazwe n'abakurambere .",
     "hero.getInvolved": "Ngwino dufatanye",
     "hero.exploreMore": "Sura Byinshi",
     "hero.stats.oralStories": "INKURU ZIRYOHEYE AMATWI",
