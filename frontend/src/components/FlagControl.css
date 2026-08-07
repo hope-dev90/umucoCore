@@ -1,5 +1,5 @@
 .flag-control {
-  display: inline-flex;
+  display: inline-block;
   position: relative;
 }
 
@@ -32,10 +32,13 @@
   gap: 10px;
   min-width: 240px;
   padding: 12px;
-  position: absolute;
-  right: 0;
-  top: calc(100% + 8px);
-  z-index: 50;
+  position: fixed;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10000;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .flag-popover label {
