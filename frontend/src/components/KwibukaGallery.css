@@ -27,6 +27,23 @@
   margin-bottom: 20px;
 }
 
+.gallery-header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.gallery-flame-logo {
+  color: var(--primary);
+  height: 60px;
+  width: 48px;
+  flex-shrink: 0;
+}
+
+.gallery-flame-logo .kwibuka-flame-cutout {
+  fill: var(--bg-card);
+}
+
 .gallery-modal-header h2 {
   margin: 0 0 4px 0;
   font-family: var(--font-display);
@@ -121,6 +138,18 @@
   color: var(--text-primary);
   text-align: center;
   border-top: 1px solid var(--border-light);
+  background: var(--bg-card);
+}
+
+.video-card,
+.song-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.video-card iframe,
+.song-card iframe {
+  flex: 1;
 }
 
 @media (max-width: 640px) {
