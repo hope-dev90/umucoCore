@@ -90,6 +90,7 @@ const events = [
 export default function Kwibuka() {
   const { t, language } = useLanguage();
   const [topbarSearch, setTopbarSearch] = React.useState('');
+  const [showGallery, setShowGallery] = React.useState(false);
 
   const filteredVoices = topbarSearch.trim()
     ? voices.filter(v => {
@@ -116,61 +117,63 @@ export default function Kwibuka() {
     <Layout searchPlaceholder={t('kwibuka.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
       <div className="kwibuka-page">
 
-        {/* Gallery Section */}
-        <div className="kwibuka-gallery-section">
-          <div className="gallery-header">
-            <h2 className="gallery-title">{t('kwibuka.galleryTitle') || 'Kwibuka Gallery'}</h2>
-            <p className="gallery-subtitle">{t('kwibuka.gallerySubtitle') || 'Videos and songs of remembrance'}</p>
-          </div>
+        {/* Gallery Section - shown when "Explore Repository" is clicked */}
+        {showGallery && (
+          <div className="kwibuka-gallery-section">
+            <div className="gallery-header">
+              <h2 className="gallery-title">{t('kwibuka.galleryTitle') || 'Kwibuka Gallery'}</h2>
+              <p className="gallery-subtitle">{t('kwibuka.gallerySubtitle') || 'Videos and songs of remembrance'}</p>
+            </div>
 
-          {/* Videos Grid */}
-          <div className="gallery-videos">
-            <h3 className="gallery-section-title">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-              {t('kwibuka.videosTitle') || 'Videos'}
-            </h3>
-            <div className="video-grid">
-              {videos.map((video, i) => (
-                <div key={i} className="video-card">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${video.id}`}
-                    title={getLocalizedText(video.title, language)}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                  <div className="video-card-title">{getLocalizedText(video.title, language)}</div>
-                </div>
-              ))}
+            {/* Videos Grid */}
+            <div className="gallery-videos">
+              <h3 className="gallery-section-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+                {t('kwibuka.videosTitle') || 'Videos'}
+              </h3>
+              <div className="video-grid">
+                {videos.map((video, i) => (
+                  <div key={i} className="video-card">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${video.id}`}
+                      title={getLocalizedText(video.title, language)}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                    <div className="video-card-title">{getLocalizedText(video.title, language)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Songs Grid */}
+            <div className="gallery-songs">
+              <h3 className="gallery-section-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 18V5l12-2v13" />
+                  <circle cx="6" cy="18" r="3" />
+                  <circle cx="18" cy="16" r="3" />
+                </svg>
+                {t('kwibuka.songsTitle') || 'Songs of Remembrance'}
+              </h3>
+              <div className="songs-grid">
+                {songs.map((song, i) => (
+                  <div key={i} className="song-card">
+                    <iframe
+                      src={`https://www.youtube.com/embed/${song.id}`}
+                      title={getLocalizedText(song.title, language)}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                    <div className="song-card-title">{getLocalizedText(song.title, language)}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-
-          {/* Songs Grid */}
-          <div className="gallery-songs">
-            <h3 className="gallery-section-title">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 18V5l12-2v13" />
-                <circle cx="6" cy="18" r="3" />
-                <circle cx="18" cy="16" r="3" />
-              </svg>
-              {t('kwibuka.songsTitle') || 'Songs of Remembrance'}
-            </h3>
-            <div className="songs-grid">
-              {songs.map((song, i) => (
-                <div key={i} className="song-card">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${song.id}`}
-                    title={getLocalizedText(song.title, language)}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                  <div className="song-card-title">{getLocalizedText(song.title, language)}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Today's Reflection hero */}
         <div className="reflection-hero">
@@ -236,7 +239,9 @@ export default function Kwibuka() {
                 <div className="voice-excerpt">{getLocalizedText(v.excerpt, language)}</div>
               </div>
             ))}
-            <button className="explore-repo-btn">{t('kwibuka.exploreRepoBtn')}</button>
+            <button className="explore-repo-btn" onClick={() => setShowGallery(!showGallery)}>
+              {showGallery ? t('kwibuka.hideGalleryBtn') || 'Hide Gallery' : t('kwibuka.exploreRepoBtn')}
+            </button>
           </div>
         </div>
 
