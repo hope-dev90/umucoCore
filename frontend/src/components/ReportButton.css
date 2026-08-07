@@ -25,49 +25,75 @@
   transform: scale(1.1);
 }
 
+/* ── Modal overlay — rendered via portal into document.body ── */
 .report-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
   align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  bottom: 0;
+  display: flex;
   justify-content: center;
-  z-index: 10000;
+  left: 0;
   padding: 1rem;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 10000;
 }
 
+/* ── Modal card ── */
 .report-modal-content {
   background: #FDFBF7;
   border-radius: 12px;
-  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   max-width: 500px;
+  padding: 1.5rem;
+  position: relative;
   width: 100%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-.report-modal-content h3 {
-  margin: 0 0 1rem 0;
+/* ── Header row with title + close button ── */
+.report-modal-header {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.report-modal-header h3 {
   color: #1a1a1a;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.report-close-btn {
+  background: none;
+  border: none;
+  color: #6F5B55;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 4px 8px;
+}
+
+.report-close-btn:hover {
+  color: #2C1A14;
 }
 
 .report-modal-content textarea {
-  width: 100%;
-  padding: 0.75rem;
   border: 1px solid #EADBC8;
   border-radius: 8px;
   font-family: inherit;
   font-size: 0.95rem;
-  resize: vertical;
   min-height: 100px;
+  padding: 0.75rem;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .report-modal-content textarea:focus {
-  outline: none;
   border-color: #8D493A;
+  outline: none;
 }
 
 .report-modal-actions {
@@ -78,23 +104,23 @@
 }
 
 .report-modal-actions button[type="button"] {
-  padding: 0.6rem 1.2rem;
-  border: 1px solid #EADBC8;
   background: white;
-  color: #666;
+  border: 1px solid #EADBC8;
   border-radius: 6px;
+  color: #666;
   cursor: pointer;
   font-size: 0.9rem;
+  padding: 0.6rem 1.2rem;
 }
 
 .report-modal-actions .submit-btn {
-  padding: 0.6rem 1.2rem;
-  border: none;
   background: #8D493A;
-  color: white;
+  border: none;
   border-radius: 6px;
+  color: white;
   cursor: pointer;
   font-size: 0.9rem;
+  padding: 0.6rem 1.2rem;
 }
 
 .report-modal-actions .submit-btn:hover {
@@ -103,28 +129,28 @@
 
 .report-success {
   background: #4CAF50;
-  color: white;
-  padding: 0.5rem 1rem;
   border-radius: 6px;
+  color: white;
   font-size: 0.9rem;
+  padding: 0.5rem 1rem;
 }
 
 .topbar-report {
-  display: flex;
   align-items: center;
+  display: flex;
   margin-right: 0.75rem;
 }
 
 .topbar-report .report-button {
-  padding: 0.3rem 0.5rem;
   font-size: 0.75rem;
+  padding: 0.3rem 0.5rem;
 }
 
-/* Compact style for cards (riddles, heritage cards, collections) */
+/* Compact style for cards */
 .proverb-flip-front .report-button,
 .heritage-card-actions .report-button,
 .coll-card-actions .report-button {
-  padding: 0.15rem 0.35rem;
-  font-size: 0.65rem;
   border-radius: 3px;
+  font-size: 0.65rem;
+  padding: 0.15rem 0.35rem;
 }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { apiUrl } from '../config/api';
 
@@ -63,12 +64,26 @@ export default function ReportButton({ itemType, itemId, itemTitle }) {
         </svg>
       </button>
 
-      {isOpen && (
-        <div className="report-modal">
-          <div className="report-modal-content">
-            <h3>
-              {language === 'rw' ? 'Raporo' : language === 'fr' ? 'Signaler un problème' : 'Report Issue'}
-            </h3>
+      {isOpen && ReactDOM.createPortal(
+        <div
+          className="report-modal"
+          onClick={() => setIsOpen(false)}
+        >
+          <div
+            className="report-modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="report-modal-header">
+              <h3>
+                {language === 'rw' ? 'Raporo' : language === 'fr' ? 'Signaler un problème' : 'Report Issue'}
+              </h3>
+              <button
+                type="button"
+                className="report-close-btn"
+                onClick={() => setIsOpen(false)}
+                aria-label="Close"
+              >✕</button>
+            </div>
             <form onSubmit={handleSubmit}>
               <textarea
                 value={reason}
@@ -87,7 +102,8 @@ export default function ReportButton({ itemType, itemId, itemTitle }) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
