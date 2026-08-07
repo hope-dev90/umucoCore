@@ -411,8 +411,18 @@ export default function Listen() {
     
     if (story && story.content) {
       // Use full story content from local story file
-      // content can be a string (from audio.json) or array (from story files)
-      const storyText = Array.isArray(story.content) ? story.content.join(' ') : story.content;
+      // Handle language-specific content objects (e.g., { en: [...], rw: [...], fr: [...] })
+      let storyText;
+      if (typeof story.content === 'object' && !Array.isArray(story.content)) {
+        // Language-specific content object
+        storyText = story.content[language] || story.content.en || Object.values(story.content)[0];
+        if (Array.isArray(storyText)) {
+          storyText = storyText.join(' ');
+        }
+      } else {
+        // Legacy string or array content
+        storyText = Array.isArray(story.content) ? story.content.join(' ') : story.content;
+      }
       narrationText = `${track.title}. ${storyText}`;
     } else if (track.content) {
       // Fall back to content string baked directly into the track (from audio.json)
