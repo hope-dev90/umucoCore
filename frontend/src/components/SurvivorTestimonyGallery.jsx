@@ -267,7 +267,7 @@ export default function SurvivorTestimonyGallery({
               />
             </div>
             <span className="testimony-count">
-              {filtered.length} {filtered.length === 1 ? t('testimonies.count', { count: 1 }) : t('testimonies.count_plural', { count: filtered.length })}
+              {filtered.length} {filtered.length === 1 ? t('testimonies.count') : t('testimonies.count_plural')}
             </span>
           </div>
         </header>
