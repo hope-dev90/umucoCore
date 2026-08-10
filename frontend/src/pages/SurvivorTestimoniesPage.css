@@ -2,3 +2,25 @@
   min-height: 100vh;
   background: var(--bg-page, #fbf6ef);
 }
+
+.testimonies-page-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  margin: 20px 40px;
+  background: transparent;
+  border: 1px solid var(--border-light, #ece4d8);
+  border-radius: 8px;
+  color: var(--text-secondary, #8a8177);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.testimonies-page-back-btn:hover {
+  background: var(--bg-card, #ffffff);
+  border-color: var(--primary, #c1592e);
+  color: var(--primary, #c1592e);
+}
