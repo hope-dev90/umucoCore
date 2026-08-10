@@ -25,6 +25,7 @@ import ruganzuImg from '../assets/listen/ruganzu.png';
 import notFoundImg from '../assets/explore/notfound.png';
 import { trackView } from '../utils/trackView';
 import ReportButton from '../components/ReportButton';
+import exploreStories from '../data/explore-stories.json';
 
 const fallbackImages = [nyanzaImg, buhangaImg, intoreImg, weavingImg, imigongoImg, artifactImg];
 
@@ -49,260 +50,21 @@ const EXPLORER_CATKEY_MAP = {
 };
 
 // Shown immediately -- API data merges into these in the background.
+// Now loaded from explore-stories.json for single-source-of-truth.
 // Titles, category labels, locations and descriptions are in Kinyarwanda.
 // catKey values are unchanged so CSS classes and explorer-type sorting work.
-const FALLBACK_ITEMS = [
-  {
-    //{
-    // Card 1 -- Ingoro y'Ubwami ya Nyanza
-    category: 'Ubwami', catKey: 'architecture',
-    title: "Ingoro y'Ubwami ya Nyanza", location: 'Nyanza', locationKey: 'Nyanza',
-    image: nyanzaImg,
-    desc: "Ingoro y'Ubwami yubatswe bundi bushya, yerekana ubwubatsi, imihango n'ubuzima bwa buri munsi bw'Urukiko rw'Ubwami rw'u Rwanda.",
-    lat: -2.358, lng: 29.546, era: 'pre-colonial',
-  },
-  {
-    // Card 2 -- Intore
-    category: 'Ubutwari', catKey: 'performance',
-    title: "Intore – Umubyino w'Ubutwari", location: 'Nyanza', locationKey: 'Nyanza',
-    image: intoreImg,
-    desc: "Umuco ukomeye wa Intore, umubyino w'abasirikare uzwi cyane mu Rwanda, wavutse ku murwa w'intambara z'ubwami maze ugezwa ku bindi bisekuru.",
-    lat: -1.970, lng: 30.104, era: 'pre-colonial',
-  },
-  {
-    // Card 3 -- Inanga (music instrument, nationwide)
-    category: 'Umuziki', catKey: 'artifacts',
-    title: "Inanga – Umutima w'Umuziki Nyarwanda", location: 'Igihugu hose', locationKey: 'National',
-    image: artifactImg,
-    desc: "Umva inanga, ikembe n'ingoma nk'uko byacurangwaga mu binyejana byinshi mu nkambi z'ubwami no mu materaniro y'imidugudu mu Rwanda hose.",
-    lat: -1.9500, lng: 29.9000, era: 'pre-colonial',
-  },
-  {
-    // Card 4 -- Imigani (fireside folktales)
-    category: 'Imigani', catKey: 'culture',
-    title: "Imigani – Inkuru zivugwa ku Muriro", location: 'Igihugu hose', locationKey: 'National',
-    image: buhangaImg,
-    desc: "Injira mu muco nyarwanda w'imvugo dukesha abakurambere: imigani, inkuru n'ibitekerezo byigishwa ku muriro w'ijoro, uva ku gisekuru kigana ikindi.",
-    lat: -1.9500, lng: 29.9000, era: 'pre-colonial',
-  },
-  {
-    // Card 5 -- Kigeli IV Rwabugiri
-    category: 'Ubwami', catKey: 'history',
-    title: "Kigeli IV Rwabugiri – Umwami w'Intwari", location: 'Kigali', locationKey: 'Kigali',
-    image: weavingImg,
-    desc: "Umwe mu bami b'u Rwanda bakomeye cyane, wagushije ubutaka bw'igihugu binyuze mu ntambara no mu ivugurura ry'ubuyobozi.",
-    lat: -1.9346, lng: 30.0621, era: 'colonial',
-  },
-  {
-    // Card 6 -- Ubwiru (royal court ceremonies)
-    category: 'Imigani', catKey: 'culture',
-    title: "Ubwiru – Imihango y'Urukiko rw'Ubwami", location: 'Nyanza', locationKey: 'Nyanza',
-    image: nyanzaImg,
-    desc: "Imihango yera n'ubumenyi bwihishe byayoboraga ubuzima bw'urukiko rw'ubwami, bigezwa gusa ku bantu bemerewe kubimenya.",
-    lat: -2.358, lng: 29.546, era: 'pre-colonial',
-  },
-  {
-    // Card 7 -- Ibyivugo (warrior self-praise poetry)
-    category: 'Imigani', catKey: 'culture',
-    title: "Ibyivugo – Ibisigo by'Ubutwari", location: 'Igihugu hose', locationKey: 'National',
-    image: intoreImg,
-    desc: "Ibisigo byanditswe n'ababivuga ubwabo, bikavugwa n'abasirikare n'abahigi basingiza ubutwari n'ibikorwa byabo bwite.",
-    lat: -1.9700, lng: 30.1040, era: 'pre-colonial',
-  },
-  {
-    // Card 8 -- Inzira z'Ubwenge (riddles and wisdom)
-    category: 'Imigani', catKey: 'culture',
-    title: "Inzira z'Ubwenge – Ibisakuzo n'Ubuhanga", location: 'Igihugu hose', locationKey: 'National',
-    image: artifactImg,
-    desc: "Ibisakuzo n'imigani gakondo byakoreshwaga mu kwigisha ubuhanga no gutekereza neza mu bisekuru.",
-    lat: -1.9500, lng: 29.9000, era: 'pre-colonial',
-  },
-  {
-    // Card 9 -- Ingoma (royal drums)
-    category: 'Umuziki', catKey: 'performance',
-    title: "Ingoma – Ingoma Zera z'Ubwami", location: 'Nyanza', locationKey: 'Nyanza',
-    image: nyanzaImg,
-    desc: "Ingoma zari umutima w'urukiko rw'ubwami, zikoreshwa mu mihango, mu gutangaza amakuru no mu birori.",
-    lat: -2.358, lng: 29.546, era: 'pre-colonial',
-  },
-  {
-    // Card 10 -- Umuvugo (praise songs)
-    category: 'Umuziki', catKey: 'artifacts',
-    title: "Umuvugo – Indirimbo z'Ishimwe", location: 'Igihugu hose', locationKey: 'National',
-    image: buhangaImg,
-    desc: "Indirimbo gakondo zasingizaga abami, intwari n'ibintu bikomeye, zicurangwa kugira ngo babishimire.",
-    lat: -1.9500, lng: 29.9000, era: 'pre-colonial',
-  },
-  {
-    // Card 11 -- Ubudehe (community work)
-    category: 'Rusange', catKey: 'crafts',
-    title: "Ubudehe – Ubufatanye bw'Abaturage", location: 'Igihugu hose', locationKey: 'National',
-    image: weavingImg,
-    desc: "Umuco wa kera w'akazi gakorwa hamwe no gufashanya, wagaragaje ubuzima bw'abaturage b'u Rwanda mu binyejana byinshi.",
-    lat: -1.9500, lng: 29.9000, era: 'colonial',
-  },
-  {
-    // Card 12 -- Agaseke baskets
-    category: 'Rusange', catKey: 'crafts',
-    title: "Agaseke – Ibiseke by'Amahoro", location: 'Igihugu hose', locationKey: 'National',
-    image: weavingImg,
-    desc: "Ibiseke bidukanywe mu buryo bw'ubuhanga, bifite icyerekezo cy'umuco mwinshi, bikoreshwa mu mihango, nk'impano no mu bikoresho bya buri munsi.",
-    lat: -2.073, lng: 29.752, era: 'pre-colonial',
-  },
-  {
-    // Card 13 -- Ingabo royal guard
-    category: 'Ubutwari', catKey: 'history',
-    title: "Ingabo – Abarinzi b'Ubwami", location: 'Kigali', locationKey: 'Kigali',
-    image: intoreImg,
-    desc: "Abarinzi b'intwari b'ubwami barinzaga Umwami kandi bagacunga umutekano mu gihugu.",
-    lat: -1.9346, lng: 30.0621, era: 'post-1994',
-  },
-  {
-    // Card 14 -- Nyungwe Forest National Park
-    category: 'Ibyitangira Cyumweru', catKey: 'wildlife',
-    title: "Nyungwe Forest National Park", location: 'Rusizi', locationKey: 'Rusizi',
-    image: safariImg,
-    desc: "Ishyamba ritandukanye mu Rwanda, harimo inyamaswa n'inyamaswa z'ibihumbi byinshi, inyungura n'inzoka z'amakungu.",
-    lat: -2.47, lng: 29.24, era: 'pre-colonial',
-  },
-  {
-    // Card 15 -- Akagera National Park
-    category: 'Ibyitangira Cyumweru', catKey: 'wildlife',
-    title: "Akagera National Park", location: 'Kayonza', locationKey: 'Kayonza',
-    image: safariImg,
-    desc: "Pariki y'ibisura yabera mu bwongereza bw'u Rwanda, harimo ibisura nk'inyambo, imvura, amavumbi n'ibindi.",
-    lat: -1.65, lng: 30.75, era: 'pre-colonial',
-  },
-  {
-    // Card 16 -- Lake Kivu
-    category: 'Ibyitangira Cyumweru', catKey: 'lakes',
-    title: "Lake Kivu", location: 'Rubavu', locationKey: 'Rubavu',
-    image: safariImg,
-    desc: "Ikiyaga kigari cyo mu ruhande rwa burenga bw'u Rwanda, cyuzuye amateka y'ibihumbi n'ibintu bikomeye.",
-    lat: -1.66, lng: 29.22, era: 'pre-colonial',
-  },
- 
-  {
-    // Card 18 -- Butare National Museum of Rwanda
-    category: 'Ubwenge', catKey: 'artifacts',
-    title: "Butare National Museum of Rwanda", location: 'Huye', locationKey: 'Gitarama',
-    image: buhangaImg,
-    desc: "Ihaha ry'ibitekerezo ry'amateka y'u Rwanda, harimo ibintu byinshi by'umugambi n'amaherezo.",
-    lat: -2.59, lng: 29.74, era: 'colonial',
-  },
-  {
-    // Card 19 -- Murambi Genocide Memorial
-    category: 'Amateka', catKey: 'history',
-    title: "Murambi Genocide Memorial", location: 'Nyamagabe', locationKey: 'Gitarama',
-    image: artifactImg,
-    desc: "Ihaha rya jenoside rya 1994 mu Murambi, rishobora kumenya abantu kugira ngo babigire icyo ariyo.",
-    lat: -2.39, lng: 29.67, era: 'post-1994',
-  },
-  {
-    // Card 20 -- Nyarugenge Church
-    category: 'Ubwenge', catKey: 'architecture',
-    title: "Nyarugenge Church", location: 'Kigali', locationKey: 'Kigali',
-    image: nyanzaImg,
-    desc: "Itorero rya kera rya Nyarugenge, rikubiyemo ubwubatsi bw'ibihumbi.",
-    lat: -1.95, lng: 30.06, era: 'colonial',
-  },
-  {
-    // Card 21 -- Kibeho
-    category: 'Ubwenge', catKey: 'culture',
-    title: "Kibeho Shrine", location: 'Nyaruguru', locationKey: 'Gitarama',
-    image: buhangaImg,
-    desc: "Aho Maria yaboneje mu Rwanda, harimo itorero n'ibindi bikomeye.",
-    lat: -2.65, lng: 29.55, era: 'colonial',
-  },
-  {
-    // Card 22 -- Rwankeri Hill
-    category: 'Ibyitangira Cyumweru', catKey: 'wildlife',
-    title: "Rwankeri Hill", location: 'Rwamagana', locationKey: 'Kayonza',
-    image: imigongoImg,
-    desc: "Umusozi ukomeye mu Rwanda, harimo imirima y'amakungu n'ibintu bikomeye.",
-    lat: -1.95, lng: 30.35, era: 'pre-colonial',
-  },
-  {
-    // Card 23 -- Lake Muhazi
-    category: 'Ibyitangira Cyumweru', catKey: 'lakes',
-    title: "Lake Muhazi", location: 'Rwamagana', locationKey: 'Kayonza',
-    image: safariImg,
-    desc: "Ikiyaga kigari cyo mu Rwanda, cyuzuye amateka n'ibintu bikomeye.",
-    lat: -1.85, lng: 30.25, era: 'pre-colonial',
-  },
-  {
-    // Card 24 -- Bisesero Genocide Memorial
-    category: 'Amateka', catKey: 'history',
-    title: "Bisesero Genocide Memorial", location: 'Karongi', locationKey: 'Rubavu',
-    image: artifactImg,
-    desc: "Ihaha rya jenoside rya 1994 mu Bisesero.",
-    lat: -2.15, lng: 29.35, era: 'post-1994',
-  },
-  {
-    // Card 25 -- Mount Karisimbi
-    category: 'Ibyitangira Cyumweru', catKey: 'wildlife',
-    title: "Mount Karisimbi", location: 'Musanze', locationKey: 'Musanze',
-    image: imigongoImg,
-    desc: "Umusozi mukuru mu Virunga, harimo ibisura n'inyamaswa.",
-    lat: -1.50, lng: 29.45, era: 'pre-colonial',
-  },
-  {
-    // Card 26 -- Gishwati Forest
-    category: 'Ibyitangira Cyumweru', catKey: 'wildlife',
-    title: "Gishwati Forest", location: 'Ngororero', locationKey: 'Musanze',
-    image: safariImg,
-    desc: "Ishyamba rikubiyemo ibintu bikomeye cyane.",
-    lat: -1.75, lng: 29.55, era: 'pre-colonial',
-  },
-  {
-    // Card 27 -- Rugezi Marsh
-    category: 'Ibyitangira Cyumweru', catKey: 'lakes',
-    title: "Rugezi Marsh", location: 'Burera', locationKey: 'Musanze',
-    image: safariImg,
-    desc: "Akabiriziro kizwi cyane mu Rwanda, harimo inyamaswa.",
-    lat: -1.45, lng: 29.85, era: 'pre-colonial',
-  },
-  {
-    // Card 28 -- Gatagara Crafts Village
-    category: 'Rusange', catKey: 'crafts',
-    title: "Gatagara Crafts Village", location: 'Huye', locationKey: 'Gitarama',
-    image: weavingImg,
-    desc: "Umujyi w'ibintu byahindutse, harimo imigongo n'ibindi byanditswe.",
-    lat: -2.55, lng: 29.70, era: 'post-1994',
-  },
-  {
-    // Card 29 -- Huye Mountain
-    category: 'Ibyitangira Cyumweru', catKey: 'wildlife',
-    title: "Huye Mountain", location: 'Huye', locationKey: 'Gitarama',
-    image: imigongoImg,
-    desc: "Umusozi ukomeye mu Rwanda, harimo imirima.",
-    lat: -2.60, lng: 29.75, era: 'pre-colonial',
-  },
-  {
-    // Card 30 -- Rusumo Falls
-    category: 'Ibyitangira Cyumweru', catKey: 'lakes',
-    title: "Rusumo Falls", location: 'Rusumo', locationKey: 'Kayonza',
-    image: safariImg,
-    desc: "Imirima y'ibisura, yabera mu Rusumo.",
-    lat: -2.39, lng: 30.78, era: 'pre-colonial',
-  },
-  {
-    // Card 31 -- Amahoro National Stadium
-    category: 'Ubwenge', catKey: 'architecture',
-    title: "Amahoro National Stadium", location: 'Kigali', locationKey: 'Kigali',
-    image: imigongoImg,
-    desc: "Ikibuga kizwi cyane mu Rwanda, cyuzuye amateka n'ibintu bikomeye.",
-    lat: -1.94, lng: 30.07, era: 'post-1994',
-  },
-  {
-    // Card 32 -- Rwanda Art Museum
-    category: 'Ubwenge', catKey: 'art',
-    title: "Rwanda Art Museum", location: 'Kigali', locationKey: 'Kigali',
-    image: imigongoImg,
-    desc: "Ihaha ry'imigongo n'ibindi by'ubwenge.",
-    lat: -1.93, lng: 30.08, era: 'post-1994',
-  },
-];
+const FALLBACK_ITEMS = exploreStories.map((story, index) => ({
+  ...story,
+  // Assign images based on imageKey
+  image: story.imageKey === 'nyanza' ? nyanzaImg :
+         story.imageKey === 'buhanga' ? buhangaImg :
+         story.imageKey === 'intore' ? intoreImg :
+         story.imageKey === 'weaving' ? weavingImg :
+         story.imageKey === 'imigongo' ? imigongoImg :
+         story.imageKey === 'artifact' ? artifactImg :
+         story.imageKey === 'safari' ? safariImg :
+         fallbackImages[index % fallbackImages.length],
+}));
 
 const toCoordinate = (value) => {
   if (value === null || value === undefined || value === '') return null;
