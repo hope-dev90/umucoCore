@@ -145,7 +145,7 @@ export default function SurvivorTestimonyView() {
                 <h2>{t('testimonies.notAvailable')}</h2>
                 <p>
                   {t('testimonies.notAvailableDesc', { 
-                    link: t('testimonies.archiveLink'),
+                    link: `<a href="${testimony.listing_url}" target="_blank" rel="noopener noreferrer" className="testimony-view-archive-link">${t('testimonies.archiveLink')}</a>`,
                     id: testimony.id 
                   })}
                 </p>
