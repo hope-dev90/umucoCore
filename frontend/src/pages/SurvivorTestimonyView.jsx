@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 import Layout from '../components/Layout';
 import survivorData from '../data/survivorTestimony.json';
 import './SurvivorTestimonyView.css';
@@ -49,6 +50,7 @@ function getLinks(itemUrl) {
 export default function SurvivorTestimonyView() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useLanguage();
   
   const testimonies = survivorData.testimonies || [];
   const testimony = testimonies.find(t => t.id === id);
@@ -59,11 +61,11 @@ export default function SurvivorTestimonyView() {
       <Layout>
         <div className="testimony-view-page">
           <div className="testimony-view-not-found">
-            <h2>Testimony Not Found</h2>
-            <p>The testimony you're looking for doesn't exist.</p>
+            <h2>{t('testimonies.notFound')}</h2>
+            <p>{t('testimonies.notFoundDesc')}</p>
             <button type="button" onClick={() => navigate('/kwibuka')} className="testimony-view-back-btn">
               <ArrowLeftIcon />
-              Back to Kwibuka
+              {t('testimonies.backToKwibuka')}
             </button>
           </div>
         </div>
@@ -81,11 +83,11 @@ export default function SurvivorTestimonyView() {
             className="testimony-view-back-btn"
           >
             <ArrowLeftIcon />
-            Back to Testimonies
+            {t('testimonies.backToTestimonies')}
           </button>
 
           <div className="testimony-view-header">
-            <div className="testimony-view-badge">Survivor Testimony</div>
+            <div className="testimony-view-badge">{t('testimonies.badge')}</div>
             <h1 className="testimony-view-title">{testimony.title || 'Testimony'}</h1>
             
             <div className="testimony-view-meta">
@@ -107,15 +109,15 @@ export default function SurvivorTestimonyView() {
 
           <div className="testimony-view-content">
             <div className="testimony-view-summary">
-              <h2>Summary</h2>
+              <h2>{t('testimonies.summaryTitle')}</h2>
               <p>{testimony.summary || 'No summary available.'}</p>
             </div>
 
             {links.length > 0 && (
               <div className="testimony-view-links">
-                <h2>Access the Full Testimony</h2>
+                <h2>{t('testimonies.accessTitle')}</h2>
                 <p className="testimony-view-links-intro">
-                  The complete testimony is available through the Genocide Archive of Rwanda:
+                  {t('testimonies.accessIntro')}
                 </p>
                 <div className="testimony-view-links-list">
                   {links.map((url, i) => (
@@ -127,7 +129,7 @@ export default function SurvivorTestimonyView() {
                       className="testimony-view-link"
                     >
                       <LinkIcon />
-                      {links.length > 1 ? `Testimony Part ${i + 1}` : 'View Full Testimony'}
+                      {links.length > 1 ? t('testimonies.part', { part: i + 1 }) : t('testimonies.viewFull')}
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                         <path d="M15 3h6v6M10 14 21 3" />
@@ -140,36 +142,22 @@ export default function SurvivorTestimonyView() {
 
             {!testimony.item_url && (
               <div className="testimony-view-note">
-                <h2>Full Testimony</h2>
+                <h2>{t('testimonies.notAvailable')}</h2>
                 <p>
-                  The complete testimony is not yet available online. Please visit the{' '}
-                  <a 
-                    href={testimony.listing_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="testimony-view-archive-link"
-                  >
-                    Genocide Archive of Rwanda
-                  </a>{' '}
-                  to search for this testimony by name or ID: <strong>{testimony.id}</strong>
+                  {t('testimonies.notAvailableDesc', { 
+                    link: t('testimonies.archiveLink'),
+                    id: testimony.id 
+                  })}
                 </p>
               </div>
             )}
 
             <div className="testimony-view-archive">
-              <h2>About This Archive</h2>
+              <h2>{t('testimonies.aboutArchive')}</h2>
               <p>
-                This testimony is part of the{' '}
-                <a 
-                  href={testimony.listing_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="testimony-view-archive-link"
-                >
-                  Survivor Testimonies collection
-                </a>{' '}
-                from the Genocide Archive of Rwanda. These testimonies preserve the personal experiences 
-                of survivors before, during, and after the 1994 genocide against the Tutsi.
+                {t('testimonies.aboutArchiveDesc', { 
+                  link: `<a href="${testimony.listing_url}" target="_blank" rel="noopener noreferrer" className="testimony-view-archive-link">${t('testimonies.searchLink')}</a>`
+                })}
               </p>
             </div>
           </div>

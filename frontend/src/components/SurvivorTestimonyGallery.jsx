@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '../contexts/LanguageContext';
 import survivorData from '../data/survivorTestimony.json';
 import './SurvivorTestimonyGallery.css';
 
@@ -90,7 +91,7 @@ function TestimonyCard({ testimony, onReadFull }) {
           <KwibukaFlameLogo />
         </div>
         <div className="testimony-card-badge">
-          <span className="testimony-badge-text">Survivor Testimony</span>
+          <span className="testimony-badge-text">{t('testimonies.badge')}</span>
         </div>
       </div>
 
@@ -126,7 +127,7 @@ function TestimonyCard({ testimony, onReadFull }) {
                 className="testimony-read-btn"
               >
                 <LinkIcon />
-                {links.length > 1 ? `Read Part ${i + 1}` : 'Read Testimony'}
+                {links.length > 1 ? t('testimonies.readPart', { part: i + 1 }) : t('testimonies.readFull')}
               </a>
             ))
           ) : (
@@ -135,7 +136,7 @@ function TestimonyCard({ testimony, onReadFull }) {
               className="testimony-read-btn"
               onClick={() => onReadFull(testimony)}
             >
-              Read Full Testimony
+              {t('testimonies.readFull')}
             </button>
           )}
         </div>
@@ -183,7 +184,7 @@ function TestimonyModal({ testimony, onClose }) {
             <p>{testimony.summary}</p>
             {testimony.item_url && (
               <div className="testimony-modal-links">
-                <h4>Access the full testimony:</h4>
+                <h4>{t('testimonies.accessTitle')}</h4>
                 {getLinks(testimony.item_url).map((url, i) => (
                   <a
                     key={url}
@@ -193,23 +194,17 @@ function TestimonyModal({ testimony, onClose }) {
                     className="testimony-modal-link"
                   >
                     <LinkIcon />
-                    {getLinks(testimony.item_url).length > 1 ? `Testimony Part ${i + 1}` : 'View Testimony'}
+                    {getLinks(testimony.item_url).length > 1 ? t('testimonies.part', { part: i + 1 }) : t('testimonies.viewFull')}
                   </a>
                 ))}
               </div>
             )}
             {!testimony.item_url && (
               <p className="testimony-modal-note">
-                The full testimony is not yet available online. Please visit the{' '}
-                <a 
-                  href={testimony.listing_url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="testimony-modal-link"
-                >
-                  Genocide Archive of Rwanda
-                </a>{' '}
-                to search for this testimony.
+                {t('testimonies.notAvailableDesc', { 
+                  link: `<a href="${testimony.listing_url}" target="_blank" rel="noopener noreferrer" className="testimony-modal-link">${t('testimonies.archiveLink')}</a>`,
+                  id: testimony.id 
+                })}
               </p>
             )}
           </div>
@@ -221,9 +216,8 @@ function TestimonyModal({ testimony, onClose }) {
 
 export default function SurvivorTestimonyGallery({
   testimonies = survivorData.testimonies || [],
-  title = 'Survivor Testimonies',
-  subtitle = 'Preserving the stories. Honoring the lives.',
 }) {
+  const { t } = useLanguage();
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
@@ -255,8 +249,8 @@ export default function SurvivorTestimonyGallery({
             <KwibukaFlameLogo className="testimony-gallery-logo" />
             <div className="testimony-gallery-eyebrow">Kwibuka</div>
           </div>
-          <h2 className="testimony-gallery-title">{title}</h2>
-          <p className="testimony-gallery-subtitle">{subtitle}</p>
+          <h2 className="testimony-gallery-title">{t('testimonies.title')}</h2>
+          <p className="testimony-gallery-subtitle">{t('testimonies.subtitle')}</p>
 
           <div className="testimony-gallery-controls">
             <div className="testimony-search">
@@ -268,12 +262,12 @@ export default function SurvivorTestimonyGallery({
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by name or district…"
-                aria-label="Search testimonies"
+                placeholder={t('testimonies.searchPlaceholder')}
+                aria-label={t('testimonies.searchPlaceholder')}
               />
             </div>
             <span className="testimony-count">
-              {filtered.length} {filtered.length === 1 ? 'testimony' : 'testimonies'}
+              {filtered.length} {t('testimonies.count', { count: filtered.length })}
             </span>
           </div>
         </header>
@@ -289,7 +283,7 @@ export default function SurvivorTestimonyGallery({
             ))}
           </div>
         ) : (
-          <div className="testimony-empty">No testimonies match your search.</div>
+          <div className="testimony-empty">{t('testimonies.noResults')}</div>
         )}
       </section>
 
