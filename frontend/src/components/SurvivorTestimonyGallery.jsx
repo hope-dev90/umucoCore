@@ -12,6 +12,41 @@ function PinIcon() {
   );
 }
 
+function KwibukaFlameLogo({ className = '' }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 120 160"
+      role="img"
+      aria-label="Kwibuka remembrance flame"
+    >
+      <path
+        d="M67 7C47 35 42 61 53 84c5 11 4 21-3 31 25-16 38-39 33-67-2-13-8-27-16-41Z"
+        fill="currentColor"
+      />
+      <path
+        d="M39 55C22 78 20 103 34 124c7 10 16 17 28 22-13-20-8-38 9-55-10 8-20 7-26-2-6-9-6-21-6-34Z"
+        fill="currentColor"
+      />
+      <path
+        d="M73 88c20 22 20 44-2 66 31-15 44-39 36-65-3-11-10-21-20-30 3 13-1 22-14 29Z"
+        fill="currentColor"
+      />
+      <path
+        className="kwibuka-flame-cutout"
+        d="M58 97c-12-10-11-24 4-42-3 24 5 32 18 39-19 6-30 22-28 47-14-15-13-31 6-44Z"
+      />
+      <path
+        d="M58 97c-12-10-11-24 4-42"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="5"
+      />
+    </svg>
+  );
+}
+
 function LanguageIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -47,24 +82,12 @@ function getLinks(itemUrl) {
 
 function TestimonyCard({ testimony, onReadFull }) {
   const links = getLinks(testimony.item_url);
-  const avatarName = Array.isArray(testimony.subjects) && testimony.subjects.length > 0 ? testimony.subjects[0] : 'Testimony';
 
   return (
     <article className="testimony-card">
       <div className="testimony-card-img">
-        <img 
-          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(avatarName)}&background=c1592e&color=fff&size=400`}
-          alt={testimony.subjects?.join(' & ') || 'Testimony'}
-          onError={(e) => {
-            e.target.style.display = 'none';
-            e.target.nextSibling.style.display = 'flex';
-          }}
-        />
-        <div className="testimony-card-img-placeholder" style={{ display: 'none' }}>
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
+        <div className="testimony-card-logo">
+          <KwibukaFlameLogo />
         </div>
         <div className="testimony-card-badge">
           <span className="testimony-badge-text">Survivor Testimony</span>
@@ -228,7 +251,10 @@ export default function SurvivorTestimonyGallery({
     <>
       <section className="testimony-gallery">
         <header className="testimony-gallery-header">
-          <div className="testimony-gallery-eyebrow">Kwibuka</div>
+          <div className="testimony-gallery-header-top">
+            <KwibukaFlameLogo className="testimony-gallery-logo" />
+            <div className="testimony-gallery-eyebrow">Kwibuka</div>
+          </div>
           <h2 className="testimony-gallery-title">{title}</h2>
           <p className="testimony-gallery-subtitle">{subtitle}</p>
 
