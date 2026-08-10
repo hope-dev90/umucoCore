@@ -50,8 +50,9 @@ export default function SurvivorTestimonyView() {
   const { id } = useParams();
   const navigate = useNavigate();
   
-  const testimony = survivorData.testimonies.find(t => t.id === id);
-  const links = getLinks(testimony?.item_url);
+  const testimonies = survivorData.testimonies || [];
+  const testimony = testimonies.find(t => t.id === id);
+  const links = getLinks(testimony?.item_url) || [];
 
   if (!testimony) {
     return (
@@ -60,7 +61,7 @@ export default function SurvivorTestimonyView() {
           <div className="testimony-view-not-found">
             <h2>Testimony Not Found</h2>
             <p>The testimony you're looking for doesn't exist.</p>
-            <button onClick={() => navigate('/kwibuka')} className="testimony-view-back-btn">
+            <button type="button" onClick={() => navigate('/kwibuka')} className="testimony-view-back-btn">
               <ArrowLeftIcon />
               Back to Kwibuka
             </button>
@@ -75,6 +76,7 @@ export default function SurvivorTestimonyView() {
       <div className="testimony-view-page">
         <div className="testimony-view-container">
           <button 
+            type="button"
             onClick={() => navigate('/kwibuka')} 
             className="testimony-view-back-btn"
           >
@@ -84,7 +86,7 @@ export default function SurvivorTestimonyView() {
 
           <div className="testimony-view-header">
             <div className="testimony-view-badge">Survivor Testimony</div>
-            <h1 className="testimony-view-title">{testimony.title}</h1>
+            <h1 className="testimony-view-title">{testimony.title || 'Testimony'}</h1>
             
             <div className="testimony-view-meta">
               {testimony.district && (
@@ -106,7 +108,7 @@ export default function SurvivorTestimonyView() {
           <div className="testimony-view-content">
             <div className="testimony-view-summary">
               <h2>Summary</h2>
-              <p>{testimony.summary}</p>
+              <p>{testimony.summary || 'No summary available.'}</p>
             </div>
 
             {links.length > 0 && (
