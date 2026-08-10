@@ -81,7 +81,7 @@ function getLinks(itemUrl) {
   return Array.isArray(itemUrl) ? itemUrl : [itemUrl];
 }
 
-function TestimonyCard({ testimony, onReadFull }) {
+function TestimonyCard({ testimony, onReadFull, t }) {
   const links = getLinks(testimony.item_url);
 
   return (
@@ -145,7 +145,7 @@ function TestimonyCard({ testimony, onReadFull }) {
   );
 }
 
-function TestimonyModal({ testimony, onClose }) {
+function TestimonyModal({ testimony, onClose, t }) {
   if (!testimony) return null;
 
   return (
@@ -224,12 +224,12 @@ export default function SurvivorTestimonyGallery({
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return testimonies;
-    return testimonies.filter((t) => {
-      const subjects = Array.isArray(t.subjects) ? t.subjects : [];
+    return testimonies.filter((testimony) => {
+      const subjects = Array.isArray(testimony.subjects) ? testimony.subjects : [];
       const haystack = [
         ...subjects,
-        t.district || '',
-        t.summary || '',
+        testimony.district || '',
+        testimony.summary || '',
       ]
         .join(' ')
         .toLowerCase();
@@ -279,6 +279,7 @@ export default function SurvivorTestimonyGallery({
                 key={testimony.id} 
                 testimony={testimony} 
                 onReadFull={handleReadFull}
+                t={t}
               />
             ))}
           </div>
