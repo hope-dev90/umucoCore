@@ -137,7 +137,7 @@ export default function Kwibuka() {
             </div>
             <div className="reflection-author">{t('kwibuka.reflectionAuthor')}</div>
             <div className="reflection-actions">
-              <button className="btn-testimony" onClick={() => navigate('/testimonies')}>
+              <button type="button" className="btn-testimony" onClick={() => navigate('/testimonies')}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 {t('kwibuka.readTestimonyBtn')}
               </button>
@@ -185,7 +185,7 @@ export default function Kwibuka() {
                 <div className="voice-excerpt">{v.excerpt}</div>
               </div>
             ))}
-            <button className="explore-repo-btn" onClick={() => setGalleryOpen(true)}>
+            <button type="button" className="explore-repo-btn" onClick={() => setGalleryOpen(true)}>
               {t('kwibuka.exploreRepoBtn')}
             </button>
           </div>
