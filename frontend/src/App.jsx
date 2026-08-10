@@ -23,6 +23,7 @@ import Videos      from './pages/Videos';
 import Collections from './pages/Collections';
 import Kwibuka     from './pages/Kwibuka';
 import SurvivorTestimonyView from './pages/SurvivorTestimonyView';
+import SurvivorTestimoniesPage from './pages/SurvivorTestimoniesPage';
 import IntlDays    from './pages/Intldays';
 import Contribute  from './pages/Contribute';
 import Saved       from './pages/Saved';
@@ -118,6 +119,7 @@ export default function App() {
                 <Route path="/videos"      element={<PrivateRoute><Videos /></PrivateRoute>} />
                 <Route path="/collections" element={<PrivateRoute><Collections /></PrivateRoute>} />
                 <Route path="/kwibuka"     element={<PrivateRoute><Kwibuka /></PrivateRoute>} />
+                <Route path="/testimonies" element={<PrivateRoute><SurvivorTestimoniesPage /></PrivateRoute>} />
                 <Route path="/testimony/:id" element={<PrivateRoute><SurvivorTestimonyView /></PrivateRoute>} />
                 <Route path="/intl-days"   element={<PrivateRoute><IntlDays /></PrivateRoute>} />
                 <Route path="/contribute"  element={<PrivateRoute><Contribute /></PrivateRoute>} />
