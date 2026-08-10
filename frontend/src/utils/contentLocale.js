@@ -491,8 +491,14 @@ export function localizeItem(item, lang) {
     localizedDesc = item.desc[lang] || item.desc.en || item.desc.rw || '';
   }
 
+  // Handle category localization - if category is an object, get the right language
+  let localizedCategory = item.category;
+  if (typeof item.category === 'object' && item.category !== null) {
+    localizedCategory = item.category[lang] || item.category.en || item.category.rw || '';
+  }
+  
   // Translate category label
-  const rawCat = (item.category || item.catKey || '').toLowerCase().trim();
+  const rawCat = (localizedCategory || item.catKey || '').toLowerCase().trim();
   const catOverride = CATEGORY_LABELS[rawCat]?.[lang];
 
   // Handle location localization - if location is an object, get the right language
@@ -510,7 +516,7 @@ export function localizeItem(item, lang) {
     desc:        overrides.desc        || localizedDesc,
     description: overrides.desc        || localizedDesc,
     location:    overrides.location    || localizedLocation,
-    category:    catOverride           || item.category,
+    category:    catOverride           || localizedCategory,
   };
 }
 
