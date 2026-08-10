@@ -1,6 +1,5 @@
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
-import { getLocalizedText } from '../utils/i18n';
 import './KwibukaGallery.css';
 
 function KwibukaFlameLogo({ className = '' }) {
@@ -97,13 +96,13 @@ export default function KwibukaGallery({ videos, songs, onClose }) {
               {videos.map((video, i) => (
                 <div key={i} className="video-card">
                   <CardTypeBadge type="video" />
-                  <iframe
-                    src={`https://www.youtube.com/embed/${video.id}`}
-                    title={getLocalizedText(video.title, language)}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                  <div className="video-card-title">{getLocalizedText(video.title, language)}</div>
+                   <iframe
+                     src={`https://www.youtube.com/embed/${video.id}`}
+                     title={video.title}
+                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                     allowFullScreen
+                   />
+                   <div className="video-card-title">{video.title}</div>
                 </div>
               ))}
             </div>
@@ -123,13 +122,13 @@ export default function KwibukaGallery({ videos, songs, onClose }) {
               {songs.map((song, i) => (
                 <div key={i} className="song-card">
                   <CardTypeBadge type="audio" />
-                  <iframe
-                    src={`https://www.youtube.com/embed/${song.id}`}
-                    title={getLocalizedText(song.title, language)}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                  <div className="song-card-title">{getLocalizedText(song.title, language)}</div>
+                   <iframe
+                     src={`https://www.youtube.com/embed/${song.id}`}
+                     title={song.title}
+                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                     allowFullScreen
+                   />
+                   <div className="song-card-title">{song.title}</div>
                 </div>
               ))}
             </div>
