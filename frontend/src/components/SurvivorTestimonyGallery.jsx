@@ -47,13 +47,14 @@ function getLinks(itemUrl) {
 
 function TestimonyCard({ testimony, onReadFull }) {
   const links = getLinks(testimony.item_url);
+  const avatarName = testimony.subjects && testimony.subjects.length > 0 ? testimony.subjects[0] : 'Testimony';
 
   return (
     <article className="testimony-card">
       <div className="testimony-card-img">
         <img 
-          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(testimony.subjects[0])}&background=c1592e&color=fff&size=400`}
-          alt={testimony.subjects.join(' & ')}
+          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(avatarName)}&background=c1592e&color=fff&size=400`}
+          alt={testimony.subjects?.join(' & ') || 'Testimony'}
           onError={(e) => {
             e.target.style.display = 'none';
             e.target.nextSibling.style.display = 'flex';
@@ -71,7 +72,7 @@ function TestimonyCard({ testimony, onReadFull }) {
       </div>
 
       <div className="testimony-card-body">
-        <h3 className="testimony-card-name">{testimony.subjects.join(' & ')}</h3>
+        <h3 className="testimony-card-name">{testimony.subjects?.join(' & ') || 'Testimony'}</h3>
 
         <div className="testimony-card-meta">
           {testimony.district && (
@@ -207,8 +208,9 @@ export default function SurvivorTestimonyGallery({
     const q = query.trim().toLowerCase();
     if (!q) return testimonies;
     return testimonies.filter((t) => {
+      const subjects = t.subjects || [];
       const haystack = [
-        ...t.subjects,
+        ...subjects,
         t.district || '',
         t.summary || '',
       ]
