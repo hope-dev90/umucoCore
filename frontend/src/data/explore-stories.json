@@ -54,7 +54,7 @@
     "desc": {
       "en": "The powerful Intore tradition, Rwanda's famous warrior dance, born from the kingdom's battlefields and passed down through generations.",
       "fr": "La puissante tradition Intore, la célèbre danse guerrière du Rwanda, née des champs de bataille du royaume et transmise de génération en génération.",
-      "rw": "Umuco ukomeye wa Intore, umubyino w'abasirikare uzwi cyane mu Rwanda, wavutse ku murwa w'intambara z'ubwami maze ugezwa ku bindi bisekuru."
+      "rw": "Imbyino gakondo z'inogye ijisho kandi zibereye ibirori z'ihuza abanyarwanda."
     }
   },
   {
@@ -141,7 +141,7 @@
     "desc": {
       "en": "One of Rwanda's most powerful kings, who expanded the country's territory through wars and governance reforms.",
       "fr": "L'un des rois les plus puissants du Rwanda, qui a étendu le territoire du pays par des guerres et des réformes de gouvernance.",
-      "rw": "Umwe mu bami b'u Rwanda bakomeye cyane, wagushije ubutaka bw'igihugu binyuze mu ntambara no mu ivugurura ry'ubuyobozi."
+      "rw": "Umwe mu bami b’abanyamaboko n’igihagararo kurusha abandi mu Rwanda, waguye imbago z’ubwami binyuze mu Ntambara no mu mavugurura y’ubuyobozi."
     }
   },
   {
@@ -170,7 +170,7 @@
     "desc": {
       "en": "Sacred ceremonies and secret knowledge that governed royal court life, passed only to those authorized to know.",
       "fr": "Cérémonies sacrées et connaissances secrètes qui régissaient la vie de la cour royale, transmises uniquement aux personnes autorisées.",
-      "rw": "Imihango yera n'ubumenyi bwihishe byayoboraga ubuzima bw'urukiko rw'ubwami, bigezwa gusa ku bantu bemerewe kubimenya."
+      "rw": "Imihango y'ibwami n'ubumenyi bw'ibibanga byayoboraga urukiko rw'ubwami, bigezwa gusa ku bantu bemerewe kubimenya."
     }
   },
   {
@@ -315,7 +315,7 @@
     "desc": {
       "en": "The ancient tradition of communal work and mutual assistance, demonstrating Rwandan community life across centuries.",
       "fr": "L'ancienne tradition de travail communal et d'entraide, illustrant la vie communautaire rwandaise à travers les siècles.",
-      "rw": "Umuco wa kera w'akazi gakorwa hamwe no gufashanya, wagaragaje ubuzima bw'abaturage b'u Rwanda mu binyejana byinshi."
+      "rw": "Umuco wa kera wo gukorera  hamwe no gufashanya, wafashije mu iterambere ry'abaturage b'u Rwanda."
     }
   },
   {
@@ -402,7 +402,7 @@
     "desc": {
       "en": "Rwanda's diverse rainforest, home to thousands of wildlife species, birds, and rare primates.",
       "fr": "La forêt tropicale diversifiée du Rwanda, abritant des milliers d'espèces animales, d'oiseaux et de primates rares.",
-      "rw": "Ishyamba ritandukanye mu Rwanda, harimo inyamaswa n'inyamaswa z'ibihumbi byinshi, inyungura n'inzoka z'amakungu."
+      "rw": "Ishyamba kimeza rya kera cyane ricumbikiye amoko ibihumbi y'inyamaswa n'ibimera, harimo inyamaswa zo mu bwoko bw'inkende, inyoni zikunze kuboneka gake, n'izikururuka."
     }
   },
   {
@@ -431,7 +431,7 @@
     "desc": {
       "en": "A savanna park in eastern Rwanda, home to the Big Five and diverse wildlife species.",
       "fr": "Un parc de savane dans l'est du Rwanda, abritant les Big Five et de nombreuses espèces animales.",
-      "rw": "Pariki y'ibisura yabera mu bwongereza bw'u Rwanda, harimo ibisura nk'inyambo, imvura, amavumbi n'ibindi."
+      "rw": "Pariki nini y'igishanga muri Afrika yo Hagati, ikaba icumbikiye Inyamaswa Nini z' amoko atanu n'andi moko meza atandukanye y'inyamaswa zo muri savana."
     }
   },
   {
@@ -460,7 +460,7 @@
     "desc": {
       "en": "One of Rwanda's great lakes on the western border, filled with thousands of years of history and significance.",
       "fr": "L'un des grands lacs du Rwanda à la frontière occidentale, chargé de millénaires d'histoire et de signification.",
-      "rw": "Ikiyaga kigari cyo mu ruhande rwa burenga bw'u Rwanda, cyuzuye amateka y'ibihumbi n'ibintu bikomeye."
+      "rw": "Igiyaga giciye ibintu mu mateka n’urusobe rw’ibinyabuzima ku mupaka w’iburengerazuba bw’u Rwanda, gisangiwe na Repubulika Iharanira Demokarasi ya Kongo. Ikiyaga cya Kivu."
     }
   },
   {
@@ -489,7 +489,7 @@
     "desc": {
       "en": "Rwanda's premier museum of history and culture, containing many artifacts and archaeological treasures.",
       "fr": "Le principal musée d'histoire et de culture du Rwanda, contenant de nombreux artefacts et trésors archéologiques.",
-      "rw": "Ihaha ry'ibitekerezo ry'amateka y'u Rwanda, harimo ibintu byinshi by'umugambi n'amaherezo."
+      "rw": "Ingoro nini y’icyitegererezo mu Rwanda igaragaza amateka y’umuco w’igihugu, ikaba ifite amakusanyirizo rikomeye ry’ibikoresho bya kera n’inyandiko z’amateka. Ingoro y’Umurage w’Umuco i Huye."
     }
   },
   {
@@ -518,7 +518,7 @@
     "desc": {
       "en": "The 1994 genocide memorial at Murambi, educating visitors about the tragic events.",
       "fr": "Le mémorial du génocide de 1994 à Murambi, sensibilisant les visiteurs aux événements tragiques.",
-      "rw": "Ihaha rya jenoside rya 1994 mu Murambi, rishobora kumenya abantu kugira ngo babigire icyo ariyo."
+      "rw": "Urwibutso rwa Jenoside yakorewe Abatutsi mu 1994 rwa Murambi, rubumbatiye amateka  ya Genocide n'itegurwa ryayo kugira ngo amateka atazigera yibagirana."
     }
   },
   {
@@ -547,7 +547,7 @@
     "desc": {
       "en": "The historic Nyarugenge Church, featuring architecture spanning centuries.",
       "fr": "L'historique église de Nyarugenge, dont l'architecture s'étend sur des siècles.",
-      "rw": "Itorero rya kera rya Nyarugenge, rikubiyemo ubwubatsi bw'ibihumbi."
+      "rw": "Rimwe mu masengero ya kera cyane i Kigali, rikaba umuhamya w’amateka y’imyubakire yo mu gihe cy’ubukoroni muri uyu mujyi. Kiliziya ya Sainte-Famille cyangwa se Paruwasi ya Nyamirambo."
     }
   },
   {
@@ -576,7 +576,7 @@
     "desc": {
       "en": "The site of Marian apparitions in Rwanda, containing a church and other significant religious structures.",
       "fr": "Le site des apparitions mariales au Rwanda, avec une église et d'autres structures religieuses importantes.",
-      "rw": "Aho Maria yaboneje mu Rwanda, harimo itorero n'ibindi bikomeye."
+      "rw": "Ahantu hazwi cyane ku rwego mpuzamahanga h’ingendo ntagatifu z’Abagatolika, ahari amakuru avuga ko habereye amabonekerwa y'umubyeyi bikira Mariya."
     }
   },
   {
@@ -605,7 +605,7 @@
     "desc": {
       "en": "An important hill in Rwanda, featuring beautiful landscapes and significant cultural sites.",
       "fr": "Une colline importante au Rwanda, avec de beaux paysages et des sites culturels significatifs.",
-      "rw": "Umusozi ukomeye mu Rwanda, harimo imirima y'amakungu n'ibintu bikomeye."
+      "rw": "Umusozi ushimishije cyane mu Rwanda ugaragaza amaterasi meza y’ubuhinzi n’utwenda dutesha amayeri tw’imisozi itandukanye."
     }
   },
   {
@@ -663,7 +663,7 @@
     "desc": {
       "en": "The 1994 genocide memorial at Bisesero, honoring those who resisted the genocide.",
       "fr": "Le mémorial du génocide de 1994 à Bisesero, honorant ceux qui ont résisté au génocide.",
-      "rw": "Ihaha rya jenoside rya 1994 mu Bisesero."
+      "rw": "Urwibutso rwa Bisesero rwahaye icyubahiro abari n’abagabo bagerageje kwirwanaho mu gihe cya Jenoside yakorewe Abatutsi mu 1994 ku misozi ya Bisesero"
     }
   },
   {
@@ -692,7 +692,7 @@
     "desc": {
       "en": "The highest peak in the Virunga mountains, featuring stunning views and diverse wildlife.",
       "fr": "Le plus haut sommet des montagnes Virunga, offrant des vues époustouflantes et une faune diversifiée.",
-      "rw": "Umusozi mukuru mu Virunga, harimo ibisura n'inyamaswa."
+      "rw": "Ishyamba rinini ricumbikiye inkandaganyabami (shimpanze) n’urusobe rw’ibinyabuzima, rikaba riri gusubiranywa mu buryo bwo kubungabunga ibidukikije."
     }
   },
   {
@@ -750,7 +750,7 @@
     "desc": {
       "en": "A famous marshland in Rwanda, home to diverse wildlife and bird species.",
       "fr": "Un marais célèbre au Rwanda, abritant une faune et une avifaune diversifiées.",
-      "rw": "Akabiriziro kizwi cyane mu Rwanda, harimo inyamaswa."
+      "rw": "Igishanga cyemewe ku rwego mpuzamahanga, kizwi cyane kubera urusobe rwa kadasohoka rw’amoko y’inyoni."
     }
   },
   {
@@ -779,7 +779,7 @@
     "desc": {
       "en": "A village of transformed artisans, featuring traditional crafts and artwork.",
       "fr": "Un village d'artisans transformés, mettant en vedette des artisanats et des œuvres d'art traditionnels.",
-      "rw": "Umujyi w'ibintu byahindutse, harimo imigongo n'ibindi byanditswe."
+      "rw": "Umudugudu uzwi cyane kubera ubukorikori gakondo bw’u Rwanda, birimo ibishushanyo by’imigongo n’inkangara ziboshywe."
     }
   },
   {
@@ -837,7 +837,7 @@
     "desc": {
       "en": "Magnificent waterfalls on the border between Rwanda and Tanzania, historically significant.",
       "fr": "De magnifiques chutes d'eau à la frontière entre le Rwanda et la Tanzanie, d'une grande importance historique.",
-      "rw": "Imirima y'ibisura, yabera mu Rusumo."
+      "rw": "Isumo ry’amazi ritangaje rishushanya umupaka hagati y’u Rwanda na Tanzaniya, rikaba ari akataraboneka."
     }
   },
   {
@@ -866,7 +866,7 @@
     "desc": {
       "en": "Rwanda's famous national stadium, rich in history and cultural significance.",
       "fr": "Le célèbre stade national du Rwanda, riche en histoire et en signification culturelle.",
-      "rw": "Ikibuga kizwi cyane mu Rwanda, cyuzuye amateka n'ibintu bikomeye."
+      "rw": "Sitade y’igihugu y’icyitegererezo y’u Rwanda, umuhamya w’ibihe bikomeye by’amateka n’ikimenyetso cy’amahoro. Sitade Amahoro."
     }
   },
   {
@@ -895,7 +895,7 @@
     "desc": {
       "en": "A museum featuring traditional and contemporary Rwandan art and cultural artifacts.",
       "fr": "Un musée présentant l'art rwandais traditionnel et contemporain ainsi que des artefacts culturels.",
-      "rw": "Ihaha ry'imigongo n'ibindi by'ubwenge."
+      "rw": "Ahantu hagenewe ibihangano nyabugeni bya kijyambere n’ibya gakondo by’u Rwanda, hagaragaza ibishushanyo bizwi cyane by’imigongo bifite imisusire n’imijyo y’injyanamuntu."
     }
   }
 ]
