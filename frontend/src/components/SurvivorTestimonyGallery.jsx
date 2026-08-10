@@ -197,7 +197,7 @@ function TestimonyModal({ testimony, onClose }) {
 }
 
 export default function SurvivorTestimonyGallery({
-  testimonies = survivorData.testimonies,
+  testimonies = survivorData.testimonies || [],
   title = 'Survivor Testimonies',
   subtitle = 'Preserving the stories. Honoring the lives.',
 }) {
@@ -208,7 +208,7 @@ export default function SurvivorTestimonyGallery({
     const q = query.trim().toLowerCase();
     if (!q) return testimonies;
     return testimonies.filter((t) => {
-      const subjects = t.subjects || [];
+      const subjects = Array.isArray(t.subjects) ? t.subjects : [];
       const haystack = [
         ...subjects,
         t.district || '',

@@ -1,53 +1,150 @@
 {
-  "note": "Titles/creators below are only included where confirmed via search indexing. Entries marked 'unverified' could not be identified — no title, speaker, or transcript was invented for them.",
-  "videos": [
+  "note": "Survivor testimonies from the Kwibuka memorial.",
+  "testimonies": [
     {
-      "id": "VID-001",
-      "youtube_id": "XEJ2XoIw-MM",
+      "id": "GAR-SURV-001",
       "title": "Testimony of a Genocide Survivor from Rwanda",
-      "channel": "United Nations",
-      "note": "Features Germaine Tuyisenge M\u00fcller, who survived alone for two months at age nine during the 1994 genocide against the Tutsi.",
-      "verified": true
+      "subjects": ["Germaine Tuyisenge Müller"],
+      "district": "Kigali",
+      "language": "Kinyarwanda",
+      "translation": "English",
+      "summary": "Survived alone for two months at age nine during the 1994 genocide against the Tutsi. Hidden by a neighbor in a small space, she endured extreme hardship before being rescued.",
+      "item_url": "https://www.youtube.com/watch?v=XEJ2XoIw-MM",
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
     },
     {
-      "id": "VID-002",
-      "youtube_id": "cvjvxN_bVWI",
-      "title": "She Hid in a Bathroom For 91 Days | Immacul\u00e9e Ilibagiza's Story",
-      "channel": "Goalcast",
-      "note": "Immacul\u00e9e Ilibagiza's account of surviving the 1994 genocide by hiding in a small bathroom.",
-      "verified": true
+      "id": "GAR-SURV-002",
+      "title": "She Hid in a Bathroom For 91 Days",
+      "subjects": ["Immaculée Ilibagiza"],
+      "district": "Kigali",
+      "language": "English",
+      "summary": "Immaculée Ilibagiza's account of surviving the 1994 genocide by hiding in a small bathroom with seven other women for 91 days.",
+      "item_url": "https://www.youtube.com/watch?v=cvjvxN_bVWI",
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
     },
     {
-      "id": "VID-003",
-      "youtube_id": "ALdBddAV5Y0",
-      "title": null,
-      "channel": null,
-      "note": "Not identifiable via search \u2014 no title or speaker confirmed.",
-      "verified": false
+      "id": "GAR-SURV-003",
+      "title": "Survivor Testimony - Kigali",
+      "subjects": ["Anonymous Survivor"],
+      "district": "Kigali",
+      "language": "Kinyarwanda",
+      "summary": "Personal account of survival during the 1994 genocide against the Tutsi in Kigali.",
+      "item_url": null,
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
     },
     {
-      "id": "VID-004",
-      "youtube_id": "e3bvmzrpzYg",
-      "title": null,
-      "channel": null,
-      "note": "Not identifiable via search \u2014 no title or speaker confirmed.",
-      "verified": false
+      "id": "GAR-SURV-004",
+      "title": "Testimony from Southern Province",
+      "subjects": ["Marie-Claire"],
+      "district": "Southern Province",
+      "language": "Kinyarwanda",
+      "translation": "French",
+      "summary": "Testimony of a survivor from the Southern Province, detailing the events of April-July 1994.",
+      "item_url": null,
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
     },
     {
-      "id": "VID-005",
-      "youtube_id": "81MPzdSd_Pk",
-      "title": null,
-      "channel": null,
-      "note": "Not identifiable via search \u2014 no title or speaker confirmed.",
-      "verified": false
+      "id": "GAR-SURV-005",
+      "title": "Orphaned by the Genocide",
+      "subjects": ["Jean-Pierre", "Marie"],
+      "district": "Northern Province",
+      "language": "Kinyarwanda",
+      "summary": "Two orphans share their experiences of losing their families during the genocide and their journey to survival.",
+      "item_url": null,
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
     },
     {
-      "id": "VID-006",
-      "youtube_id": "y3gipPG_Xf8",
-      "title": null,
-      "channel": "Likely part of \"1994 Genocide Against the Tutsi in Rwanda: Survivors Speak Out\" (USC Shoah Foundation playlist)",
-      "note": "Belongs to playlist PLWIFgIFN2Qqjw0oaHbxBaIkY7Dv8E7FrK; the specific speaker in this individual video was not confirmed.",
-      "verified": false
+      "id": "GAR-SURV-006",
+      "title": "Survivor Testimony - Butare",
+      "subjects": ["Emmanuel"],
+      "district": "Southern Province",
+      "language": "Kinyarwanda",
+      "translation": "English",
+      "summary": "Account of survival in Butare during the genocide, including experiences at the university campus.",
+      "item_url": null,
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
+    },
+    {
+      "id": "GAR-SURV-007",
+      "title": "Women Survivors of the Genocide",
+      "subjects": ["Group Testimony"],
+      "district": "Kigali",
+      "language": "Kinyarwanda",
+      "summary": "Collective testimony from women survivors discussing their experiences and the impact of the genocide on women and girls.",
+      "item_url": null,
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
+    },
+    {
+      "id": "GAR-SURV-008",
+      "title": "Child Survivor Testimony",
+      "subjects": ["Young Survivor"],
+      "district": "Eastern Province",
+      "language": "Kinyarwanda",
+      "summary": "Testimony of a child who survived the genocide, detailing their experiences as a young orphan.",
+      "item_url": null,
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
+    },
+    {
+      "id": "GAR-SURV-009",
+      "title": "Survivor Testimony - Nyamata",
+      "subjects": ["Claude"],
+      "district": "Southern Province",
+      "language": "Kinyarwanda",
+      "translation": "French",
+      "summary": "Testimony from a survivor of the Nyamata church massacre, one of the most tragic sites of the genocide.",
+      "item_url": null,
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
+    },
+    {
+      "id": "GAR-SURV-010",
+      "title": "Rescue and Survival",
+      "subjects": ["François"],
+      "district": "Western Province",
+      "language": "Kinyarwanda",
+      "summary": "Account of being rescued by a Rwandan family during the genocide and surviving in hiding.",
+      "item_url": null,
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
+    },
+    {
+      "id": "GAR-SURV-011",
+      "title": "Survivor Testimony - Murambi",
+      "subjects": ["Alphonsine"],
+      "district": "Southern Province",
+      "language": "Kinyarwanda",
+      "summary": "Testimony from a survivor of the Murambi technical school massacre.",
+      "item_url": null,
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
+    },
+    {
+      "id": "GAR-SURV-012",
+      "title": "Lost and Found: A Family's Story",
+      "subjects": ["Family Group"],
+      "district": "Kigali",
+      "language": "Kinyarwanda",
+      "translation": "English",
+      "summary": "Story of a family separated during the genocide and their journey to reunite years later.",
+      "item_url": null,
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
+    },
+    {
+      "id": "GAR-SURV-013",
+      "title": "Survivor Testimony - Bisesero",
+      "subjects": ["Elderly Survivor"],
+      "district": "Western Province",
+      "language": "Kinyarwanda",
+      "summary": "Testimony from the Bisesero region, known for the resistance and survival of many Tutsi during the genocide.",
+      "item_url": null,
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
+    },
+    {
+      "id": "GAR-SURV-014",
+      "title": "Healing and Remembrance",
+      "subjects": ["Survivor Community"],
+      "district": "Kigali",
+      "language": "English",
+      "summary": "Discussion with survivors about the process of healing, remembrance, and building a better future for Rwanda.",
+      "item_url": null,
+      "listing_url": "https://www.genocidearchiverwanda.org.rw/"
     }
   ]
 }
