@@ -47,7 +47,7 @@ function getLinks(itemUrl) {
 
 function TestimonyCard({ testimony, onReadFull }) {
   const links = getLinks(testimony.item_url);
-  const avatarName = testimony.subjects && testimony.subjects.length > 0 ? testimony.subjects[0] : 'Testimony';
+  const avatarName = Array.isArray(testimony.subjects) && testimony.subjects.length > 0 ? testimony.subjects[0] : 'Testimony';
 
   return (
     <article className="testimony-card">
