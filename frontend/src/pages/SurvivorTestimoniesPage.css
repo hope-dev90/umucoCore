@@ -1,0 +1,4 @@
+.survivor-testimonies-page {
+  min-height: 100vh;
+  background: var(--bg-page, #fbf6ef);
+}

@@ -5,8 +5,8 @@ import ReflectionImg from '../assets/kwibuka/reflection.jpg';
 import Memorial1Img from '../assets/kwibuka/memorial1.jpg';
 import Memorial2Img from '../assets/kwibuka/memorial2.jpg';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 import KwibukaGallery from '../components/KwibukaGallery';
-import SurvivorTestimonyGallery from '../components/SurvivorTestimonyGallery';
 
 const IMG = {
   reflection: ReflectionImg,
@@ -53,9 +53,9 @@ function KwibukaFlameLogo({ className = '' }) {
 
 export default function Kwibuka() {
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const [topbarSearch, setTopbarSearch] = React.useState('');
   const [galleryOpen, setGalleryOpen] = React.useState(false);
-  const [testimonyGalleryOpen, setTestimonyGalleryOpen] = React.useState(false);
 
   const voices = [
     {
@@ -137,7 +137,7 @@ export default function Kwibuka() {
             </div>
             <div className="reflection-author">{t('kwibuka.reflectionAuthor')}</div>
             <div className="reflection-actions">
-              <button className="btn-testimony" onClick={() => setTestimonyGalleryOpen(true)}>
+              <button className="btn-testimony" onClick={() => navigate('/testimonies')}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                 {t('kwibuka.readTestimonyBtn')}
               </button>
@@ -227,12 +227,7 @@ export default function Kwibuka() {
         />
       )}
 
-      {/* Survivor Testimony Gallery - opens when "Read testimony" is clicked */}
-      {testimonyGalleryOpen && (
-        <SurvivorTestimonyGallery 
-          onClose={() => setTestimonyGalleryOpen(false)} 
-        />
-      )}
+      {/* Survivor Testimonies are now on a dedicated page at /testimonies */}
     </Layout>
   );
 }
