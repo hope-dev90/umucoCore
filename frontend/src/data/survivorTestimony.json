@@ -1,0 +1,165 @@
+{
+  "source": "Genocide Archive of Rwanda — Category: Survivor Testimonies",
+  "source_category_url": "https://genocidearchiverwanda.org.rw/category/Survivors",
+  "extraction_note": "genocidearchiverwanda.org.rw renders its catalog client-side via JavaScript, which this extraction tool cannot execute. The entries below are limited to what was recoverable from search-engine-indexed snippets of the site and are NOT a complete listing of the Survivor Testimonies category. Fields left as null were not present in the available snippet.",
+  "extracted_date": "2026-08-10",
+  "testimonies": [
+    {
+      "id": "GAR-SURV-001",
+      "title": "Testimony of Angélique Uwase",
+      "subjects": ["Angélique Uwase"],
+      "district": null,
+      "language": null,
+      "translation": null,
+      "summary": "Angélique Uwase shares her story before, during, and after the 1994 genocide against the Tutsi.",
+      "item_url": null,
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-002",
+      "title": "Testimonies of Dieudonné Ntagengerwa and Thierry Ntagengerwa",
+      "subjects": ["Dieudonné Ntagengerwa", "Thierry Ntagengerwa"],
+      "district": "Nyarugenge",
+      "language": null,
+      "translation": null,
+      "summary": "Dieudonné Ntagengerwa and Thierry Ntagengerwa share their story before, during, and after the 1994 genocide against the Tutsi. They survived at Nyarugenge District.",
+      "item_url": null,
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-003",
+      "title": "Testimony of Yves Kamuronsi",
+      "subjects": ["Yves Kamuronsi"],
+      "district": "Muhanga",
+      "language": "Kinyarwanda",
+      "translation": "French",
+      "summary": "Yves Kamuronsi tells the story of his experiences before, during, and after the 1994 genocide against the Tutsi. He survived at Muhanga district.",
+      "item_url": null,
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-004",
+      "title": "Testimony of Marcel Harerimana",
+      "subjects": ["Marcel Harerimana"],
+      "district": "Karongi",
+      "language": "Kinyarwanda",
+      "translation": "English transcript",
+      "summary": "Marcel Harerimana shares his story before, during, and after the 1994 genocide against the Tutsi. He survived at Karongi District.",
+      "item_url": null,
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-005",
+      "title": "Testimony of Rémy Kamugire",
+      "subjects": ["Rémy Kamugire"],
+      "district": null,
+      "language": null,
+      "translation": null,
+      "summary": "Rémy Kamugire shares his story before, during, and after the 1994 genocide against the Tutsi.",
+      "item_url": null,
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-006",
+      "title": "Oral History Testimony of Josephine Murebwayire",
+      "subjects": ["Josephine Murebwayire"],
+      "district": "Rulindo",
+      "language": "Kinyarwanda",
+      "translation": "English translation and subtitles",
+      "summary": "Josephine Murebwayire shares her story before, during, and after the 1994 genocide against the Tutsi. She survived at Rulindo District.",
+      "item_url": [
+        "https://genocidearchiverwanda.org.rw/index.php?gsearch=&title=Kmc00005-sub1-eng-glifos",
+        "https://genocidearchiverwanda.org.rw/index.php?gsearch=kwibuka&title=Kmc00005-sub2-eng-glifos"
+      ],
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-007",
+      "title": "A testimony of Gilbert Masengo Rutayisire",
+      "subjects": ["Gilbert Masengo Rutayisire"],
+      "district": "Nyarugenge",
+      "language": "Kinyarwanda",
+      "translation": "English translation and subtitles",
+      "summary": "Gilbert Masengo Rutayisire shares his story before, during, and after the 1994 genocide against the Tutsi. He survived at Nyarugenge District.",
+      "item_url": "https://genocidearchiverwanda.org.rw/index.php?title=Kmc00006-sub1-eng-glifos",
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-008",
+      "title": "A testimony of Mathilde Uwanyirigira",
+      "subjects": ["Mathilde Uwanyirigira"],
+      "district": "Nyarugenge",
+      "language": "Kinyarwanda",
+      "translation": "English translation and subtitles",
+      "summary": "Mathilde Uwanyirigira shares her story before, during, and after the 1994 genocide against the Tutsi. She survived at Nyarugenge District.",
+      "item_url": "https://genocidearchiverwanda.org.rw/Kmc00033-sub1-eng-glifos",
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-009",
+      "title": "A testimony of Pascal Kubwimana",
+      "subjects": ["Pascal Kubwimana"],
+      "district": "Gisagara",
+      "language": null,
+      "translation": null,
+      "summary": "Pascal Kubwimana shares his story before, during and after the 1994 genocide against the Tutsi. He survived at Gisagara District.",
+      "item_url": "https://genocidearchiverwanda.org.rw/index.php?title=Oral_Testimony_of_Pascal_Kubwimana",
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-010",
+      "title": "A testimony of Dominique Rurangirwa",
+      "subjects": ["Dominique Rurangirwa"],
+      "district": "Nyarugenge",
+      "language": null,
+      "translation": null,
+      "summary": "Dominique Rurangirwa shares his story before, during, and after the 1994 genocide against the Tutsi. He survived at Nyarugenge District.",
+      "item_url": "https://genocidearchiverwanda.org.rw/Survivor5",
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-011",
+      "title": "A testimony of Innocent Kamanzi",
+      "subjects": ["Innocent Kamanzi"],
+      "district": "Muhanga",
+      "language": null,
+      "translation": null,
+      "summary": "Innocent Kamanzi shares his story before, during, and after the 1994 genocide against the Tutsi. He survived at Muhanga District.",
+      "item_url": "https://www.genocidearchiverwanda.org.rw/index.php/Oral_Testimony_of_Innocent_kamanzi",
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-012",
+      "title": "A testimony of Marie Grace Mukabyagaju",
+      "subjects": ["Marie Grace Mukabyagaju"],
+      "district": "Nyarugenge",
+      "language": null,
+      "translation": null,
+      "summary": "Marie Grace Mukabyagaju shares her story before, during, and after the 1994 genocide against the Tutsi. She survived at Nyarugenge District.",
+      "item_url": "https://genocidearchiverwanda.org.rw/Survivor1",
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-013",
+      "title": "Testimony referencing Jacques Ntagorama",
+      "subjects": ["Jacques Ntagorama"],
+      "district": "Gatsibo",
+      "language": null,
+      "translation": null,
+      "summary": "Jacques Ntagorama shares his story before, during, and after the 1994 genocide against the Tutsi. He survived at Gatsibo District.",
+      "item_url": null,
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    },
+    {
+      "id": "GAR-SURV-014",
+      "title": "Testimony referencing Jean d'Amour Niyonsenga",
+      "subjects": ["Jean d'Amour Niyonsenga"],
+      "district": "Ngororero",
+      "language": null,
+      "translation": null,
+      "summary": "Jean d'Amour Niyonsenga shares his story before, during, and after the 1994 genocide against the Tutsi. He survived at Ngororero District.",
+      "item_url": null,
+      "listing_url": "https://genocidearchiverwanda.org.rw/category/Survivors"
+    }
+  ]
+}
