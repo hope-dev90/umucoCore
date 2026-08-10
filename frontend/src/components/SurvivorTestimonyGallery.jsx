@@ -148,7 +148,7 @@ function TestimonyModal({ testimony, onClose }) {
                     className="testimony-modal-link"
                   >
                     <LinkIcon />
-                    {links.length > 1 ? `Testimony Part ${i + 1}` : 'View Testimony'}
+                    {getLinks(testimony.item_url).length > 1 ? `Testimony Part ${i + 1}` : 'View Testimony'}
                   </a>
                 ))}
               </div>
