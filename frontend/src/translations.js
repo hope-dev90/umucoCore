@@ -1447,7 +1447,7 @@ export const translations = {
     "testimonies.subtitle": "Kubungabunga inkuru. Guha icyubahiro ubuzima.",
     "testimonies.searchPlaceholder": "Shaka ku izina cyangwa akarere…",
     "testimonies.count": "{count} ubuhamya",
-    "testimonies.count_plural": "{count} ubuhamya",
+    "testimonies.count_plural": "{count} ubuhamya bwinshi",
     "testimonies.noResults": "Nta bubuhamya buboneka.",
     "testimonies.readFull": "Soma Ubuhamya Bwose",
     "testimonies.readPart": "Soma Igice {part}",
