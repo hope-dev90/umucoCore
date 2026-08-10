@@ -177,8 +177,15 @@ export default function Explore() {
           });
 
           setHeritageItems(prev => {
-            const byKey = new Map(prev.map(item => [item.title, item]));
-            apiMapped.forEach(item => byKey.set(item.title, item));
+            // Start with API data as base
+            const byKey = new Map(apiMapped.map(item => [item.title, item]));
+            // Merge fallback data on top - this ensures explore-stories.json takes precedence
+            prev.forEach(item => {
+              // Only override if this item came from explore-stories.json (has id starting with 'card-')
+              if (item.id && item.id.startsWith('card-')) {
+                byKey.set(item.title, item);
+              }
+            });
             return Array.from(byKey.values());
           });
         }
