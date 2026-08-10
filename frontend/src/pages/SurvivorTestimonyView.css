@@ -1,67 +1,87 @@
+/* ── SURVIVOR TESTIMONY VIEW ──
+   Same palette as the other Kwibuka components: warm cream
+   background, terracotta accent, serif display headline. */
+
 .testimony-view-page {
+  --tv-accent: var(--primary, #c1592e);
+  --tv-bg: var(--bg-page, #fbf6ef);
+  --tv-card: var(--bg-card, #ffffff);
+  --tv-border: var(--border-light, #ece4d8);
+  --tv-text: var(--text-primary, #211c18);
+  --tv-muted: var(--text-secondary, #8a8177);
+
+  background: var(--tv-bg);
   min-height: 100vh;
-  background: var(--bg-page, #fbf6ef);
-  padding: 48px 40px 64px;
+  padding: 40px 24px 80px;
 }
 
 .testimony-view-container {
-  max-width: 800px;
+  max-width: 760px;
   margin: 0 auto;
 }
+
+/* ── Back button ── */
 
 .testimony-view-back-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 18px;
-  background: var(--bg-card, #ffffff);
-  border: 1px solid var(--border-light, #ece4d8);
-  border-radius: 8px;
+  border: 1px solid var(--tv-border);
+  background: var(--tv-card);
+  color: var(--tv-muted);
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #211c18);
+  padding: 9px 16px;
+  border-radius: 999px;
   cursor: pointer;
-  transition: all 0.15s;
-  margin-bottom: 32px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  margin-bottom: 28px;
 }
 
 .testimony-view-back-btn:hover {
-  background: var(--border-light, #ece4d8);
-  transform: translateX(-2px);
+  background: var(--tv-accent);
+  border-color: var(--tv-accent);
+  color: #fff;
 }
 
+.testimony-view-back-btn:focus-visible {
+  outline: 2px solid var(--tv-accent);
+  outline-offset: 2px;
+}
+
+/* ── Header ── */
+
 .testimony-view-header {
-  margin-bottom: 40px;
-  padding-bottom: 24px;
-  border-bottom: 2px solid var(--border-light, #ece4d8);
+  margin-bottom: 36px;
 }
 
 .testimony-view-badge {
   display: inline-block;
-  background: var(--primary, #c1592e);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: var(--tv-accent);
+  background: color-mix(in srgb, var(--tv-accent) 12%, transparent);
+  padding: 5px 12px;
+  border-radius: 999px;
   margin-bottom: 16px;
 }
 
 .testimony-view-title {
   margin: 0 0 16px;
   font-family: var(--font-display, 'Playfair Display', Georgia, serif);
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--text-primary, #211c18);
+  font-size: 34px;
+  font-weight: 600;
   line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--tv-text);
 }
 
 .testimony-view-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 20px;
+  gap: 8px 18px;
 }
 
 .testimony-view-meta-item {
@@ -70,146 +90,159 @@
   gap: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary, #8a8177);
+  color: var(--tv-muted);
 }
 
 .testimony-view-meta-item svg {
-  color: var(--primary, #c1592e);
+  color: var(--tv-accent);
   flex-shrink: 0;
 }
+
+/* ── Body sections ── */
 
 .testimony-view-content {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 28px;
+}
+
+.testimony-view-content h2 {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--tv-muted);
+}
+
+.testimony-view-content p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--tv-text);
 }
 
 .testimony-view-summary,
 .testimony-view-links,
 .testimony-view-note,
 .testimony-view-archive {
-  background: var(--bg-card, #ffffff);
-  border-radius: 12px;
-  padding: 28px;
-  border: 1px solid var(--border-light, #ece4d8);
-}
-
-.testimony-view-summary h2,
-.testimony-view-links h2,
-.testimony-view-note h2,
-.testimony-view-archive h2 {
-  margin: 0 0 16px;
-  font-family: var(--font-display, 'Playfair Display', Georgia, serif);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--text-primary, #211c18);
-}
-
-.testimony-view-summary p {
-  margin: 0;
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--text-primary, #211c18);
+  background: var(--tv-card);
+  border: 1px solid var(--tv-border);
+  border-radius: 16px;
+  padding: 24px 28px;
 }
 
 .testimony-view-links-intro {
-  margin: 0 0 16px;
-  font-size: 14px;
-  color: var(--text-secondary, #8a8177);
-  line-height: 1.6;
+  margin-bottom: 16px !important;
+  color: var(--tv-muted) !important;
+  font-size: 13.5px !important;
 }
+
+/* ── Inline video embed ── */
+
+.testimony-video-embed {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #17110d;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+.testimony-video-embed iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* ── Link / play buttons ── */
 
 .testimony-view-links-list {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
 .testimony-view-link {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 18px;
-  background: var(--primary, #c1592e);
-  color: white;
+  gap: 8px;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--tv-accent);
+  background: var(--tv-bg);
+  border: 1px solid var(--tv-border);
+  border-radius: 999px;
+  padding: 9px 16px;
+  cursor: pointer;
   text-decoration: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  transition: background 0.15s;
-  align-self: flex-start;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .testimony-view-link:hover {
-  background: var(--primary-dark, #8D493A);
-  text-decoration: none;
+  border-color: var(--tv-accent);
 }
+
+.testimony-view-link:focus-visible {
+  outline: 2px solid var(--tv-accent);
+  outline-offset: 2px;
+}
+
+.testimony-view-link--active {
+  background: var(--tv-accent);
+  border-color: var(--tv-accent);
+  color: #fff;
+}
+
+/* ── Note / archive callouts ── */
 
 .testimony-view-note {
-  background: var(--bg-page, #fbf6ef);
-  border: 1px solid var(--border-light, #ece4d8);
-}
-
-.testimony-view-note p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--text-secondary, #8a8177);
+  border-color: color-mix(in srgb, var(--tv-accent) 30%, var(--tv-border));
 }
 
 .testimony-view-archive-link {
-  color: var(--primary, #c1592e);
+  color: var(--tv-accent);
   font-weight: 600;
-  text-decoration: none;
-}
-
-.testimony-view-archive-link:hover {
   text-decoration: underline;
 }
 
-.testimony-video-embed {
-  position: relative;
-  width: 100%;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
-  height: 0;
-  overflow: hidden;
-  border-radius: 12px;
-  margin-top: 20px;
-  background: #000;
-}
-
-.testimony-video-embed iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
+/* ── Not found state ── */
 
 .testimony-view-not-found {
+  max-width: 480px;
+  margin: 80px auto 0;
   text-align: center;
-  padding: 80px 20px;
 }
 
 .testimony-view-not-found h2 {
-  margin: 0 0 12px;
   font-family: var(--font-display, 'Playfair Display', Georgia, serif);
-  font-size: 28px;
-  color: var(--text-primary, #211c18);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--tv-text);
+  margin: 0 0 10px;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 .testimony-view-not-found p {
+  font-size: 14px;
+  color: var(--tv-muted);
   margin: 0 0 24px;
-  font-size: 15px;
-  color: var(--text-secondary, #8a8177);
+}
+
+.testimony-view-not-found .testimony-view-back-btn {
+  margin: 0 auto;
 }
 
 /* ── Responsive ── */
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .testimony-view-page {
-    padding: 32px 20px 48px;
+    padding: 28px 18px 60px;
   }
 
   .testimony-view-title {
@@ -221,23 +254,5 @@
   .testimony-view-note,
   .testimony-view-archive {
     padding: 20px;
-  }
-
-  .testimony-view-summary h2,
-  .testimony-view-links h2,
-  .testimony-view-note h2,
-  .testimony-view-archive h2 {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 480px) {
-  .testimony-view-title {
-    font-size: 22px;
-  }
-
-  .testimony-view-back-btn {
-    width: 100%;
-    justify-content: center;
   }
 }
