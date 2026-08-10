@@ -45,11 +45,11 @@ export default function KwibukaGallery({ videos, songs, onClose }) {
       <div className="gallery-modal" onClick={(e) => e.stopPropagation()}>
         <div className="gallery-modal-header">
           <div className="gallery-header-content">
-            <KwibukaFlameLogo className="gallery-flame-logo" />
-            <div>
+            <div className="gallery-header-top">
+              <KwibukaFlameLogo className="gallery-flame-logo" />
               <h2>{t('kwibuka.galleryTitle') || 'Kwibuka Gallery'}</h2>
-              <p className="gallery-modal-subtitle">{t('kwibuka.gallerySubtitle') || 'Videos and songs of remembrance'}</p>
             </div>
+            <p className="gallery-modal-subtitle">{t('kwibuka.gallerySubtitle') || 'Videos and songs of remembrance'}</p>
           </div>
           <button className="gallery-modal-close" onClick={onClose}>&times;</button>
         </div>
