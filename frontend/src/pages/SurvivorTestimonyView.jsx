@@ -120,23 +120,36 @@ export default function SurvivorTestimonyView() {
                   {t('testimonies.accessIntro')}
                 </p>
                 <div className="testimony-view-links-list">
-                  {links.map((url, i) => (
-                    <a
-                      key={url}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="testimony-view-link"
-                    >
-                      <LinkIcon />
-                      {links.length > 1 ? t('testimonies.part', { part: i + 1 }) : t('testimonies.viewFull')}
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                        <path d="M15 3h6v6M10 14 21 3" />
-                      </svg>
-                    </a>
-                  ))}
+                  {links.map((url, i) => {
+                    // Convert YouTube watch URLs to embed URLs
+                    const embedUrl = url.replace('watch?v=', 'embed/');
+                    return (
+                      <a
+                        key={url}
+                        href={url}
+                        className="testimony-view-link"
+                      >
+                        <LinkIcon />
+                        {links.length > 1 ? t('testimonies.part', { part: i + 1 }) : t('testimonies.viewFull')}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                          <path d="M15 3h6v6M10 14 21 3" />
+                        </svg>
+                      </a>
+                    );
+                  })}
                 </div>
+                {links.some(url => url.includes('youtube')) && (
+                  <div className="testimony-video-embed">
+                    <iframe
+                      src={links[0].replace('watch?v=', 'embed/')}
+                      title="Testimony Video"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                )}
               </div>
             )}
 
