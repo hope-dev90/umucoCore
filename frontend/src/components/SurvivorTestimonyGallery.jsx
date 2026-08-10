@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import survivorData from '../data/survivorTestimony.json';
 import './SurvivorTestimonyGallery.css';
 
@@ -200,7 +201,7 @@ export default function SurvivorTestimonyGallery({
   subtitle = 'Preserving the stories. Honoring the lives.',
 }) {
   const [query, setQuery] = useState('');
-  const [selectedTestimony, setSelectedTestimony] = useState(null);
+  const navigate = useNavigate();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -218,11 +219,7 @@ export default function SurvivorTestimonyGallery({
   }, [testimonies, query]);
 
   const handleReadFull = (testimony) => {
-    setSelectedTestimony(testimony);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedTestimony(null);
+    navigate(`/testimony/${testimony.id}`);
   };
 
   return (
@@ -268,12 +265,7 @@ export default function SurvivorTestimonyGallery({
         )}
       </section>
 
-      {selectedTestimony && (
-        <TestimonyModal 
-          testimony={selectedTestimony} 
-          onClose={handleCloseModal} 
-        />
-      )}
+      {/* Modal removed - now using dedicated page at /testimony/:id */}
     </>
   );
 }
