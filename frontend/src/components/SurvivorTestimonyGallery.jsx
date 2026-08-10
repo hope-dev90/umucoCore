@@ -49,51 +49,71 @@ function TestimonyCard({ testimony, onReadFull }) {
 
   return (
     <article className="testimony-card">
-      <div className="testimony-card-quote" aria-hidden="true">&ldquo;</div>
-
-      <h3 className="testimony-card-name">{testimony.subjects.join(' & ')}</h3>
-
-      <div className="testimony-card-meta">
-        {testimony.district && (
-          <span className="testimony-meta-item">
-            <PinIcon />
-            {testimony.district} District
-          </span>
-        )}
-        {testimony.language && (
-          <span className="testimony-meta-item">
-            <LanguageIcon />
-            {testimony.language}
-            {testimony.translation ? ` · ${testimony.translation}` : ''}
-          </span>
-        )}
+      <div className="testimony-card-img">
+        <img 
+          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(testimony.subjects[0])}&background=c1592e&color=fff&size=400`}
+          alt={testimony.subjects.join(' & ')}
+          onError={(e) => {
+            e.target.style.display = 'none';
+            e.target.nextSibling.style.display = 'flex';
+          }}
+        />
+        <div className="testimony-card-img-placeholder" style={{ display: 'none' }}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </div>
+        <div className="testimony-card-badge">
+          <span className="testimony-badge-text">Survivor Testimony</span>
+        </div>
       </div>
 
-      <p className="testimony-card-summary">{testimony.summary}</p>
+      <div className="testimony-card-body">
+        <h3 className="testimony-card-name">{testimony.subjects.join(' & ')}</h3>
 
-      <div className="testimony-card-footer">
-        {links.length > 0 ? (
-          links.map((url, i) => (
-            <a
-              key={url}
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="testimony-card-link"
+        <div className="testimony-card-meta">
+          {testimony.district && (
+            <span className="testimony-meta-item">
+              <PinIcon />
+              {testimony.district} District
+            </span>
+          )}
+          {testimony.language && (
+            <span className="testimony-meta-item">
+              <LanguageIcon />
+              {testimony.language}
+              {testimony.translation ? ` · ${testimony.translation}` : ''}
+            </span>
+          )}
+        </div>
+
+        <p className="testimony-card-summary">{testimony.summary}</p>
+
+        <div className="testimony-card-actions">
+          {links.length > 0 ? (
+            links.map((url, i) => (
+              <a
+                key={url}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="testimony-read-btn"
+              >
+                <LinkIcon />
+                {links.length > 1 ? `Read Part ${i + 1}` : 'Read Testimony'}
+              </a>
+            ))
+          ) : (
+            <button 
+              type="button"
+              className="testimony-read-btn"
+              onClick={() => onReadFull(testimony)}
             >
-              <LinkIcon />
-              {links.length > 1 ? `Read testimony ${i + 1}` : 'Read testimony'}
-            </a>
-          ))
-        ) : (
-          <button 
-            type="button"
-            className="testimony-card-link testimony-card-link--button"
-            onClick={() => onReadFull(testimony)}
-          >
-            Read full testimony
-          </button>
-        )}
+              Read Full Testimony
+            </button>
+          )}
+        </div>
       </div>
     </article>
   );

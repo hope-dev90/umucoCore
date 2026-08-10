@@ -116,56 +116,103 @@
   gap: 20px;
 }
 
+/* Card - matches Collections page style */
 .testimony-card {
-  position: relative;
+  background: var(--ts-card);
+  border-radius: var(--radius-lg, 16px);
+  overflow: hidden;
+  border: 1px solid var(--ts-border);
+  box-shadow: 0 1px 2px rgba(40, 25, 15, 0.04);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
-  background: var(--ts-card);
-  border: 1px solid var(--ts-border);
-  border-radius: 16px;
-  padding: 24px 24px 20px;
-  box-shadow: 0 1px 2px rgba(40, 25, 15, 0.04);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .testimony-card:hover {
   transform: translateY(-3px);
-  border-color: var(--ts-accent);
   box-shadow: 0 16px 32px rgba(40, 25, 15, 0.1);
 }
 
-.testimony-card-quote {
+/* Image container - 4:3 ratio like Collections */
+.testimony-card-img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--bg-secondary, #f5ede6);
+  position: relative;
+}
+
+.testimony-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.testimony-card:hover .testimony-card-img img {
+  transform: scale(1.05);
+}
+
+.testimony-card-img-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--primary-dark, #8D493A), var(--primary-dark, #8D493A));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.testimony-card-badge {
   position: absolute;
-  top: 8px;
-  right: 20px;
-  font-family: var(--font-display, 'Playfair Display', Georgia, serif);
-  font-size: 56px;
-  line-height: 1;
-  color: var(--ts-accent);
-  opacity: 0.12;
-  pointer-events: none;
+  top: 12px;
+  left: 12px;
+  background: var(--ts-accent);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  z-index: 2;
+}
+
+.testimony-badge-text {
+  display: inline-block;
+}
+
+/* Card body */
+.testimony-card-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .testimony-card-name {
-  margin: 0 32px 10px 0;
+  margin: 0 0 6px;
   font-family: var(--font-display, 'Playfair Display', Georgia, serif);
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--ts-text);
+  line-height: 1.3;
 }
 
 .testimony-card-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 14px;
-  margin-bottom: 14px;
+  gap: 6px 12px;
+  margin-bottom: 10px;
 }
 
 .testimony-meta-item {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  font-size: 12px;
+  gap: 4px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--ts-muted);
 }
@@ -176,63 +223,53 @@
 }
 
 .testimony-card-summary {
-  margin: 0 0 18px;
-  font-size: 13.5px;
-  line-height: 1.55;
+  margin: 0 0 12px;
+  font-size: 12px;
   color: var(--ts-text);
   opacity: 0.85;
+  line-height: 1.55;
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex: 1;
 }
 
-.testimony-card-footer {
-  margin-top: auto;
+/* Card actions */
+.testimony-card-actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  padding-top: 14px;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 10px;
   border-top: 1px solid var(--ts-border);
 }
 
-.testimony-card-link {
+.testimony-read-btn {
+  flex: 1;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
-  color: var(--ts-accent);
-  text-decoration: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.testimony-card-link:hover {
-  text-decoration: underline;
-}
-
-.testimony-card-link--disabled {
-  color: var(--ts-muted);
-  font-weight: 600;
-  font-style: italic;
-  cursor: default;
-}
-
-.testimony-card-link--button {
-  background: var(--ts-accent);
   color: white;
-  padding: 6px 14px;
-  border-radius: 8px;
+  background: var(--ts-accent);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
   text-decoration: none;
+  transition: background 0.15s;
 }
 
-.testimony-card-link--button:hover {
+.testimony-read-btn:hover {
   background: var(--ts-accent);
   opacity: 0.9;
   text-decoration: none;
+}
+
+.testimony-read-btn:visited {
+  color: white;
 }
 
 /* ── Empty state ── */
