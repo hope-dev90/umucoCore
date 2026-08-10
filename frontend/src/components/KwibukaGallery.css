@@ -1,16 +1,20 @@
-/* ── GALLERY MODAL ── */
+/* ── KWIBUKA GALLERY MODAL ──
+   Palette and type follow the Umuco Core "Kwibuka Gallery" page:
+   warm cream background, terracotta accent, serif display headline.
+   Swap the fallback values below for your real design tokens once
+   you confirm them — the component will follow automatically. */
 
 .gallery-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(20, 10, 18, 0.78);
-  backdrop-filter: blur(3px);
+  background: rgba(26, 20, 16, 0.65);
+  backdrop-filter: blur(2px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 20px;
-  animation: kwibuka-overlay-in 0.25s ease;
+  animation: kwibuka-overlay-in 0.2s ease;
 }
 
 @keyframes kwibuka-overlay-in {
@@ -19,105 +23,119 @@
 }
 
 .gallery-modal {
-  --gallery-accent: var(--primary, #5b2a52);
-  --gallery-flame: #c9a24b;
+  --gallery-accent: var(--primary, #c1592e);
+  --gallery-bg: var(--bg-page, #fbf6ef);
+  --gallery-card: var(--bg-card, #ffffff);
+  --gallery-border: var(--border-light, #ece4d8);
+  --gallery-text: var(--text-primary, #211c18);
+  --gallery-muted: var(--text-secondary, #8a8177);
 
   position: relative;
-  background: var(--bg-card, #fff);
-  border-radius: 16px;
-  max-width: 920px;
+  background: var(--gallery-bg);
+  border-radius: 20px;
+  max-width: 960px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
-  padding: 0 0 32px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-  animation: kwibuka-modal-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0 0 36px;
+  box-shadow: 0 30px 70px rgba(40, 25, 15, 0.25);
+  animation: kwibuka-modal-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes kwibuka-modal-in {
-  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* thin flame-toned band across the top, in place of a loud header block */
-.gallery-modal::before {
-  content: '';
-  display: block;
-  height: 4px;
-  border-radius: 16px 16px 0 0;
-  background: linear-gradient(90deg, var(--gallery-accent), var(--gallery-flame));
-}
+/* ── Header ── */
 
 .gallery-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  padding: 32px 32px 24px;
-  border-bottom: 1px solid var(--border-light, #eee);
+  padding: 36px 40px 24px;
 }
 
 .gallery-header-content {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
 .gallery-header-top {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gallery-accent);
 }
 
 .gallery-flame-logo {
   color: var(--gallery-accent);
-  height: 52px;
-  width: 42px;
+  height: 20px;
+  width: 16px;
   flex-shrink: 0;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.12));
 }
 
 .gallery-flame-logo .kwibuka-flame-cutout {
-  fill: var(--bg-card, #fff);
+  fill: var(--gallery-bg);
 }
 
 .gallery-modal-header h2 {
   margin: 0;
-  font-family: var(--font-display, Georgia, serif);
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  color: var(--text-primary, #1a1a1a);
+  font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--gallery-text);
 }
 
 .gallery-modal-subtitle {
-  margin: 0;
-  font-size: 13.5px;
-  font-style: italic;
-  color: var(--text-secondary, #666);
+  margin: 2px 0 0;
+  padding-bottom: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--gallery-accent);
+  position: relative;
+}
+
+.gallery-modal-subtitle::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 36px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--gallery-accent);
 }
 
 .gallery-modal-close {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  border: 1px solid var(--border-light, #eee);
-  background: transparent;
+  border: 1px solid var(--gallery-border);
+  background: var(--gallery-card);
   font-size: 20px;
   line-height: 1;
   cursor: pointer;
-  color: var(--text-secondary, #666);
+  color: var(--gallery-muted);
   flex-shrink: 0;
-  transition: background 0.15s, color 0.15s, transform 0.15s;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
 .gallery-modal-close:hover {
   background: var(--gallery-accent);
+  border-color: var(--gallery-accent);
   color: #fff;
-  transform: rotate(90deg);
 }
 
 .gallery-modal-close:focus-visible {
@@ -125,91 +143,113 @@
   outline-offset: 2px;
 }
 
+/* ── Body / sections ── */
+
 .gallery-modal-content {
   display: flex;
   flex-direction: column;
-  gap: 36px;
-  padding: 28px 32px 0;
+  gap: 32px;
+  padding: 4px 40px 0;
+}
+
+.gallery-section {
+  display: flex;
+  flex-direction: column;
 }
 
 .gallery-section-title {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 12.5px;
+  gap: 8px;
+  font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--gallery-accent);
-  margin: 0 0 18px 0;
-}
-
-.gallery-section-title::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border-light, #eee);
-  margin-left: 4px;
+  letter-spacing: 0.1em;
+  color: var(--gallery-muted);
+  margin: 0 0 16px 0;
 }
 
 .gallery-section-title svg {
-  color: var(--gallery-flame);
+  color: var(--gallery-accent);
   flex-shrink: 0;
 }
+
+/* ── Cards ── */
 
 .video-grid,
 .songs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
 }
 
 .video-card,
 .song-card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  background: var(--bg-card, #fff);
-  border-radius: 12px;
+  background: var(--gallery-card);
+  border-radius: 16px;
   overflow: hidden;
-  border: 1px solid var(--border-light, #eee);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  border: 1px solid var(--gallery-border);
+  box-shadow: 0 1px 2px rgba(40, 25, 15, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .video-card:hover,
 .song-card:hover {
   transform: translateY(-3px);
-  border-color: var(--gallery-flame);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 16px 32px rgba(40, 25, 15, 0.12);
 }
 
 .video-card iframe,
 .song-card iframe {
   width: 100%;
-  height: 190px;
+  height: 180px;
   border: none;
   display: block;
   flex: 1;
-  background: #111;
+  background: #17110d;
+}
+
+/* Dark rounded chip over the top-left of each thumbnail, holding
+   a type icon (play glyph for video, note glyph for audio). */
+.card-type-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(20, 14, 10, 0.55);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
 }
 
 .video-card-title,
 .song-card-title {
   padding: 14px 16px;
-  font-family: var(--font-display, Georgia, serif);
-  font-size: 13.5px;
+  font-family: var(--font-display, 'Playfair Display', Georgia, serif);
+  font-size: 14.5px;
   font-weight: 600;
-  letter-spacing: 0.01em;
-  color: var(--text-primary, #1a1a1a);
+  color: var(--gallery-text);
   text-align: left;
-  border-top: 1px solid var(--border-light, #eee);
 }
+
+/* ── Responsive ── */
 
 @media (max-width: 640px) {
   .gallery-modal-header,
   .gallery-modal-content {
-    padding-left: 20px;
-    padding-right: 20px;
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .gallery-modal-header h2 {
+    font-size: 26px;
   }
 
   .video-grid,
@@ -219,16 +259,7 @@
 
   .video-card iframe,
   .song-card iframe {
-    height: 190px;
-  }
-
-  .gallery-modal-header h2 {
-    font-size: 19px;
-  }
-
-  .gallery-flame-logo {
-    height: 44px;
-    width: 36px;
+    height: 180px;
   }
 }
 
