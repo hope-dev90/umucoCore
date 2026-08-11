@@ -60,11 +60,16 @@ export function LanguageProvider({ children }) {
     }
   }, [user, updateUser]);
 
-  const t = (key) => {
+  const t = (key, params) => {
     const val = translations[language]?.[key] ?? translations.en?.[key] ?? key;
     // Guard: never return an object to React — fall back to key string
     if (val !== null && typeof val === 'object') return key;
-    return val;
+    if (!params || typeof val !== 'string') return val;
+    return val.replace(/\{(\w+)\}/g, (match, name) => (
+      Object.prototype.hasOwnProperty.call(params, name) && params[name] != null
+        ? String(params[name])
+        : match
+    ));
   };
 
   return (

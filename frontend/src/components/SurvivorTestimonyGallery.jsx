@@ -1,5 +1,4 @@
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import survivorData from '../data/survivorTestimony.json';
 import './SurvivorTestimonyGallery.css';
@@ -57,11 +56,10 @@ function LanguageIcon() {
   );
 }
 
-function LinkIcon() {
+function PlayIcon() {
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      <path d="M15 3h6v6M10 14 21 3" />
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+      <polygon points="5 3 19 12 5 21 5 3" />
     </svg>
   );
 }
@@ -81,8 +79,26 @@ function getLinks(itemUrl) {
   return Array.isArray(itemUrl) ? itemUrl : [itemUrl];
 }
 
+/** Extracts a YouTube video ID from watch, youtu.be, or embed-style URLs. */
+function getYouTubeId(url) {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes('youtu.be')) {
+      return u.pathname.slice(1).split('/')[0] || null;
+    }
+    if (u.hostname.includes('youtube.com')) {
+      if (u.pathname === '/watch') return u.searchParams.get('v');
+      if (u.pathname.startsWith('/embed/')) return u.pathname.split('/embed/')[1]?.split('/')[0] || null;
+      if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/shorts/')[1]?.split('/')[0] || null;
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 function TestimonyCard({ testimony, onReadFull, t }) {
-  const links = getLinks(testimony.item_url);
+  const hasVideo = getLinks(testimony.item_url).some((url) => getYouTubeId(url));
 
   return (
     <article className="testimony-card">
@@ -117,28 +133,14 @@ function TestimonyCard({ testimony, onReadFull, t }) {
         <p className="testimony-card-summary">{testimony.summary}</p>
 
         <div className="testimony-card-actions">
-          {links.length > 0 ? (
-            links.map((url, i) => (
-              <a
-                key={url}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="testimony-read-btn"
-              >
-                <LinkIcon />
-                {links.length > 1 ? t('testimonies.readPart', { part: i + 1 }) : t('testimonies.readFull')}
-              </a>
-            ))
-          ) : (
-            <button 
-              type="button"
-              className="testimony-read-btn"
-              onClick={() => onReadFull(testimony)}
-            >
-              {t('testimonies.readFull')}
-            </button>
-          )}
+          <button
+            type="button"
+            className="testimony-read-btn"
+            onClick={() => onReadFull(testimony)}
+          >
+            {hasVideo ? <PlayIcon /> : null}
+            {t('testimonies.readFull')}
+          </button>
         </div>
       </div>
     </article>
@@ -146,12 +148,43 @@ function TestimonyCard({ testimony, onReadFull, t }) {
 }
 
 function TestimonyModal({ testimony, onClose, t }) {
+  const links = getLinks(testimony?.item_url);
+  const youtubeLinks = links
+    .map((url) => ({ url, id: getYouTubeId(url) }))
+    .filter((entry) => entry.id);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [testimony?.id]);
+
+  useEffect(() => {
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
+
   if (!testimony) return null;
 
+  const activeVideo = youtubeLinks[activeIndex] || null;
+
   return (
-    <div className="testimony-modal-overlay" onClick={onClose}>
-      <div className="testimony-modal" onClick={(e) => e.stopPropagation()}>
-        <button 
+    <div className="testimony-modal-overlay" onClick={onClose} role="presentation">
+      <div
+        className="testimony-modal"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="testimony-modal-title"
+      >
+        <button
           type="button"
           className="testimony-modal-close"
           onClick={onClose}
@@ -162,7 +195,7 @@ function TestimonyModal({ testimony, onClose, t }) {
 
         <div className="testimony-modal-content">
           <div className="testimony-modal-header">
-            <h2>{testimony.title}</h2>
+            <h2 id="testimony-modal-title">{testimony.title}</h2>
             <div className="testimony-modal-meta">
               {testimony.district && (
                 <span className="testimony-meta-item">
@@ -181,30 +214,49 @@ function TestimonyModal({ testimony, onClose, t }) {
           </div>
 
           <div className="testimony-modal-body">
-            <p>{testimony.summary}</p>
-            {testimony.item_url && (
-              <div className="testimony-modal-links">
-                <h4>{t('testimonies.accessTitle')}</h4>
-                {getLinks(testimony.item_url).map((url, i) => (
-                  <a
-                    key={url}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="testimony-modal-link"
+            {activeVideo ? (
+              <div className="testimony-modal-video">
+                <iframe
+                  src={`https://www.youtube.com/embed/${activeVideo.id}?rel=0`}
+                  title={testimony.title || 'Testimony video'}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+            ) : null}
+
+            {youtubeLinks.length > 1 ? (
+              <div className="testimony-modal-parts">
+                {youtubeLinks.map((entry, i) => (
+                  <button
+                    key={entry.url}
+                    type="button"
+                    className={`testimony-modal-part-btn${i === activeIndex ? ' is-active' : ''}`}
+                    onClick={() => setActiveIndex(i)}
+                    aria-pressed={i === activeIndex}
                   >
-                    <LinkIcon />
-                    {getLinks(testimony.item_url).length > 1 ? t('testimonies.part', { part: i + 1 }) : t('testimonies.viewFull')}
-                  </a>
+                    <PlayIcon />
+                    {t('testimonies.part', { part: i + 1 })}
+                  </button>
                 ))}
               </div>
-            )}
-            {!testimony.item_url && (
+            ) : null}
+
+            <p>{testimony.summary}</p>
+
+            {!activeVideo && (
               <p className="testimony-modal-note">
-                {t('testimonies.notAvailableDesc', { 
-                  link: `<a href="${testimony.listing_url}" target="_blank" rel="noopener noreferrer" className="testimony-modal-link">${t('testimonies.archiveLink')}</a>`,
-                  id: testimony.id 
-                })}
+                {t('testimonies.notAvailable')}{' '}
+                {testimony.listing_url ? (
+                  <a
+                    href={testimony.listing_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="testimony-modal-archive-link"
+                  >
+                    {t('testimonies.archiveLink')}
+                  </a>
+                ) : null}
               </p>
             )}
           </div>
@@ -219,7 +271,7 @@ export default function SurvivorTestimonyGallery({
 }) {
   const { t } = useLanguage();
   const [query, setQuery] = useState('');
-  const navigate = useNavigate();
+  const [selected, setSelected] = useState(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -228,6 +280,7 @@ export default function SurvivorTestimonyGallery({
       const subjects = Array.isArray(testimony.subjects) ? testimony.subjects : [];
       const haystack = [
         ...subjects,
+        testimony.title || '',
         testimony.district || '',
         testimony.summary || '',
       ]
@@ -236,10 +289,6 @@ export default function SurvivorTestimonyGallery({
       return haystack.includes(q);
     });
   }, [testimonies, query]);
-
-  const handleReadFull = (testimony) => {
-    navigate(`/testimony/${testimony.id}`);
-  };
 
   return (
     <>
@@ -275,10 +324,10 @@ export default function SurvivorTestimonyGallery({
         {filtered.length > 0 ? (
           <div className="testimony-grid">
             {filtered.map((testimony) => (
-              <TestimonyCard 
-                key={testimony.id} 
-                testimony={testimony} 
-                onReadFull={handleReadFull}
+              <TestimonyCard
+                key={testimony.id}
+                testimony={testimony}
+                onReadFull={setSelected}
                 t={t}
               />
             ))}
@@ -288,7 +337,13 @@ export default function SurvivorTestimonyGallery({
         )}
       </section>
 
-      {/* Modal removed - now using dedicated page at /testimony/:id */}
+      {selected ? (
+        <TestimonyModal
+          testimony={selected}
+          onClose={() => setSelected(null)}
+          t={t}
+        />
+      ) : null}
     </>
   );
 }

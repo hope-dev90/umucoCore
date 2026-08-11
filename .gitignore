@@ -5,8 +5,10 @@ node_modules/
 !.env.example
 frontend/.env
 backend/.env
+mobile/.env
 .kiro/
 .kilo/
 .vscode/
 .agents/
 frontend/dist/
+
