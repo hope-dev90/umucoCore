@@ -1,0 +1,295 @@
+import type { LanguageCode } from '../types';
+
+type Dict = Record<string, string>;
+
+const en: Dict = {
+  'app.name': 'Umuco Core',
+  'welcome.tagline': 'Preserve, explore, and share Rwandan cultural heritage.',
+  'welcome.login': 'Log in',
+  'welcome.signup': 'Create account',
+  'welcome.continue': 'Begin your journey',
+  'hero.tagline': 'DIGITALIZING CULTURAL ACCESS.',
+  'hero.title1': 'The Sanctuary of',
+  'hero.title2': 'Our Heritage.',
+  'hero.description':
+    "Sustaining the nation's pulse by keeping our roots, carrying the spoken wisdom of our ancestors, for our shared pact.",
+  'hero.getInvolved': 'Get Involved',
+  'hero.exploreMore': 'Explore More',
+  'hero.stats.oralStories': 'ORAL STORIES',
+  'hero.stats.languageModules': 'LANGUAGE MODULES',
+  'hero.stats.aiAssistant': 'AI ASSISTANT',
+  'hero.feature1.title': 'Connect & Share',
+  'hero.feature1.desc': 'Join a global community dedicated to keeping Rwandan culture.',
+  'hero.feature2.title': 'Learn Kinyarwanda',
+  'hero.feature2.desc': 'Master the language of thousand hills with interactive means.',
+  'hero.feature3.title': 'Explore Traditions',
+  'hero.feature3.desc': 'Immerse yourself in oral histories, rhythmic drums, and the art.',
+  'archive.title': 'The Digital Archive',
+  'archive.description': 'A collection that spans centuries of wisdom for all sorts of audience.',
+  'archive.viewAll': 'View All Collections',
+  'archive.collection1.title': 'Oral History',
+  'archive.collection1.desc':
+    "High-fidelity recordings of the elders' stories, preserved forever in our secure cloud.",
+  'archive.collection2.title': 'Virtual Museum',
+  'archive.collection2.desc':
+    '3D scans of sacred artifacts, allowing you to examine every detail from your screen.',
+  'archive.collection3.title': 'Traditional Music',
+  'archive.collection3.desc':
+    'The rhythms of the Inanga and Umuduri, remastered for the highest audio quality.',
+  'discover.title': 'A story worth remembering',
+  'discover.subtitle':
+    'Step into an oral history carried through generations. Read where it begins, then continue the journey once you join.',
+  'community.proverbTranslation': 'Many hands make light work. Let\'s preserve together.',
+  'community.exploreWisdom': 'Explore the deep wisdom of Rwandan culture.',
+  'community.createAccount': 'Create Your Account',
+  'community.becomeGuardian': 'Become a Cultural Guardian.',
+  'community.joinNetwork':
+    'Join our network of institutions, historians, and individuals dedicated to preserving the Rwandan narrative. Your contribution ensures that the voices of today become the wisdom of tomorrow.',
+  'community.contribute': 'Contribute',
+  'community.dashboard': 'Dashboard',
+  'footer.tagline':
+    'Connecting the world to the heart of Rwanda. Experience the depth of our traditions and the spirit of our people.',
+  'footer.subscribe': 'Subscribe',
+  'footer.subscribeDesc': 'Receive monthly cultural insights directly to your inbox.',
+  'footer.emailPlaceholder': 'Email address',
+  'footer.send': 'Send',
+  'footer.copyright': '© 2026 UmucoCore',
+  
+  // Landing Page
+  'landing.hero.title': 'Umuco Core',
+  'landing.hero.subtitle': 'Preserving Rwanda\'s Living Heritage',
+  'landing.hero.cta': 'Explore Archive',
+  'landing.hero.secondary': 'Learn More',
+  'landing.archive.title': 'Digital Archive',
+  'landing.archive.desc': 'Explore thousands of cultural artifacts, stories, and traditions',
+  'landing.community.title': 'Community Guardians',
+  'landing.community.desc': 'Join thousands of Rwandans preserving our heritage together',
+  'landing.footer.rights': '© 2025 Umuco Core. All rights reserved.',
+  'landing.language': 'Language / Ururimi',
+  'auth.email': 'Email',
+  'auth.password': 'Password',
+  'auth.name': 'Full name',
+  'auth.confirmPassword': 'Confirm password',
+  'auth.login': 'Log in',
+  'auth.signup': 'Sign up',
+  'auth.verify': 'Verify email',
+  'auth.otp': 'Enter the 6-digit code',
+  'auth.resend': 'Resend code',
+  'auth.explorerType': 'Explorer type',
+  'auth.login.title': 'Welcome Back!',
+  'auth.login.subtitle': 'Ready to access your heritage gateway.',
+  'auth.signup.title': 'Create Account',
+  'auth.signup.subtitle': 'Set up your profile to the heritage gateway.',
+  'auth.login.button': 'Sign In',
+  'auth.signup.button': 'Sign Up',
+  'auth.google': 'Continue with Google',
+  'auth.googleError': 'Google login failed. Please try again.',
+  'auth.hasAccount': 'Already have an account?',
+  'auth.noAccount': "Don't have an account?",
+  'auth.orContinueWith': 'or continue with',
+  'auth.forgotPassword': 'Forgot password?',
+  'auth.signUp': 'Sign Up',
+  'auth.signIn': 'Sign In',
+  'auth.backToHome': 'Back to Home',
+  'auth.verificationCode': 'Verification Code',
+  'auth.verifyEmail': 'Verify Your Email',
+  'auth.enterCodeSentTo': 'Enter the 6-digit verification code sent to',
+  'auth.resetPassword': 'Reset Password',
+  'auth.reset.emailLabel': 'Enter your email to receive a password reset code.',
+  'auth.reset.sendCode': 'Send Code',
+  'auth.confirmAccount': 'Confirm Account',
+  'common.comingSoon': 'Coming Soon',
+  'tabs.home': 'Home',
+  'tabs.explore': 'Explore',
+  'tabs.listen': 'Listen',
+  'tabs.collections': 'Collections',
+  'tabs.more': 'More',
+  'home.greeting': 'Muraho, {name}',
+  'home.subtitle': 'Continue your cultural adventure',
+  'home.xp': 'XP',
+  'home.level': 'Level',
+  'home.streak': 'Streak',
+  'home.recent': 'Recent history',
+  'home.highlight': 'Heritage highlight',
+  'home.quickLinks': 'Quick links',
+  'explore.title': 'Explore heritage',
+  'explore.search': 'Search places, stories, crafts…',
+  'explore.empty': 'No heritage items found.',
+  'listen.title': 'Listen',
+  'listen.audio': 'Audio archive',
+  'listen.proverbs': 'Imigani / Proverbs',
+  'listen.play': 'Play',
+  'listen.pause': 'Pause',
+  'listen.save': 'Save',
+  'listen.saved': 'Saved',
+  'collections.title': 'Collections',
+  'collections.save': 'Save collection',
+  'collections.byCategory': 'By category',
+  'kwibuka.title': 'Kwibuka',
+  'kwibuka.subtitle': 'Remember. Unite. Renew.',
+  'kwibuka.testimonies': 'Survivor testimonies',
+  'kwibuka.openGallery': 'Open memorial gallery',
+  'testimonies.title': 'Survivor testimonies',
+  'testimonies.back': 'Back to Kwibuka',
+  'testimonies.notFound': 'Testimony not found',
+  'intl.title': 'International & national days',
+  'videos.title': 'Videos',
+  'videos.empty': 'No videos available yet.',
+  'contribute.title': 'Contribute',
+  'contribute.subtitle': 'Share oral history with the archive',
+  'contribute.submit': 'Submit oral history',
+  'contribute.success': 'Contribution submitted for review.',
+  'saved.title': 'Saved',
+  'saved.empty': 'Nothing saved yet.',
+  'saved.remove': 'Remove',
+  'history.title': 'History',
+  'history.empty': 'Start exploring to build your history.',
+  'history.itemsViewed': 'Items viewed',
+  'history.audioSessions': 'Audio sessions',
+  'history.articlesRead': 'Articles read',
+  'profile.title': 'Profile',
+  'profile.explorer': 'Explorer type',
+  'settings.title': 'Settings',
+  'settings.language': 'Language',
+  'settings.password': 'Change password',
+  'settings.logout': 'Log out',
+  'settings.currentPassword': 'Current password',
+  'settings.newPassword': 'New password',
+  'settings.savePassword': 'Update password',
+  'common.loading': 'Loading…',
+  'common.retry': 'Retry',
+  'common.error': 'Something went wrong',
+  'common.save': 'Save',
+  'more.title': 'More',
+  'explorer.warrior': 'Warrior',
+  'explorer.nature-lover': 'Nature Lover',
+  'explorer.royal-historian': 'Royal Historian',
+  'explorer.folktale-hunter': 'Folktale Hunter',
+  'explorer.music-explorer': 'Music Explorer',
+};
+
+const rw: Dict = {
+  ...en,
+  'common.comingSoon': 'Kuri',
+  'welcome.tagline': 'Bika, shakisha, kandi sange umuco w’u Rwanda.',
+  'welcome.login': 'Injira',
+  'welcome.signup': 'Fungura konti',
+  'tabs.home': 'Ahabanza',
+  'tabs.explore': 'Shakisha',
+  'tabs.listen': 'Umva',
+  'tabs.collections': 'Amakusanyirizo',
+  'tabs.more': 'Ibindi',
+  'home.greeting': 'Muraho, {name}',
+  'home.subtitle': 'Komeza urugendo rwawe rw\'umuco',
+  'explore.title': 'Shakisha umuco',
+  'listen.title': 'Umva',
+  'listen.proverbs': 'Imigani',
+  'kwibuka.title': 'Kwibuka',
+  'kwibuka.subtitle': 'Ibuka. Huza. Vugurura.',
+  'contribute.title': 'Tanga umusanzu',
+  'saved.title': 'Byabitswe',
+  'history.title': 'Amateka',
+  'profile.title': 'Umwirondoro',
+  'settings.title': 'Igenamiterere',
+  'settings.language': 'Ururimi',
+  'settings.logout': 'Sohoka',
+  'more.title': 'Ibindi',
+  
+  // Landing Page
+  'landing.hero.title': 'Umuco Core',
+  'landing.hero.subtitle': 'Kubungabunga Umuco Uhoraho w\'u Rwanda',
+  'landing.hero.cta': 'Sura Ibubiko',
+  'landing.hero.secondary': 'Menya Byinshi',
+  'landing.archive.title': 'Isanduku y\'amateka',
+  'landing.archive.desc': 'Sura ibihumbi by\'ibintu by\'umuco, inkuru, n\'imigenzo',
+  'landing.community.title': 'Abarinzi b\'Umuryango',
+  'landing.community.desc': 'Jya mu Banyarwanda ibihumbi babungabunga umuco wacu hamwe',
+  'landing.footer.rights': '© 2025 Umuco Core. Uburenganzira bwose bwihariwe.',
+  'landing.language': 'Ururimi / Language',
+};
+
+const fr: Dict = {
+  ...en,
+  'common.comingSoon': 'Bientôt',
+  'welcome.tagline': 'Préservez, explorez et partagez le patrimoine culturel rwandais.',
+  'welcome.login': 'Connexion',
+  'welcome.signup': 'Créer un compte',
+  'tabs.home': 'Accueil',
+  'tabs.explore': 'Explorer',
+  'tabs.listen': 'Écouter',
+  'tabs.collections': 'Collections',
+  'tabs.more': 'Plus',
+  'home.greeting': 'Bonjour, {name}',
+  'home.subtitle': 'Continuez votre aventure culturelle',
+  'explore.title': 'Explorer le patrimoine',
+  'listen.title': 'Écouter',
+  'listen.proverbs': 'Proverbes / Imigani',
+  'kwibuka.title': 'Kwibuka',
+  'kwibuka.subtitle': 'Se souvenir. S\'unir. Renouveler.',
+  'contribute.title': 'Contribuer',
+  'saved.title': 'Enregistrés',
+  'history.title': 'Historique',
+  'profile.title': 'Profil',
+  'settings.title': 'Paramètres',
+  'settings.language': 'Langue',
+  'settings.logout': 'Déconnexion',
+  'more.title': 'Plus',
+  
+  // Landing Page
+  'landing.hero.title': 'Umuco Core',
+  'landing.hero.subtitle': 'Préserver le patrimoine vivant du Rwanda',
+  'landing.hero.cta': 'Explorer les archives',
+  'landing.hero.secondary': 'En savoir plus',
+  'landing.archive.title': 'Archives numériques',
+  'landing.archive.desc': 'Explorez des milliers d\'objets culturels, de récits et de traditions',
+  'landing.community.title': 'Gardiens de la communauté',
+  'landing.community.desc': 'Rejoignez les Rwandais qui préservent ensemble notre patrimoine',
+  'landing.footer.rights': '© 2025 Umuco Core. Tous droits réservés.',
+  'landing.language': 'Langue / Ururimi',
+};
+
+const dictionaries: Record<LanguageCode, Dict> = { en, rw, fr };
+
+export function translate(
+  language: LanguageCode,
+  key: string,
+  params?: Record<string, string | number>
+): string {
+  const raw = dictionaries[language]?.[key] ?? dictionaries.en[key] ?? key;
+  if (!params) return raw;
+  return raw.replace(/\{(\w+)\}/g, (_, name: string) =>
+    params[name] != null ? String(params[name]) : `{${name}}`
+  );
+}
+
+export function localizeField(
+  value: string | Record<string, string> | undefined,
+  language: LanguageCode,
+  fallback = ''
+): string {
+  if (!value) return fallback;
+  if (typeof value === 'string') return value;
+  return value[language] || value.en || value.rw || value.fr || fallback;
+}
+
+export const LANGUAGE_LABELS: Record<LanguageCode, string> = {
+  en: 'English',
+  rw: 'Kinyarwanda',
+  fr: 'Français',
+};
+
+export function mapLanguageToDb(code: LanguageCode): string {
+  const map: Record<LanguageCode, string> = {
+    en: 'English (UK)',
+    rw: 'Kinyarwanda',
+    fr: 'French (France)',
+  };
+  return map[code];
+}
+
+export function mapLanguageFromDb(value?: string): LanguageCode {
+  if (!value) return 'en';
+  if (value === 'Kinyarwanda' || value === 'rw') return 'rw';
+  if (value === 'French (France)' || value === 'fr') return 'fr';
+  return 'en';
+}

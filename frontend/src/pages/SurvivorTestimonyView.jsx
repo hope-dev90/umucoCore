@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import Layout from '../components/Layout';
@@ -60,16 +60,28 @@ function getYouTubeId(url) {
   try {
     const u = new URL(url);
     if (u.hostname.includes('youtu.be')) {
-      return u.pathname.slice(1);
+      return u.pathname.slice(1).split('/')[0] || null;
     }
     if (u.hostname.includes('youtube.com')) {
       if (u.pathname === '/watch') return u.searchParams.get('v');
-      if (u.pathname.startsWith('/embed/')) return u.pathname.split('/embed/')[1];
+      if (u.pathname.startsWith('/embed/')) return u.pathname.split('/embed/')[1]?.split('/')[0] || null;
+      if (u.pathname.startsWith('/shorts/')) return u.pathname.split('/shorts/')[1]?.split('/')[0] || null;
     }
   } catch {
     return null;
   }
   return null;
+}
+
+function splitAroundPlaceholder(text, placeholder) {
+  const marker = `{${placeholder}}`;
+  const index = text.indexOf(marker);
+  if (index === -1) return [text, null, ''];
+  return [
+    text.slice(0, index),
+    marker,
+    text.slice(index + marker.length),
+  ];
 }
 
 export default function SurvivorTestimonyView() {
@@ -85,6 +97,10 @@ export default function SurvivorTestimonyView() {
   // Auto-open when there's exactly one link, since there's no ambiguity to resolve.
   const [activeIndex, setActiveIndex] = useState(links.length === 1 ? 0 : null);
 
+  useEffect(() => {
+    setActiveIndex(links.length === 1 ? 0 : null);
+  }, [id, links.length]);
+
   if (!testimony) {
     return (
       <Layout>
@@ -92,9 +108,9 @@ export default function SurvivorTestimonyView() {
           <div className="testimony-view-not-found">
             <h2>{t('testimonies.notFound')}</h2>
             <p>{t('testimonies.notFoundDesc')}</p>
-            <button type="button" onClick={() => navigate('/kwibuka')} className="testimony-view-back-btn">
+            <button type="button" onClick={() => navigate('/testimonies')} className="testimony-view-back-btn">
               <ArrowLeftIcon />
-              {t('testimonies.backToKwibuka')}
+              {t('testimonies.backToTestimonies')}
             </button>
           </div>
         </div>
@@ -105,13 +121,19 @@ export default function SurvivorTestimonyView() {
   const activeUrl = activeIndex !== null ? links[activeIndex] : null;
   const activeYouTubeId = activeUrl ? getYouTubeId(activeUrl) : null;
 
+  const notAvailableTemplate = t('testimonies.notAvailableDesc', { link: '{link}', id: testimony.id });
+  const [notAvailableBefore, , notAvailableAfter] = splitAroundPlaceholder(notAvailableTemplate, 'link');
+
+  const aboutArchiveTemplate = t('testimonies.aboutArchiveDesc', { link: '{link}' });
+  const [aboutBefore, , aboutAfter] = splitAroundPlaceholder(aboutArchiveTemplate, 'link');
+
   return (
     <Layout>
       <div className="testimony-view-page">
         <div className="testimony-view-container">
           <button
             type="button"
-            onClick={() => navigate('/kwibuka')}
+            onClick={() => navigate('/testimonies')}
             className="testimony-view-back-btn"
           >
             <ArrowLeftIcon />
@@ -157,9 +179,9 @@ export default function SurvivorTestimonyView() {
                 {activeYouTubeId && (
                   <div className="testimony-video-embed">
                     <iframe
-                      src={`https://www.youtube.com/embed/${activeYouTubeId}`}
+                      src={`https://www.youtube.com/embed/${activeYouTubeId}?rel=0`}
                       title={testimony.title || 'Testimony video'}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                       allowFullScreen
                     />
                   </div>
@@ -181,7 +203,7 @@ export default function SurvivorTestimonyView() {
                         aria-pressed={isActive}
                       >
                         <PlayIcon />
-                        {isActive ? (t('testimonies.hideVideo') || 'Hide video') : label}
+                        {isActive ? t('testimonies.hideVideo') : label}
                       </button>
                     ) : (
                       // Non-YouTube links can't be embedded — these still open
@@ -206,10 +228,16 @@ export default function SurvivorTestimonyView() {
               <div className="testimony-view-note">
                 <h2>{t('testimonies.notAvailable')}</h2>
                 <p>
-                  {t('testimonies.notAvailableDesc', {
-                    link: `<a href="${testimony.listing_url}" target="_blank" rel="noopener noreferrer" className="testimony-view-archive-link">${t('testimonies.archiveLink')}</a>`,
-                    id: testimony.id,
-                  })}
+                  {notAvailableBefore}
+                  <a
+                    href={testimony.listing_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="testimony-view-archive-link"
+                  >
+                    {t('testimonies.archiveLink')}
+                  </a>
+                  {notAvailableAfter}
                 </p>
               </div>
             )}
@@ -217,9 +245,16 @@ export default function SurvivorTestimonyView() {
             <div className="testimony-view-archive">
               <h2>{t('testimonies.aboutArchive')}</h2>
               <p>
-                {t('testimonies.aboutArchiveDesc', {
-                  link: `<a href="${testimony.listing_url}" target="_blank" rel="noopener noreferrer" className="testimony-view-archive-link">${t('testimonies.searchLink')}</a>`,
-                })}
+                {aboutBefore}
+                <a
+                  href={testimony.listing_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="testimony-view-archive-link"
+                >
+                  {t('testimonies.searchLink')}
+                </a>
+                {aboutAfter}
               </p>
             </div>
           </div>
