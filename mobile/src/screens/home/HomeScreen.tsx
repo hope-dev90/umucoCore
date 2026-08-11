@@ -1,16 +1,33 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  Modal,
+  Pressable,
+  Share,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Screen } from '../../components/Screen';
-import { Card, Subtitle, Title } from '../../components/ui';
+import { Button, Card } from '../../components/ui';
 import { HeritageCard } from '../../components/HeritageCard';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { useGamification } from '../../context/GamificationContext';
 import { getHeritage } from '../../services/heritageService';
-import { getHistory } from '../../services/historyService';
-import { dailyLogin, fetchXP } from '../../services/gamificationService';
+import { getFeaturedAudio } from '../../services/audioService';
+import { getHistory, trackView } from '../../services/historyService';
+import { updateExplorerType } from '../../services/userService';
 import { colors } from '../../theme/colors';
-import type { HeritageItem, HistoryItem } from '../../types';
+import type { AudioItem, ExplorerType, HeritageItem, HistoryItem } from '../../types';
+
+const EXPLORER_TYPES: ExplorerType[] = [
+  'warrior',
+  'nature-lover',
+  'royal-historian',
+  'folktale-hunter',
+  'music-explorer',
+];
 
 const EXPLORER_CATEGORY: Record<string, string> = {
   warrior: 'warrior',
@@ -20,44 +37,42 @@ const EXPLORER_CATEGORY: Record<string, string> = {
   'music-explorer': 'music',
 };
 
-const QUICK_LINKS = [
-  { label: 'Explore', tab: 'Explore' },
-  { label: 'Listen', tab: 'Listen' },
-  { label: 'Kwibuka', more: 'Kwibuka' },
-  { label: 'Contribute', more: 'Contribute' },
-  { label: 'Saved', more: 'Saved' },
-  { label: 'Videos', more: 'Videos' },
-] as const;
-
+/** Dashboard Home — RN equivalent of frontend Home.jsx (not marketing landing). */
 export default function HomeScreen() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { t } = useLanguage();
+  const { xp, level, streak, awardXP } = useGamification();
   const navigation = useNavigation<any>();
-  const [xp, setXp] = useState(user?.xp || 0);
-  const [level, setLevel] = useState(user?.level || 1);
-  const [streak, setStreak] = useState(user?.currentStreak || 0);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [highlight, setHighlight] = useState<HeritageItem | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
 
   const explorerType = user?.explorerType || user?.explorer_type || '';
+  const [showPicker, setShowPicker] = useState(false);
+  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [savingType, setSavingType] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [highlight, setHighlight] = useState<HeritageItem | null>(null);
+  const [audioHighlight, setAudioHighlight] = useState<AudioItem | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
   const category = EXPLORER_CATEGORY[String(explorerType)] || undefined;
 
+  useEffect(() => {
+    if (!explorerType) {
+      const timer = setTimeout(() => setShowPicker(true), 500);
+      return () => clearTimeout(timer);
+    }
+    setShowPicker(false);
+  }, [explorerType]);
+
   const load = useCallback(async () => {
-    const [xpData, hist, heritage] = await Promise.all([
-      fetchXP(),
+    const [hist, heritage, featured] = await Promise.all([
       getHistory(5).catch(() => []),
       getHeritage(category).catch(() => []),
-      dailyLogin().catch(() => null),
+      explorerType === 'music-explorer' ? getFeaturedAudio().catch(() => null) : Promise.resolve(null),
     ]);
-    if (xpData) {
-      setXp(xpData.xp ?? 0);
-      setLevel(xpData.level ?? 1);
-      setStreak(xpData.currentStreak ?? xpData.current_streak ?? 0);
-    }
     setHistory(hist);
     setHighlight(heritage[0] || null);
-  }, [category]);
+    setAudioHighlight(featured);
+  }, [category, explorerType]);
 
   useEffect(() => {
     load();
@@ -69,310 +84,257 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
-  const goQuick = (link: (typeof QUICK_LINKS)[number]) => {
-    if ('tab' in link) {
-      navigation.navigate(link.tab);
-      return;
+  const saveExplorer = async () => {
+    if (!selectedType) return;
+    setSavingType(true);
+    try {
+      await updateExplorerType(selectedType);
+      updateUser({ explorerType: selectedType, explorer_type: selectedType });
+      setShowPicker(false);
+    } catch {
+      // keep modal open
+    } finally {
+      setSavingType(false);
     }
-    navigation.navigate('More', { screen: link.more });
   };
+
+  const openHighlight = async () => {
+    if (!highlight) return;
+    await trackView({
+      type: 'Place',
+      itemId: highlight.id,
+      title: highlight.title,
+      image: String(highlight.image_url || highlight.image || ''),
+      category: highlight.category,
+    });
+    await awardXP(10, `Read dashboard item: ${highlight.title}`);
+    navigation.navigate('Explore');
+  };
+
+  const shareHighlight = async () => {
+    if (!highlight) return;
+    await Share.share({
+      message: `${highlight.title}\n\n${highlight.description || ''}`.trim(),
+    });
+  };
+
+  const questTiles = useMemo(
+    () => [
+      { label: t('home.level'), value: String(level) },
+      { label: t('home.streak'), value: String(streak) },
+      { label: t('home.xp'), value: String(xp) },
+    ],
+    [t, level, streak, xp]
+  );
 
   return (
     <Screen refreshing={refreshing} onRefresh={onRefresh}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Hero Section */}
-        <View style={styles.hero}>
-          <View style={styles.heroTop}>
-            <View style={[styles.questPill, { backgroundColor: colors.primarySoft }]}>
-              <Text style={styles.questPillText}>🧭</Text>
-              <Text style={[styles.questPillLabel, { color: colors.primaryDark }]}>Begin your journey</Text>
-            </View>
+      <Text style={styles.greeting}>
+        {t('home.greeting', { name: user?.name || 'explorer' })}
+      </Text>
+      <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
 
-            <Title style={styles.heroTitle}>
-              Discover Rwanda's <Text style={[styles.heroTitleAccent, { color: colors.primary }]}>Heritage</Text>
-            </Title>
+      <View style={styles.questStrip}>
+        {questTiles.map((tile) => (
+          <View key={tile.label} style={styles.questTile}>
+            <Text style={styles.questValue}>{tile.value}</Text>
+            <Text style={styles.questLabel}>{tile.label}</Text>
+          </View>
+        ))}
+      </View>
 
-            <Subtitle style={styles.heroSubtitle}>
-              Explore oral stories, cultural traditions, and historical treasures passed down through generations.
-            </Subtitle>
+      <View style={styles.links}>
+        {(
+          [
+            { label: t('tabs.explore'), tab: 'Explore' },
+            { label: t('tabs.listen'), tab: 'Listen' },
+            { label: t('sidebar.kwibuka') || 'Kwibuka', more: 'Kwibuka' },
+            { label: t('sidebar.contribute') || 'Contribute', more: 'Contribute' },
+            { label: t('sidebar.saved') || 'Saved', more: 'Saved' },
+            { label: t('sidebar.videos') || 'Videos', more: 'Videos' },
+          ] as const
+        ).map((link) => (
+          <Pressable
+            key={link.label}
+            style={styles.linkChip}
+            onPress={() => {
+              if ('tab' in link) navigation.navigate(link.tab);
+              else navigation.navigate('More', { screen: link.more });
+            }}
+          >
+            <Text style={styles.linkText}>{link.label}</Text>
+          </Pressable>
+        ))}
+      </View>
 
-            <View style={styles.heroActions}>
-              <Pressable
-                onPress={() => navigation.navigate('More', { screen: 'Contribute' })}
-                style={[styles.heroButton, { backgroundColor: colors.primary }]}
-              >
-                <Text style={[styles.heroButtonText, { color: colors.white }]}>Get Involved</Text>
-                <Text style={[styles.heroButtonArrow, { color: colors.white }]}>→</Text>
-              </Pressable>
-
-              <Pressable
-                onPress={() => navigation.navigate('Explore')}
-                style={[styles.heroButtonSecondary, { borderColor: colors.primary }]}
-              >
-                <Text style={[styles.heroButtonSecondaryText, { color: colors.primary }]}>Explore More</Text>
-              </Pressable>
-            </View>
-
-            {/* Stats */}
-            <View style={styles.statsRow}>
-              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.statValue, { color: colors.primary }]}>200+</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Oral Stories</Text>
-              </View>
-              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.statValue, { color: colors.primary }]}>3</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Language Modules</Text>
-              </View>
-              <View style={[styles.statCard, { backgroundColor: colors.bgCard, borderColor: colors.border }]}>
-                <Text style={[styles.statValue, { color: colors.primary }]}>24/7</Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>AI Assistant</Text>
-              </View>
-            </View>
-
-            {/* Quest Progress */}
-            <View style={styles.questProgress}>
-              <View style={styles.questStep}>
-                <View style={[styles.questStepNumber, { backgroundColor: colors.primary }]}>
-                  <Text style={[styles.questStepNumberText, { color: colors.white }]}>01</Text>
-                </View>
-                <Text style={[styles.questStepLabel, { color: colors.textPrimary }]}>Pick a story</Text>
-              </View>
-              <View style={styles.questStep}>
-                <View style={[styles.questStepNumber, { backgroundColor: colors.primary }]}>
-                  <Text style={[styles.questStepNumberText, { color: colors.white }]}>02</Text>
-                </View>
-                <Text style={[styles.questStepLabel, { color: colors.textPrimary }]}>Learn & explore</Text>
-              </View>
-              <View style={styles.questStep}>
-                <View style={[styles.questStepNumber, { backgroundColor: colors.primary }]}>
-                  <Text style={[styles.questStepNumberText, { color: colors.white }]}>03</Text>
-                </View>
-                <Text style={[styles.questStepLabel, { color: colors.textPrimary }]}>Earn rewards</Text>
-              </View>
-            </View>
+      {highlight ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('home.highlight')}</Text>
+          <HeritageCard item={highlight} onPress={openHighlight} />
+          <View style={styles.row}>
+            <Button label={t('explore.discoverMore')} onPress={openHighlight} />
+            <Button label={t('common.save')} variant="secondary" onPress={shareHighlight} />
           </View>
         </View>
+      ) : null}
 
-        {/* Quick Links */}
+      {audioHighlight ? (
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Quick Links</Text>
-          <View style={styles.links}>
-            {QUICK_LINKS.map((link) => (
-              <Pressable key={link.label} style={[styles.linkChip, { backgroundColor: colors.primary }]} onPress={() => goQuick(link)}>
-                <Text style={[styles.linkText, { color: colors.white }]}>{link.label}</Text>
-              </Pressable>
-            ))}
-          </View>
+          <Text style={styles.sectionTitle}>{t('listen.audio')}</Text>
+          <Card>
+            <Text style={styles.cardTitle}>{audioHighlight.title}</Text>
+            <Text style={styles.cardMeta} numberOfLines={3}>
+              {String(audioHighlight.description || '')}
+            </Text>
+            <Button
+              label={t('tabs.listen')}
+              variant="secondary"
+              onPress={() => navigation.navigate('Listen')}
+            />
+          </Card>
         </View>
+      ) : null}
 
-        {/* Highlight */}
-        {highlight ? (
-          <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Featured</Text>
-            <HeritageCard item={highlight} />
-          </View>
-        ) : null}
-
-        {/* Recent */}
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Recent</Text>
-          {history.length === 0 ? (
-            <Card>
-              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No recent activity yet.</Text>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('home.recent')}</Text>
+        {history.length === 0 ? (
+          <Card>
+            <Text style={styles.empty}>{t('history.empty')}</Text>
+          </Card>
+        ) : (
+          history.map((item) => (
+            <Card key={String(item.id)} style={styles.historyCard}>
+              <Text style={styles.cardTitle}>{item.title}</Text>
+              <Text style={styles.cardMeta}>
+                {item.type || 'Item'}
+                {item.viewedAt ? ` · ${new Date(item.viewedAt).toLocaleDateString()}` : ''}
+              </Text>
             </Card>
-          ) : (
-            history.map((item) => (
-              <Card key={String(item.id)} style={styles.historyCard}>
-                <Text style={[styles.historyTitle, { color: colors.textPrimary }]}>{item.title}</Text>
-                <Text style={[styles.historyMeta, { color: colors.textMuted }]}>
-                  {item.type || 'Item'}
-                  {item.viewedAt ? ` · ${new Date(item.viewedAt).toLocaleDateString()}` : ''}
-                </Text>
-              </Card>
-            ))
-          )}
+          ))
+        )}
+      </View>
+
+      <Pressable
+        style={styles.kwibukaCard}
+        onPress={() => navigation.navigate('More', { screen: 'Kwibuka' })}
+      >
+        <Text style={styles.kwibukaTitle}>{t('sidebar.kwibuka') || 'Kwibuka'}</Text>
+        <Text style={styles.kwibukaSub}>{t('kwibuka.subtitle')}</Text>
+      </Pressable>
+
+      <Modal visible={showPicker} transparent animationType="fade">
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalKicker}>{t('explorerPicker.kicker')}</Text>
+            <Text style={styles.modalTitle}>{t('explorerPicker.title')}</Text>
+            <Text style={styles.modalSub}>{t('explorerPicker.subtitle')}</Text>
+            {EXPLORER_TYPES.map((type) => {
+              const active = selectedType === type;
+              return (
+                <Pressable
+                  key={type}
+                  onPress={() => setSelectedType(type)}
+                  style={[styles.typeRow, active && styles.typeRowActive]}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.typeTitle}>{t(`explorer.${type}.label`)}</Text>
+                    <Text style={styles.typeSub}>{t(`explorer.${type}.tagline`)}</Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+            <Button
+              label={savingType ? t('common.saving') : t('explorerPicker.start')}
+              onPress={saveExplorer}
+              disabled={!selectedType}
+              loading={savingType}
+            />
+          </View>
         </View>
-      </ScrollView>
+      </Modal>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContent: {
-    paddingBottom: 24,
-  },
-  hero: {
-    backgroundColor: colors.bgMain,
-    paddingHorizontal: 16,
-    paddingTop: 24,
-    paddingBottom: 32,
-  },
-  heroTop: {
-    maxWidth: 800,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  questPill: {
-    flexDirection: 'row',
+  greeting: { fontSize: 26, fontWeight: '800', color: colors.textPrimary },
+  subtitle: { color: colors.textSecondary, marginBottom: 8 },
+  questStrip: { flexDirection: 'row', gap: 10 },
+  questTile: {
+    flex: 1,
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 14,
+    paddingVertical: 12,
     alignItems: 'center',
-    gap: 8,
-    alignSelf: 'flex-start',
+  },
+  questValue: { fontSize: 18, fontWeight: '800', color: colors.primary },
+  questLabel: { fontSize: 11, color: colors.textMuted, fontWeight: '700', marginTop: 2 },
+  links: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  linkChip: {
+    backgroundColor: colors.primary,
+    borderRadius: 999,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 999,
-    marginBottom: 16,
   },
-  questPillText: {
-    fontSize: 16,
+  linkText: { color: colors.white, fontWeight: '700', fontSize: 12 },
+  section: { gap: 10 },
+  sectionTitle: { fontSize: 17, fontWeight: '800', color: colors.textPrimary },
+  row: { flexDirection: 'row', gap: 8 },
+  cardTitle: { fontWeight: '800', color: colors.textPrimary, fontSize: 15 },
+  cardMeta: { color: colors.textMuted, marginTop: 4, lineHeight: 18 },
+  empty: { color: colors.textMuted, textAlign: 'center', paddingVertical: 8 },
+  historyCard: { marginBottom: 0 },
+  kwibukaCard: {
+    backgroundColor: colors.primaryDark,
+    borderRadius: 16,
+    padding: 18,
+    gap: 4,
   },
-  questPillLabel: {
-    fontSize: 12,
-    fontWeight: '700',
+  kwibukaTitle: { color: colors.white, fontWeight: '800', fontSize: 18 },
+  kwibukaSub: { color: colors.primarySoft },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(44,26,20,0.35)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    backgroundColor: colors.bgMain,
+    borderRadius: 20,
+    padding: 20,
+    gap: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  modalKicker: {
+    color: colors.primary,
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1.5,
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    textAlign: 'center',
   },
-  heroTitle: {
-    fontSize: 36,
+  modalTitle: {
+    fontSize: 22,
     fontWeight: '800',
     color: colors.textPrimary,
-    lineHeight: 42,
-    marginBottom: 16,
+    textAlign: 'center',
   },
-  heroTitleAccent: {
-    color: colors.primary,
-  },
-  heroSubtitle: {
-    fontSize: 15,
-    color: colors.textSecondary,
-    lineHeight: 22,
-    marginBottom: 24,
-  },
-  heroActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 32,
-  },
-  heroButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 12,
-    flex: 1,
-    minWidth: 160,
-    justifyContent: 'center',
-  },
-  heroButtonText: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  heroButtonArrow: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  heroButtonSecondary: {
-    paddingHorizontal: 20,
-    paddingVertical: 14,
-    borderRadius: 12,
+  modalSub: { color: colors.textSecondary, textAlign: 'center', marginBottom: 4 },
+  typeRow: {
     borderWidth: 1,
-    flex: 1,
-    minWidth: 160,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: colors.border,
+    borderRadius: 12,
+    padding: 12,
+    backgroundColor: colors.bgCard,
   },
-  heroButtonSecondaryText: {
-    fontSize: 14,
-    fontWeight: '700',
+  typeRowActive: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primarySoft,
+    borderWidth: 2,
   },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 32,
-  },
-  statCard: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: '800',
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    textAlign: 'center',
-  },
-  questProgress: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  questStep: {
-    flex: 1,
-    alignItems: 'center',
-    gap: 8,
-  },
-  questStepNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  questStepNumberText: {
-    fontSize: 12,
-    fontWeight: '800',
-  },
-  questStepLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  section: {
-    paddingHorizontal: 16,
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    marginBottom: 12,
-  },
-  links: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  linkChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 999,
-  },
-  linkText: {
-    color: colors.white,
-    fontWeight: '700',
-    fontSize: 13,
-  },
-  emptyText: {
-    fontSize: 14,
-    textAlign: 'center',
-    paddingVertical: 16,
-  },
-  historyCard: {
-    marginBottom: 10,
-  },
-  historyTitle: {
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  historyMeta: {
-    marginTop: 4,
-    fontSize: 12,
-  },
+  typeTitle: { fontWeight: '800', color: colors.textPrimary },
+  typeSub: { color: colors.textMuted, fontSize: 12, marginTop: 2 },
 });

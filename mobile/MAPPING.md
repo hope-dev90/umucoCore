@@ -1,66 +1,95 @@
-# WEB → MOBILE mapping
+# WEB → MOBILE feature inventory & mapping
 
-Source of truth: `frontend/` (web). Mobile rewrite lives in `mobile/` (Expo + TypeScript).
+**Source of truth:** `/frontend` (READ ONLY)  
+**Target:** `/mobile` — Expo + React Native + TypeScript rewrite  
+**Rule:** migrate existing product features only.
 
-Admin (`/admin`) and gov (`/gov`) are **web-only** and omitted from mobile.
+Admin (`/admin`) and gov (`/gov`) remain **web-only**.
 
-## Routes
+---
 
-| Web route | Mobile screen | Notes |
-|---|---|---|
-| `/` Landing | `LandingScreen` | Full brand landing (hero/archive/discover/community/footer) |
-| `/login` | `LoginScreen` | Email/password + **Continue with Google** + forgot password |
-| `/signup` | `SignupScreen` | Register + OTP + **Continue with Google** |
-| `/dashboard` | `HomeScreen` (tab) | XP, streak, history, heritage highlight |
-| `/explore` | `ExploreScreen` (tab) | `GET /api/heritage` + search/save |
-| `/listen` | `ListenScreen` (tab) | `GET /api/audio`, `GET /api/proverbs`, expo-audio |
-| `/collections` | `CollectionsScreen` (tab) | Artifacts JSON + heritage categories + save |
-| `/kwibuka` | `KwibukaScreen` (More stack) | Remembrance UI |
-| `/testimonies` | `TestimoniesScreen` | Local `survivorTestimony.json` |
-| `/testimony/:id` | `TestimonyDetailScreen` | WebView YouTube embed |
-| `/intl-days` | `IntlDaysScreen` | Ported static 2026 events |
-| `/videos` | `VideosScreen` | `GET /api/video` |
-| `/contribute` | `ContributeScreen` | FormData → `/api/contributions/*` |
-| `/saved` | `SavedScreen` | `GET/DELETE /api/saved` |
-| `/history` | `HistoryScreen` | `GET /api/history`, `/api/history/stats` |
-| `/profile` | `ProfileScreen` | User + explorer type |
-| `/settings` | `SettingsScreen` | Language en/rw/fr, password, logout |
+## Languages
 
-## Auth
+| Code | Label |
+|------|--------|
+| `en` | English (UK) |
+| `rw` | Kinyarwanda |
+| `fr` | French (France) |
 
-| Web | Mobile |
-|---|---|
-| `localStorage` key `token` | `expo-secure-store` key `token` |
-| `AuthContext` login/register/profile/logout | `src/context/AuthContext.tsx` |
-| OTP via `AuthPage` verify/resend | Signup step → `/auth/verify-email`, `/auth/resend-otp` |
+Catalogs: `mobile/src/translations/{en,rw,fr}.json` (from `frontend/src/translations.js`).
+
+---
+
+## Route / screen map
+
+| Web route | Mobile screen | Status |
+|-----------|---------------|--------|
+| `/` Landing | `LandingScreen` | Done |
+| `/login` | `LoginScreen` | Done (email + Google + forgot) |
+| `/signup` | `SignupScreen` | Done (register + OTP + Google) |
+| `/gov` | — | Web-only |
+| `/dashboard` | `HomeScreen` | Done (quest strip, explorer picker, highlight, history) |
+| `/explore` | `ExploreScreen` | Done (list + map + stories fallback) |
+| `/listen` | `ListenScreen` | Done |
+| `/videos` | `VideosScreen` | Done |
+| `/collections` | `CollectionsScreen` | Done (museum gallery modal) |
+| `/kwibuka` | `KwibukaScreen` | Done |
+| `/testimonies` | `TestimoniesScreen` | Done |
+| `/testimony/:id` | `TestimonyDetailScreen` | Done |
+| `/intl-days` | `IntlDaysScreen` | Done |
+| `/contribute` | `ContributeScreen` | Done |
+| `/saved` | `SavedScreen` | Done |
+| `/history` | `HistoryScreen` | Done |
+| `/profile` | `ProfileScreen` | Done (avatar, badges catalog, edit) |
+| `/settings` | `SettingsScreen` | Done (lang, notifs, a11y, password, sessions, export, deactivate, delete) |
+| `/admin` | — | Web-only |
+
+### Global overlays
+
+| Web | Mobile | Status |
+|-----|--------|--------|
+| `ChatWidget` | `ChatWidget.tsx` | Done |
+| `RiddlePopup` | `RiddlePopup.tsx` | Done |
+| Reward toasts | `RewardToastContainer` + `GamificationContext` | Done |
+
+---
+
+## Final parity checklist
+
+- [x] Landing page (+ language selector EN/RW/FR)
+- [x] Navigation (tabs + More stack)
+- [x] Authentication (login / signup / OTP / Google / logout)
+- [x] Protected auth gate
+- [x] Language selection + persistence + profile sync
+- [x] Translation catalogs for all 3 languages
+- [x] Dashboard Home (not marketing hero)
+- [x] Explore list + map
+- [x] Listen / Videos / Collections / Museum gallery
+- [x] Kwibuka + testimonies
+- [x] Intl days / Contribute / Saved / History
+- [x] Profile (avatar upload via ImagePicker, badges catalog, XP)
+- [x] Settings (notifications, accessibility, sessions, export, deactivate, delete)
+- [x] Gamification (daily login, award XP, toasts, riddles)
+- [x] Chat / AI assistant overlay
+- [x] Design tokens from web
+- [x] No web DOM / HTML / react-router in `/mobile`
+- [x] Admin /gov intentionally web-only
+
+---
 
 ## API base
 
-- Web: `VITE_API_BASE` → `https://umucocore.onrender.com`
-- Mobile: `EXPO_PUBLIC_API_BASE` → same
+`EXPO_PUBLIC_API_BASE` → `https://umucocore.onrender.com`  
+Optional: `EXPO_PUBLIC_GEMINI_API_KEY`, `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`
 
-## Design tokens
+---
 
-From `frontend/src/styles/global.css` → `mobile/src/theme/colors.ts`:
-
-- primary `#8D493A`, primaryDark `#3E2723`, primarySoft `#FCDFD3`
-- bgMain `#FDFBF7`, bgCard `#FFFFFF`
-- textPrimary `#2C1A14`, textSecondary `#6F5B55`, textMuted `#8A7B73`
-- border `#EADBC8`
-
-## Navigation shape
+## Navigation
 
 ```
-AuthStack: Welcome → Login / Signup(OTP)
-MainTabs:
-  Home | Explore | Listen | Collections | More
-MoreStack:
-  MoreHome, Kwibuka, Testimonies, TestimonyDetail,
-  IntlDays, Videos, Contribute, Saved, History, Profile, Settings
+AuthStack: Landing → Login / Signup
+MainTabs: Home | Explore | Listen | Collections | More
+MoreStack: Kwibuka, Testimonies, IntlDays, Videos, Contribute,
+           Saved, History, Profile, Settings
+Overlays: ChatWidget, RiddlePopup, RewardToastContainer
 ```
-
-## Data copied locally
-
-- `frontend/src/data/survivorTestimony.json` → `mobile/src/data/survivorTestimony.json`
-- `frontend/src/data/artifacts.json` → `mobile/src/data/artifacts.json` (collections grid)
-- Intl day events adapted into `mobile/src/data/intlEvents.ts`

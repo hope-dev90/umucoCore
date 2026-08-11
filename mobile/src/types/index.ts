@@ -23,6 +23,19 @@ export interface User {
   bestStreak?: number;
   emailVerified?: boolean;
   xpToNextLevel?: number;
+  notifications?: {
+    archiveUpdates?: boolean;
+    newsletter?: boolean;
+    eventReminders?: boolean;
+  };
+  accessibility?: {
+    voice?: number;
+    fontSize?: number;
+    highContrast?: boolean;
+    reduceMotion?: boolean;
+    dateFormat?: string;
+    timezone?: string;
+  };
 }
 
 export interface AuthResponse {

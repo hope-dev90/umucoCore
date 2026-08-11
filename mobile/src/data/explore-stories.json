@@ -1,0 +1,901 @@
+[
+  {
+    "id": "card-1",
+    "catKey": "architecture",
+    "imageKey": "nyanza",
+    "lat": -2.358,
+    "lng": 29.546,
+    "era": "pre-colonial",
+    "locationKey": "Nyanza",
+    "category": {
+      "en": "Ubwami",
+      "fr": "Ubwami",
+      "rw": "Ubwami"
+    },
+    "title": {
+      "en": "The Royal Palace of Nyanza",
+      "fr": "Le Palais royal de Nyanza",
+      "rw": "Ingoro y'Ubwami ya Nyanza"
+    },
+    "location": {
+      "en": "Nyanza",
+      "fr": "Nyanza",
+      "rw": "Nyanza"
+    },
+    "desc": {
+      "en": "A newly reconstructed palace showcasing traditional architecture, ceremonies, and daily life in Rwanda's royal court.",
+      "fr": "Un palais nouvellement reconstruit présentant l'architecture traditionnelle, les cérémonies et la vie quotidienne de la cour royale rwandaise.",
+      "rw": "Ingoro y'Ubwami yubatswe bundi bushya, yerekana ubwubatsi, imihango n'ubuzima bwa buri munsi bw'Urukiko rw'Ubwami rw'u Rwanda."
+    }
+  },
+  {
+    "id": "card-2",
+    "catKey": "performance",
+    "imageKey": "intore",
+    "lat": -1.97,
+    "lng": 30.104,
+    "era": "pre-colonial",
+    "locationKey": "Nyanza",
+    "category": {
+      "en": "Ubutwari",
+      "fr": "Ubutwari",
+      "rw": "Ubutwari"
+    },
+    "title": {
+      "en": "Intore – The Dance of Warriors",
+      "fr": "Intore – La danse des guerriers",
+      "rw": "Intore – Umubyino w'Ubutwari"
+    },
+    "location": {
+      "en": "Nyanza",
+      "fr": "Nyanza",
+      "rw": "Nyanza"
+    },
+    "desc": {
+      "en": "The powerful Intore tradition, Rwanda's famous warrior dance, born from the kingdom's battlefields and passed down through generations.",
+      "fr": "La puissante tradition Intore, la célèbre danse guerrière du Rwanda, née des champs de bataille du royaume et transmise de génération en génération.",
+      "rw": "Imbyino gakondo z'inogye ijisho kandi zibereye ibirori z'ihuza abanyarwanda."
+    }
+  },
+  {
+    "id": "card-3",
+    "catKey": "artifacts",
+    "imageKey": "artifact",
+    "lat": -1.95,
+    "lng": 29.9,
+    "era": "pre-colonial",
+    "locationKey": "National",
+    "category": {
+      "en": "Umuziki",
+      "fr": "Umuziki",
+      "rw": "Umuziki"
+    },
+    "title": {
+      "en": "Inanga – The Heart of Rwandan Music",
+      "fr": "Inanga – Le cœur de la musique rwandaise",
+      "rw": "Inanga – Umutima w'Umuziki Nyarwanda"
+    },
+    "location": {
+      "en": "Nationwide",
+      "fr": "Tout le pays",
+      "rw": "Igihugu hose"
+    },
+    "desc": {
+      "en": "Experience the inanga, kembe, and ingoma as they were played centuries ago in royal camps and village gatherings across Rwanda.",
+      "fr": "Vivez l'inanga, le kembe et l'ingoma tels qu'ils étaient joués il y a des siècles dans les camps royaux et les rassemblements villageois à travers le Rwanda.",
+      "rw": "Umva inanga, ikembe n'ingoma nk'uko byacurangwaga mu binyejana byinshi mu nkambi z'ubwami no mu materaniro y'imidugudu mu Rwanda hose."
+    }
+  },
+  {
+    "id": "card-4",
+    "catKey": "culture",
+    "imageKey": "buhanga",
+    "lat": -1.95,
+    "lng": 29.9,
+    "era": "pre-colonial",
+    "locationKey": "National",
+    "category": {
+      "en": "Imigani",
+      "fr": "Imigani",
+      "rw": "Imigani"
+    },
+    "title": {
+      "en": "Imigani – Fireside Stories",
+      "fr": "Imigani – Contes du foyer",
+      "rw": "Imigani – Inkuru zivugwa ku Muriro"
+    },
+    "location": {
+      "en": "Nationwide",
+      "fr": "Tout le pays",
+      "rw": "Igihugu hose"
+    },
+    "desc": {
+      "en": "Enter Rwandan oral culture passed from ancestors: proverbs, stories, and wisdom taught around the evening fire, from generation to generation.",
+      "fr": "Entrez dans la culture orale rwandaise transmise par les ancêtres : proverbes, histoires et sagesse enseignés autour du feu du soir, de génération en génération.",
+      "rw": "Injira mu muco nyarwanda w'imvugo dukesha abakurambere: imigani, inkuru n'ibitekerezo byigishwa ku muriro w'ijoro, uva ku gisekuru kigana ikindi."
+    }
+  },
+  {
+    "id": "card-5",
+    "catKey": "history",
+    "imageKey": "weaving",
+    "lat": -1.9346,
+    "lng": 30.0621,
+    "era": "colonial",
+    "locationKey": "Kigali",
+    "category": {
+      "en": "Ubwami",
+      "fr": "Ubwami",
+      "rw": "Ubwami"
+    },
+    "title": {
+      "en": "Kigeli IV Rwabugiri – The Warrior King",
+      "fr": "Kigeli IV Rwabugiri – Le roi guerrier",
+      "rw": "Kigeli IV Rwabugiri – Umwami w'Intwari"
+    },
+    "location": {
+      "en": "Kigali",
+      "fr": "Kigali",
+      "rw": "Kigali"
+    },
+    "desc": {
+      "en": "One of Rwanda's most powerful kings, who expanded the country's territory through wars and governance reforms.",
+      "fr": "L'un des rois les plus puissants du Rwanda, qui a étendu le territoire du pays par des guerres et des réformes de gouvernance.",
+      "rw": "Umwe mu bami b’abanyamaboko n’igihagararo kurusha abandi mu Rwanda, waguye imbago z’ubwami binyuze mu Ntambara no mu mavugurura y’ubuyobozi."
+    }
+  },
+  {
+    "id": "card-6",
+    "catKey": "culture",
+    "imageKey": "nyanza",
+    "lat": -2.358,
+    "lng": 29.546,
+    "era": "pre-colonial",
+    "locationKey": "Nyanza",
+    "category": {
+      "en": "Imigani",
+      "fr": "Imigani",
+      "rw": "Imigani"
+    },
+    "title": {
+      "en": "Ubwiru – Royal Court Ceremonies",
+      "fr": "Ubwiru – Cérémonies de la cour royale",
+      "rw": "Ubwiru – Imihango y'Urukiko rw'Ubwami"
+    },
+    "location": {
+      "en": "Nyanza",
+      "fr": "Nyanza",
+      "rw": "Nyanza"
+    },
+    "desc": {
+      "en": "Sacred ceremonies and secret knowledge that governed royal court life, passed only to those authorized to know.",
+      "fr": "Cérémonies sacrées et connaissances secrètes qui régissaient la vie de la cour royale, transmises uniquement aux personnes autorisées.",
+      "rw": "Imihango y'ibwami n'ubumenyi bw'ibibanga byayoboraga urukiko rw'ubwami, bigezwa gusa ku bantu bemerewe kubimenya."
+    }
+  },
+  {
+    "id": "card-7",
+    "catKey": "culture",
+    "imageKey": "intore",
+    "lat": -1.97,
+    "lng": 30.104,
+    "era": "pre-colonial",
+    "locationKey": "National",
+    "category": {
+      "en": "Imigani",
+      "fr": "Imigani",
+      "rw": "Imigani"
+    },
+    "title": {
+      "en": "Ibyivugo – Warrior Praise Poetry",
+      "fr": "Ibyivugo – Poésie de gloire guerrière",
+      "rw": "Ibyivugo – Ibisigo by'Ubutwari"
+    },
+    "location": {
+      "en": "Nationwide",
+      "fr": "Tout le pays",
+      "rw": "Igihugu hose"
+    },
+    "desc": {
+      "en": "Self-praise poetry composed and recited by warriors, praising their bravery and personal achievements.",
+      "fr": "Poésie d'auto-éloge composée et récitée par les guerriers, célébrant leur bravoure et leurs réalisations personnelles.",
+      "rw": "Ibisigo byanditswe n'ababivuga ubwabo, bikavugwa n'abasirikare n'abahigi basingiza ubutwari n'ibikorwa byabo bwite."
+    }
+  },
+  {
+    "id": "card-8",
+    "catKey": "culture",
+    "imageKey": "artifact",
+    "lat": -1.95,
+    "lng": 29.9,
+    "era": "pre-colonial",
+    "locationKey": "National",
+    "category": {
+      "en": "Imigani",
+      "fr": "Imigani",
+      "rw": "Imigani"
+    },
+    "title": {
+      "en": "Inzira z'Ubwenge – Riddles and Wisdom",
+      "fr": "Inzira z'Ubwenge – Énigmes et sagesse",
+      "rw": "Inzira z'Ubwenge – Ibisakuzo n'Ubuhanga"
+    },
+    "location": {
+      "en": "Nationwide",
+      "fr": "Tout le pays",
+      "rw": "Igihugu hose"
+    },
+    "desc": {
+      "en": "Riddles and traditional proverbs used to teach wisdom and critical thinking across generations.",
+      "fr": "Énigmes et proverbes traditionnels utilisés pour enseigner la sagesse et la pensée critique à travers les générations.",
+      "rw": "Ibisakuzo n'imigani gakondo byakoreshwaga mu kwigisha ubuhanga no gutekereza neza mu bisekuru."
+    }
+  },
+  {
+    "id": "card-9",
+    "catKey": "performance",
+    "imageKey": "nyanza",
+    "lat": -2.358,
+    "lng": 29.546,
+    "era": "pre-colonial",
+    "locationKey": "Nyanza",
+    "category": {
+      "en": "Umuziki",
+      "fr": "Umuziki",
+      "rw": "Umuziki"
+    },
+    "title": {
+      "en": "Ingoma – The Sacred Royal Drums",
+      "fr": "Ingoma – Les tambours royaux sacrés",
+      "rw": "Ingoma – Ingoma Zera z'Ubwami"
+    },
+    "location": {
+      "en": "Nyanza",
+      "fr": "Nyanza",
+      "rw": "Nyanza"
+    },
+    "desc": {
+      "en": "Drums that were the heartbeat of the royal court, used in ceremonies, announcements, and celebrations.",
+      "fr": "Des tambours qui étaient le cœur battant de la cour royale, utilisés dans les cérémonies, les annonces et les célébrations.",
+      "rw": "Ingoma zari umutima w'urukiko rw'ubwami, zikoreshwa mu mihango, mu gutangaza amakuru no mu birori."
+    }
+  },
+  {
+    "id": "card-10",
+    "catKey": "artifacts",
+    "imageKey": "buhanga",
+    "lat": -1.95,
+    "lng": 29.9,
+    "era": "pre-colonial",
+    "locationKey": "National",
+    "category": {
+      "en": "Umuziki",
+      "fr": "Umuziki",
+      "rw": "Umuziki"
+    },
+    "title": {
+      "en": "Umuvugo – Praise Songs",
+      "fr": "Umuvugo – Chants de louange",
+      "rw": "Umuvugo – Indirimbo z'Ishimwe"
+    },
+    "location": {
+      "en": "Nationwide",
+      "fr": "Tout le pays",
+      "rw": "Igihugu hose"
+    },
+    "desc": {
+      "en": "Traditional songs that praised kings, warriors, and important things, performed to celebrate and honor.",
+      "fr": "Chants traditionnels qui louaient les rois, les guerriers et les choses importantes, exécutés pour célébrer et honorer.",
+      "rw": "Indirimbo gakondo zasingizaga abami, intwari n'ibintu bikomeye, zicurangwa kugira ngo babishimire."
+    }
+  },
+  {
+    "id": "card-11",
+    "catKey": "crafts",
+    "imageKey": "weaving",
+    "lat": -1.95,
+    "lng": 29.9,
+    "era": "colonial",
+    "locationKey": "National",
+    "category": {
+      "en": "Rusange",
+      "fr": "Rusange",
+      "rw": "Rusange"
+    },
+    "title": {
+      "en": "Ubudehe – Community Cooperation",
+      "fr": "Ubudehe – Coopération communautaire",
+      "rw": "Ubudehe – Ubufatanye bw'Abaturage"
+    },
+    "location": {
+      "en": "Nationwide",
+      "fr": "Tout le pays",
+      "rw": "Igihugu hose"
+    },
+    "desc": {
+      "en": "The ancient tradition of communal work and mutual assistance, demonstrating Rwandan community life across centuries.",
+      "fr": "L'ancienne tradition de travail communal et d'entraide, illustrant la vie communautaire rwandaise à travers les siècles.",
+      "rw": "Umuco wa kera wo gukorera  hamwe no gufashanya, wafashije mu iterambere ry'abaturage b'u Rwanda."
+    }
+  },
+  {
+    "id": "card-12",
+    "catKey": "crafts",
+    "imageKey": "weaving",
+    "lat": -2.073,
+    "lng": 29.752,
+    "era": "pre-colonial",
+    "locationKey": "National",
+    "category": {
+      "en": "Rusange",
+      "fr": "Rusange",
+      "rw": "Rusange"
+    },
+    "title": {
+      "en": "Agaseke – Baskets of Peace",
+      "fr": "Agaseke – Paniers de paix",
+      "rw": "Agaseke – Ibiseke by'Amahoro"
+    },
+    "location": {
+      "en": "Nationwide",
+      "fr": "Tout le pays",
+      "rw": "Igihugu hose"
+    },
+    "desc": {
+      "en": "Artistically woven baskets with deep cultural meaning, used in ceremonies, as gifts, and in daily life.",
+      "fr": "Paniers tissés artistiquement avec une signification culturelle profonde, utilisés dans les cérémonies, comme cadeaux et dans la vie quotidienne.",
+      "rw": "Ibiseke bidukanywe mu buryo bw'ubuhanga, bifite icyerekezo cy'umuco mwinshi, bikoreshwa mu mihango, nk'impano no mu bikoresho bya buri munsi."
+    }
+  },
+  {
+    "id": "card-13",
+    "catKey": "history",
+    "imageKey": "intore",
+    "lat": -1.9346,
+    "lng": 30.0621,
+    "era": "post-1994",
+    "locationKey": "Kigali",
+    "category": {
+      "en": "Ubutwari",
+      "fr": "Ubutwari",
+      "rw": "Ubutwari"
+    },
+    "title": {
+      "en": "Ingabo – The Royal Guard",
+      "fr": "Ingabo – La garde royale",
+      "rw": "Ingabo – Abarinzi b'Ubwami"
+    },
+    "location": {
+      "en": "Kigali",
+      "fr": "Kigali",
+      "rw": "Kigali"
+    },
+    "desc": {
+      "en": "The kingdom's heroic guards who protected the King and maintained security throughout the nation.",
+      "fr": "Les gardes héroïques du royaume qui protégeaient le Roi et maintenaient la sécurité dans toute la nation.",
+      "rw": "Abarinzi b'intwari b'ubwami barinzaga Umwami kandi bagacunga umutekano mu gihugu."
+    }
+  },
+  {
+    "id": "card-14",
+    "catKey": "wildlife",
+    "imageKey": "safari",
+    "lat": -2.47,
+    "lng": 29.24,
+    "era": "pre-colonial",
+    "locationKey": "Rusizi",
+    "category": {
+      "en": "Ibyitangira Cyumweru",
+      "fr": "Ibyitangira Cyumweru",
+      "rw": "Ibyitangira Cyumweru"
+    },
+    "title": {
+      "en": "Nyungwe Forest National Park",
+      "fr": "Parc national de la forêt de Nyungwe",
+      "rw": "Nyungwe Forest National Park"
+    },
+    "location": {
+      "en": "Rusizi",
+      "fr": "Rusizi",
+      "rw": "Rusizi"
+    },
+    "desc": {
+      "en": "Rwanda's diverse rainforest, home to thousands of wildlife species, birds, and rare primates.",
+      "fr": "La forêt tropicale diversifiée du Rwanda, abritant des milliers d'espèces animales, d'oiseaux et de primates rares.",
+      "rw": "Ishyamba kimeza rya kera cyane ricumbikiye amoko ibihumbi y'inyamaswa n'ibimera, harimo inyamaswa zo mu bwoko bw'inkende, inyoni zikunze kuboneka gake, n'izikururuka."
+    }
+  },
+  {
+    "id": "card-15",
+    "catKey": "wildlife",
+    "imageKey": "safari",
+    "lat": -1.65,
+    "lng": 30.75,
+    "era": "pre-colonial",
+    "locationKey": "Kayonza",
+    "category": {
+      "en": "Ibyitangira Cyumweru",
+      "fr": "Ibyitangira Cyumweru",
+      "rw": "Ibyitangira Cyumweru"
+    },
+    "title": {
+      "en": "Akagera National Park",
+      "fr": "Parc national de l'Akagera",
+      "rw": "Akagera National Park"
+    },
+    "location": {
+      "en": "Kayonza",
+      "fr": "Kayonza",
+      "rw": "Kayonza"
+    },
+    "desc": {
+      "en": "A savanna park in eastern Rwanda, home to the Big Five and diverse wildlife species.",
+      "fr": "Un parc de savane dans l'est du Rwanda, abritant les Big Five et de nombreuses espèces animales.",
+      "rw": "Pariki nini y'igishanga muri Afrika yo Hagati, ikaba icumbikiye Inyamaswa Nini z' amoko atanu n'andi moko meza atandukanye y'inyamaswa zo muri savana."
+    }
+  },
+  {
+    "id": "card-16",
+    "catKey": "lakes",
+    "imageKey": "safari",
+    "lat": -1.66,
+    "lng": 29.22,
+    "era": "pre-colonial",
+    "locationKey": "Rubavu",
+    "category": {
+      "en": "Ibyitangira Cyumweru",
+      "fr": "Ibyitangira Cyumweru",
+      "rw": "Ibyitangira Cyumweru"
+    },
+    "title": {
+      "en": "Lake Kivu",
+      "fr": "Lac Kivu",
+      "rw": "Lake Kivu"
+    },
+    "location": {
+      "en": "Rubavu",
+      "fr": "Rubavu",
+      "rw": "Rubavu"
+    },
+    "desc": {
+      "en": "One of Rwanda's great lakes on the western border, filled with thousands of years of history and significance.",
+      "fr": "L'un des grands lacs du Rwanda à la frontière occidentale, chargé de millénaires d'histoire et de signification.",
+      "rw": "Igiyaga giciye ibintu mu mateka n’urusobe rw’ibinyabuzima ku mupaka w’iburengerazuba bw’u Rwanda, gisangiwe na Repubulika Iharanira Demokarasi ya Kongo. Ikiyaga cya Kivu."
+    }
+  },
+  {
+    "id": "card-18",
+    "catKey": "artifacts",
+    "imageKey": "buhanga",
+    "lat": -2.59,
+    "lng": 29.74,
+    "era": "colonial",
+    "locationKey": "Gitarama",
+    "category": {
+      "en": "Ubwenge",
+      "fr": "Ubwenge",
+      "rw": "Ubwenge"
+    },
+    "title": {
+      "en": "Butare National Museum of Rwanda",
+      "fr": "Musée national du Rwanda à Butare",
+      "rw": "Butare National Museum of Rwanda"
+    },
+    "location": {
+      "en": "Huye",
+      "fr": "Huye",
+      "rw": "Huye"
+    },
+    "desc": {
+      "en": "Rwanda's premier museum of history and culture, containing many artifacts and archaeological treasures.",
+      "fr": "Le principal musée d'histoire et de culture du Rwanda, contenant de nombreux artefacts et trésors archéologiques.",
+      "rw": "Ingoro nini y’icyitegererezo mu Rwanda igaragaza amateka y’umuco w’igihugu, ikaba ifite amakusanyirizo rikomeye ry’ibikoresho bya kera n’inyandiko z’amateka. Ingoro y’Umurage w’Umuco i Huye."
+    }
+  },
+  {
+    "id": "card-19",
+    "catKey": "history",
+    "imageKey": "artifact",
+    "lat": -2.39,
+    "lng": 29.67,
+    "era": "post-1994",
+    "locationKey": "Gitarama",
+    "category": {
+      "en": "Amateka",
+      "fr": "Amateka",
+      "rw": "Amateka"
+    },
+    "title": {
+      "en": "Murambi Genocide Memorial",
+      "fr": "Mémorial du génocide de Murambi",
+      "rw": "Murambi Genocide Memorial"
+    },
+    "location": {
+      "en": "Nyamagabe",
+      "fr": "Nyamagabe",
+      "rw": "Nyamagabe"
+    },
+    "desc": {
+      "en": "The 1994 genocide memorial at Murambi, educating visitors about the tragic events.",
+      "fr": "Le mémorial du génocide de 1994 à Murambi, sensibilisant les visiteurs aux événements tragiques.",
+      "rw": "Urwibutso rwa Jenoside yakorewe Abatutsi mu 1994 rwa Murambi, rubumbatiye amateka  ya Genocide n'itegurwa ryayo kugira ngo amateka atazigera yibagirana."
+    }
+  },
+  {
+    "id": "card-20",
+    "catKey": "architecture",
+    "imageKey": "nyanza",
+    "lat": -1.95,
+    "lng": 30.06,
+    "era": "colonial",
+    "locationKey": "Kigali",
+    "category": {
+      "en": "Ubwenge",
+      "fr": "Ubwenge",
+      "rw": "Ubwenge"
+    },
+    "title": {
+      "en": "Nyarugenge Church",
+      "fr": "Église de Nyarugenge",
+      "rw": "Nyarugenge Church"
+    },
+    "location": {
+      "en": "Kigali",
+      "fr": "Kigali",
+      "rw": "Kigali"
+    },
+    "desc": {
+      "en": "The historic Nyarugenge Church, featuring architecture spanning centuries.",
+      "fr": "L'historique église de Nyarugenge, dont l'architecture s'étend sur des siècles.",
+      "rw": "Rimwe mu masengero ya kera cyane i Kigali, rikaba umuhamya w’amateka y’imyubakire yo mu gihe cy’ubukoroni muri uyu mujyi. Kiliziya ya Sainte-Famille cyangwa se Paruwasi ya Nyamirambo."
+    }
+  },
+  {
+    "id": "card-21",
+    "catKey": "culture",
+    "imageKey": "buhanga",
+    "lat": -2.65,
+    "lng": 29.55,
+    "era": "colonial",
+    "locationKey": "Gitarama",
+    "category": {
+      "en": "Ubwenge",
+      "fr": "Ubwenge",
+      "rw": "Ubwenge"
+    },
+    "title": {
+      "en": "Kibeho Shrine",
+      "fr": "Sanctuaire de Kibeho",
+      "rw": "Kibeho Shrine"
+    },
+    "location": {
+      "en": "Nyaruguru",
+      "fr": "Nyaruguru",
+      "rw": "Nyaruguru"
+    },
+    "desc": {
+      "en": "The site of Marian apparitions in Rwanda, containing a church and other significant religious structures.",
+      "fr": "Le site des apparitions mariales au Rwanda, avec une église et d'autres structures religieuses importantes.",
+      "rw": "Ahantu hazwi cyane ku rwego mpuzamahanga h’ingendo ntagatifu z’Abagatolika, ahari amakuru avuga ko habereye amabonekerwa y'umubyeyi bikira Mariya."
+    }
+  },
+  {
+    "id": "card-22",
+    "catKey": "wildlife",
+    "imageKey": "imigongo",
+    "lat": -1.95,
+    "lng": 30.35,
+    "era": "pre-colonial",
+    "locationKey": "Kayonza",
+    "category": {
+      "en": "Ibyitangira Cyumweru",
+      "fr": "Ibyitangira Cyumweru",
+      "rw": "Ibyitangira Cyumweru"
+    },
+    "title": {
+      "en": "Rwankeri Hill",
+      "fr": "Colline de Rwankeri",
+      "rw": "Rwankeri Hill"
+    },
+    "location": {
+      "en": "Rwamagana",
+      "fr": "Rwamagana",
+      "rw": "Rwamagana"
+    },
+    "desc": {
+      "en": "An important hill in Rwanda, featuring beautiful landscapes and significant cultural sites.",
+      "fr": "Une colline importante au Rwanda, avec de beaux paysages et des sites culturels significatifs.",
+      "rw": "Umusozi ushimishije cyane mu Rwanda ugaragaza amaterasi meza y’ubuhinzi n’utwenda dutesha amayeri tw’imisozi itandukanye."
+    }
+  },
+  {
+    "id": "card-23",
+    "catKey": "lakes",
+    "imageKey": "safari",
+    "lat": -1.85,
+    "lng": 30.25,
+    "era": "pre-colonial",
+    "locationKey": "Kayonza",
+    "category": {
+      "en": "Ibyitangira Cyumweru",
+      "fr": "Ibyitangira Cyumweru",
+      "rw": "Ibyitangira Cyumweru"
+    },
+    "title": {
+      "en": "Lake Muhazi",
+      "fr": "Lac Muhazi",
+      "rw": "Lake Muhazi"
+    },
+    "location": {
+      "en": "Rwamagana",
+      "fr": "Rwamagana",
+      "rw": "Rwamagana"
+    },
+    "desc": {
+      "en": "One of Rwanda's largest lakes, rich in history and cultural significance.",
+      "fr": "L'un des plus grands lacs du Rwanda, riche en histoire et en signification culturelle.",
+      "rw": "Ikiyaga kigari cyo mu Rwanda, cyuzuye amateka n'ibintu bikomeye."
+    }
+  },
+  {
+    "id": "card-24",
+    "catKey": "history",
+    "imageKey": "artifact",
+    "lat": -2.15,
+    "lng": 29.35,
+    "era": "post-1994",
+    "locationKey": "Rubavu",
+    "category": {
+      "en": "Amateka",
+      "fr": "Amateka",
+      "rw": "Amateka"
+    },
+    "title": {
+      "en": "Bisesero Genocide Memorial",
+      "fr": "Mémorial du génocide de Bisesero",
+      "rw": "Bisesero Genocide Memorial"
+    },
+    "location": {
+      "en": "Karongi",
+      "fr": "Karongi",
+      "rw": "Karongi"
+    },
+    "desc": {
+      "en": "The 1994 genocide memorial at Bisesero, honoring those who resisted the genocide.",
+      "fr": "Le mémorial du génocide de 1994 à Bisesero, honorant ceux qui ont résisté au génocide.",
+      "rw": "Urwibutso rwa Bisesero rwahaye icyubahiro abari n’abagabo bagerageje kwirwanaho mu gihe cya Jenoside yakorewe Abatutsi mu 1994 ku misozi ya Bisesero"
+    }
+  },
+  {
+    "id": "card-25",
+    "catKey": "wildlife",
+    "imageKey": "imigongo",
+    "lat": -1.5,
+    "lng": 29.45,
+    "era": "pre-colonial",
+    "locationKey": "Musanze",
+    "category": {
+      "en": "Ibyitangira Cyumweru",
+      "fr": "Ibyitangira Cyumweru",
+      "rw": "Ibyitangira Cyumweru"
+    },
+    "title": {
+      "en": "Mount Karisimbi",
+      "fr": "Mont Karisimbi",
+      "rw": "Mount Karisimbi"
+    },
+    "location": {
+      "en": "Musanze",
+      "fr": "Musanze",
+      "rw": "Musanze"
+    },
+    "desc": {
+      "en": "The highest peak in the Virunga mountains, featuring stunning views and diverse wildlife.",
+      "fr": "Le plus haut sommet des montagnes Virunga, offrant des vues époustouflantes et une faune diversifiée.",
+      "rw": "Ishyamba rinini ricumbikiye inkandaganyabami (shimpanze) n’urusobe rw’ibinyabuzima, rikaba riri gusubiranywa mu buryo bwo kubungabunga ibidukikije."
+    }
+  },
+  {
+    "id": "card-26",
+    "catKey": "wildlife",
+    "imageKey": "safari",
+    "lat": -1.75,
+    "lng": 29.55,
+    "era": "pre-colonial",
+    "locationKey": "Musanze",
+    "category": {
+      "en": "Ibyitangira Cyumweru",
+      "fr": "Ibyitangira Cyumweru",
+      "rw": "Ibyitangira Cyumweru"
+    },
+    "title": {
+      "en": "Gishwati Forest",
+      "fr": "Forêt de Gishwati",
+      "rw": "Gishwati Forest"
+    },
+    "location": {
+      "en": "Ngororero",
+      "fr": "Ngororero",
+      "rw": "Ngororero"
+    },
+    "desc": {
+      "en": "A forest reserve of great biodiversity and ecological importance.",
+      "fr": "Une réserve forestière d'une grande biodiversité et d'une importance écologique majeure.",
+      "rw": "Ishyamba rikubiyemo ibintu bikomeye cyane."
+    }
+  },
+  {
+    "id": "card-27",
+    "catKey": "lakes",
+    "imageKey": "safari",
+    "lat": -1.45,
+    "lng": 29.85,
+    "era": "pre-colonial",
+    "locationKey": "Musanze",
+    "category": {
+      "en": "Ibyitangira Cyumweru",
+      "fr": "Ibyitangira Cyumweru",
+      "rw": "Ibyitangira Cyumweru"
+    },
+    "title": {
+      "en": "Rugezi Marsh",
+      "fr": "Marais de Rugezi",
+      "rw": "Rugezi Marsh"
+    },
+    "location": {
+      "en": "Burera",
+      "fr": "Burera",
+      "rw": "Burera"
+    },
+    "desc": {
+      "en": "A famous marshland in Rwanda, home to diverse wildlife and bird species.",
+      "fr": "Un marais célèbre au Rwanda, abritant une faune et une avifaune diversifiées.",
+      "rw": "Igishanga cyemewe ku rwego mpuzamahanga, kizwi cyane kubera urusobe rwa kadasohoka rw’amoko y’inyoni."
+    }
+  },
+  {
+    "id": "card-28",
+    "catKey": "crafts",
+    "imageKey": "weaving",
+    "lat": -2.55,
+    "lng": 29.7,
+    "era": "post-1994",
+    "locationKey": "Gitarama",
+    "category": {
+      "en": "Rusange",
+      "fr": "Rusange",
+      "rw": "Rusange"
+    },
+    "title": {
+      "en": "Gatagara Crafts Village",
+      "fr": "Village artisanal de Gatagara",
+      "rw": "Gatagara Crafts Village"
+    },
+    "location": {
+      "en": "Huye",
+      "fr": "Huye",
+      "rw": "Huye"
+    },
+    "desc": {
+      "en": "A village of transformed artisans, featuring traditional crafts and artwork.",
+      "fr": "Un village d'artisans transformés, mettant en vedette des artisanats et des œuvres d'art traditionnels.",
+      "rw": "Umudugudu uzwi cyane kubera ubukorikori gakondo bw’u Rwanda, birimo ibishushanyo by’imigongo n’inkangara ziboshywe."
+    }
+  },
+  {
+    "id": "card-29",
+    "catKey": "wildlife",
+    "imageKey": "imigongo",
+    "lat": -2.6,
+    "lng": 29.75,
+    "era": "pre-colonial",
+    "locationKey": "Gitarama",
+    "category": {
+      "en": "Ibyitangira Cyumweru",
+      "fr": "Ibyitangira Cyumweru",
+      "rw": "Ibyitangira Cyumweru"
+    },
+    "title": {
+      "en": "Huye Mountain",
+      "fr": "Mont Huye",
+      "rw": "Huye Mountain"
+    },
+    "location": {
+      "en": "Huye",
+      "fr": "Huye",
+      "rw": "Huye"
+    },
+    "desc": {
+      "en": "An important mountain in Rwanda, featuring beautiful landscapes and hiking trails.",
+      "fr": "Une montagne importante au Rwanda, avec de beaux paysages et des sentiers de randonnée.",
+      "rw": "Umusozi ukomeye mu Rwanda, harimo imirima."
+    }
+  },
+  {
+    "id": "card-30",
+    "catKey": "lakes",
+    "imageKey": "safari",
+    "lat": -2.39,
+    "lng": 30.78,
+    "era": "pre-colonial",
+    "locationKey": "Kayonza",
+    "category": {
+      "en": "Ibyitangira Cyumweru",
+      "fr": "Ibyitangira Cyumweru",
+      "rw": "Ibyitangira Cyumweru"
+    },
+    "title": {
+      "en": "Rusumo Falls",
+      "fr": "Chutes de Rusumo",
+      "rw": "Rusumo Falls"
+    },
+    "location": {
+      "en": "Rusumo",
+      "fr": "Rusumo",
+      "rw": "Rusumo"
+    },
+    "desc": {
+      "en": "Magnificent waterfalls on the border between Rwanda and Tanzania, historically significant.",
+      "fr": "De magnifiques chutes d'eau à la frontière entre le Rwanda et la Tanzanie, d'une grande importance historique.",
+      "rw": "Isumo ry’amazi ritangaje rishushanya umupaka hagati y’u Rwanda na Tanzaniya, rikaba ari akataraboneka."
+    }
+  },
+  {
+    "id": "card-31",
+    "catKey": "architecture",
+    "imageKey": "imigongo",
+    "lat": -1.94,
+    "lng": 30.07,
+    "era": "post-1994",
+    "locationKey": "Kigali",
+    "category": {
+      "en": "Ubwenge",
+      "fr": "Ubwenge",
+      "rw": "Ubwenge"
+    },
+    "title": {
+      "en": "Amahoro National Stadium",
+      "fr": "Stade national Amahoro",
+      "rw": "Amahoro National Stadium"
+    },
+    "location": {
+      "en": "Kigali",
+      "fr": "Kigali",
+      "rw": "Kigali"
+    },
+    "desc": {
+      "en": "Rwanda's famous national stadium, rich in history and cultural significance.",
+      "fr": "Le célèbre stade national du Rwanda, riche en histoire et en signification culturelle.",
+      "rw": "Sitade y’igihugu y’icyitegererezo y’u Rwanda, umuhamya w’ibihe bikomeye by’amateka n’ikimenyetso cy’amahoro. Sitade Amahoro."
+    }
+  },
+  {
+    "id": "card-32",
+    "catKey": "art",
+    "imageKey": "imigongo",
+    "lat": -1.93,
+    "lng": 30.08,
+    "era": "post-1994",
+    "locationKey": "Kigali",
+    "category": {
+      "en": "Ubwenge",
+      "fr": "Ubwenge",
+      "rw": "Ubwenge"
+    },
+    "title": {
+      "en": "Rwanda Art Museum",
+      "fr": "Musée d'art du Rwanda",
+      "rw": "Rwanda Art Museum"
+    },
+    "location": {
+      "en": "Kigali",
+      "fr": "Kigali",
+      "rw": "Kigali"
+    },
+    "desc": {
+      "en": "A museum featuring traditional and contemporary Rwandan art and cultural artifacts.",
+      "fr": "Un musée présentant l'art rwandais traditionnel et contemporain ainsi que des artefacts culturels.",
+      "rw": "Ahantu hagenewe ibihangano nyabugeni bya kijyambere n’ibya gakondo by’u Rwanda, hagaragaza ibishushanyo bizwi cyane by’imigongo bifite imisusire n’imijyo y’injyanamuntu."
+    }
+  }
+]

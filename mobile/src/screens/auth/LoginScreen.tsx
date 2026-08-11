@@ -100,7 +100,7 @@ export default function LoginScreen({ navigation }: Props) {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>{t('auth.noAccount')}</Text>
-        <Text style={styles.link} onPress={() => navigation.navigate('Signup')}>
+        <Text style={styles.link} onPress={() => navigation.navigate('Signup', {})}>
           {t('auth.signUp')}
         </Text>
       </View>
