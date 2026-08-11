@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import './KwibukaGallery.css';
 
 function KwibukaFlameLogo({ className = '' }) {
@@ -57,6 +58,8 @@ function CardTypeBadge({ type }) {
 }
 
 export default function KwibukaGallery({ videos, songs, onClose }) {
+  const { t } = useLanguage();
+
   return (
     <div className="gallery-modal-overlay" onClick={onClose}>
       <div className="gallery-modal" onClick={(e) => e.stopPropagation()}>
@@ -66,12 +69,13 @@ export default function KwibukaGallery({ videos, songs, onClose }) {
               <KwibukaFlameLogo className="gallery-flame-logo" />
               <span>Kwibuka</span>
             </div>
-            <h2>Kwibuka Gallery</h2>
+            <h2>{t('kwibuka.galleryTitle')}</h2>
             <p className="gallery-modal-subtitle">
-              Videos and songs of remembrance
+              {t('kwibuka.gallerySubtitle')}
             </p>
           </div>
           <button
+            type="button"
             className="gallery-modal-close"
             onClick={onClose}
             aria-label="Close"
@@ -87,7 +91,7 @@ export default function KwibukaGallery({ videos, songs, onClose }) {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="5 3 19 12 5 21 5 3" />
               </svg>
-              Videos
+              {t('kwibuka.videosTitle')}
             </h3>
             <div className="video-grid">
               {videos.map((video, i) => (
@@ -113,7 +117,7 @@ export default function KwibukaGallery({ videos, songs, onClose }) {
                 <circle cx="6" cy="18" r="3" />
                 <circle cx="18" cy="16" r="3" />
               </svg>
-              Songs of Remembrance
+              {t('kwibuka.songsTitle')}
             </h3>
             <div className="songs-grid">
               {songs.map((song, i) => (

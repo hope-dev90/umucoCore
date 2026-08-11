@@ -1,0 +1,230 @@
+{
+  "collections": [
+    {
+      "id": "ikibindi",
+      "title": "Ikibindi",
+      "category": "Vessels & Pottery",
+      "count": "0 items",
+      "description": "Traditional pot used for storing milk or banana beer.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRgZt5Kww54PAZbxp0wJsYrOj5AAT_cK7fUQxGBaYdZFA&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTx_q0LLnOK3dp8bUyTBRX1Q0YFLiwbDYsdXuqhJa1NyQ&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTYU96lJ6uH3fc6kvORZgRKlEl571gRAF7RtBfCzR0hvg&s=10"
+      ]
+    },
+    {
+      "id": "isuka",
+      "title": "Isuka",
+      "category": "Agricultural Tools",
+      "count": "0 items",
+      "description": "Traditional hoe used for cultivating land.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR1ihFjWYlYwiTRsqAzq5tb2emVntqjOZVWtvz2BvgG6Q&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdZsQpQH_n-JljpgTFNIu0hm9B0aRZYFYugq66OUWFNQ&s"
+      ]
+    },
+    {
+      "id": "inkongoro",
+      "title": "Inkongoro",
+      "category": "Vessels & Pottery",
+      "count": "0 items",
+      "description": "Gourd container traditionally used to hold liquids.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGe-IFGBp9dCUYQN8rW1O2qChJHduu_WMAYzosFergEA&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQwY7MPGWBtdO_IMOnDBCxXSb4KHKCH-tNtZhxirKFsg&s=10"
+      ]
+    },
+    {
+      "id": "inanga-tool",
+      "title": "Inanga",
+      "category": "Music & Oral Tradition",
+      "count": "0 items",
+      "description": "Zither-like string instrument used to accompany poetry and storytelling.",
+      "images": [
+        "https://wmic.net/wp-content/uploads/2020/11/African-Zither2-768x342-1.jpg",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJFFtRQpiyApIxvVVHqH6fGxuQZaI807rN9OKuLykanQ&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMxDOOu2kUnEdZoL4eJvEbYVD4OqjbYJyqIlZkGtZLTA&s"
+      ]
+    },
+    {
+      "id": "icyansi",
+      "title": "Icyansi",
+      "category": "Vessels & Pottery",
+      "count": "0 items",
+      "description": "Woven or wooden drinking vessel.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRGrMOYIwz6OmPG3e23DaUNcInxxGd8dbljvY5oJsBdBg&s",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4ZzcecSKx--l5TSaDpBTkaz9JB3zMCTsYUesX-f3LWQ&s=10"
+      ]
+    },
+    {
+      "id": "icumu",
+      "title": "Icumu",
+      "category": "Weapons & Hunting",
+      "count": "0 items",
+      "description": "Traditional spear.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWOooanouf1jWd9SVjpTL1MYO2EttRH_Tch94UAKyuAw&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQKjgpiEbGcKe1PjYuzphHXt-9SnhviTzlbuMrJp7Larw&s=10"
+      ]
+    },
+    {
+      "id": "umuheto",
+      "title": "Umuheto",
+      "category": "Weapons & Hunting",
+      "count": "0 items",
+      "description": "Traditional bow.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTiMyFNTknFJL47231IPfWQDA1w79ZHxnDdtglcUp1pXA&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTc5h-9IWgtI6dfkThWpEOOlIo0ZceTNKT7y9QQzTri3A&s=10"
+      ]
+    },
+    {
+      "id": "urwabya",
+      "title": "Urwabya",
+      "category": "Vessels & Pottery",
+      "count": "0 items",
+      "description": "Wooden bowl used for food or liquids.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3AuG9JZl-9J76bf_cTEphFav9xcHcHmgSHbBtsDxz0Q&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTVC23tRIXfuyHz7ZZoL3Ifmy9Ap0WQXNBubw_T8tJspQ&s=10"
+      ]
+    },
+    {
+      "id": "uruho",
+      "title": "Uruho",
+      "category": "Tools & Craft",
+      "count": "0 items",
+      "description": "Pestle used for drinking",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT01S2w3nyCDNBLJr9xB6f_PRAnhZU3GHd-suRo3xnu_A&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjMk_FNMZafsLdrRdy6u1uba1bBc65l5OmcYDqTX3oEQ&s=10"
+      ]
+    },
+    {
+      "id": "urusyo",
+      "title": "Urusyo",
+      "category": "Tools & Craft",
+      "count": "0 items",
+      "description": "Grinding stone used to process grain.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTs2sMoCLejr2QaQd6K4osc92QqI02XyqVYhPNg7RjkFA&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRakfmFNEDi_KkowAMLy1TsNMfGjWIdcYGIA4NWb3TmaQ&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRst1J8tb96Lrqs1NcCYv9i5PTbz2MeOfuKLDkr019ClQ&s=10"
+      ]
+    },
+    {
+      "id": "ingasire",
+      "title": "Ingasire",
+      "category": "Weaving & Basketry",
+      "count": "0 items",
+      "description": "Woven tray traditionally used for winnowing.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNGT2Eq8iZiNltgfogYymZcsta9_mAa0hdjn6G4EAHNA&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHw4bbkmMLIKdFK5buYJLJKPE0dCn0ckRZeM6AoJQEYg&s"
+      ]
+    },
+    {
+      "id": "intorezo",
+      "title": "Intorezo",
+      "category": "Tools & Craft",
+      "count": "0 items",
+      "description": "Traditional tool used in weaving or hair styling.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRNv1_Vb-pDXBUbeUKNfXX-V83CVnIOq5o2PJOWxtQbSQ&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSryMWZtjqwTwOpv4fFCNvpyR7SXQIhT-waxBPXFZGnPw&s=10"
+      ]
+    },
+    {
+      "id": "agaseke-tool",
+      "title": "Agaseke",
+      "category": "Weaving & Basketry",
+      "count": "0 items",
+      "description": "Iconic coiled peace basket, historically exchanged as a gift.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRT3uBiNYcw0p_TCiYpYlJCkEYIYds6ZkzDhoezvZgCAA&s",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdD5qzB8DY-gp5hZnUO9dybi8gCADS_E7osFJna47cCw&s=10"
+      ]
+    },
+    {
+      "id": "ikibo",
+      "title": "Ikibo",
+      "category": "Weaving & Basketry",
+      "count": "0 items",
+      "description": "Large woven basket used for storage or carrying goods.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTtUOKnCrPzzpQEYNnWg30-pGwW897ziVgZkradEGXR3Q&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSei3EKpt2KcTpZsKO3oyHDSkWZS7U6UA4xwK2P7pw7Kg&s=10"
+      ]
+    },
+    {
+      "id": "umwuko",
+      "title": "Umwuko",
+      "category": "Weaving & Basketry",
+      "count": "0 items",
+      "description": "Woven basket used for winnowing grain.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRQfK5-LJqfefRPCPqMWDR0qJxnRei2ubqKZzziYHTM_g&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTLbfbGC-4tk3Lpe5Pm2v1N2OvQzcmn9ZsyHRnkGgJ0w&s=10"
+      ]
+    },
+    {
+      "id": "akamamiyo",
+      "title": "Akamamiyo",
+      "category": "Vessels & Pottery",
+      "count": "0 items",
+      "description": "Small traditional vessel or spoon.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTeZ3JNxe8Q58pweNXUIE3IUpOuckvqDiZ6Xv4K_xOdAQ&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT-1mtkmoZ3oi9sO_p7q3yE77YBPMBzbqKezxvNdT8w1Q&s=10"
+      ]
+    },
+    {
+      "id": "umuvure",
+      "title": "Umuvure",
+      "category": "Tools & Craft",
+      "count": "0 items",
+      "description": "Spindle used for spinning fiber.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT7HuCd6Y7QV28r_aeJoDUD7m7IOqnwfQzCqdQH4HHI8A&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSeJlRTqAG-M8imT3qO6xhcLMCelQQez2NNwFNg1ehjzQ&s=10"
+      ]
+    },
+   
+    {
+      "id": "inkanda",
+      "title": "Inkanda",
+      "category": "Traditional Attire",
+      "count": "0 items",
+      "description": "Hide or leather traditionally used for clothing.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8SwAzXtdCrfi54HV4kY9GK5loIVXlVbY5sYyNj7Nw6g&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStHAU5tc42KolOAPIAVZ4Zx8eKkadAygpj2oRRHUu02Q&s=10"
+      ]
+    },
+    {
+      "id": "urunigi",
+      "title": "Urunigi",
+      "category": "Tools & Craft",
+      "count": "0 items",
+      "description": "Traditional cord or rope.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbaYEm2X5aAdbsfqUjVkkM8JfMA2cUXtNo0PPHIeZ8fw&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSEQGYe4NFYYKm7QcSbUzrsGCe_SQzJkKKisp1bi-x49A&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXyc_s6ndDn2me393WORbwIuxndWY5KX-4BifQ3P4cBA&s=10"
+      ]
+    },
+    {
+      "id": "imbehe",
+      "title": "Imbehe",
+      "category": "Vessels & Pottery",
+      "count": "0 items",
+      "description": "Large gourd container used for milk or beer.",
+      "images": [
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTvNgujvjlDNijySiHTtDPoQz5RNRXYYhWa9z1wV4Ad1g&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSUonU1IGBIK1Gb1u-xWN_LZaHOBlRjUZ39luvKw1YcGA&s=10",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTHeQtU75M6lTP2OrBsOaPLEDJIvczrTTWOExA9avGo6A&s=10"
+      ]
+    }
+  ]
+}
