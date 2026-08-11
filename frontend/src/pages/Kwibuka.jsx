@@ -7,6 +7,7 @@ import Memorial2Img from '../assets/kwibuka/memorial2.jpg';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import KwibukaGallery from '../components/KwibukaGallery';
+import KwibukaMemorialMap from '../components/KwibukaMemorialMap';
 
 const IMG = {
   reflection: ReflectionImg,
@@ -190,6 +191,8 @@ export default function Kwibuka() {
             </button>
           </div>
         </div>
+
+        <KwibukaMemorialMap />
 
         {/* Events timeline */}
         <div className="events-section">

@@ -7,6 +7,7 @@ export type AuthStackParamList = {
 export type MoreStackParamList = {
   MoreHome: undefined;
   Kwibuka: undefined;
+  MemorialMap: undefined;
   Testimonies: undefined;
   TestimonyDetail: { id: string };
   IntlDays: undefined;

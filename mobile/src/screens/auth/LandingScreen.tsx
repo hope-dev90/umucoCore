@@ -47,7 +47,8 @@ export default function LandingScreen() {
   };
 
   const registerOffset = (key: string) => (e: LayoutChangeEvent) => {
-    setOffsets((prev: Record<string, number>) => ({ ...prev, [key]: e.nativeEvent.layout.y }));
+    const y = e.nativeEvent.layout.y;
+    setOffsets((prev) => ({ ...prev, [key]: y }));
   };
 
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {

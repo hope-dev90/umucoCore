@@ -1,0 +1,212 @@
+.kmm-section {
+  margin-bottom: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+}
+
+.kmm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.kmm-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.kmm-sub {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  max-width: 52ch;
+  line-height: 1.45;
+}
+
+.kmm-count {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--primary-dark);
+  background: color-mix(in srgb, var(--primary, #8D493A) 12%, transparent);
+  border-radius: 999px;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+.kmm-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(240px, 0.9fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.kmm-map-box {
+  min-width: 0;
+  height: 420px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  isolation: isolate;
+}
+
+.kmm-map.leaflet-container,
+.kmm-map-box .leaflet-container {
+  width: 100%;
+  height: 100%;
+  font-family: inherit;
+}
+
+.kmm-marker-wrap {
+  background: transparent;
+  border: none;
+}
+
+.kmm-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3e2723;
+  background: #fdfbf7;
+  border: 2px solid #8d493a;
+  border-radius: 50% 50% 50% 8%;
+  box-shadow: 0 6px 14px rgba(62, 39, 35, 0.28);
+  transform: rotate(-45deg);
+}
+
+.kmm-marker svg {
+  width: 58%;
+  height: 58%;
+  transform: rotate(45deg);
+}
+
+.kmm-marker--active {
+  color: #fdfbf7;
+  background: #8d493a;
+  border-color: #3e2723;
+  box-shadow: 0 0 0 6px rgba(141, 73, 58, 0.18), 0 8px 18px rgba(62, 39, 35, 0.35);
+}
+
+.kmm-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 420px;
+  max-height: 420px;
+}
+
+.kmm-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kmm-list-item {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border-light);
+  background: var(--bg-main, #fdfbf7);
+  border-radius: 12px;
+  padding: 10px 12px 10px 14px;
+  cursor: pointer;
+  border-left: 3px solid var(--kmm-type, #8d493a);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.kmm-list-item:hover,
+.kmm-list-item.is-active {
+  background: color-mix(in srgb, var(--primary, #8D493A) 10%, white);
+  border-color: color-mix(in srgb, var(--primary, #8D493A) 35%, var(--border-light));
+}
+
+.kmm-list-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.kmm-list-meta {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.kmm-detail {
+  border-top: 1px solid var(--border-light);
+  padding-top: 12px;
+  flex: 0 0 auto;
+}
+
+.kmm-detail-type {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--primary, #8d493a);
+}
+
+.kmm-detail-title {
+  margin: 4px 0 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+}
+
+.kmm-detail-district {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.kmm-detail-desc {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary, #6f5b55);
+}
+
+.kmm-directions {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-dark, #3e2723);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .kmm-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .kmm-map-box {
+    height: 320px;
+  }
+
+  .kmm-sidebar {
+    min-height: 0;
+    max-height: none;
+  }
+
+  .kmm-list {
+    max-height: 220px;
+  }
+}

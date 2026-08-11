@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MoreHomeScreen from '../screens/more/MoreHomeScreen';
 import KwibukaScreen from '../screens/kwibuka/KwibukaScreen';
+import MemorialMapScreen from '../screens/kwibuka/MemorialMapScreen';
 import TestimoniesScreen from '../screens/kwibuka/TestimoniesScreen';
 import TestimonyDetailScreen from '../screens/kwibuka/TestimonyDetailScreen';
 import IntlDaysScreen from '../screens/intl/IntlDaysScreen';
@@ -28,6 +29,11 @@ export default function MoreStack() {
     >
       <Stack.Screen name="MoreHome" component={MoreHomeScreen} options={{ title: 'More' }} />
       <Stack.Screen name="Kwibuka" component={KwibukaScreen} />
+      <Stack.Screen
+        name="MemorialMap"
+        component={MemorialMapScreen}
+        options={{ title: 'Memorial map' }}
+      />
       <Stack.Screen name="Testimonies" component={TestimoniesScreen} options={{ headerShown: false }} />
       <Stack.Screen name="TestimonyDetail" component={TestimonyDetailScreen} options={{ title: 'Testimony' }} />
       <Stack.Screen name="IntlDays" component={IntlDaysScreen} options={{ title: 'Intl Days' }} />
