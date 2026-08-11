@@ -7,6 +7,7 @@ import {
   updateKwibuka,
   deleteKwibuka
 } from '../controller/kwibukaController.js';
+import { adminOnly, authMiddleware } from '../middleware/authMiddleWare.js';
 
 const router = Router();
 
@@ -20,12 +21,12 @@ router.get('/featured', getFeaturedKwibuka);
 router.get('/:id', getKwibukaById);
 
 // POST /api/kwibuka
-router.post('/', createKwibuka);
+router.post('/', authMiddleware, adminOnly, createKwibuka);
 
 // PUT /api/kwibuka/:id
-router.put('/:id', updateKwibuka);
+router.put('/:id', authMiddleware, adminOnly, updateKwibuka);
 
 // DELETE /api/kwibuka/:id
-router.delete('/:id', deleteKwibuka);
+router.delete('/:id', authMiddleware, adminOnly, deleteKwibuka);
 
 export default router;
