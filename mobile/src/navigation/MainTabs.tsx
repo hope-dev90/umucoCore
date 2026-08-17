@@ -8,6 +8,7 @@ import CollectionsScreen from '../screens/collections/CollectionsScreen';
 import MoreStack from './MoreStack';
 import ChatWidget from '../components/ChatWidget';
 import RiddlePopup from '../components/RiddlePopup';
+import MobileHeader from '../components/MobileHeader';
 import { useLanguage } from '../context/LanguageContext';
 import { colors } from '../theme/colors';
 import type { MainTabParamList } from './types';
@@ -33,7 +34,8 @@ export default function MainTabs() {
   const { t } = useLanguage();
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: colors.bgMain }}>
+      <MobileHeader />
       <Tab.Navigator
         screenOptions={({ route }) => ({
           headerShown: false,
