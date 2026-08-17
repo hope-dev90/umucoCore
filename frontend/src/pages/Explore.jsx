@@ -9,6 +9,7 @@ import HeritageMap, { hasValidCoordinates } from '../components/Map/HeritageMap'
 import MapDiscoveryHint from '../components/Map/MapDiscoveryHint';
 import { mapHeritageApiItem } from '../utils/heritageMapping';
 import { localizeItem } from '../utils/contentLocale';
+import { getLocalizedText } from '../utils/i18n';
 import commonsImagesCached from '../data/commonsImageCache.json';
 import { BookOpen, CheckCircle2, ChevronDown, Flag, Headphones, MapPinned, Play, RefreshCw, X } from 'lucide-react';
 import { apiUrl } from '../config/api';
@@ -261,10 +262,10 @@ export default function Explore() {
     const placeMatch = activePlace === 'all' || normalizePlaceValue(item.locationKey) === normalizePlaceValue(activePlace);
     const query = topbarSearch.trim().toLowerCase();
     const searchMatch = !query
-      || (item.title || '').toLowerCase().includes(query)
-      || (item.desc || '').toLowerCase().includes(query)
-      || (item.category || '').toLowerCase().includes(query)
-      || (item.location || '').toLowerCase().includes(query);
+      || getLocalizedText(item.title, language).toLowerCase().includes(query)
+      || getLocalizedText(item.desc, language).toLowerCase().includes(query)
+      || getLocalizedText(item.category, language).toLowerCase().includes(query)
+      || getLocalizedText(item.location, language).toLowerCase().includes(query);
     return regionMatch && eraMatch && placeMatch && searchMatch;
   });
 
@@ -310,17 +311,24 @@ export default function Explore() {
 
   const audioForExplorer = useMemo(() => {
     if (!isMusicExplorer || !audioItems.length) return [];
-    return audioItems.map((audio, index) => ({
-      ...audio,
-      isAudio: true,
-      catKey: (audio.category || 'audio').toLowerCase().replace(/\s+/g, ''),
-      location: audio.category || 'Audio',
-      locationKey: audio.category || 'Audio',
-      image: '',
-      desc: audio.description || '',
-      gridIndex: filteredHeritageItems.length + index,
-    }));
-  }, [isMusicExplorer, audioItems, filteredHeritageItems.length]);
+    return audioItems.map((audio, index) => {
+      const resolvedCategory = getLocalizedText(audio.category, language) || 'Audio';
+      const resolvedDesc = getLocalizedText(audio.description, language) || '';
+      const resolvedTitle = getLocalizedText(audio.title, language) || '';
+      return {
+        ...audio,
+        isAudio: true,
+        title: resolvedTitle,
+        catKey: resolvedCategory.toLowerCase().replace(/\s+/g, ''),
+        location: resolvedCategory,
+        locationKey: resolvedCategory,
+        image: '',
+        desc: resolvedDesc,
+        description: resolvedDesc,
+        gridIndex: filteredHeritageItems.length + index,
+      };
+    });
+  }, [isMusicExplorer, audioItems, filteredHeritageItems.length, language]);
 
   const combinedItems = useMemo(() => {
     const heritageMapped = filteredHeritageItems.map((item, index) => ({
@@ -729,10 +737,10 @@ export default function Explore() {
             <div style={{ padding: '1.5rem', borderBottom: '1px solid #EADBC8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#8D493A', marginBottom: 4 }}>
-                  {selectedAudio.category || 'Audio'}
+                  {getLocalizedText(selectedAudio.category, language) || 'Audio'}
                 </div>
                 <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#2C1A14' }}>
-                  {selectedAudio.title}
+                  {getLocalizedText(selectedAudio.title, language)}
                 </h3>
               </div>
               <button
@@ -745,7 +753,7 @@ export default function Explore() {
             <div style={{ padding: '1.5rem' }}>
               {selectedAudio.description && (
                 <p style={{ margin: '0 0 1.25rem', fontSize: '0.9rem', color: '#6F5B55', lineHeight: 1.6 }}>
-                  {selectedAudio.description}
+                  {getLocalizedText(selectedAudio.description, language)}
                 </p>
               )}
               {selectedAudio.audio_url ? (
