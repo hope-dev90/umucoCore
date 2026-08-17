@@ -474,49 +474,58 @@ const ITEM_TRANSLATIONS = {
 export function localizeItem(item, lang) {
   if (!item) return item;
 
-  // Handle title as either a string or an object with language keys
-  const titleString = typeof item.title === 'string' ? item.title : (item.title?.rw || item.title?.en || '');
+  // Derive the stable Kinyarwanda title string (used as image / activity key).
+  // If title is already a plain string (API items) we use it directly.
+  // If it is an i18n object (JSON cards) we prefer the rw variant.
+  const titleString = typeof item.title === 'string'
+    ? item.title
+    : (item.title?.rw || item.title?.en || '');
+
+  // ITEM_TRANSLATIONS are fallback overrides for API items that come in as
+  // plain strings and have no i18n object of their own.
+  // They must NOT override JSON cards that already carry {en,fr,rw} objects.
+  const hasI18nTitle    = typeof item.title    === 'object' && item.title    !== null;
+  const hasI18nDesc     = typeof item.desc     === 'object' && item.desc     !== null;
+  const hasI18nLocation = typeof item.location === 'object' && item.location !== null;
+  const hasI18nCategory = typeof item.category === 'object' && item.category !== null;
+
+  // Only look up ITEM_TRANSLATIONS when the item has no i18n objects at all
   const key = titleString.toLowerCase().trim();
-  const overrides = ITEM_TRANSLATIONS[key]?.[lang] || {};
+  const overrides = (!hasI18nTitle && !hasI18nDesc && !hasI18nLocation)
+    ? (ITEM_TRANSLATIONS[key]?.[lang] || {})
+    : {};
 
-  // Handle title localization - if title is an object, get the right language
-  let localizedTitle = item.title;
-  if (typeof item.title === 'object' && item.title !== null) {
-    localizedTitle = item.title[lang] || item.title.en || item.title.rw || '';
-  }
+  // Resolve title: JSON i18n object → ITEM_TRANSLATIONS fallback → raw string
+  const localizedTitle = hasI18nTitle
+    ? (item.title[lang] || item.title.en || item.title.rw || '')
+    : (overrides.title || item.title || '');
 
-  // Handle desc localization - if desc is an object, get the right language
-  let localizedDesc = item.desc;
-  if (typeof item.desc === 'object' && item.desc !== null) {
-    localizedDesc = item.desc[lang] || item.desc.en || item.desc.rw || '';
-  }
+  // Resolve desc: JSON i18n object → ITEM_TRANSLATIONS fallback → raw string
+  const localizedDesc = hasI18nDesc
+    ? (item.desc[lang] || item.desc.en || item.desc.rw || '')
+    : (overrides.desc || item.desc || item.description || '');
 
-  // Handle category localization - if category is an object, get the right language
-  let localizedCategory = item.category;
-  if (typeof item.category === 'object' && item.category !== null) {
-    localizedCategory = item.category[lang] || item.category.en || item.category.rw || '';
-  }
-  
-  // Translate category label
-  const rawCat = (localizedCategory || item.catKey || '').toLowerCase().trim();
-  const catOverride = CATEGORY_LABELS[rawCat]?.[lang];
+  // Resolve location: JSON i18n object → ITEM_TRANSLATIONS fallback → raw string
+  const localizedLocation = hasI18nLocation
+    ? (item.location[lang] || item.location.en || item.location.rw || '')
+    : (overrides.location || item.location || '');
 
-  // Handle location localization - if location is an object, get the right language
-  let localizedLocation = item.location;
-  if (typeof item.location === 'object' && item.location !== null) {
-    localizedLocation = item.location[lang] || item.location.en || item.location.rw || '';
-  }
+  // Resolve category: JSON i18n object → raw string, then pass through CATEGORY_LABELS
+  const resolvedCategory = hasI18nCategory
+    ? (item.category[lang] || item.category.en || item.category.rw || '')
+    : (item.category || '');
+  const rawCat = (resolvedCategory || item.catKey || '').toLowerCase().trim();
+  const localizedCategory = CATEGORY_LABELS[rawCat]?.[lang] || resolvedCategory;
 
   return {
     ...item,
-    // Always stamp the original (Kinyarwanda) title so image keys stay stable
-    // across language switches — commonsImages and imageLoadErrors key off this.
+    // Stable Kinyarwanda title — image cache and activity tracking key off this
     originalTitle: titleString,
-    title:       overrides.title       || localizedTitle,
-    desc:        overrides.desc        || localizedDesc,
-    description: overrides.desc        || localizedDesc,
-    location:    overrides.location    || localizedLocation,
-    category:    catOverride           || localizedCategory,
+    title:       localizedTitle,
+    desc:        localizedDesc,
+    description: localizedDesc,
+    location:    localizedLocation,
+    category:    localizedCategory,
   };
 }
 
