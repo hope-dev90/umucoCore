@@ -155,40 +155,49 @@ export default function Explore() {
   ];
 
   // Background fetch — cards are already visible from FALLBACK_ITEMS.
-  // If the API responds in time, MERGE the real data in by title instead
-  // of replacing the whole list, so items the DB doesn't know about yet
-  // don't get wiped out.
+  // explore-stories.json is always the source of truth for the 31 cards.
+  // Any extra items the API returns (not matching a JSON card by English title)
+  // are appended so they show up too, but they can never replace JSON cards.
   useEffect(() => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000); // give up after 5s
+
+    // Build a set of English titles from the JSON cards for fast lookup
+    const jsonTitles = new Set(
+      exploreStories.map(s =>
+        (typeof s.title === 'object' ? s.title.en : s.title || '').toLowerCase().trim()
+      )
+    );
 
     fetch(apiUrl('/api/heritage'), { signal: controller.signal })
       .then(r => r.json())
       .then(data => {
         if (data.items && data.items.length > 0) {
-          const apiMapped = data.items.map((item, index) => {
-            const mapped = mapHeritageApiItem(item, index, fallbackImages, withSafeCoordinates);
-            // First try commons cache, then overrides
-            if (commonsImagesCached[mapped.title]) {
-              mapped.image = commonsImagesCached[mapped.title];
-            } else if (IMAGE_OVERRIDES[mapped.title]) {
-              mapped.image = IMAGE_OVERRIDES[mapped.title];
-            }
-            return mapped;
-          });
-
-          setHeritageItems(prev => {
-            // Start with API data as base
-            const byKey = new Map(apiMapped.map(item => [item.title, item]));
-            // Merge fallback data on top - this ensures explore-stories.json takes precedence
-            prev.forEach(item => {
-              // Only override if this item came from explore-stories.json (has id starting with 'card-')
-              if (item.id && item.id.startsWith('card-')) {
-                byKey.set(item.title, item);
+          // Only keep API items whose title doesn't match any JSON card
+          const extraApiItems = data.items
+            .filter(item => {
+              const apiTitle = (typeof item.title === 'object' ? item.title.en : item.title || '')
+                .toLowerCase().trim();
+              return !jsonTitles.has(apiTitle);
+            })
+            .map((item, index) => {
+              const mapped = mapHeritageApiItem(item, index, fallbackImages, withSafeCoordinates);
+              if (commonsImagesCached[mapped.title]) {
+                mapped.image = commonsImagesCached[mapped.title];
+              } else if (IMAGE_OVERRIDES[mapped.title]) {
+                mapped.image = IMAGE_OVERRIDES[mapped.title];
               }
+              return mapped;
             });
-            return Array.from(byKey.values());
-          });
+
+          if (extraApiItems.length > 0) {
+            // Append API-only extras after the JSON cards — never replace them
+            setHeritageItems(prev => {
+              const existingIds = new Set(prev.map(i => String(i.id)));
+              const newExtras = extraApiItems.filter(i => !existingIds.has(String(i.id)));
+              return newExtras.length > 0 ? [...prev, ...newExtras] : prev;
+            });
+          }
         }
       })
       .catch(() => {/* keep fallback */})
