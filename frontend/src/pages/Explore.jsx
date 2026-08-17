@@ -374,6 +374,13 @@ export default function Explore() {
     [sortedItems, language]
   );
 
+  // Localized version of heritageItems for the map — HeritageMap renders
+  // item.title / category / location / desc directly so they must be strings.
+  const localizedHeritageItems = useMemo(() =>
+    heritageItems.map(item => localizeItem(item, language)),
+    [heritageItems, language]
+  );
+
   const handleCardClick = useCallback((item) => {
     setMapVisible(true);
     if (hasValidCoordinates(item)) {
@@ -694,7 +701,7 @@ export default function Explore() {
         {mapVisible && (
           <div id="explore-map-section" className="map-section">
             <HeritageMap
-              items={heritageItems}
+              items={localizedHeritageItems}
               selectedMarker={selectedMarker}
               onMarkerClick={(item) => setSelectedMarker(item)}
               clickPopup={clickPopup}

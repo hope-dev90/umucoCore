@@ -277,19 +277,30 @@ export default function Listen() {
         if (data.audio && data.audio.length > 0) {
           const mapped = data.audio.map((item, i) => {
             // Match API items with local story files based on title
+            // item.title may be a plain string (DB) or a {en,fr,rw} object — resolve first
+            const titleStr = typeof item.title === 'object' && item.title !== null
+              ? (item.title.en || item.title.rw || item.title.fr || '')
+              : (item.title || '');
             let storyId = null;
-            if (item.title.includes('Gihanga')) storyId = 'gihanga-ngomijana';
-            else if (item.title.includes('Nyirarucyaba')) storyId = 'nyirarucyaba';
-            else if (item.title.includes('Ruganzu')) storyId = 'ruganzu-ii-ndoli';
-            else if (item.title.includes('Kigeli')) storyId = 'kigeli-iv-rwabugiri';
-            else if (item.title.toLowerCase().includes('inanga')) storyId = 'inanga-mazimpaka';
-            else if (item.title.toLowerCase().includes('ryangombe')) storyId = 'ryangombe';
+            if (titleStr.includes('Gihanga')) storyId = 'gihanga-ngomijana';
+            else if (titleStr.includes('Nyirarucyaba')) storyId = 'nyirarucyaba';
+            else if (titleStr.includes('Ruganzu')) storyId = 'ruganzu-ii-ndoli';
+            else if (titleStr.includes('Kigeli')) storyId = 'kigeli-iv-rwabugiri';
+            else if (titleStr.toLowerCase().includes('inanga')) storyId = 'inanga-mazimpaka';
+            else if (titleStr.toLowerCase().includes('ryangombe')) storyId = 'ryangombe';
             
+            const categoryStr = typeof item.category === 'object' && item.category !== null
+              ? (item.category.en || item.category.rw || item.category.fr || '')
+              : (item.category || '');
+            const descStr = typeof item.description === 'object' && item.description !== null
+              ? (item.description.en || item.description.rw || item.description.fr || '')
+              : (item.description || '');
+
             return {
               id: item.id,
-              genre: item.category,
-              title: item.title,
-              narrator: item.description,
+              genre: categoryStr,
+              title: titleStr,
+              narrator: descStr,
               duration: item.duration
                 ? `${Math.floor(item.duration / 60)}:${String(
                     item.duration % 60
