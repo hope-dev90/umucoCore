@@ -6,10 +6,7 @@
 // smaller, gentler story with a woman at its center rather than a king.
 // Same shape as the other story files.
 
-import NyirarucyabaImg from '../../assets/international/umuganura.jpg';
-// Using the existing Umuganura (harvest festival) image as a placeholder —
-// it fits the agricultural/pastoral theme. Swap for a dedicated image
-// (e.g. of Mount Kabuye, or cattle) whenever you have one.
+const NyirarucyabaImg = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2t6RGCok9oMiWrMdhmU2IgyTm6YGvCdZNzjAeOOPsiQ&s=10';
 
 export const nyirarucyabaStory = {
   id: 'nyirarucyaba',

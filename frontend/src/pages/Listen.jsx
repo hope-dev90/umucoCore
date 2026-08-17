@@ -61,21 +61,23 @@ const AUDIO_IMAGE_MAP = {
 
 // Map imageKey field in audio.json to local image imports
 const IMAGE_KEY_MAP = {
-  ruganzu:    RuganzuImg,
-  crane:      craneImg,
-  moon:       moonImg,
-  intore:     intoreImg,
-  ubudehe:    ubudeheImg,
-  inanga:     inangaImg,
-  royal:      royalCourtImg,
-  drums:      drumsImg,
-  ingoma:     drumsImg,
-  mwami:      mwamiImg,
-  rain:       rainImg,
-  nyamasheke: nyamashekeImg,
-  byivugo:    byivugoImg,
-  farming:    farmingImg,
-  mama:       ubudeheImg,
+  ruganzu:       RuganzuImg,
+  crane:         craneImg,
+  moon:          moonImg,
+  intore:        intoreImg,
+  ubudehe:       ubudeheImg,
+  inanga:        inangaImg,
+  royal:         royalCourtImg,
+  drums:         drumsImg,
+  ingoma:        drumsImg,
+  mwami:         mwamiImg,
+  rain:          rainImg,
+  nyamasheke:    nyamashekeImg,
+  byivugo:       byivugoImg,
+  farming:       farmingImg,
+  mama:          ubudeheImg,
+  nyirarucyaba:  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2t6RGCok9oMiWrMdhmU2IgyTm6YGvCdZNzjAeOOPsiQ&s=10',
+  umuganura:     'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2t6RGCok9oMiWrMdhmU2IgyTm6YGvCdZNzjAeOOPsiQ&s=10',
 };
 
 const ALL_AUDIO_IMAGES = Object.values(AUDIO_IMAGE_MAP);
