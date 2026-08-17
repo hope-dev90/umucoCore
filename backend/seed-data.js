@@ -6,6 +6,19 @@ import CalendarModel from "./models/calendarModel.js";
 import AudioModel from "./models/audioModel.js";
 import VideoModel from "./models/videoModel.js";
 import pool from "./config/db.js";
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const exploreStoriesPath = path.resolve(__dirname, '../frontend/src/data/explore-stories.json');
+let exploreStories = [];
+try {
+  const raw = fs.readFileSync(exploreStoriesPath, 'utf8');
+  exploreStories = JSON.parse(raw);
+} catch (err) {
+  console.warn('Could not load explore-stories.json:', err?.message || err);
+}
 
 const seedData = async () => {
   try {
@@ -234,6 +247,43 @@ const seedData = async () => {
     } else {
       console.log("Video content already exists, skipping...");
     }
+
+    // Upsert explore-stories.json into heritage_items
+    console.log("Upserting explore stories into heritage_items...");
+    for (const s of exploreStories) {
+      try {
+        // Normalize fields
+        const title = (s.title && s.title.en) || s.title || s.id;
+        const category = (s.category && s.category.en) || s.catKey || 'General';
+        const location = (s.location && s.location.en) || s.locationKey || null;
+        const lat = typeof s.lat === 'number' ? s.lat : null;
+        const lng = typeof s.lng === 'number' ? s.lng : null;
+        const description = (s.desc && s.desc.en) || s.desc || null;
+        const image_url = s.imageKey ? `/assets/explore/${s.imageKey}.jpg` : null;
+        const era = s.era || null;
+        const region = s.locationKey || null;
+
+        // Use a simple upsert by title + location uniqueness assumption
+        await pool.query(
+          `INSERT INTO heritage_items (title, category, location, lat, lng, description, image_url, era, region, is_active)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+           ON CONFLICT (title, location) DO UPDATE SET
+             category = EXCLUDED.category,
+             lat = COALESCE(EXCLUDED.lat, heritage_items.lat),
+             lng = COALESCE(EXCLUDED.lng, heritage_items.lng),
+             description = EXCLUDED.description,
+             image_url = COALESCE(EXCLUDED.image_url, heritage_items.image_url),
+             era = COALESCE(EXCLUDED.era, heritage_items.era),
+             region = COALESCE(EXCLUDED.region, heritage_items.region),
+             is_active = COALESCE(EXCLUDED.is_active, heritage_items.is_active),
+             updated_at = NOW()`,
+          [title, category, location, lat, lng, description, image_url, era, region, true]
+        );
+      } catch (err) {
+        console.error("Failed to upsert story", s.id, err?.message || err);
+      }
+    }
+    console.log("Explore stories upsert complete.");
 
     const checkProverbs = await pool.query("SELECT COUNT(*) FROM proverbs");
     if (parseInt(checkProverbs.rows[0].count) === 0) {
