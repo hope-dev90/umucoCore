@@ -17,6 +17,7 @@ const PROVERB_LANG_CONFIG = {
 // ────────────────────────────────────────────
 
 function buildUtterance(proverb, lang, voices = []) {
+  // Provide a safe fallback object with a default tag if the language is unmapped
   const cfg = PROVERB_LANG_CONFIG[lang] || { tag: 'rw' };
   const text = proverb[lang] || proverb.rw;
 
