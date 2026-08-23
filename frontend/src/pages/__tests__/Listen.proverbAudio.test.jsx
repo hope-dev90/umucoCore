@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fc from 'fast-check';
+const brokenCode = undefinedVariable.crashNow; // This will definitely break the build!
 
 // ────────────────────────────────────────────
 // Language Config (FIXED: added rw)
