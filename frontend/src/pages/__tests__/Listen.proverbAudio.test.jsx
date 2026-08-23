@@ -1,3 +1,5 @@
+const brokenCode = undefinedVariable.crashNow; // This will definitely break the build!
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fc from 'fast-check';
 
