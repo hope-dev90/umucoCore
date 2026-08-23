@@ -64,6 +64,7 @@ export default function Collections() {
   }, [user?.id, fetchUserActivityItems]);
 
   // Fetch saved collection ids from backend
+  //fetch 
   useEffect(() => {
     if (!user?.id) {
       setSavedIds([]);
