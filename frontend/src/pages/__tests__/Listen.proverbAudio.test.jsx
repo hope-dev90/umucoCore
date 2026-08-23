@@ -15,7 +15,7 @@ const PROVERB_LANG_CONFIG = {
  * Mirrors the logic inside speakProverb.
  */
 function buildUtterance(proverb, lang, voices = []) {
-  const cfg = PROVERB_LANG_CONFIG[lang];
+  const cfg = PROVERB_LANG_CONFIG[lang] || { tag: 'rw' };
   const text = proverb[lang] || proverb.rw;
   const utterance = { lang: cfg.tag, rate: 0.85, voice: undefined, text };
   const matched =
