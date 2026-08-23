@@ -3,7 +3,7 @@
    background, terracotta accent, serif display headline. */
 
 .testimony-view-page {
-  --tv-accent: var(--primary, #c1592e);
+  --tv-accent: var(--primary, #efe5e1);
   --tv-bg: var(--bg-page, #fbf6ef);
   --tv-card: var(--bg-card, #ffffff);
   --tv-border: var(--border-light, #ece4d8);

@@ -2,39 +2,29 @@
   "expo": {
     "name": "Umuco Core",
     "slug": "umuco-core-mobile",
-    "scheme": "umucocore",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/icon.png",
-      "resizeMode": "contain",
       "backgroundColor": "#FDFBF7"
     },
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.umucocore.mobile"
     },
     "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#FDFBF7",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "package": "com.umucocore.mobile"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
+      "package": "com.umucocore.mobile",
+      "config": {
+        "googleMaps": {
+          "apiKey": "YOUR_ANDROID_GOOGLE_MAPS_KEY"
+        }
+      }
     },
     "extra": {
-      "apiBaseUrl": "https://umucocore.onrender.com"
+      "apiBase": "https://umucocore.onrender.com",
+      "googleWebClientId": "829742825170-qu62f7f662o16iv6hcpgcep8g80fotb9.apps.googleusercontent.com"
     },
-    "plugins": [
-      "expo-secure-store",
-      "expo-audio",
-      "expo-web-browser"
-    ]
+    "plugins": ["@react-native-google-signin/google-signin"]
   }
 }
