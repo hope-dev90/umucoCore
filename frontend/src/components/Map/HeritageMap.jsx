@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import { MapContainer, TileLayer, Marker, Tooltip, useMapEvents, useMap } from 'react-leaflet';
 import './HeritageMap.css';
 import commonsImageCache from '../../data/commonsImageCache.json';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 // Resolve the best available image for a heritage item
 function resolveImage(item) {
@@ -92,14 +93,51 @@ function MapClickHandler(props) {
   return null;
 }
 
+const MAP_STRINGS = {
+  en: {
+    placeholder_title: 'Explore Rwanda',
+    placeholder_text: "Tap a photo marker to see details, or click anywhere on the map to discover what's nearby.",
+    get_directions: 'Get Directions',
+    loading: 'Looking around this spot...',
+    notfound_title: 'Nothing here yet',
+    notfound_text: 'No heritage site is registered at this exact spot. Try tapping one of the photo markers instead.',
+    error_title: 'Something went wrong',
+    error_text: 'Please try clicking that spot again.',
+  },
+  fr: {
+    placeholder_title: 'Explorer le Rwanda',
+    placeholder_text: "Touchez un marqueur photo pour voir les détails, ou cliquez n'importe où sur la carte pour découvrir ce qui se trouve à proximité.",
+    get_directions: 'Itinéraire',
+    loading: 'Exploration du secteur...',
+    notfound_title: 'Rien ici pour l\'instant',
+    notfound_text: 'Aucun site patrimonial n\'est enregistré à cet endroit précis. Essayez de toucher l\'un des marqueurs photo.',
+    error_title: 'Une erreur est survenue',
+    error_text: 'Veuillez réessayer en cliquant sur cet endroit.',
+  },
+  rw: {
+    placeholder_title: 'Reba u Rwanda',
+    placeholder_text: 'Kanda ku kibondo cy\'ifoto kugirango ubone amakuru, cyangwa kanda ahantu hose ku ikarita kugirango usange ibiri hafi.',
+    get_directions: 'Inzira',
+    loading: 'Gushakisha hafi...',
+    notfound_title: 'Nta kintu kihari ubu',
+    notfound_text: 'Nta nzu y\'umurage yanditswe muri aho hantu. Gerageza kanda ku mwe mu mibendo y\'amafoto.',
+    error_title: 'Habaye ikosa',
+    error_text: 'Nyamuneka gerageza gusubiramo.',
+  },
+};
+
+function useMapStrings() {
+  const { language } = useLanguage();
+  return MAP_STRINGS[language] || MAP_STRINGS.en;
+}
+
 function PanelPlaceholder() {
+  const s = useMapStrings();
   return (
     <div className="hm-panel-placeholder">
       <div className="hm-panel-placeholder-icon">🗺️</div>
-      <p className="hm-panel-placeholder-title">Explore Rwanda</p>
-      <p className="hm-panel-placeholder-text">
-        Tap a photo marker to see details, or click anywhere on the map to discover what&apos;s nearby.
-      </p>
+      <p className="hm-panel-placeholder-title">{s.placeholder_title}</p>
+      <p className="hm-panel-placeholder-text">{s.placeholder_text}</p>
     </div>
   );
 }
@@ -107,6 +145,7 @@ function PanelPlaceholder() {
 function PanelItemCard(props) {
   const item = props.item;
   const onClose = props.onClose;
+  const s = useMapStrings();
   const directionsUrl = 'https://www.openstreetmap.org/directions?to=' + item.lat + ',' + item.lng;
   const imageUrl = resolveImage(item);
 
@@ -126,7 +165,7 @@ function PanelItemCard(props) {
         {item.location ? <p className="hm-panel-card-location">{'\ud83d\udccd '}{item.location}</p> : null}
         {item.desc ? <p className="hm-panel-card-desc">{item.desc}</p> : null}
         <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="hm-panel-directions-btn">
-          Get Directions
+          {s.get_directions}
         </a>
       </div>
     </div>
@@ -136,13 +175,14 @@ function PanelItemCard(props) {
 function PanelClickResult(props) {
   const popup = props.popup;
   const onClose = props.onClose;
+  const s = useMapStrings();
 
   if (popup.status === 'loading') {
     return (
       <div className="hm-panel-card hm-panel-card--status">
         <button className="hm-panel-close" onClick={onClose} aria-label="Close">{'\u2715'}</button>
         <div className="hm-panel-spinner" />
-        <p className="hm-panel-status-text">Looking around this spot...</p>
+        <p className="hm-panel-status-text">{s.loading}</p>
       </div>
     );
   }
@@ -152,10 +192,8 @@ function PanelClickResult(props) {
       <div className="hm-panel-card hm-panel-card--status">
         <button className="hm-panel-close" onClick={onClose} aria-label="Close">{'\u2715'}</button>
         <div className="hm-panel-status-icon">🤔</div>
-        <p className="hm-panel-status-title">Nothing here yet</p>
-        <p className="hm-panel-status-text">
-          No heritage site is registered at this exact spot. Try tapping one of the photo markers instead.
-        </p>
+        <p className="hm-panel-status-title">{s.notfound_title}</p>
+        <p className="hm-panel-status-text">{s.notfound_text}</p>
       </div>
     );
   }
@@ -165,8 +203,8 @@ function PanelClickResult(props) {
       <div className="hm-panel-card hm-panel-card--status">
         <button className="hm-panel-close" onClick={onClose} aria-label="Close">{'\u2715'}</button>
         <div className="hm-panel-status-icon">⚠️</div>
-        <p className="hm-panel-status-title">Something went wrong</p>
-        <p className="hm-panel-status-text">Please try clicking that spot again.</p>
+        <p className="hm-panel-status-title">{s.error_title}</p>
+        <p className="hm-panel-status-text">{s.error_text}</p>
       </div>
     );
   }
@@ -184,7 +222,7 @@ function PanelClickResult(props) {
         {loc.location ? <p className="hm-panel-card-location">{'\ud83d\udccd '}{loc.location}</p> : null}
         {loc.description ? <p className="hm-panel-card-desc">{loc.description}</p> : null}
         <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="hm-panel-directions-btn">
-          Get Directions
+          {s.get_directions}
         </a>
       </div>
     </div>

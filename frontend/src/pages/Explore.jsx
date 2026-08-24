@@ -390,6 +390,18 @@ export default function Explore() {
     [heritageItems, language]
   );
 
+  // Keep selectedMarker in sync with the active language. When the user
+  // switches language, re-derive the panel item from localizedHeritageItems
+  // so the map panel always shows the correct language strings.
+  const localizedSelectedMarker = useMemo(() => {
+    if (!selectedMarker) return null;
+    const id = String(selectedMarker.id || selectedMarker.originalTitle || selectedMarker.title || '');
+    const fresh = localizedHeritageItems.find(i =>
+      String(i.id || i.originalTitle || i.title || '') === id
+    );
+    return fresh || localizeItem(selectedMarker, language);
+  }, [selectedMarker, localizedHeritageItems, language]);
+
   const handleCardClick = useCallback((item) => {
     setMapVisible(true);
     if (hasValidCoordinates(item)) {
@@ -719,10 +731,11 @@ export default function Explore() {
           <div id="explore-map-section" className="map-section">
             <HeritageMap
               items={localizedHeritageItems}
-              selectedMarker={selectedMarker}
+              selectedMarker={localizedSelectedMarker}
               onMarkerClick={(item) => setSelectedMarker(item)}
               clickPopup={clickPopup}
               onMapPick={handleMapPick}
+              language={language}
               onClosePanel={() => {
                 setSelectedMarker(null);
                 setClickPopup(null);
