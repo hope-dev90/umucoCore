@@ -1,8 +1,5 @@
-const brokenCode = undefinedVariable.crashNow; // This will definitely break the build!
-
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fc from 'fast-check';
-
 
 // ────────────────────────────────────────────
 // Language Config (FIXED: added rw)
@@ -133,9 +130,7 @@ describe('Proverb Tap-to-Listen — property tests', () => {
     fc.assert(
       fc.property(proverbArb, langArb, (proverb, lang) => {
         const utt = buildUtterance(proverb, lang);
-
-        const expectedTag = PROVERB_LANG_CONFIG[lang]?.tag || 'rw';
-
+        const expectedTag = PROVERB_LANG_CONFIG[lang]?.tag ?? 'rw';
         expect(utt.lang).toBe(expectedTag);
         expect(utt.rate).toBe(0.85);
       }),

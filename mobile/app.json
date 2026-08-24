@@ -25,6 +25,6 @@
       "apiBase": "https://umucocore.onrender.com",
       "googleWebClientId": "829742825170-qu62f7f662o16iv6hcpgcep8g80fotb9.apps.googleusercontent.com"
     },
-    "plugins": ["@react-native-google-signin/google-signin"]
+    "plugins": []
   }
 }
