@@ -75,7 +75,7 @@
   font-family: inherit;
 }
 
-/* ---------- Markers ---------- */
+/* ---------- Markers — circular photo markers, same treatment as hm-marker ---------- */
 
 .kmm-marker-wrap {
   background: transparent;
@@ -83,35 +83,26 @@
 }
 
 .kmm-marker {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--bg-card, #fdfbf7);
-  background: var(--kmm-marker-color, #8D493A);
-  border: 2px solid var(--primary-dark, #3E2723);
-  border-radius: 50% 50% 50% 8%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid var(--kmm-marker-color, #8D493A);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-  transform: rotate(-45deg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   transform-origin: center;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   cursor: pointer;
 }
 
-.kmm-marker svg {
-  width: 58%;
-  height: 58%;
-  transform: rotate(45deg);
-}
-
 .kmm-marker:hover {
-  transform: rotate(-45deg) scale(1.18);
+  transform: scale(1.18);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .kmm-marker.kmm-marker-pulse {
-  border-width: 3px;
+  border-width: 4px;
   animation: kmmMarkerPulse 1.4s ease-in-out infinite;
 }
 
@@ -232,7 +223,7 @@
 .kmm-panel-area {
   flex: 0 0 auto;
   border-top: 1px solid var(--border-light);
-  max-height: 260px;
+  max-height: 280px;
   overflow: auto;
 }
 
@@ -278,10 +269,8 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
-.kmm-panel-card-image { width: 100%; height: 140px; object-fit: cover; display: block; }
-.kmm-panel-card-image--placeholder {
-  background: linear-gradient(135deg, var(--primary, #8D493A) 0%, var(--primary-dark, #3E2723) 100%);
-}
+/* Image only renders when a photo exists — no placeholder frame */
+.kmm-panel-card-image { width: 100%; height: 170px; object-fit: cover; display: block; }
 
 .kmm-panel-card-body { padding: 14px; display: flex; flex-direction: column; gap: 6px; }
 

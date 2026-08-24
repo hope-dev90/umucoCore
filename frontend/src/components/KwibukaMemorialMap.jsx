@@ -111,23 +111,20 @@ function FlyToSite(props) {
   return null;
 }
 
-function createFlameIcon(site, isSelected) {
+function createSiteIcon(site, isSelected) {
   const color = getMarkerColor(site.type);
+  const imageSrc = getSiteImage(site.id);
   const pulseClass = isSelected ? ' kmm-marker-pulse' : '';
   const html =
-    '<div class="kmm-marker' + pulseClass + '" style="--kmm-marker-color:' + color + '">' +
-    '<svg viewBox="0 0 120 160" aria-hidden="true">' +
-    '<path d="M67 7C47 35 42 61 53 84c5 11 4 21-3 31 25-16 38-39 33-67-2-13-8-27-16-41Z" fill="currentColor"/>' +
-    '<path d="M39 55C22 78 20 103 34 124c7 10 16 17 28 22-13-20-8-38 9-55-10 8-20 7-26-2-6-9-6-21-6-34Z" fill="currentColor"/>' +
-    '<path d="M73 88c20 22 20 44-2 66 31-15 44-39 36-65-3-11-10-21-20-30 3 13-1 22-14 29Z" fill="currentColor"/>' +
-    '</svg></div>';
+    '<div class="kmm-marker' + pulseClass + '" style="--kmm-marker-color:' + color +
+    '; background-color:' + color + '; background-image:url(\'' + imageSrc + '\')"></div>';
 
   return L.divIcon({
     html: html,
     className: 'kmm-marker-wrap',
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-    tooltipAnchor: [0, -26],
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    tooltipAnchor: [0, -36],
   });
 }
 
@@ -165,9 +162,7 @@ function SiteCard(props) {
 
       {imageUrl ? (
         <img src={imageUrl} alt={altText} className="kmm-panel-card-image" />
-      ) : (
-        <div className="kmm-panel-card-image kmm-panel-card-image--placeholder" />
-      )}
+      ) : null}
 
       <div className="kmm-panel-card-body">
         <span className="kmm-panel-card-category" style={{ background: color }}>
@@ -260,7 +255,7 @@ export default function KwibukaMemorialMap() {
                 <Marker
                   key={site.id}
                   position={[site.lat, site.lng]}
-                  icon={createFlameIcon(site, site.id === selectedId)}
+                  icon={createSiteIcon(site, site.id === selectedId)}
                   eventHandlers={{ click: function () { handleSelect(site.id); } }}
                 >
                   <Tooltip direction="top" offset={[0, -6]} opacity={0.95} className="kmm-marker-tooltip">
