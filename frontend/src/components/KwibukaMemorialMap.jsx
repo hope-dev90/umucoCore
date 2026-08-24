@@ -52,7 +52,7 @@ const KMM_STRINGS = {
   },
   rw: {
     placeholder_title: "Inzu z'Urwibutso",
-    placeholder_text: "Kanda ku kibondo cy'amaraso cyangwa hitamo ahantu ku rutonde kugirango ubone amakuru.",
+    placeholder_text: "Kanda ifoto  uhitemo ahantu ku rutonde kugira ngo urebe amakuru arambuye.",
     get_directions: 'Inzira',
     type: {
       national: "Urwibutso rw'Igihugu",
