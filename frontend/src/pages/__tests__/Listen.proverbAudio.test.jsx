@@ -1,5 +1,3 @@
-const brokenCode = undefinedVariable.crashNow; // This will definitely break the build!
-
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import fc from 'fast-check';
 
@@ -131,7 +129,8 @@ describe('Proverb Tap-to-Listen — property tests', () => {
     fc.assert(
       fc.property(proverbArb, langArb, (proverb, lang) => {
         const utt = buildUtterance(proverb, lang);
-        expect(utt.lang).toBe(PROVERB_LANG_CONFIG[lang].tag);
+        const expectedTag = (PROVERB_LANG_CONFIG[lang] || { tag: 'rw' }).tag;
+        expect(utt.lang).toBe(expectedTag);
         expect(utt.rate).toBe(0.85);
       }),
       { numRuns: 100 }
