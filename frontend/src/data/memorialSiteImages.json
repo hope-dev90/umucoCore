@@ -1,0 +1,106 @@
+{
+  "_instructions": [
+    "Paste the image URL for each site into the 'image' field.",
+    "The 'alt' field provides multilingual alt text used on the <img> tag.",
+    "If 'image' is empty string, the panel shows a styled placeholder instead.",
+    "To add a new site image, add an entry matching the site 'id' from genocideMemorialSites.json."
+  ],
+  "sites": {
+    "kigali-gisozi": {
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR01fQpW0Tt9DWH1PcGbE7FWxf0pm8fWFNC1avfufauwQ&s=10",
+      "alt": {
+        "en": "Kigali Genocide Memorial — Gisozi",
+        "fr": "Mémorial du génocide de Kigali — Gisozi",
+        "rw": "Urwibutso rw'Itsembabwoko rwa Kigali — Gisozi"
+      }
+    },
+    "nyamata": {
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT888OB_aINx630JCJG8EFniVX06yjZtDYGpw1A54F9FQ&s=10",
+      "alt": {
+        "en": "Nyamata Genocide Memorial church interior",
+        "fr": "Intérieur de l'église mémorial de Nyamata",
+        "rw": "Imbere mu itorero ry'Urwibutso rwa Nyamata"
+      }
+    },
+    "ntarama": {
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRShjtDBYlpWX6haJZIOKjNjYGaapDQ3sxCPcTmpjh98g&s=10",
+      "alt": {
+        "en": "Ntarama Genocide Memorial church",
+        "fr": "Église mémorial de Ntarama",
+        "rw": "Itorero ry'Urwibutso rwa Ntarama"
+      }
+    },
+    "murambi": {
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrNiuv8dUacETMorOr-baMqfXuU6uPiCqybHM_MlB7pQ&s=10",
+      "alt": {
+        "en": "Murambi Genocide Memorial former technical school",
+        "fr": "Ancienne école technique — Mémorial de Murambi",
+        "rw": "Ishuri ry'ubumenyi — Urwibutso rwa Murambi"
+      }
+    },
+    "bisesero": {
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRu2JJ9Qm38SMScc6lg4PXrizStLKRD-xS30Ad-q_wR5A&s=10",
+      "alt": {
+        "en": "Bisesero Genocide Memorial hills of resistance",
+        "fr": "Collines de Bisesero — Mémorial de la résistance",
+        "rw": "Imisozi ya Bisesero — Urwibutso bw'Ubutwari"
+      }
+    },
+    "nyarubuye": {
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-xEgboc6b102bTXT7dRiP3UyRVxXDZyYMJbsPuX8EfQ&s=10",
+      "alt": {
+        "en": "Nyarubuye Genocide Memorial church complex",
+        "fr": "Complexe d'église — Mémorial de Nyarubuye",
+        "rw": "Itorero ry'Urwibutso rwa Nyarubuye"
+      }
+    },
+    "nyanza-kicukiro": {
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTzptOfDCgvkbjF29EF7GnpFrMhv7s6RupwiABEW9yr7Q&s=10",
+      "alt": {
+        "en": "Nyanza Genocide Memorial — Kicukiro",
+        "fr": "Mémorial de Nyanza — Kicukiro",
+        "rw": "Urwibutso rwa Nyanza — Kicukiro"
+      }
+    },
+    "rebero": {
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSN1-qS-SqB21YbXPFJpLJk-XbTJaXwA8QQPzDP3noBIQ&s=10",
+      "alt": {
+        "en": "Rebero Genocide Memorial hilltop burial ground",
+        "fr": "Lieu d'inhumation de Rebero sur la colline",
+        "rw": "Urwibutso rwa Rebero ku musozi"
+      }
+    },
+    "camp-kigali": {
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRYNOvQ1KMIcjuoaK2bZlfte3Nz0l_ft9St3vayrgDd8Q&s=10",
+      "alt": {
+        "en": "Camp Kigali Memorial — Belgian peacekeepers",
+        "fr": "Mémorial de Camp Kigali — Casques bleus belges",
+        "rw": "Urwibutso rwa Camp Kigali — Abasirikare b'u Bubiligi"
+      }
+    },
+    "mugonero": {
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT37v8p-HFuWVtL8bskZgegKYIUuX5uweBFDODE93WcTg&s=10",
+      "alt": {
+        "en": "Mugonero Genocide Memorial — Adventist church",
+        "fr": "Mémorial de Mugonero — Église adventiste",
+        "rw": "Urwibutso rwa Mugonero — Itorero ry'Abadiventiste"
+      }
+    },
+    "cyanika": {
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTY3OYZVgrbJy8ghTYb2YT20eVknyoyMxFFIH4yHvJVzw&s=10",
+      "alt": {
+        "en": "Cyanika Genocide Memorial parish church",
+        "fr": "Église paroissiale — Mémorial de Cyanika",
+        "rw": "Itorero ry'iparuwasi ry'Urwibutso rwa Cyanika"
+      }
+    },
+    "nyange": {
+      "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSutFsR1Fq9rT9aRtlnaN-O5meqduy-pN49JhRAD6UgDA&s=10",
+      "alt": {
+        "en": "Nyange Memorial School",
+        "fr": "École mémorial de Nyange",
+        "rw": "Ishuri ry'Urwibutso rya Nyange"
+      }
+    }
+  }
+}
