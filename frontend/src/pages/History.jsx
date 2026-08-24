@@ -98,9 +98,16 @@ export default function History() {
 
         <div className="history-list">
           {loading && (
-            <div className="history-item" style={{ justifyContent: 'center', color: '#8A7B73' }}>
-              Loading your history...
-            </div>
+            Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="history-item history-item-skeleton" aria-hidden="true">
+                <div className="history-skeleton-icon" />
+                <div className="history-skeleton-body">
+                  <div className="history-skeleton-line history-skeleton-line--title" />
+                  <div className="history-skeleton-line history-skeleton-line--badge" />
+                </div>
+                <div className="history-skeleton-line history-skeleton-line--date" />
+              </div>
+            ))
           )}
 
           {!loading && error && (

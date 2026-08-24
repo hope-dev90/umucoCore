@@ -836,19 +836,31 @@ export default function Listen() {
                   <span className="listen-view-all">{t('listen.viewAll')}</span>
                 </div>
                 <div className="fable-cards">
-                  {fables.map((fable, i) => (
-                    <div key={i} className="fable-card" onClick={() => handleFableClick(fable)} style={{ cursor: 'pointer' }}>
-                      <div className="fable-thumb">
-                        <img src={fable.image} alt={fable.title} />
-                      </div>
-                      <div className="fable-info">
-                        <div className="fable-genre">{fable.genre}</div>
-                        <div className="fable-title">{fable.title}</div>
-                        <div className="fable-narrator">{fable.narrator}</div>
-                        <div className="fable-duration">+ {fable.duration}</div>
-                      </div>
-                    </div>
-                  ))}
+                  {loading
+                    ? Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="fable-card fable-card-skeleton" aria-hidden="true">
+                          <div className="fable-thumb fable-skeleton-thumb" />
+                          <div className="fable-info">
+                            <div className="fable-skeleton-line fable-skeleton-line--short" />
+                            <div className="fable-skeleton-line fable-skeleton-line--long" />
+                            <div className="fable-skeleton-line fable-skeleton-line--mid" />
+                          </div>
+                        </div>
+                      ))
+                    : fables.map((fable, i) => (
+                        <div key={i} className="fable-card" onClick={() => handleFableClick(fable)} style={{ cursor: 'pointer' }}>
+                          <div className="fable-thumb">
+                            <img src={fable.image} alt={fable.title} />
+                          </div>
+                          <div className="fable-info">
+                            <div className="fable-genre">{fable.genre}</div>
+                            <div className="fable-title">{fable.title}</div>
+                            <div className="fable-narrator">{fable.narrator}</div>
+                            <div className="fable-duration">+ {fable.duration}</div>
+                          </div>
+                        </div>
+                      ))
+                  }
                 </div>
               </>
             )}

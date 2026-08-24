@@ -135,3 +135,42 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+/* ── HISTORY SKELETON LOADER ── */
+@keyframes history-shimmer {
+  0%   { background-position: -600px 0; }
+  100% { background-position:  600px 0; }
+}
+
+.history-item-skeleton {
+  pointer-events: none;
+}
+
+.history-skeleton-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, #EDE0D6 25%, #F5EDE6 50%, #EDE0D6 75%);
+  background-size: 1200px 100%;
+  animation: history-shimmer 1.4s infinite linear;
+}
+
+.history-skeleton-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.history-skeleton-line {
+  border-radius: 6px;
+  background: linear-gradient(90deg, #EDE0D6 25%, #F5EDE6 50%, #EDE0D6 75%);
+  background-size: 1200px 100%;
+  animation: history-shimmer 1.4s infinite linear;
+  height: 10px;
+}
+
+.history-skeleton-line--title { width: 55%; height: 12px; }
+.history-skeleton-line--badge { width: 28%; }
+.history-skeleton-line--date  { width: 64px; height: 10px; flex-shrink: 0; align-self: center; }

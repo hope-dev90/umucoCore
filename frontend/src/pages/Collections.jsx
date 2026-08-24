@@ -160,12 +160,13 @@ export default function Collections() {
 
   const handleContactSubmit = (e) => {
     e.preventDefault();
-    setContactSent(true);
-    setTimeout(() => {
-      setContactSent(false);
-      setShowContact(false);
-      setContactForm({ name: '', email: '', subject: '', message: '' });
-    }, 2500);
+    // Feature not yet wired to a backend endpoint — close the modal and
+    // show the same toast used elsewhere on the page rather than a false
+    // "Message sent!" success state.
+    setShowContact(false);
+    setContactForm({ name: '', email: '', subject: '', message: '' });
+    setMessage('Thanks for reaching out — this feature is coming soon.');
+    setTimeout(() => setMessage(''), 4000);
   };
 
   const handleSubscribe = () => {
@@ -182,6 +183,17 @@ export default function Collections() {
     setActiveCollection(null);
     setActiveImageIndex(0);
   };
+
+  // Escape key: dismiss gallery and contact modals
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key !== 'Escape') return;
+      if (activeCollection) { setActiveCollection(null); setActiveImageIndex(0); }
+      if (showContact) setShowContact(false);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [activeCollection, showContact]);
 
   const nextImage = () => {
     if (!activeCollection) return;

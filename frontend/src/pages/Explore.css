@@ -727,6 +727,15 @@
   transform: translateY(-1px);
 }
 
+.heritage-action.primary:hover {
+  background: #6F392F;
+}
+
+.heritage-action.secondary:hover {
+  background: #8D493A;
+  color: #fff;
+}
+
 .discover-more-wrap {
   position: relative;
   width: 100%;
