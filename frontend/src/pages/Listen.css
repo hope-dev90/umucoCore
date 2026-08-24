@@ -1123,3 +1123,35 @@
 .music-yt-link svg {
   color: #ff0000;
 }
+
+/* ── FABLE CARD SKELETON ── */
+@keyframes fable-shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+.fable-card-skeleton {
+  pointer-events: none;
+}
+
+.fable-skeleton-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #EDE0D6 25%, #F5EDE6 50%, #EDE0D6 75%);
+  background-size: 800px 100%;
+  animation: fable-shimmer 1.4s infinite linear;
+}
+
+.fable-skeleton-line {
+  height: 10px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #EDE0D6 25%, #F5EDE6 50%, #EDE0D6 75%);
+  background-size: 800px 100%;
+  animation: fable-shimmer 1.4s infinite linear;
+  margin-bottom: 8px;
+}
+
+.fable-skeleton-line--short { width: 40%; }
+.fable-skeleton-line--long  { width: 85%; }
+.fable-skeleton-line--mid   { width: 60%; }

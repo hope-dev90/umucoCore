@@ -659,6 +659,34 @@ function SignUpPage({ onNavigate }) {
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
+                  {/* Inline password strength indicator */}
+                  {formData.password.length > 0 && (() => {
+                    const len = formData.password.length;
+                    const hasUpper = /[A-Z]/.test(formData.password);
+                    const hasNum   = /[0-9]/.test(formData.password);
+                    const score    = (len >= 8 ? 1 : 0) + (hasUpper ? 1 : 0) + (hasNum ? 1 : 0);
+                    const bars     = [
+                      { filled: score >= 1, color: score === 1 ? '#e05a2b' : score === 2 ? '#f0a030' : '#3a9e60' },
+                      { filled: score >= 2, color: score === 2 ? '#f0a030' : '#3a9e60' },
+                      { filled: score >= 3, color: '#3a9e60' },
+                    ];
+                    const label    = score === 1 ? 'Weak' : score === 2 ? 'Fair' : 'Strong';
+                    const labelCol = score === 1 ? '#e05a2b' : score === 2 ? '#f0a030' : '#3a9e60';
+                    return (
+                      <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <div style={{ display: 'flex', gap: 4, flex: 1 }}>
+                          {bars.map((b, i) => (
+                            <div key={i} style={{
+                              flex: 1, height: 3, borderRadius: 2,
+                              background: b.filled ? b.color : '#EADBC8',
+                              transition: 'background 0.25s',
+                            }} />
+                          ))}
+                        </div>
+                        <span style={{ fontSize: '0.6rem', fontWeight: 700, color: labelCol, minWidth: 36, textAlign: 'right' }}>{label}</span>
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <label className="flex items-start space-x-2 cursor-pointer select-none pt-1">
@@ -672,8 +700,8 @@ function SignUpPage({ onNavigate }) {
 
                 <button
                   type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-[#8D493A] hover:bg-[#3E2723] disabled:opacity-70 text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200 mt-2 flex items-center justify-center space-x-2"
+                  disabled={isLoading || !formData.name.trim() || !formData.email.trim() || formData.password.length < 8 || !formData.termsAccepted}
+                  className="w-full bg-[#8D493A] hover:bg-[#3E2723] disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200 mt-2 flex items-center justify-center space-x-2"
                 >
                   {isLoading ? (
                     <>

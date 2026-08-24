@@ -162,6 +162,18 @@ function LoginPage({ onNavigate, onLoginSuccess, isGovLogin = false }) {
       e.target.previousSibling.focus();
   };
 
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    if (!pasted) return;
+    const newCode = [...verificationCode];
+    pasted.split('').forEach((char, i) => { newCode[i] = char; });
+    setVerificationCode(newCode);
+    const nextIndex = Math.min(pasted.length, 5);
+    const inputs = e.target.closest('.flex').querySelectorAll('input');
+    if (inputs[nextIndex]) inputs[nextIndex].focus();
+  };
+
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -364,8 +376,8 @@ function LoginPage({ onNavigate, onLoginSuccess, isGovLogin = false }) {
 
                   <button
                     type="submit"
-                    disabled={isLoading}
-                    className="w-full bg-[#8D493A] hover:bg-[#3E2723] disabled:opacity-70 text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200 mt-2 flex items-center justify-center space-x-2"
+                    disabled={isLoading || !formData.email || !formData.password}
+                    className="w-full bg-[#8D493A] hover:bg-[#3E2723] disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200 mt-2 flex items-center justify-center space-x-2"
                   >
                     {isLoading ? (
                       <>
@@ -454,6 +466,7 @@ function LoginPage({ onNavigate, onLoginSuccess, isGovLogin = false }) {
                           <input key={index} type="text" name="code" maxLength="1" value={data}
                             onChange={(e) => handleCodeChange(e.target, index)}
                             onKeyDown={(e) => handleKeyDown(e, index)}
+                            onPaste={handleOtpPaste}
                             onFocus={(e) => e.target.select()}
                             className="w-12 h-12 bg-white border border-[#EADBC8] rounded-xl text-center text-sm font-bold text-[#2C1A14] focus:outline-none focus:border-[#8D493A] focus:ring-1 focus:ring-[#8D493A] transition-all"
                           />

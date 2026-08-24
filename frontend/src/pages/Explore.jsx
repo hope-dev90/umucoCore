@@ -423,6 +423,14 @@ export default function Explore() {
     setImageLoadErrors(prev => ({ ...prev, [title]: true }));
   }, []);
 
+  // Escape key closes the audio player modal
+  useEffect(() => {
+    if (!selectedAudio) return;
+    const handler = (e) => { if (e.key === 'Escape') setSelectedAudio(null); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectedAudio]);
+
   const handleStoryComplete = useCallback((story) => {
     const storyId = getStoryId(story);
     if (!storyId) return;
@@ -761,6 +769,7 @@ export default function Explore() {
               </div>
               <button
                 onClick={() => setSelectedAudio(null)}
+                aria-label="Close audio player"
                 style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#6F5B55' }}
               >
                 {'\u2715'}

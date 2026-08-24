@@ -39,6 +39,15 @@ export function StoryReadModal({ story, onClose, onComplete }) {
     return () => window.removeEventListener('resize', updateReaderSize);
   }, []);
 
+  // Escape key dismisses the modal (unless a quiz is in progress)
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === 'Escape' && !showQuiz && !showCompletion) onClose();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose, showQuiz, showCompletion]);
+
   // Estimate word count from available text
   const bodyText = localizedStory?.content || localizedStory?.desc || localizedStory?.description || '';
   const wordCount = bodyText.trim().split(/\s+/).filter(Boolean).length || 200;
