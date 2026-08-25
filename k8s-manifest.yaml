@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: umuco-backend
+spec:
+  replicas: 2 # 👯 Automatically keeps 2 copies running for high-availability!
+  selector:
+    matchLabels:
+      app: umuco-backend
+  template:
+    metadata:
+      labels:
+        app: umuco-backend
+    spec:
+      containers:
+      - name: backend
+        image: umucocore-backend:latest
+        imagePullPolicy: IfNotPresent # 💻 Look on your local laptop for the image first
+        ports:
+        - containerPort: 5000
+        env:
+        - name: NODE_ENV
+          value: "development"
+        - name: NODE_OPTIONS
+          value: "--dns-result-order=ipv4first" # ⚡ Your database IPv4 fix!
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: umuco-backend-service
+spec:
+  selector:
+    app: umuco-backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: umuco-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: umuco-frontend
+  template:
+    metadata:
+      labels:
+        app: umuco-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: umucocore-frontend:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5173
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: umuco-frontend-service
+spec:
+  type: NodePort # 🌐 Exposes the interface to your laptop's outer web browser
+  selector:
+    app: umuco-frontend
+  ports:
+    - port: 5173
+      targetPort: 5173
+      nodePort: 30173 # 🔑 This maps the UI straight to http://localhost:30173
