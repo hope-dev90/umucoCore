@@ -1,14 +1,12 @@
 
 node_modules/
-.env
-.env.*
 !.env.example
 frontend/.env
 backend/.env
 mobile/.env
 .kiro/
 .kilo/
-.vscode/
 .agents/
 frontend/dist/
 
+config.bat
