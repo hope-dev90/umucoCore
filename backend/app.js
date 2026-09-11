@@ -32,6 +32,8 @@ app.set('trust proxy', 1);
 
 // Allow requests from Vercel frontend + localhost dev
 const ALLOWED_ORIGINS = [
+  'https://www.umucocore.rw',
+  'https://umucocore.rw',
   'https://umucocore.vercel.app',
   'https://umuco-core.vercel.app',
   'http://localhost:5173',
@@ -41,7 +43,7 @@ const ALLOWED_ORIGINS = [
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" },
-    crossOriginOpenerPolicy: { policy: "unsafe-none" },
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
     contentSecurityPolicy: false,
   }),
 );
@@ -54,7 +56,8 @@ app.use(
       // Allow any Vercel preview deployment for this project
       if (
         ALLOWED_ORIGINS.includes(origin) ||
-        /^https:\/\/umuco-core.*\.vercel\.app$/.test(origin)
+        /^https:\/\/umuco-core.*\.vercel\.app$/.test(origin) ||
+        /^https:\/\/(www\.)?umucocore\.rw$/.test(origin)
       ) {
         return callback(null, true);
       }
