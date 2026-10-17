@@ -23,10 +23,11 @@ function Discover({ onNavigate }) {
     setActiveIndex((prev) => (prev === FEATURED_STORIES.length - 1 ? 0 : prev + 1));
   };
 
-  const paragraphs = story.content.split('\n\n');
+  const storyText = typeof story.content === 'string' ? story.content : '';
+  const paragraphs = storyText.split('\n\n').filter(Boolean);
   const visibleParagraphs = paragraphs.slice(0, -1);
   const finalParagraph = paragraphs[paragraphs.length - 1];
-  const readMinutes = Math.max(2, Math.round(story.content.split(/\s+/).length / 200));
+  const readMinutes = Math.max(2, Math.round(storyText.split(/\s+/).length / 200));
 
   return (
     <section className="w-full bg-[#FAF8F5] font-sans px-4 sm:px-6 lg:px-10 py-12 sm:py-16 md:py-24 border-t border-[#EADBC8]/40 scroll-mt-20">
@@ -56,7 +57,7 @@ function Discover({ onNavigate }) {
             <button
               type="button"
               onClick={handlePrevStory}
-              aria-label="Previous Story"
+              aria-label={t('discover.prevStory')}
               className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-[#8D493A] text-white p-2.5 sm:p-3 rounded-full backdrop-blur-md border border-white/20 hover:border-[#8D493A] transition-all duration-200 shadow-lg cursor-pointer z-20 group/btn"
             >
               <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover/btn:-translate-x-0.5" />
@@ -64,7 +65,7 @@ function Discover({ onNavigate }) {
             <button
               type="button"
               onClick={handleNextStory}
-              aria-label="Next Story"
+              aria-label={t('discover.nextStory')}
               className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-[#8D493A] text-white p-2.5 sm:p-3 rounded-full backdrop-blur-md border border-white/20 hover:border-[#8D493A] transition-all duration-200 shadow-lg cursor-pointer z-20 group/btn"
             >
               <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 transition-transform group-hover/btn:translate-x-0.5" />
@@ -72,7 +73,7 @@ function Discover({ onNavigate }) {
             <div className="absolute inset-x-6 sm:inset-x-12 bottom-6 sm:bottom-8 text-left text-white z-10">
               <div className="flex items-center space-x-2 mb-1.5">
                 <span className="text-[10px] sm:text-xs font-black tracking-widest uppercase text-[#FCDFD3] bg-[#8D493A]/80 px-2.5 py-0.5 rounded-md backdrop-blur-xs">
-                  {t('discover.featuredStory')} • {activeIndex + 1} of {FEATURED_STORIES.length}
+                  {t('discover.featuredStory')} • {t('discover.storyOf', { current: activeIndex + 1, total: FEATURED_STORIES.length })}
                 </span>
               </div>
               <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white drop-shadow-sm font-serif">
@@ -86,7 +87,7 @@ function Discover({ onNavigate }) {
             </span>
             <span className="inline-flex items-center gap-1.5 text-[#6F5B55] normal-case font-semibold">
               <Clock className="w-3.5 h-3.5 text-[#8D493A]" />
-              {readMinutes} min read
+              {t('discover.minRead', { minutes: readMinutes })}
             </span>
           </div>
           <div className="relative px-5 sm:px-8 md:px-12 pt-5 pb-2">
