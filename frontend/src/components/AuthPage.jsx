@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Lock, Eye, EyeOff, User, ArrowLeft, Check, ArrowRight } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
-import authLeftBg from '../assets/signup/tra.png';
-import authLeftBg2 from '../assets/signup/tra2.png';
-import authLeftBg3 from '../assets/signup/tra3.jpg';
+import authLeftBg from '../assets/tra.png';
+import authLeftBg2 from '../assets/tradi.jpg';
+import authLeftBg3 from '../assets/rda.jpg';
 import UmucoLogo from './UmucoLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';

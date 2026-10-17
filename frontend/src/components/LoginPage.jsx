@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
-import authLeftBg from '../assets/login/tra.png';
-import authLeftBg2 from '../assets/login/tra2.png';
+import authLeftBg from '../assets/tra.png';
+import authLeftBg2 from '../assets/tradi.jpg';
+import authLeftBg3 from '../assets/rda.jpg';
 import UmucoLogo from './UmucoLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -23,7 +24,13 @@ function getSlides(t) {
       heading: { en: t('auth.slide.heading2'), rw: t('auth.slide.heading2') },
       accent: { en: t('auth.slide.accent2'), rw: t('auth.slide.accent2') },
       quote: { en: t('auth.slide.quote2'), rw: t('auth.slide.quote2') },
-    }
+    },
+    {
+      src: authLeftBg3,
+      heading: { en: t('auth.signup.slide.heading3'), rw: t('auth.signup.slide.heading3') },
+      accent: { en: t('auth.signup.slide.accent3'), rw: t('auth.signup.slide.accent3') },
+      quote: { en: t('auth.signup.slide.quote3'), rw: t('auth.signup.slide.quote3') },
+    },
   ];
 }
 
