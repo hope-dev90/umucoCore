@@ -1,21 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { Mail, Lock, Eye, EyeOff, User, ArrowLeft, Check, ArrowRight } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import {
+  Mail, Lock, Eye, EyeOff, User, ArrowLeft, ShieldCheck, ArrowUpRight, ArrowRight,
+  Swords, Trees, Crown, BookOpen, Music,
+} from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import authLeftBg from '../assets/tra.png';
 import authLeftBg2 from '../assets/tradi.jpg';
 import authLeftBg3 from '../assets/rda.jpg';
-import UmucoLogo from './UmucoLogo';
-import { useAuth } from '../contexts/AuthContext';
+import TribalLogo from './UmucoLogo';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import { apiUrl } from '../config/api';
-import ExplorerTypeImage from './ExplorerTypeImage';
-import { UmucoGlyph } from './UmucoGlyphs';
+
+const getSlides = (t) => [
+  {
+    src: authLeftBg,
+    heading: t('auth.signup.slide.heading1') || 'Begin your',
+    accent: t('auth.signup.slide.accent1') || 'Journey.',
+    quote: t('auth.signup.slide.quote1') || '"Preserve Rwanda\u2019s living heritage start your journey today."',
+  },
+  {
+    src: authLeftBg2,
+    heading: t('auth.signup.slide.heading2') || 'Enter the',
+    accent: t('auth.signup.slide.accent2') || 'Archive.',
+    quote: t('auth.signup.slide.quote2') || '"Be part of Rwanda\u2019s living treasury of culture and tradition."',
+  },
+  {
+    src: authLeftBg3,
+    heading: t('auth.signup.slide.heading3') || 'Become part of',
+    accent: t('auth.signup.slide.accent3') || 'History.',
+    quote: t('auth.signup.slide.quote3') || '"Your story matters\u2014preserved, celebrated, and passed on."',
+  },
+];
 
 const EXPLORER_TYPES = [
   {
     id: 'warrior',
     label: 'Warrior',
     tagline: 'Battles, legends & brave deeds',
+    icon: Swords,
     adventureTitle: 'Ready your shield, Warrior',
     adventureSubtitle: 'Your saga begins the moment you sign up. Stories of courage, battle and honor await.',
     cta: 'Begin the Battle',
@@ -24,6 +47,7 @@ const EXPLORER_TYPES = [
     id: 'nature-lover',
     label: 'Nature Lover',
     tagline: 'Forests, hills & wild places',
+    icon: Trees,
     adventureTitle: 'Step into the wild, Nature Lover',
     adventureSubtitle: "Rwanda's hills, forests and rivers are waiting to share their stories with you.",
     cta: 'Start the Trail',
@@ -32,6 +56,7 @@ const EXPLORER_TYPES = [
     id: 'royal-historian',
     label: 'Royal Historian',
     tagline: 'Kings, courts & old dynasties',
+    icon: Crown,
     adventureTitle: 'Enter the royal court, Historian',
     adventureSubtitle: 'Centuries of kings, courts and dynasties are ready to be uncovered.',
     cta: 'Claim the Throne',
@@ -40,6 +65,7 @@ const EXPLORER_TYPES = [
     id: 'folktale-hunter',
     label: 'Folktale Hunter',
     tagline: 'Myths, proverbs & fireside tales',
+    icon: BookOpen,
     adventureTitle: 'Follow the tale, Folktale Hunter',
     adventureSubtitle: 'Myths, proverbs and fireside stories are hidden throughout the archive, waiting to be found.',
     cta: 'Chase the Legend',
@@ -48,12 +74,12 @@ const EXPLORER_TYPES = [
     id: 'music-explorer',
     label: 'Music Explorer',
     tagline: 'Rhythms, songs & instruments',
+    icon: Music,
     adventureTitle: 'Follow the rhythm, Music Explorer',
     adventureSubtitle: 'Songs, instruments and rhythms passed down for generations are ready to be heard.',
     cta: 'Strike the First Note',
   },
 ];
-
 const getExplorerCopy = (t, id, fallback = {}) => ({
   label: t(`explorer.${id}.label`) || fallback.label,
   tagline: t(`explorer.${id}.tagline`) || fallback.tagline,
@@ -61,12 +87,7 @@ const getExplorerCopy = (t, id, fallback = {}) => ({
   adventureSubtitle: t(`auth.explorer.${id}.subtitle`) || fallback.adventureSubtitle,
   cta: t(`auth.explorer.${id}.cta`) || fallback.cta,
 });
-
-/**
- * Single-choice onboarding modal: "What kind of explorer are you?"
- * Calls onContinue(explorerTypeId) once the person picks a card and taps Continue.
- */
-function ExplorerTypeModal({ onContinue }) {
+function ExplorerTypeModal({ onContinue, onSkip }) {
   const { t } = useLanguage();
   const [selected, setSelected] = useState(null);
 
@@ -78,29 +99,26 @@ function ExplorerTypeModal({ onContinue }) {
       <div
         className="w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col"
         style={{
-          background: 'rgba(253,251,247,0.72)',
-          backdropFilter: 'blur(18px)',
+          background: 'rgba(253,251,247,0.96)',
           border: '1px solid rgba(234,219,200,0.6)',
-          fontFamily: 'Poppins, sans-serif',
         }}
       >
-        {/* Header */}
         <div className="px-8 pt-10 pb-2 text-center">
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2" style={{ color: '#8D493A' }}>
-            {t('auth.explorer.kicker')}
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] mb-2 text-[#8D493A]">
+            {t('auth.explorer.kicker') || 'Optional'}
           </p>
-          <h1 className="text-2xl font-bold mb-2" style={{ color: '#2C1A14' }}>
-            {t('explorerPicker.title')}
+          <h1 className="text-2xl font-bold mb-2 text-[#2C1A14]">
+            {t('explorerPicker.title') || 'What kind of explorer are you?'}
           </h1>
-          <p className="text-xs" style={{ color: '#6F5B55' }}>
-            {t('auth.explorer.subtitle')}
+          <p className="text-xs text-[#6F5B55]">
+            {t('auth.explorer.subtitle') || "Pick a path and we'll tailor your first quests to it."}
           </p>
         </div>
 
-        {/* Options */}
-        <div className="px-6 py-6 space-y-3">
+        <div className="px-6 py-6 space-y-3 max-h-[50vh] overflow-y-auto">
           {EXPLORER_TYPES.map((type) => {
             const isSelected = selected === type.id;
+            const TypeIcon = type.icon;
             const copy = getExplorerCopy(t, type.id, type);
             return (
               <button
@@ -109,18 +127,22 @@ function ExplorerTypeModal({ onContinue }) {
                 onClick={() => setSelected(type.id)}
                 className="w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-left transition-all"
                 style={{
-                  background: isSelected ? 'rgba(141,73,58,0.10)' : 'rgba(255,255,255,0.5)',
+                  background: isSelected ? 'rgba(141,73,58,0.10)' : 'rgba(255,255,255,0.6)',
                   border: isSelected ? '2px solid #8D493A' : '1px solid rgba(234,219,200,0.8)',
                 }}
               >
-                <ExplorerTypeImage type={type.id} label={copy.label} selected={isSelected} size={42} />
+                <span
+                  className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{
+                    background: isSelected ? '#8D493A' : 'rgba(141,73,58,0.10)',
+                    color: isSelected ? '#fff' : '#8D493A',
+                  }}
+                >
+                  <TypeIcon className="w-4 h-4" />
+                </span>
                 <span className="flex-1">
-                  <span className="block text-sm font-bold" style={{ color: '#2C1A14' }}>
-                    {copy.label}
-                  </span>
-                  <span className="block text-xs" style={{ color: '#6F5B55' }}>
-                    {copy.tagline}
-                  </span>
+                  <span className="block text-sm font-bold text-[#2C1A14]">{copy.label}</span>
+                  <span className="block text-xs text-[#6F5B55]">{copy.tagline}</span>
                 </span>
                 <span
                   className="w-4 h-4 rounded-full flex-shrink-0"
@@ -134,17 +156,22 @@ function ExplorerTypeModal({ onContinue }) {
           })}
         </div>
 
-        {/* Footer */}
-        <div className="px-8 pb-8 pt-2">
+        <div className="px-8 pb-8 pt-2 space-y-2">
           <button
             type="button"
             disabled={!selected}
             onClick={() => onContinue(selected)}
-            className="w-full py-3.5 rounded-xl font-semibold text-xs tracking-widest uppercase transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
-            style={{ background: '#8D493A', color: '#FFFFFF' }}
+            className="w-full py-3.5 rounded-xl font-semibold text-xs tracking-widest uppercase transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 bg-[#8D493A] text-white hover:bg-[#3E2723]"
           >
-            {t('auth.continue')}
+            {t('auth.continue') || 'Continue'}
             <ArrowRight className="w-4 h-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onSkip}
+            className="w-full py-2 text-xs font-semibold text-[#8D493A] hover:underline bg-transparent border-none cursor-pointer"
+          >
+            Skip for now!
           </button>
         </div>
       </div>
@@ -162,85 +189,62 @@ function VerificationNotice({ email }) {
       aria-live="polite"
     >
       <div
-        className="w-full max-w-sm rounded-2xl p-6 text-center shadow-2xl"
-        style={{
-          background: '#FDFBF7',
-          border: '1px solid rgba(234,219,200,0.9)',
-          fontFamily: 'Poppins, sans-serif',
-        }}
+        className="w-full max-w-sm rounded-2xl p-6 text-center shadow-2xl bg-[#FDFBF7]"
+        style={{ border: '1px solid rgba(234,219,200,0.9)' }}
       >
-        <div
-          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full"
-          style={{ background: 'rgba(141,73,58,0.10)', color: '#8D493A' }}
-        >
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#8D493A]/10 text-[#8D493A]">
           <Mail className="h-5 w-5" />
         </div>
-        <h2 className="mb-2 text-base font-bold" style={{ color: '#2C1A14' }}>
-          {t('auth.checkEmail')}
-        </h2>
-        <p className="text-xs leading-relaxed" style={{ color: '#6F5B55' }}>
-          {t('auth.receiveVerificationCode')}
+        <h2 className="mb-2 text-base font-bold text-[#2C1A14]">{t('auth.checkEmail') || 'Check your email'}</h2>
+        <p className="text-xs leading-relaxed text-[#6F5B55]">
+          {t('auth.receiveVerificationCode') || "We're sending a verification code"}
           {email ? (
-            <>
-              {' '}at <span className="font-semibold" style={{ color: '#2C1A14' }}>{email}</span>
-            </>
+            <> at <span className="font-semibold text-[#2C1A14]">{email}</span></>
           ) : null}
           .
         </p>
-        <div className="mt-5 flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-widest" style={{ color: '#8D493A' }}>
+        <div className="mt-5 flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-[#8D493A]">
           <span
             className="h-3 w-3 rounded-full border-2 border-current border-t-transparent"
             style={{ animation: 'spin 0.8s linear infinite' }}
           />
-          {t('auth.sendingCode')}
+          {t('auth.sendingCode') || 'Sending code...'}
         </div>
       </div>
     </div>
   );
 }
 
-const getSlides = (t) => [
-  {
-    src: authLeftBg,
-    heading: t('auth.signup.slide.heading1'),
-    accent: t('auth.signup.slide.accent1'),
-    quote: t('auth.signup.slide.quote1'),
-  },
-  {
-    src: authLeftBg2,
-    heading: t('auth.signup.slide.heading2'),
-    accent: t('auth.signup.slide.accent2'),
-    quote: t('auth.signup.slide.quote2'),
-  },
-  {
-    src: authLeftBg3,
-    heading: t('auth.signup.slide.heading3'),
-    accent: t('auth.signup.slide.accent3'),
-    quote: t('auth.signup.slide.quote3'),
-  }
-];
-
 function LeftSlideshow() {
   const { t } = useLanguage();
-  const [current, setCurrent] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
   const SLIDES = getSlides(t);
+  const [current, setCurrent] = useState(0);
+  const [textVisible, setTextVisible] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTransitioning(true);
+      setTextVisible(false);
       setTimeout(() => {
         setCurrent(prev => (prev + 1) % SLIDES.length);
-        setTransitioning(false);
-      }, 500);
-    }, 3700);
+        setTextVisible(true);
+      }, 250);
+    }, 3900);
     return () => clearInterval(timer);
   }, []);
+
+  const goTo = (idx) => {
+    if (idx === current) return;
+    setTextVisible(false);
+    setTimeout(() => {
+      setCurrent(idx);
+      setTextVisible(true);
+    }, 250);
+  };
 
   const slide = SLIDES[current];
 
   return (
-    <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
+    <div className="hidden lg:block lg:w-1/2 relative overflow-hidden bg-[#2C1A14]">
       {SLIDES.map((s, idx) => (
         <img
           key={idx}
@@ -254,19 +258,12 @@ function LeftSlideshow() {
             height: '100%',
             objectFit: 'cover',
             objectPosition: 'center',
-            transition: 'opacity 0.8s ease, transform 0.8s ease',
-            opacity: idx === current && !transitioning ? 1 : 0,
-            transform:
-              idx === current && !transitioning
-                ? 'translateY(0px)'
-                : transitioning && idx === current
-                ? 'translateY(-16px)'
-                : 'translateY(24px)',
+            transition: 'opacity 0.35s ease',
+            opacity: idx === current ? 1 : 0,
             zIndex: idx === current ? 1 : 0,
           }}
         />
       ))}
-
       <div
         className="absolute inset-0"
         style={{
@@ -274,13 +271,12 @@ function LeftSlideshow() {
           zIndex: 2,
         }}
       />
-
       <div className="absolute inset-0 flex flex-col justify-end p-12" style={{ zIndex: 3 }}>
         <div
           style={{
-            transition: 'opacity 0.6s ease, transform 0.6s ease',
-            opacity: transitioning ? 0 : 1,
-            transform: transitioning ? 'translateY(10px)' : 'translateY(0px)',
+            transition: 'opacity 0.25s ease, transform 0.25s ease',
+            opacity: textVisible ? 1 : 0,
+            transform: textVisible ? 'translateY(0px)' : 'translateY(8px)',
           }}
         >
           <h2 className="text-4xl font-bold text-white leading-tight mb-4">
@@ -294,15 +290,11 @@ function LeftSlideshow() {
             {slide.quote}
           </p>
         </div>
-
         <div className="flex items-center gap-2 mt-10">
           {SLIDES.map((_, idx) => (
             <button
               key={idx}
-              onClick={() => {
-                setTransitioning(true);
-                setTimeout(() => { setCurrent(idx); setTransitioning(false); }, 400);
-              }}
+              onClick={() => goTo(idx)}
               aria-label={`Go to slide ${idx + 1}`}
               style={{
                 width: idx === current ? '24px' : '8px',
@@ -319,14 +311,145 @@ function LeftSlideshow() {
         </div>
 
         <div className="mt-6 text-xs font-semibold tracking-widest text-white/40">
-          {t('auth.slide.footer')}
+          {t('auth.slide.footer') || 'Preserving Rwandan Roots and Culture.'}
         </div>
       </div>
     </div>
   );
 }
 
+function Confetti() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const COLORS = ['#8D493A', '#8D493A', '#8D493A', '#8D493A', '#8D493A', '#FCDFD3', '#fff', '#C4724A', '#8D493A'];
+    const SHAPES = ['circle', 'rect', 'star', 'ribbon'];
+
+    const particles = Array.from({ length: 220 }, () => ({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 200,
+      size: 6 + Math.random() * 12,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
+      speedY: 2.5 + Math.random() * 4,
+      speedX: (Math.random() - 0.5) * 3,
+      rotation: Math.random() * 360,
+      rotSpeed: (Math.random() - 0.5) * 8,
+      opacity: 1,
+      wobble: Math.random() * Math.PI * 2,
+      wobbleSpeed: 0.05 + Math.random() * 0.08,
+    }));
+
+    function drawStar(ctx, x, y, r) {
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+        const fn = i === 0 ? 'moveTo' : 'lineTo';
+        ctx[fn](x + r * Math.cos(angle), y + r * Math.sin(angle));
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    let animId;
+    let frame = 0;
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      frame++;
+
+      particles.forEach(p => {
+        p.y += p.speedY;
+        p.x += p.speedX + Math.sin(p.wobble) * 1.2;
+        p.wobble += p.wobbleSpeed;
+        p.rotation += p.rotSpeed;
+        if (frame > 120) p.opacity = Math.max(0, p.opacity - 0.008);
+
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color;
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+
+        if (p.shape === 'circle') {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (p.shape === 'rect') {
+          ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        } else if (p.shape === 'star') {
+          drawStar(ctx, 0, 0, p.size / 2);
+        } else {
+          ctx.fillRect(-p.size / 2, -p.size / 6, p.size, p.size / 3);
+        }
+
+        ctx.restore();
+      });
+
+      if (particles.some(p => p.opacity > 0)) {
+        animId = requestAnimationFrame(animate);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    animate();
+    return () => cancelAnimationFrame(animId);
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 50 }}
+    />
+  );
+}
+
+function PasswordStrength({ password }) {
+  if (!password) return null;
+  const len = password.length;
+  const hasUpper = /[A-Z]/.test(password);
+  const hasNum = /[0-9]/.test(password);
+  const score = (len >= 8 ? 1 : 0) + (hasUpper ? 1 : 0) + (hasNum ? 1 : 0);
+  const bars = [
+    { filled: score >= 1, color: score === 1 ? '#e05a2b' : score === 2 ? '#f0a030' : '#3a9e60' },
+    { filled: score >= 2, color: score === 2 ? '#f0a030' : '#3a9e60' },
+    { filled: score >= 3, color: '#3a9e60' },
+  ];
+  const label = score === 1 ? 'Weak' : score === 2 ? 'Fair' : 'Strong';
+  const labelColor = score === 1 ? '#e05a2b' : score === 2 ? '#f0a030' : '#3a9e60';
+
+  return (
+    <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div style={{ display: 'flex', gap: 4, flex: 1 }}>
+        {bars.map((b, i) => (
+          <div
+            key={i}
+            style={{
+              flex: 1,
+              height: 3,
+              borderRadius: 2,
+              background: b.filled ? b.color : '#EADBC8',
+              transition: 'background 0.25s',
+            }}
+          />
+        ))}
+      </div>
+      <span style={{ fontSize: '0.6rem', fontWeight: 700, color: labelColor, minWidth: 36, textAlign: 'right' }}>
+        {label}
+      </span>
+    </div>
+  );
+}
+
 function SignUpPage({ onNavigate }) {
+  const { t } = useLanguage();
+  const { register, googleLogin, updateUser } = useAuth();
   const [showExplorerModal, setShowExplorerModal] = useState(false);
   const [explorerType, setExplorerType] = useState(null);
 
@@ -334,19 +457,23 @@ function SignUpPage({ onNavigate }) {
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '', termsAccepted: false });
+  const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '', termsAccepted: false });
   const [isLoading, setIsLoading] = useState(false);
   const [showVerificationNotice, setShowVerificationNotice] = useState(false);
   const [error, setError] = useState('');
-  const { register, googleLogin, updateUser } = useAuth();
-  const { t } = useLanguage();
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendLoading, setResendLoading] = useState(false);
 
   const selectedExplorer = EXPLORER_TYPES.find((type) => type.id === explorerType) || null;
   const selectedExplorerCopy = selectedExplorer ? getExplorerCopy(t, selectedExplorer.id, selectedExplorer) : null;
-
   const handleExplorerContinue = (typeId) => {
     setExplorerType(typeId);
     setShowExplorerModal(false);
+    setIsSuccess(true);
+  };
+  const handleExplorerSkip = () => {
+    setShowExplorerModal(false);
+    setIsSuccess(true);
   };
 
   const handleInputChange = (e) => {
@@ -374,23 +501,30 @@ function SignUpPage({ onNavigate }) {
     const newCode = [...verificationCode];
     pasted.split('').forEach((char, i) => { newCode[i] = char; });
     setVerificationCode(newCode);
-    // Focus the next empty box or the last one
     const nextIndex = Math.min(pasted.length, 5);
-    const inputs = e.target.closest('.flex').querySelectorAll('input');
-    if (inputs[nextIndex]) inputs[nextIndex].focus();
+    const inputs = e.target.closest('.flex')?.querySelectorAll('input');
+    if (inputs && inputs[nextIndex]) inputs[nextIndex].focus();
   };
-
   const handleSignUpSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setShowVerificationNotice(true);
     setError('');
 
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+    if (!formData.termsAccepted) {
+      setError('Please accept the Terms of Service and Privacy Policy.');
+      return;
+    }
+
+    setIsLoading(true);
+    setShowVerificationNotice(true);
     try {
       await register(formData.name, formData.email, formData.password, explorerType);
       setIsVerifying(true);
     } catch (err) {
-      setError(err.message);
+      setError(err?.message || 'Unable to create your account.');
     } finally {
       setIsLoading(false);
       setShowVerificationNotice(false);
@@ -399,43 +533,40 @@ function SignUpPage({ onNavigate }) {
 
   const handleCodeSubmit = async (e) => {
     e.preventDefault();
+    const code = verificationCode.join('');
+    if (code.length !== 6) {
+      setError('Enter all 6 digits to continue.');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
-    const code = verificationCode.join('');
-
     try {
       const response = await fetch(apiUrl('/auth/verify-email'), {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, otp: code }),
       });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || 'Email verification failed.');
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Verification failed');
+      if (data.token) localStorage.setItem('token', data.token);
+      if (data.user) {
+        updateUser({
+          ...data.user,
+          explorerType: data.user.explorerType || data.user.explorer_type || explorerType || undefined,
+        });
       }
-
-      // Store the token in localStorage and update AuthContext
-      if (data.token && data.user) {
-        localStorage.setItem('token', data.token);
-        const userToSet = { ...data.user, explorerType: data.user.explorerType || explorerType };
-        updateUser(userToSet);
-      }
-
-      setIsSuccess(true);
+      setShowExplorerModal(true);
     } catch (err) {
-      setError(err.message);
+      setError(err?.message || 'Unable to verify your email.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const [resendLoading, setResendLoading] = useState(false);
-
   const handleResendOtp = async () => {
+    if (resendCooldown > 0 || resendLoading) return;
     setResendLoading(true);
     setError('');
     try {
@@ -444,127 +575,167 @@ function SignUpPage({ onNavigate }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email }),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Failed to resend OTP');
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || 'Failed to resend verification code.');
+
       setResendCooldown(30);
       const interval = setInterval(() => {
-        setResendCooldown(prev => {
-          if (prev <= 1) { clearInterval(interval); return 0; }
+        setResendCooldown((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
           return prev - 1;
         });
       }, 1000);
     } catch (err) {
-      setError(err.message);
+      setError(err?.message || 'Unable to resend the verification code.');
     } finally {
       setResendLoading(false);
     }
   };
 
   const handleGoogleSuccess = async (response) => {
+    if (!response?.credential) {
+      setError('Google did not return a valid credential. Please try again.');
+      return;
+    }
     setIsLoading(true);
     setError('');
-
     try {
       await googleLogin(response.credential);
       onNavigate('dashboard');
     } catch (err) {
-      setError(err.message);
+      setError(err?.message || 'Google sign-in failed.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleGoogleFailure = (err) => {
-    console.error('Google login error:', err);
-    setError('Google login failed. Please try again.');
+  const handleGoogleFailure = () => {
+    setError('Google sign-in failed. Please try again.');
   };
 
   if (isSuccess) {
-    const explorerInfo = EXPLORER_TYPES.find(type => type.id === explorerType);
-    const explorerCopy = explorerInfo ? getExplorerCopy(t, explorerInfo.id, explorerInfo) : null;
     return (
-      <div className="youth-auth-shell fixed inset-0 w-full min-h-screen flex items-center justify-center bg-[#FDFBF7]" style={{ fontFamily: 'Poppins, sans-serif' }}>
-        <div className="flex flex-col items-center text-center px-8 max-w-md mx-auto">
-
-          {/* Glowing logo */}
-          <div className="relative mb-6">
-            <div style={{ position: 'absolute', inset: '-12px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,215,0,0.35) 0%, rgba(255,140,0,0.12) 60%, transparent 80%)', animation: 'pulse-glow 1.5s ease-in-out infinite' }} />
-            <UmucoLogo style={{ width: 90, height: 90, display: 'block', overflow: 'hidden', borderRadius: '50%', position: 'relative', zIndex: 1 }} />
-          </div>
-
-          {/* Explorer badge */}
-          {explorerInfo && (
-            <div className="flex items-center gap-2 mb-4 px-4 py-2 rounded-full" style={{ background: 'rgba(141,73,58,0.10)', border: '1px solid rgba(141,73,58,0.2)' }}>
-              <ExplorerTypeImage type={explorerInfo.id} label={explorerCopy.label} size={24} />
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#8D493A' }}>{explorerCopy.label}</span>
+      <>
+        <Confetti />
+        <div className="fixed inset-0 w-full min-h-screen flex items-center justify-center bg-[#FDFBF7]" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <div className="flex flex-col items-center text-center px-8 max-w-md mx-auto">
+            <div className="relative mb-8">
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: '-12px',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(255,215,0,0.35) 0%, rgba(255,140,0,0.12) 60%, transparent 80%)',
+                  animation: 'pulse-glow 1.5s ease-in-out infinite',
+                }}
+              />
+              <TribalLogo style={{ width: 100, height: 100, display: 'block', overflow: 'hidden', borderRadius: '50%', position: 'relative', zIndex: 1 }} />
+              {[0, 60, 120, 180, 240, 300].map((deg, i) => (
+                <span
+                  key={i}
+                  style={{
+                    position: 'absolute',
+                    width: i % 2 === 0 ? '10px' : '7px',
+                    height: i % 2 === 0 ? '10px' : '7px',
+                    borderRadius: '50%',
+                    background: i % 3 === 0 ? '#8D493A' : i % 3 === 1 ? '#8D493A' : '#FCDFD3',
+                    top: `${50 - 55 * Math.cos((deg * Math.PI) / 180)}%`,
+                    left: `${50 + 55 * Math.sin((deg * Math.PI) / 180)}%`,
+                    transform: 'translate(-50%, -50%)',
+                    animation: `bounce-dot 0.8s ease-in-out infinite`,
+                    animationDelay: `${i * 0.13}s`,
+                  }}
+                />
+              ))}
             </div>
-          )}
+            {selectedExplorer && (
+              <div className="flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-[#8D493A]/10 border border-[#8D493A]/20">
+                <selectedExplorer.icon className="w-4 h-4 text-[#8D493A]" />
+                <span className="text-xs font-bold uppercase tracking-widest text-[#8D493A]">
+                  {selectedExplorerCopy.label}
+                </span>
+              </div>
+            )}
 
-          <h1 className="text-3xl font-bold text-[#2C1A14] mb-2 leading-tight">
-            {explorerInfo ? explorerCopy.adventureTitle : t('auth.youreIn')}
-          </h1>
-          <p className="text-sm text-[#6F5B55] leading-relaxed mb-1">
-            {t('auth.welcomeTo')} <span className="font-semibold text-[#2C1A14]">{formData.name}</span>.
-          </p>
-          <p className="text-xs text-[#8D493A]/70 mb-3 tracking-wide">
-            {explorerInfo ? explorerCopy.adventureSubtitle : t('auth.yourGatewayReady')}
-          </p>
+            <h1 className="text-3xl font-bold text-[#2C1A14] mb-3 leading-tight">
+              {selectedExplorer ? selectedExplorerCopy.adventureTitle : (t('auth.youreIn') || "You're in! \ud83c\udf89")}
+            </h1>
+            <p className="text-sm text-[#6F5B55] leading-relaxed mb-1">
+              {t('auth.welcomeTo') || 'Welcome to UmucoCore,'}{' '}
+              <span className="font-semibold text-[#2C1A14]">{formData.name}</span>.
+            </p>
+            <p className="text-xs text-[#8D493A]/70 mb-10 tracking-wide">
+              {selectedExplorer ? selectedExplorerCopy.adventureSubtitle : (t('auth.yourGatewayReady') || 'Your cultural gateway is ready.')}
+            </p>
 
-          {/* XP badge */}
-          <div className="flex items-center gap-2 mb-8 px-4 py-2 rounded-full" style={{ background: 'linear-gradient(135deg, #8D493A, #C4724A)', color: '#fff' }}>
-            <UmucoGlyph type="spark" size={18} style={{ color: '#fff' }} />
-            <span className="text-xs font-bold tracking-wide">{t('auth.explorerUnlocked')}</span>
+            <div className="w-12 h-[2px] bg-[#8D493A]/30 rounded-full mb-10" />
+
+            <button
+              onClick={() => onNavigate('login')}
+              className="w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-3.5 px-6 rounded-xl font-semibold text-sm tracking-wide transition-colors duration-200 mb-3"
+            >
+              {selectedExplorer ? `${selectedExplorerCopy.cta} \u2192` : (t('auth.enterArchive') || 'Login \u2192')}
+            </button>
+            <button
+              onClick={() => onNavigate('home')}
+              className="w-full border border-[#EADBC8] text-[#6F5B55] hover:bg-[#FCDFD3]/20 py-3 px-6 rounded-xl text-xs font-medium transition-colors duration-200"
+            >
+              {t('auth.backToHome') || 'Back to Home'}
+            </button>
+
+            <p className="text-[10px] text-[#8D493A]/40 mt-8 tracking-widest uppercase">
+              {t('auth.success.preservingText') || 'Preserving Rwandan Roots and Culture'}
+            </p>
           </div>
 
-          <div className="w-12 h-[2px] bg-[#8D493A]/30 rounded-full mb-8" />
-
-          <button onClick={() => onNavigate('dashboard')}
-            className="w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-3.5 px-6 rounded-xl font-semibold text-sm tracking-wide transition-colors duration-200 mb-3">
-            {explorerInfo ? `${explorerCopy.cta} ->` : t('auth.enterArchive')}
-          </button>
-          <button onClick={() => onNavigate('home')}
-            className="w-full border border-[#EADBC8] text-[#6F5B55] hover:bg-[#FCDFD3]/20 py-3 px-6 rounded-xl text-xs font-medium transition-colors duration-200">
-            {t('auth.backToHome')}
-          </button>
-
-          <p className="text-[10px] text-[#8D493A]/40 mt-8 tracking-widest uppercase">
-            {t('auth.success.preservingText')}
-          </p>
+          <style>{`
+            @keyframes pulse-glow {
+              0%, 100% { opacity: 0.7; transform: scale(1); }
+              50% { opacity: 1; transform: scale(1.08); }
+            }
+            @keyframes bounce-dot {
+              0%, 100% { transform: translate(-50%, -50%) scale(1); }
+              50% { transform: translate(-50%, -50%) scale(1.5); }
+            }
+          `}</style>
         </div>
-
-        <style>{`
-          @keyframes pulse-glow {
-            0%, 100% { opacity: 0.7; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.08); }
-          }
-          @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
+      </>
     );
   }
 
   return (
-    <section className="youth-auth-shell w-full min-h-screen flex font-sans bg-[#FDFBF7]">
+    <section className="w-full h-screen flex font-sans bg-[#FDFBF7] overflow-hidden">
+      <style>{`
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+      `}</style>
+
+      {showExplorerModal && (
+        <ExplorerTypeModal
+          onContinue={handleExplorerContinue}
+          onSkip={handleExplorerSkip}
+        />
+      )}
+
       {showVerificationNotice && !isVerifying && (
         <VerificationNotice email={formData.email} />
       )}
 
       <LeftSlideshow />
 
-      <div className="w-full lg:w-1/2 flex flex-col p-8 md:p-10 bg-[#FDFBF7]">
+      <div className="w-full lg:w-1/2 h-screen overflow-y-auto flex flex-col p-8 md:p-10 bg-[#FAF8F5]">
         <div className="flex items-center justify-between w-full mb-8">
           <button
             onClick={() => onNavigate('home')}
             className="inline-flex items-center space-x-2 text-xs font-semibold text-[#8D493A] hover:text-[#3E2723] transition-colors focus:outline-none"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span style={{ fontFamily: 'Poppins, sans-serif' }} className="font-semibold">{t('auth.backToHome')}</span>
+            <span style={{ fontFamily: 'Poppins, sans-serif' }} className="font-semibold">{t('auth.backToHome') || 'Back to Home'}</span>
           </button>
           <div className="flex items-center space-x-1.5">
-            <UmucoLogo style={{ width: 50, height: 50, display: 'block', flexShrink: 0, overflow: 'hidden', borderRadius: '50%' }} />
+            <TribalLogo style={{ width: 50, height: 50, display: 'block', flexShrink: 0, overflow: 'hidden', borderRadius: '50%' }} />
           </div>
         </div>
 
@@ -572,25 +743,11 @@ function SignUpPage({ onNavigate }) {
           {!isVerifying ? (
             <>
               <div className="text-left mb-8">
-                {selectedExplorer && (
-                  <div
-                    className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full"
-                    style={{ background: 'rgba(141,73,58,0.10)' }}
-                  >
-                    <ExplorerTypeImage type={selectedExplorer.id} label={selectedExplorerCopy.label} size={22} />
-                    <span
-                      className="text-[10px] font-bold uppercase tracking-widest"
-                      style={{ color: '#8D493A' }}
-                    >
-                      {selectedExplorerCopy.label}
-                    </span>
-                  </div>
-                )}
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">
-                  {selectedExplorer ? selectedExplorerCopy.adventureTitle : t('auth.createAccount')}
+                <h1 className="text-3xl font-bold tracking-tight text-[#8D493A] mb-2 font-sans">
+                  {t('auth.createAccount') || 'Create Account.'}
                 </h1>
                 <p className="text-xs md:text-sm text-[#6F5B55]">
-                  {selectedExplorer ? selectedExplorerCopy.adventureSubtitle : t('auth.setUpProfile')}
+                  {t('auth.setUpProfile') || "Start exploring Rwanda's cultural heritage today."}
                 </p>
               </div>
 
@@ -598,145 +755,157 @@ function SignUpPage({ onNavigate }) {
                 <div className="mb-4 rounded-xl overflow-hidden" style={{ border: '1px solid #e8dcd0', background: '#fff', boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}>
                   <div className="flex items-start gap-3 p-4">
                     <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#e8dcd0', color: '#6b3e26' }}>
-                      <UmucoGlyph type="shield" size={18} />
+                      <ShieldCheck className="w-5 h-5 text-[#8D493A]" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold mb-0.5" style={{ color: '#4b2e1e' }}>
-                        {error.toLowerCase().includes('already exists') ? 'Account already exists' : 'Something went wrong'}
-                      </p>
+                      <p className="text-xs font-bold mb-0.5" style={{ color: '#4b2e1e' }}>Something went wrong</p>
                       <p className="text-xs leading-relaxed" style={{ color: '#6b4c3b' }}>{error}</p>
-                      {error.toLowerCase().includes('already exists') && (
-                        <p className="text-[11px] mt-1" style={{ color: '#8a6a58' }}>
-                          <button
-                            type="button"
-                            onClick={() => onNavigate('login')}
-                            className="font-bold bg-transparent border-none p-0 cursor-pointer hover:underline"
-                            style={{ color: '#6b3e26' }}
-                          >
-                            Sign in instead
-                          </button>
-                        </p>
-                      )}
                     </div>
                   </div>
                 </div>
               )}
 
-              <form onSubmit={handleSignUpSubmit} className="space-y-5">
+              <form onSubmit={handleSignUpSubmit} className="space-y-4">
                 <div className="relative text-left">
-                  <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">{t('auth.labelFullName')}</label>
+                  <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">{t('auth.labelFullName') || 'Full Name'}</label>
                   <div className="relative">
-                    <input type="text" name="name" value={formData.name} onChange={handleInputChange}
-                      placeholder={t('auth.placeholder.name')}
-                      className="w-full bg-white border border-[#EADBC8] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#2C1A14] placeholder-neutral-400 focus:outline-none focus:border-[#8D493A] transition-colors"
-                      required />
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder={t('auth.placeholder.name') || 'Your full name'}
+                      className="w-full bg-white border border-[#EADBC8]/60 rounded-xl pl-10 pr-4 py-3 text-xs text-[#2C1A14] placeholder-neutral-400/70 focus:outline-none focus:border-[#8D493A] transition-colors"
+                      required
+                    />
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><User className="w-4 h-4" /></span>
                   </div>
                 </div>
 
                 <div className="relative text-left">
-                  <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">{t('auth.labelEmail')}</label>
+                  <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">{t('auth.labelEmail') || 'Email Address'}</label>
                   <div className="relative">
-                    <input type="email" name="email" value={formData.email} onChange={handleInputChange}
-                      placeholder={t('auth.placeholder.email')}
-                      className="w-full bg-white border border-[#EADBC8] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[#2C1A14] placeholder-neutral-400 focus:outline-none focus:border-[#8D493A] transition-colors"
-                      required />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder={t('auth.placeholder.email') || 'name@domain.com'}
+                      className="w-full bg-white border border-[#EADBC8]/60 rounded-xl pl-10 pr-4 py-3 text-xs text-[#2C1A14] placeholder-neutral-400/70 focus:outline-none focus:border-[#8D493A] transition-colors"
+                      required
+                    />
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><Mail className="w-4 h-4" /></span>
                   </div>
                 </div>
 
                 <div className="relative text-left">
-                  <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">{t('auth.labelPassword')}</label>
+                  <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">{t('auth.labelPassword') || 'Password'}</label>
                   <div className="relative">
-                    <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password}
-                      onChange={handleInputChange} placeholder={t('auth.placeholder.password')}
-                      className="w-full bg-white border border-[#EADBC8] rounded-xl pl-10 pr-10 py-2.5 text-xs text-[#2C1A14] placeholder-neutral-400 focus:outline-none focus:border-[#8D493A] transition-colors"
-                      minLength={8}
-                      required />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      placeholder={t('auth.placeholder.password') || 'Create a strong password'}
+                      className="w-full bg-white border border-[#EADBC8]/60 rounded-xl pl-10 pr-10 py-3 text-xs text-[#2C1A14] placeholder-neutral-400/70 focus:outline-none focus:border-[#8D493A] transition-colors"
+                      required
+                    />
                     <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><Lock className="w-4 h-4" /></span>
                     <button type="button" onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 focus:outline-none">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  {/* Inline password strength indicator */}
-                  {formData.password.length > 0 && (() => {
-                    const len = formData.password.length;
-                    const hasUpper = /[A-Z]/.test(formData.password);
-                    const hasNum   = /[0-9]/.test(formData.password);
-                    const score    = (len >= 8 ? 1 : 0) + (hasUpper ? 1 : 0) + (hasNum ? 1 : 0);
-                    const bars     = [
-                      { filled: score >= 1, color: score === 1 ? '#e05a2b' : score === 2 ? '#f0a030' : '#3a9e60' },
-                      { filled: score >= 2, color: score === 2 ? '#f0a030' : '#3a9e60' },
-                      { filled: score >= 3, color: '#3a9e60' },
-                    ];
-                    const label    = score === 1 ? 'Weak' : score === 2 ? 'Fair' : 'Strong';
-                    const labelCol = score === 1 ? '#e05a2b' : score === 2 ? '#f0a030' : '#3a9e60';
-                    return (
-                      <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <div style={{ display: 'flex', gap: 4, flex: 1 }}>
-                          {bars.map((b, i) => (
-                            <div key={i} style={{
-                              flex: 1, height: 3, borderRadius: 2,
-                              background: b.filled ? b.color : '#EADBC8',
-                              transition: 'background 0.25s',
-                            }} />
-                          ))}
-                        </div>
-                        <span style={{ fontSize: '0.6rem', fontWeight: 700, color: labelCol, minWidth: 36, textAlign: 'right' }}>{label}</span>
-                      </div>
-                    );
-                  })()}
+                  {/* Password strength meter, added from the richer sign-up flow */}
+                  <PasswordStrength password={formData.password} />
                 </div>
 
-                <label className="flex items-start space-x-2 cursor-pointer select-none pt-1">
-                  <input type="checkbox" name="termsAccepted" checked={formData.termsAccepted}
+                <div className="relative text-left">
+                  <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-1.5">Confirm Password</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      placeholder="Repeat your password"
+                      className="w-full bg-white border border-[#EADBC8]/60 rounded-xl pl-10 pr-10 py-3 text-xs text-[#2C1A14] placeholder-neutral-400/70 focus:outline-none focus:border-[#8D493A] transition-colors"
+                      required
+                    />
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400"><Lock className="w-4 h-4" /></span>
+                  </div>
+                </div>
+
+                <label className="flex items-start space-x-2 cursor-pointer select-none pt-2">
+                  <input
+                    type="checkbox"
+                    name="termsAccepted"
+                    checked={formData.termsAccepted}
                     onChange={handleInputChange}
-                    className="accent-[#8D493A] h-4 w-4 rounded border-neutral-300 mt-0.5" required />
+                    className="accent-[#8D493A] h-4 w-4 rounded border-neutral-300 mt-0.5"
+                    required
+                  />
                   <span className="text-xs text-[#6F5B55] leading-normal">
-                    {t('auth.agreePrefix')} <a href="#" className="text-[#8D493A] font-medium hover:underline">{t('auth.termsLink')}</a> {t('auth.agreeAnd')} <a href="#" className="text-[#8D493A] font-medium hover:underline">{t('auth.privacyLink')}</a>.
+                    {t('auth.agreePrefix') || 'I agree to the'} <a href="#" className="text-[#8D493A] font-medium hover:underline">{t('auth.termsLink') || 'Terms of Service'}</a> {t('auth.agreeAnd') || 'and'} <a href="#" className="text-[#8D493A] font-medium hover:underline">{t('auth.privacyLink') || 'Privacy Policy'}</a>
                   </span>
                 </label>
 
                 <button
                   type="submit"
-                  disabled={isLoading || !formData.name.trim() || !formData.email.trim() || formData.password.length < 8 || !formData.termsAccepted}
-                  className="w-full bg-[#8D493A] hover:bg-[#3E2723] disabled:opacity-50 disabled:cursor-not-allowed text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200 mt-2 flex items-center justify-center space-x-2"
+                  disabled={isLoading}
+                  className="w-full bg-[#AF8272] hover:bg-[#8D493A] disabled:opacity-70 text-white py-3.5 px-4 rounded-xl font-bold text-xs tracking-widest uppercase transition-all duration-200 mt-4 flex items-center justify-center space-x-2 shadow-xs"
                 >
                   {isLoading ? (
                     <>
-                      <div style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }}>
-                        <UmucoLogo />
-                      </div>
-                      <span>{t('auth.loading.creatingAccount')}</span>
+                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                      </svg>
+                      <span>{t('auth.loading.creatingAccount') || 'Creating Account...'}</span>
                     </>
                   ) : (
-                    <span>{selectedExplorer ? selectedExplorerCopy.cta : t('auth.signUp')}</span>
+                    <span className="flex items-center gap-1">
+                      {t('auth.signUp') || 'Create Account'} <ArrowUpRight className="w-4 h-4" />
+                    </span>
                   )}
                 </button>
               </form>
 
-              <div className="flex items-center my-6">
-                <div className="flex-grow border-t border-[#EADBC8]" />
-                <span className="mx-4 text-xs text-[#6F5B55]">{t('auth.orContinueWith')}</span>
-                <div className="flex-grow border-t border-[#EADBC8]" />
+              <div className="relative flex py-5 items-center">
+                <div className="flex-grow border-t border-neutral-200"></div>
+                <span className="flex-shrink mx-4 text-neutral-400 text-[11px] font-medium">{t('auth.orContinueWith') || 'or register with'}</span>
+                <div className="flex-grow border-t border-neutral-200"></div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {GoogleLogin ? (
+                  <div className="col-span-2 h-[42px] flex items-center justify-center overflow-hidden rounded-full border border-neutral-200 shadow-2xs [&>div]:!w-full [&_iframe]:!w-full [&_iframe]:!h-[42px] [&_iframe]:!m-0 [&_iframe]:!border-none">
+                    <GoogleLogin
+                      onSuccess={handleGoogleSuccess}
+                      onError={handleGoogleFailure}
+                      shape="pill"
+                      theme="outline"
+                      size="large"
+                      width="100%"
+                      logo_alignment="center"
+                    />
+                  </div>
+                ) : (
+                  <button type="button" onClick={handleGoogleSuccess} className="col-span-2 flex items-center justify-center gap-2 border border-neutral-200 bg-white hover:bg-neutral-50 rounded-full py-2.5 text-xs font-semibold text-neutral-700 transition-colors shadow-2xs">
+                    <svg className="w-4 h-4" viewBox="0 0 24 24">
+                      <path fill="#EA4335" d="M12 5.04c1.64 0 3.12.56 4.28 1.67l3.2-3.2C17.52 1.64 14.96 1 12 1 7.36 1 3.4 3.68 1.48 7.6l3.8 2.96C6.24 7.4 8.88 5.04 12 5.04z"/>
+                      <path fill="#4285F4" d="M23.52 12.32c0-.8-.08-1.56-.2-2.32H12v4.4h6.48c-.28 1.48-1.12 2.72-2.36 3.56l3.68 2.84c2.16-2 3.4-4.96 3.4-8.48z"/>
+                      <path fill="#FBBC05" d="M5.28 14.76c-.24-.72-.36-1.48-.36-2.28s.12-1.56.36-2.28L1.48 7.24C.52 9.16 0 11.28 0 13.5s.52 4.34 1.48 6.26l3.8-3z"/>
+                      <path fill="#34A853" d="M12 23c3.24 0 5.96-1.08 7.96-2.92l-3.68-2.84c-1.04.7-2.36 1.12-4.28 1.12-3.12 0-5.76-2.36-6.72-5.52l-3.8 2.96C3.4 20.32 7.36 23 12 23z"/>
+                    </svg>
+                    Google
+                  </button>
+                )}
               </div>
 
-              <div className="w-full">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={handleGoogleFailure}
-                  theme="outline"
-                  shape="pill"
-                  size="large"
-                  width="100%"
-                />
-              </div>
-
-              <p className="text-xs text-[#6F5B55] mt-6">
-                {t('auth.hasAccount')}{' '}
+              <p className="text-xs text-[#6F5B55] text-center mt-2">
+                {t('auth.hasAccount') || 'Already have an account?'}{' '}
                 <button onClick={() => onNavigate('login')} className="font-bold text-[#8D493A] hover:underline bg-transparent border-none p-0 cursor-pointer">
-                  {t('auth.signIn')}
+                  {t('auth.signIn') || 'Sign In'}
                 </button>
               </p>
             </>
@@ -747,12 +916,12 @@ function SignUpPage({ onNavigate }) {
                   onClick={() => setIsVerifying(false)}
                   className="text-xs font-semibold text-[#8D493A] hover:text-[#3E2723] mb-5 transition-colors block"
                 >
-                  {t('auth.backToSignup')}
+                  {t('auth.backToSignup') || 'Back to Sign Up'}
                 </button>
 
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">{t('auth.verifyEmail')}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-[#8D493A] mb-2">{t('auth.verifyEmail') || 'Verify Your Email'}</h1>
                 <p className="text-xs md:text-sm text-[#6F5B55]">
-                  {t('auth.enterCodeSentTo')}{' '}
+                  {t('auth.enterCodeSentTo') || 'Enter the 6-digit verification code sent to'}{' '}
                   <span className="font-semibold text-[#2C1A14]">{formData.email}</span>.
                 </p>
               </div>
@@ -773,10 +942,10 @@ function SignUpPage({ onNavigate }) {
 
               <form onSubmit={handleCodeSubmit} className="space-y-6">
                 <div>
-                  <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-3 text-center">
-                    {t('auth.verificationCode')}
+                  <label className="block text-[10px] font-bold text-[#2C1A14] tracking-wider uppercase mb-3">
+                    {t('auth.verificationCode') || 'Verification Code'}
                   </label>
-                  <div className="flex justify-between gap-2">
+                  <div className="flex justify-between gap-2" onPaste={handlePaste}>
                     {verificationCode.map((data, index) => (
                       <input
                         key={index}
@@ -786,7 +955,6 @@ function SignUpPage({ onNavigate }) {
                         value={data}
                         onChange={(e) => handleCodeChange(e.target, index)}
                         onKeyDown={(e) => handleKeyDown(e, index)}
-                        onPaste={handlePaste}
                         onFocus={(e) => e.target.select()}
                         className="w-12 h-12 bg-white border border-[#EADBC8] rounded-xl text-center text-sm font-bold text-[#2C1A14] focus:outline-none focus:border-[#8D493A] focus:ring-1 focus:ring-[#8D493A] transition-all"
                       />
@@ -797,30 +965,34 @@ function SignUpPage({ onNavigate }) {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full bg-[#8D493A] hover:bg-[#3E2723] text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200 flex items-center justify-center space-x-2"
+                  className="w-full bg-[#8D493A] hover:bg-[#3E2723] disabled:opacity-70 text-white py-3 px-4 rounded-xl font-semibold text-xs tracking-widest uppercase transition-colors duration-200 flex items-center justify-center space-x-2"
                 >
                   {isLoading ? (
                     <>
-                      <div style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }}>
-                        <UmucoLogo />
-                      </div>
-                      <span>{t('auth.loading.verifying')}</span>
+                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                      </svg>
+                      <span>{t('auth.loading.verifying') || 'Verifying...'}</span>
                     </>
                   ) : (
-                    <span>{t('auth.confirmAccount')}</span>
+                    <span>{t('auth.confirmAccount') || 'Confirm Account'}</span>
                   )}
                 </button>
               </form>
-
               <p className="text-xs text-[#6F5B55] mt-5 text-center">
-                {t('auth.didntReceive')}{' '}
+                {t('auth.didntReceive') || "Didn't receive a code?"}{' '}
                 <button
                   type="button"
                   onClick={handleResendOtp}
                   disabled={resendCooldown > 0 || resendLoading}
                   className="font-bold text-[#8D493A] hover:underline bg-transparent border-none p-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {resendLoading ? t('auth.sending') : resendCooldown > 0 ? t('auth.resendIn').replace('{seconds}', resendCooldown) : t('auth.resendOtp')}
+                  {resendLoading
+                    ? (t('auth.sending') || 'Sending...')
+                    : resendCooldown > 0
+                    ? (t('auth.resendIn') ? t('auth.resendIn').replace('{seconds}', resendCooldown) : `Resend in ${resendCooldown}s`)
+                    : (t('auth.resendOtp') || 'Resend code')}
                 </button>
               </p>
             </>
@@ -832,5 +1004,3 @@ function SignUpPage({ onNavigate }) {
 }
 
 export default SignUpPage;
-
-
