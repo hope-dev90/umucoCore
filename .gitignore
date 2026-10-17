@@ -1,17 +1,15 @@
 
 node_modules/
-.env
-.env.*
 !.env.example
 frontend/.env
 backend/.env
 mobile/.env
 .kiro/
 .kilo/
-.vscode/
 .agents/
 frontend/dist/
 
 branch_structure.json
 temp_auto_push.bat
 temp_interactive_push.bat
+config.bat
