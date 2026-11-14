@@ -1,101 +1,51 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ExternalLink, Play, Share2 } from 'lucide-react';
 import Layout from '../components/Layout';
 import './Kwibuka.css';
-import ReflectionImg from '../assets/kwibuka/reflection.jpg';
-import Memorial1Img from '../assets/kwibuka/memorial1.jpg';
-import Memorial2Img from '../assets/kwibuka/memorial2.jpg';
+import './KwibukaDs.css';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useNavigate } from 'react-router-dom';
 import KwibukaGallery from '../components/KwibukaGallery';
 import KwibukaMemorialMap from '../components/KwibukaMemorialMap';
+import memorialData from '../data/genocideMemorialSites.json';
+import siteImages from '../data/memorialSiteImages.json';
+import testimonyData from '../data/survivorTestimony.json';
+import Memorial1Img from '../assets/kwibuka/memorial1.jpg';
+import Memorial2Img from '../assets/kwibuka/memorial2.jpg';
+import ReflectionImg from '../assets/kwibuka/reflection.jpg';
 
-const IMG = {
-  reflection: ReflectionImg,
-  memorial1: Memorial1Img,
-  memorial2: Memorial2Img,
-};
+const FALLBACK_SITE_IMAGES = [Memorial1Img, Memorial2Img, ReflectionImg];
+
+const IMPORTANT_SITES = [
+  { name: 'MINUBUMWE', descKey: 'kwibuka.site.minubumwe', url: 'https://www.minubumwe.gov.rw' },
+  { name: 'Kigali Genocide Memorial', descKey: 'kwibuka.site.kgm', url: 'https://kgm.rw' },
+  { name: 'Aegis Trust', descKey: 'kwibuka.site.aegis', url: 'https://www.aegistrust.org' },
+  { name: 'United Nations', descKey: 'kwibuka.site.un', url: 'https://www.un.org/en/preventgenocide/rwanda' },
+];
 
 function KwibukaFlameLogo({ className = '' }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 120 160"
-      role="img"
-      aria-label="Kwibuka remembrance flame"
-    >
-      <path
-        d="M67 7C47 35 42 61 53 84c5 11 4 21-3 31 25-16 38-39 33-67-2-13-8-27-16-41Z"
-        fill="currentColor"
-      />
-      <path
-        d="M39 55C22 78 20 103 34 124c7 10 16 17 28 22-13-20-8-38 9-55-10 8-20 7-26-2-6-9-6-21-6-34Z"
-        fill="currentColor"
-      />
-      <path
-        d="M73 88c20 22 20 44-2 66 31-15 44-39 36-65-3-11-10-21-20-30 3 13-1 22-14 29Z"
-        fill="currentColor"
-      />
-      <path
-        className="kwibuka-flame-cutout"
-        d="M58 97c-12-10-11-24 4-42-3 24 5 32 18 39-19 6-30 22-28 47-14-15-13-31 6-44Z"
-      />
-      <path
-        d="M58 97c-12-10-11-24 4-42"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeWidth="5"
-      />
+    <svg className={className} viewBox="0 0 120 160" role="img" aria-label="Kwibuka remembrance flame">
+      <path d="M67 7C47 35 42 61 53 84c5 11 4 21-3 31 25-16 38-39 33-67-2-13-8-27-16-41Z" fill="currentColor" />
+      <path d="M39 55C22 78 20 103 34 124c7 10 16 17 28 22-13-20-8-38 9-55-10 8-20 7-26-2-6-9-6-21-6-34Z" fill="currentColor" />
+      <path d="M73 88c20 22 20 44-2 66 31-15 44-39 36-65-3-11-10-21-20-30 3 13-1 22-14 29Z" fill="currentColor" />
     </svg>
   );
 }
 
-// voices and events are built inside the component so t() is available
+// Kwibuka is counted from April 1995 (Kwibuka 1); the commemoration starts on 7 April.
+function kwibukaNumber(now = new Date()) {
+  const afterApril7 = now.getMonth() > 3 || (now.getMonth() === 3 && now.getDate() >= 7);
+  return now.getFullYear() - 1994 - (afterApril7 ? 0 : 1);
+}
+
+const pick = (val, language) => (val && typeof val === 'object' ? (val[language] || val.en || Object.values(val)[0]) : (val || ''));
 
 export default function Kwibuka() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [topbarSearch, setTopbarSearch] = React.useState('');
   const [galleryOpen, setGalleryOpen] = React.useState(false);
-
-  const voices = [
-    {
-      type: t('kwibuka.voice1.type'),
-      title: t('kwibuka.voice1.title'),
-      excerpt: t('kwibuka.voice1.excerpt'),
-    },
-    {
-      type: t('kwibuka.voice2.type'),
-      title: t('kwibuka.voice2.title'),
-      excerpt: t('kwibuka.voice2.excerpt'),
-    },
-    {
-      type: t('kwibuka.voice3.type'),
-      title: t('kwibuka.voice3.title'),
-      excerpt: t('kwibuka.voice3.excerpt'),
-    },
-  ];
-
-  const events = [
-    {
-      dot: 'active',
-      date: t('kwibuka.event1.date'),
-      title: t('kwibuka.event1.title'),
-      desc: t('kwibuka.event1.desc'),
-    },
-    {
-      dot: 'past',
-      date: t('kwibuka.event2.date'),
-      title: t('kwibuka.event2.title'),
-      desc: t('kwibuka.event2.desc'),
-    },
-    {
-      dot: 'future',
-      date: t('kwibuka.event3.date'),
-      title: t('kwibuka.event3.title'),
-      desc: t('kwibuka.event3.desc'),
-    },
-  ];
 
   const videos = [
     { id: 'ww2ycQpsk-k', title: t('kwibuka.video1.title') },
@@ -109,128 +59,142 @@ export default function Kwibuka() {
     { id: 'nQ_EGsniRC4', title: t('kwibuka.song2.title') },
   ];
 
-  const filteredVoices = topbarSearch.trim()
-    ? voices.filter(v => {
-        const q = topbarSearch.toLowerCase();
-        return v.title.toLowerCase().includes(q)
-          || v.excerpt.toLowerCase().includes(q)
-          || v.type.toLowerCase().includes(q);
-      })
-    : voices;
+  const query = topbarSearch.trim().toLowerCase();
+  const matches = (...parts) => !query || parts.join(' ').toLowerCase().includes(query);
+
+  const sites = (memorialData.sites || [])
+    .map((site, i) => ({
+      id: site.id,
+      name: pick(site.name, language),
+      district: pick(site.district, language),
+      image: siteImages.sites?.[site.id]?.image || FALLBACK_SITE_IMAGES[i % FALLBACK_SITE_IMAGES.length],
+    }))
+    .filter((s) => matches(s.name, s.district));
+
+  const testimonies = (Array.isArray(testimonyData) ? testimonyData : (testimonyData.testimonies || testimonyData.items || []))
+    .filter((item) => matches(item.title, (item.subjects || []).join(' '), item.district));
+
+  const kwibukaN = kwibukaNumber();
+
+  const shareReflection = async () => {
+    const text = `${t('kwibuka.reflectionQuote')} ${t('kwibuka.reflectionAuthor')}`;
+    try {
+      if (navigator.share) await navigator.share({ title: `Kwibuka ${kwibukaN}`, text });
+      else await navigator.clipboard.writeText(text);
+    } catch { /* cancelled */ }
+  };
+
+  const scrollToMap = () => {
+    document.getElementById('kwibuka-map')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <Layout searchPlaceholder={t('kwibuka.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
-      <div className="kwibuka-page">
-
-        {/* Today's Reflection hero */}
-        <div className="reflection-hero">
-          <img src={IMG.reflection} alt="Reflection" className="reflection-hero-bg"
-            onError={e => e.target.style.display='none'} />
-          <div className="reflection-hero-overlay" />
-          <div className="reflection-hero-content">
-            <div className="kwibuka-flame-badge">
-              <KwibukaFlameLogo className="kwibuka-flame-logo" />
-              <span>{t('kwibuka.markLabel')}</span>
-            </div>
-            <div className="reflection-label">{t('kwibuka.reflectionLabel')}</div>
-            <div className="reflection-quote">
-              {t('kwibuka.reflectionQuote')}
-            </div>
-            <div className="reflection-author">{t('kwibuka.reflectionAuthor')}</div>
-            <div className="reflection-actions">
-              <button type="button" className="btn-testimony" onClick={() => navigate('/testimonies')}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                {t('kwibuka.readTestimonyBtn')}
-              </button>
-              <button type="button" className="btn-share-reflect">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-                </svg>
-                {t('kwibuka.shareReflectionBtn')}
-              </button>
+      <div className="ds-page kwb">
+        {/* Banner */}
+        <section className="kwb-banner">
+          <div className="kwb-banner-art" aria-hidden="true" />
+          <div className="kwb-brand">
+            <KwibukaFlameLogo className="kwb-flame" />
+            <div>
+              <div className="kwb-wordmark">kwibuka <span>{kwibukaN}</span></div>
+              <div className="kwb-tagline">{t('kwibuka.markLabel')}</div>
             </div>
           </div>
+          <blockquote className="kwb-quote">
+            <p>&ldquo;{t('kwibuka.reflectionQuote')}&rdquo;</p>
+            <cite>{t('kwibuka.reflectionAuthor')}</cite>
+          </blockquote>
+          <div className="kwb-banner-actions">
+            <button type="button" className="kwb-btn kwb-btn--light" onClick={() => navigate('/testimonies')}>
+              <Play size={12} fill="currentColor" /> {t('kwibuka.readTestimonyBtn')}
+            </button>
+            <button type="button" className="kwb-btn" onClick={shareReflection}>
+              <Share2 size={12} /> {t('kwibuka.shareReflectionBtn')}
+            </button>
+          </div>
+        </section>
+
+        {/* Virtual memorial sites */}
+        <div className="kwb-heading">
+          <h2>{t('kwibuka.virtualSites')}</h2>
+          <p>{t('kwibuka.virtualSitesSub')}</p>
+        </div>
+        <div className="kwb-sites">
+          {sites.map((site) => (
+            <button type="button" key={site.id} className="kwb-site" onClick={scrollToMap}>
+              <img src={site.image} alt="" loading="lazy" onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }} />
+              <span className="kwb-site-name">{site.name}</span>
+              <span className="kwb-site-meta">{site.district}</span>
+            </button>
+          ))}
         </div>
 
-        {/* Mid grid: Memorial + Voices */}
-        <div className="kwibuka-mid">
-          <div className="memorial-card">
-            <div className="memorial-card-header">
-              <div>
-                <div className="memorial-card-title">{t('kwibuka.memorialTitle')}</div>
-                <div className="memorial-card-sub">{t('kwibuka.memorialSub')}</div>
-              </div>
-              <KwibukaFlameLogo className="memorial-flame-logo" />
-            </div>
-            <div className="memorial-photos">
-              {[IMG.memorial1, IMG.memorial2].map((src, i) => (
-                <div key={i} className="memorial-photo">
-                  <img src={src} alt={`Memorial ${i+1}`}
-                    onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }} />
-                  <div className="memorial-photo-placeholder"
-                    style={{ background: i===0 ? 'linear-gradient(135deg,var(--primary-dark),var(--primary-dark))' : 'linear-gradient(135deg,var(--primary-dark),var(--primary-dark))', display:'none' }}>
-                    {i===0 ? '' : ''}
-                  </div>
-                </div>
+        {/* Memorial map */}
+        <div className="kwb-map" id="kwibuka-map">
+          <KwibukaMemorialMap />
+        </div>
+
+        {/* Speeches + testimonies */}
+        <section className="kwb-archive">
+          <div className="kwb-speeches">
+            <span className="kwb-kicker">{t('kwibuka.community')}</span>
+            <h3>{t('kwibuka.speeches')}</h3>
+            <div className="kwb-speech-list">
+              {videos.filter((v) => matches(v.title)).map((v) => (
+                <button type="button" key={v.id} className="kwb-speech" onClick={() => setGalleryOpen(true)}>
+                  <strong>{v.title}</strong>
+                  <small>{t('kwibuka.videoLabel')}</small>
+                </button>
               ))}
             </div>
           </div>
-
-          <div className="voices-card">
-            <div className="voices-title">{t('kwibuka.voicesTitle')}</div>
-            {filteredVoices.map((v, i) => (
-              <div key={i} className="voice-item">
-                <div className="voice-type">{v.type}</div>
-                <div className="voice-title">{v.title}</div>
-                <div className="voice-excerpt">{v.excerpt}</div>
-              </div>
-            ))}
-            <button type="button" className="explore-repo-btn" onClick={() => setGalleryOpen(true)}>
-              {t('kwibuka.exploreRepoBtn')}
-            </button>
+          <div className="kwb-oral">
+            <span className="kwb-kicker">{t('kwibuka.oralArchive')}</span>
+            <h3>{t('kwibuka.testimoniesSongs')}</h3>
+            <div className="kwb-oral-list">
+              {testimonies.map((item) => (
+                <button type="button" key={item.id} className="kwb-oral-row" onClick={() => navigate(`/testimony/${item.id}`)}>
+                  <span className="kwb-oral-play"><Play size={12} fill="currentColor" /></span>
+                  <span className="kwb-oral-text">
+                    <strong>{item.title} <em>{item.language || t('kwibuka.testimonyTag')}</em></strong>
+                    <small>{[(item.subjects || []).join(', '), item.district].filter(Boolean).join(' · ')}</small>
+                  </span>
+                </button>
+              ))}
+              {songs.filter((s) => matches(s.title)).map((song) => (
+                <button type="button" key={song.id} className="kwb-oral-row" onClick={() => setGalleryOpen(true)}>
+                  <span className="kwb-oral-play"><Play size={12} fill="currentColor" /></span>
+                  <span className="kwb-oral-text">
+                    <strong>{song.title} <em>{t('kwibuka.songTag')}</em></strong>
+                    <small>{t('kwibuka.remembranceSong')}</small>
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
+        </section>
+
+        {/* Important websites */}
+        <div className="kwb-heading">
+          <span className="kwb-kicker">{t('kwibuka.importantWebsites')}</span>
+          <h2>{t('kwibuka.knowMore')}</h2>
         </div>
-
-        <KwibukaMemorialMap />
-
-        {/* Events timeline */}
-        <div className="events-section">
-          <div className="events-header">
-            <div className="events-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-              </svg>
-              {t('kwibuka.eventsTitle')}
-            </div>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.8">
-              <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
-              <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-          </div>
-          {events.map((ev, i) => (
-            <div key={i} className="event-item">
-              <div className={`event-dot ${ev.dot}`} />
-              <div className="event-info">
-                <div className="event-date">{ev.date}</div>
-                <div className="event-title">{ev.title}</div>
-                <div className="event-desc">{ev.desc}</div>
-              </div>
-            </div>
+        <div className="kwb-links">
+          {IMPORTANT_SITES.map((site) => (
+            <a key={site.url} className="kwb-link" href={site.url} target="_blank" rel="noopener noreferrer">
+              <KwibukaFlameLogo className="kwb-link-mark" />
+              <strong>{site.name}</strong>
+              <small>{t(site.descKey)}</small>
+              <ExternalLink size={13} className="kwb-link-ext" aria-hidden="true" />
+            </a>
           ))}
         </div>
       </div>
 
-      {/* Gallery Modal - opens when "Explore Repository" is clicked */}
       {galleryOpen && (
-        <KwibukaGallery 
-          videos={videos} 
-          songs={songs} 
-          onClose={() => setGalleryOpen(false)} 
-        />
+        <KwibukaGallery videos={videos} songs={songs} onClose={() => setGalleryOpen(false)} />
       )}
-
-      {/* Survivor Testimonies are now on a dedicated page at /testimonies */}
     </Layout>
   );
 }

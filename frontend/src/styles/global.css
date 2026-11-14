@@ -1,28 +1,32 @@
 :root {
-  --primary: #8D493A;
-  --primary-dark: #3E2723;
-  --primary-soft: #FCDFD3;
+  --primary: #5B2A1E;
+  --primary-dark: #3D1E15;
+  --primary-soft: #F8E1D8;
   --accent-gold: var(--primary);
   --accent-olive: var(--primary);
-  --bg-main: #FDFBF7;
+  --bg-main: #F4F0EA;
+  --bg-soft: #F7F3EE;
+  --brand-gradient: linear-gradient(150deg, #9A5442 0%, #6E3427 55%, #4E2219 100%);
   --bg-card: #FFFFFF;
   --bg-sidebar: #FFFFFF;
   --bg-dark: var(--primary-dark);
-  --text-primary: #2C1A14;
-  --text-secondary: #6F5B55;
-  --text-muted: #8A7B73;
-  --border: #EADBC8;
-  --border-light: #F1ECE6;
-  --sidebar-width: 220px;
-  --topbar-height: 56px;
+  --text-primary: #2A211D;
+  --text-secondary: #5F5650;
+  --text-muted: #8C847E;
+  --border: #ECE5DC;
+  --border-light: #F2EDE6;
+  --sidebar-width: 236px;
+  --layout-gap: 12px;
+  --topbar-height: 72px;
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
+  --radius-card: 14px;
   --shadow-sm: 0 1px 4px rgba(44,26,20,0.06);
   --shadow-md: 0 8px 24px rgba(44,26,20,0.09);
   --shadow-lg: 0 16px 40px rgba(44,26,20,0.14);
-  --font-display: 'Poppins', sans-serif;
-  --font-body: 'Poppins', sans-serif;
+  --font-display: 'Outfit', 'Poppins', sans-serif;
+  --font-body: 'Outfit', 'Poppins', sans-serif;
 }
 
 * {

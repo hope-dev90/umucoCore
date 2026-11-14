@@ -5,13 +5,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
 import { StoryReadModal } from '../components/Gamification/StoryReadModal';
 import './Explore.css';
+import './ExploreDs.css';
 import HeritageMap, { hasValidCoordinates } from '../components/Map/HeritageMap';
-import MapDiscoveryHint from '../components/Map/MapDiscoveryHint';
 import { mapHeritageApiItem } from '../utils/heritageMapping';
 import { localizeItem } from '../utils/contentLocale';
 import { getLocalizedText } from '../utils/i18n';
 import commonsImagesCached from '../data/commonsImageCache.json';
-import { BookOpen, CheckCircle2, ChevronDown, Flag, Headphones, MapPinned, Play, RefreshCw, X } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ChevronDown, Headphones, History, Landmark, MapPin, MapPinned, Play, RefreshCw } from 'lucide-react';
 import { apiUrl } from '../config/api';
 import nyanzaImg from '../assets/explore/nyanza.jpg';
 import buhangaImg from '../assets/explore/buhanga.jpg';
@@ -83,6 +83,9 @@ const getStoryId = (item) => String(item?.id || item?.title || item?.location ||
 
 const normalizePlaceValue = (value) => String(value ?? '').trim().toLowerCase();
 
+// Rough reading time for a card description (min 2 minutes).
+const readMinutes = (text) => Math.max(2, Math.round(String(text || '').split(/\s+/).length / 12));
+
 export default function Explore() {
   const { t, language } = useLanguage();
   const { user } = useAuth();
@@ -99,6 +102,7 @@ export default function Explore() {
   const [activeRegion, setActiveRegion] = useState(t('explore.allRegions'));
   const [activeEras, setActiveEras] = useState([]);
   const [activePlace, setActivePlace] = useState('all');
+  const [activeCategory, setActiveCategory] = useState('all');
   const [mapVisible, setMapVisible] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState(null);
   const [clickPopup, setClickPopup] = useState(null); // { lat, lng, status, location }
@@ -246,6 +250,22 @@ export default function Explore() {
     [t('explore.post1994')]:    'post-1994',
   }), [t]);
 
+  const ERA_LABELS = useMemo(() => ({
+    'pre-colonial': t('explore.preColonial'),
+    'colonial': t('explore.colonial'),
+    'post-1994': t('explore.post1994'),
+  }), [t]);
+
+  const categoryOptions = useMemo(() => {
+    const seen = new Map();
+    heritageItems.forEach((item) => {
+      if (item.catKey && !seen.has(item.catKey)) {
+        seen.set(item.catKey, getLocalizedText(item.category, language) || item.catKey);
+      }
+    });
+    return [...seen.entries()].map(([value, label]) => ({ value, label }));
+  }, [heritageItems, language]);
+
   // Only show Place chips that are valid for the currently selected Region.
   // "All places" is always shown. When Region = "All regions", every place is shown.
   // This is what prevents the user from ever building an impossible
@@ -275,7 +295,8 @@ export default function Explore() {
       || getLocalizedText(item.desc, language).toLowerCase().includes(query)
       || getLocalizedText(item.category, language).toLowerCase().includes(query)
       || getLocalizedText(item.location, language).toLowerCase().includes(query);
-    return regionMatch && eraMatch && placeMatch && searchMatch;
+    const categoryMatch = activeCategory === 'all' || item.catKey === activeCategory;
+    return regionMatch && eraMatch && placeMatch && categoryMatch && searchMatch;
   });
 
   // True when any filter differs from its default — drives the "Clear filters" control.
@@ -283,12 +304,14 @@ export default function Explore() {
     activeRegion !== t('explore.allRegions') ||
     activePlace !== 'all' ||
     activeEras.length > 0 ||
+    activeCategory !== 'all' ||
     topbarSearch.trim() !== '';
 
   const clearAllFilters = useCallback(() => {
     setActiveRegion(t('explore.allRegions'));
     setActivePlace('all');
     setActiveEras([]);
+    setActiveCategory('all');
     setTopbarSearch('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t]);
@@ -489,261 +512,151 @@ export default function Explore() {
   }, []);
 
   return (
-    <Layout searchPlaceholder={t('search.placeholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
-      <div className="explore-page">
-        <div className="explore-header">
-          <div>
-            <span className="explore-kicker">{t('sidebar.explore')}</span>
-            <h1>{t('explore.title')}</h1>
+    <Layout searchPlaceholder={t('ui.searchArchive')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
+      <div className="ds-page explore-ds">
+        <section className="ds-hero explore-hero">
+          <span className="ds-kicker">{t('explore.heroKicker')}</span>
+          <h1>{t('explore.heroTitle')}</h1>
+          <p>{t('explore.heroDesc')}</p>
+          <div className="explore-filters">
+            <label className="explore-select">
+              <MapPin size={13} aria-hidden="true" />
+              <select value={activeRegion} onChange={(e) => handleRegionChange(e.target.value)} aria-label={t('explore.regions')}>
+                {regions.map((region) => <option key={region} value={region}>{region}</option>)}
+              </select>
+              <ChevronDown size={12} aria-hidden="true" />
+            </label>
+            <label className="explore-select">
+              <MapPinned size={13} aria-hidden="true" />
+              <select value={activePlace} onChange={(e) => setActivePlace(e.target.value)} aria-label={t('explore.places')}>
+                {visiblePlaces.map((place) => <option key={place.value} value={place.value}>{place.label}</option>)}
+              </select>
+              <ChevronDown size={12} aria-hidden="true" />
+            </label>
+            <label className="explore-select">
+              <History size={13} aria-hidden="true" />
+              <select
+                value={activeEras[0] || ''}
+                onChange={(e) => setActiveEras(e.target.value ? [e.target.value] : [])}
+                aria-label={t('explore.eras')}
+              >
+                <option value="">{t('explore.historicalPeriod')}</option>
+                {eras.map((era) => <option key={era} value={era}>{era}</option>)}
+              </select>
+              <ChevronDown size={12} aria-hidden="true" />
+            </label>
+            <label className="explore-select">
+              <Landmark size={13} aria-hidden="true" />
+              <select value={activeCategory} onChange={(e) => setActiveCategory(e.target.value)} aria-label={t('explore.topicCategory')}>
+                <option value="all">{t('explore.topicCategory')}</option>
+                {categoryOptions.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+              </select>
+              <ChevronDown size={12} aria-hidden="true" />
+            </label>
+            <button type="button" className="explore-reset" onClick={clearAllFilters} disabled={!hasActiveFilters}>
+              {t('explore.reset')}
+            </button>
           </div>
-          <button
-            type="button"
-            className="explore-map-cta"
-            onClick={() => {
-              setMapVisible(true);
-              setTimeout(() => {
-                document.getElementById('explore-map-section')?.scrollIntoView({ behavior: 'smooth' });
-              }, 50);
-            }}
-          >
-            <MapPinned size={17} />
-            {t('explore.map')}
-          </button>
-        </div>
+          <div className="ds-diamonds" aria-hidden="true" />
+        </section>
 
-        <div className="filter-bar">
-          <div className="filter-row">
-            <span className="filter-label">{t('explore.regions')}</span>
-            <div className="filter-chips">
-              {regions.map((region) => (
-                <button
-                  key={region}
-                  className={`filter-chip ${activeRegion === region ? 'active' : ''}`}
-                  onClick={() => handleRegionChange(region)}
-                >
-                  {region}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="filter-row">
-            <span className="filter-label">{t('explore.places')}</span>
-            <div className="filter-chips">
-               {visiblePlaces.map((place) => (
-                 <button
-                   key={place.value}
-                   className={`filter-chip ${activePlace === place.value ? 'active' : ''}`}
-                   onClick={() => setActivePlace(place.value)}
-                 >
-                   {place.label}
-                 </button>
-               ))}
-            </div>
-          </div>
-          <div className="filter-row">
-            <span className="filter-label">{t('explore.eras')}</span>
-            <div className="filter-chips">
-              {eras.map((era) => (
-                <button
-                  key={era}
-                  className={`filter-chip ${activeEras.includes(era) ? 'active' : ''}`}
-                  onClick={() => toggleEra(era)}
-                >
-                  {era}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {hasActiveFilters && (
-            <button
-              type="button"
-              className="filter-clear-btn"
-              onClick={clearAllFilters}
-            >
-              <X size={13} aria-hidden="true" />
+        {localizedSortedItems.length === 0 ? (
+          <div className="ds-card archive-empty-state">
+            <img src={notFoundImg} alt="" aria-hidden="true" className="archive-empty-illustration" />
+            <h3 className="archive-empty-title">
+              {tf('explore.noResultsTitle', 'No heritage sites match your search.')}
+            </h3>
+            <p className="archive-empty-desc">
+              {tf('explore.noResultsDescLine1', "We couldn't find any results for the selected filters.")}
+            </p>
+            <button type="button" className="ds-btn" onClick={clearAllFilters}>
+              <RefreshCw size={13} aria-hidden="true" />
               {tf('explore.clearFilters', 'Clear filters')}
             </button>
-          )}
-        </div>
-
-        <div className="archive-grid">
-          {localizedSortedItems.length === 0 ? (
-            <div className="archive-empty-state">
-              <img
-                src={notFoundImg}
-                alt=""
-                aria-hidden="true"
-                className="archive-empty-illustration"
-              />
-              <h3 className="archive-empty-title">
-                {tf('explore.noResultsTitle', 'No heritage sites match your search.')}
-              </h3>
-              <p className="archive-empty-desc">
-                {tf('explore.noResultsDescLine1', "We couldn't find any results for the selected filters.")}
-                <br />
-                {tf(
-                  'explore.noResultsDescLine2',
-                  "Try adjusting your filters or explore other stories from Rwanda's rich cultural heritage."
-                )}
-              </p>
-              <button type="button" className="archive-empty-clear-btn" onClick={clearAllFilters}>
-                <RefreshCw size={14} aria-hidden="true" />
-                {tf('explore.clearFilters', 'Clear filters')}
-              </button>
-            </div>
-          ) : (
-            localizedSortedItems.map(({ item, index, isCompleted, isAudio }) => (
-              <div
-                key={isAudio ? `audio-${item.id}` : (getStoryId(item) || index)}
-                className="heritage-card"
-                onClick={() => {
-                  if (isAudio) {
-                    setSelectedAudio(item);
-                    return;
-                  }
-                  handleCardClick(item);
-                }}
-              >
-                <div className="heritage-img-wrap">
-                  <span className={`heritage-card-category cat-${item.catKey}`}>
-                    {isAudio ? <Headphones size={12} aria-hidden="true" /> : null}
-                    {item.category}
-                  </span>
-                  {isCompleted && !isAudio && (
-                    <span className="heritage-status-badge completed">
-                      <CheckCircle2 size={12} aria-hidden="true" />
-                      Read
-                    </span>
-                  )}
-                  {isAudio && (
-                    <span className="heritage-status-badge audio">
-                      <Headphones size={12} aria-hidden="true" />
-                      Listen
-                    </span>
-                  )}
-                  {isAudio ? (
-                    <div className="heritage-card-image heritage-card-audio-art" role="img" aria-label={item.title}>
-                      <Headphones size={52} aria-hidden="true" />
+          </div>
+        ) : (
+          <div className="explore-rail">
+            {localizedSortedItems.map(({ item, index, isCompleted, isAudio }) => {
+              const stableKey = item.originalTitle || item.title;
+              const cachedImage = commonsImagesCached[stableKey] || commonsImagesCached[item.title];
+              const openMap = (e) => {
+                e.stopPropagation();
+                handleCardClick(item);
+                setTimeout(() => {
+                  document.getElementById('explore-map-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 60);
+              };
+              return (
+                <article
+                  key={isAudio ? `audio-${item.id}` : (getStoryId(item) || index)}
+                  className="explore-card"
+                  onClick={(e) => (isAudio ? setSelectedAudio(item) : handleReadMore(e, item))}
+                >
+                  <div className="explore-card-media">
+                    {isAudio || imageLoadErrors[stableKey] ? (
+                      <div className="explore-card-fallback" role="img" aria-label={item.title}>
+                        {isAudio ? <Headphones size={40} aria-hidden="true" /> : null}
+                      </div>
+                    ) : (
+                      <img src={cachedImage || item.image} alt={item.title} onError={() => handleCardImageError(stableKey)} />
+                    )}
+                    <div className="explore-card-tags">
+                      <span className="explore-tag">{item.location}</span>
+                      {isCompleted && !isAudio
+                        ? <span className="explore-tag explore-tag--done"><CheckCircle2 size={11} /> {t('explore.read')}</span>
+                        : <span className="explore-tag explore-tag--xp">+{item.xpReward ?? 50} XP</span>}
                     </div>
-                  ) : (
-                    // Always key by originalTitle (Kinyarwanda) so the same image
-                    // is used regardless of which language is active
-                    (() => {
-                      const stableKey = item.originalTitle || item.title;
-                      const cachedImage = commonsImagesCached[stableKey]
-                        || commonsImagesCached[item.title];
-                      return imageLoadErrors[stableKey] ? (
-                        <div
-                          className="heritage-card-image"
-                          style={{
-                            height: 230,
-                            background: 'linear-gradient(135deg, #6B4226 0%, #3E2723 100%)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}
-                          role="img"
-                          aria-label={item.title}
-                        >
-                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(245,235,224,0.5)" strokeWidth="1.5" aria-hidden="true">
-                            <rect x="3" y="3" width="18" height="18" rx="2" />
-                            <circle cx="8.5" cy="8.5" r="1.5" />
-                            <polyline points="21 15 16 10 5 21" />
-                          </svg>
-                        </div>
-                      ) : (
-                        <img
-                          src={cachedImage || item.image}
-                          alt={item.title}
-                          className="heritage-card-image"
-                          onError={() => handleCardImageError(stableKey)}
-                        />
-                      );
-                    })()
-                  )}
-                </div>
-                <div className="heritage-card-body">
-                  <div className="heritage-card-heading">
-                    <h3 className="heritage-card-title">{item.title}</h3>
-                    <span className="heritage-card-location">{item.location}</span>
+                    <div className="explore-card-report" onClick={(e) => e.stopPropagation()}>
+                      <ReportButton itemType="heritage" itemId={item.id || item.title} itemTitle={item.title} />
+                    </div>
                   </div>
-                  <p className="heritage-card-desc">{item.desc}</p>
-                  <div className="heritage-card-actions">
-                    {!isAudio ? (
+                  <div className="explore-card-body">
+                    <div className="explore-card-meta">
+                      <span>{item.category}{item.era ? ` • ${ERA_LABELS[item.era] || item.era}` : ''}</span>
+                      <span>{isAudio ? t('explore.audio') : t('explore.minRead', { minutes: readMinutes(item.desc) })}</span>
+                    </div>
+                    <h3>{item.title}</h3>
+                    <p>{item.desc}</p>
+                    <div className="explore-card-actions">
+                      {!isAudio && hasValidCoordinates(item) && (
+                        <button type="button" className="ds-btn" onClick={openMap}>
+                          {t('explore.mapBtn')} <ArrowRight size={12} aria-hidden="true" />
+                        </button>
+                      )}
                       <button
                         type="button"
-                        className="heritage-action secondary"
+                        className="ds-btn ds-btn--soft explore-card-read"
                         onClick={(e) => {
-                          e.stopPropagation();
-                          handleCardClick(item);
-                          setMapVisible(true);
-                          setTimeout(() => {
-                            document.getElementById('explore-map-section')?.scrollIntoView({ behavior: 'smooth' });
-                          }, 50);
+                          if (isAudio) { e.stopPropagation(); setSelectedAudio(item); return; }
+                          handleReadMore(e, item);
                         }}
                       >
-                        <MapPinned size={15} aria-hidden="true" />
-                        Map
+                        {isAudio ? <Play size={12} aria-hidden="true" /> : null}
+                        {isAudio ? t('explore.play') : t('explore.readBtn')} {!isAudio && <ArrowRight size={12} aria-hidden="true" />}
                       </button>
-                    ) : null}
-                    <button
-                      type="button"
-                      className="heritage-action primary"
-                      onClick={(e) => {
-                        if (isAudio) {
-                          e.stopPropagation();
-                          setSelectedAudio(item);
-                          return;
-                        }
-                        handleReadMore(e, item);
-                      }}
-                    >
-                      {isAudio ? <Play size={14} aria-hidden="true" /> : <BookOpen size={14} aria-hidden="true" />}
-                      {isAudio ? 'Play audio' : 'Read more'}
-                    </button>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <ReportButton 
-                        itemType="heritage" 
-                        itemId={item.id || item.title}
-                        itemTitle={item.title}
-                      />
                     </div>
                   </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="discover-more-wrap">
-          <button className="discover-btn" onClick={() => setMapVisible(!mapVisible)}>
-            {mapVisible ? 'Hide map' : t('explore.map')}
-            <ChevronDown size={14} className={mapVisible ? 'is-open' : ''} aria-hidden="true" />
-          </button>
-          <MapDiscoveryHint
-            mapVisible={mapVisible}
-            onOpenMap={() => setMapVisible(true)}
-          />
-        </div>
-
-        {mapVisible && (
-          <div id="explore-map-section" className="map-section">
-            <HeritageMap
-              items={localizedHeritageItems}
-              selectedMarker={localizedSelectedMarker}
-              onMarkerClick={(item) => setSelectedMarker(item)}
-              clickPopup={clickPopup}
-              onMapPick={handleMapPick}
-              language={language}
-              onClosePanel={() => {
-                setSelectedMarker(null);
-                setClickPopup(null);
-              }}
-              showPanel={true}
-            />
+                </article>
+              );
+            })}
           </div>
         )}
+
+        <div id="explore-map-section" className="ds-card explore-map">
+          <HeritageMap
+            items={localizedHeritageItems}
+            selectedMarker={localizedSelectedMarker}
+            onMarkerClick={(item) => setSelectedMarker(item)}
+            clickPopup={clickPopup}
+            onMapPick={handleMapPick}
+            language={language}
+            onClosePanel={() => {
+              setSelectedMarker(null);
+              setClickPopup(null);
+            }}
+            showPanel={true}
+          />
+        </div>
       </div>
       {/* Story read modal */}
       {selectedStory && (
