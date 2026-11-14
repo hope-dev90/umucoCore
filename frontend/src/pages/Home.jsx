@@ -5,10 +5,8 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useGamificationContext } from '../contexts/GamificationContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Home.css';
-import './Dashboard.css';
 import commonsImagesCached from '../data/commonsImageCache.json';
-import { ArrowRight, ArrowUpRight, Award, BookOpen, Share2, Play, Plus, Quote, Music, Video, FileText } from 'lucide-react';
-import proverbsData from '../data/proverbs.json';
+import { ArrowRight, Share2, Headphones, Plus, Search, Music, Video, FileText } from 'lucide-react';
 import ExplorerTypeImage from '../components/ExplorerTypeImage';
 import { getHighlightForCategory, ALL_STORIES } from '../data/stories';
 import { DashboardStoryView } from '../components/Gamification/DashboardStoryView';
@@ -334,6 +332,11 @@ export default function Home() {
     { day: '23', month: t('dashboard.monthJun'), title: t('dashboard.calendar.widows'),     sub: t('dashboard.calendar.widowsSub') },
     { day: '09', month: t('dashboard.monthAug'), title: t('dashboard.calendar.indigenous'), sub: t('dashboard.calendar.indigenousSub') },
   ];
+  const quickActions = [
+    { icon: <Headphones size={16} />, label: t('home.listen')         },
+    { icon: <Plus       size={16} />, label: t('home.contribute')     },
+    { icon: <Search     size={16} />, label: t('home.advancedSearch') },
+  ];
 
   const explorerGreetings = {
     'warrior':         { prefix: t('dashboard.greeting.warrior') },
@@ -459,41 +462,6 @@ export default function Home() {
   const highlightTitle = extractText(highlight?.title, t('home.highlight.title'));
   const highlightDesc  = extractText(highlight?.description, t('home.highlight.desc'));
 
-  // ── Dashboard data for the Doomshield layout ───────────────────────────────
-  const nextLevel = getNextLevelData ? getNextLevelData() : null;
-  const nextLevelXP = nextLevel?.required_xp || Math.max(100, (level || 1) * 100);
-  const xpPct = Math.max(0, Math.min(100, Math.round(((xp || 0) / nextLevelXP) * 100)));
-  const xpToNext = Math.max(0, nextLevelXP - (xp || 0));
-  const rankSegments = 7;
-  const filledSegments = Math.round((xpPct / 100) * rankSegments);
-
-  const proverbList = Array.isArray(proverbsData?.proverbs) ? proverbsData.proverbs : [];
-  const dayIndex = Math.floor(Date.now() / 86400000);
-  const proverb = proverbList.length ? proverbList[dayIndex % proverbList.length] : null;
-  const proverbTranslation = proverb ? ((language === 'fr' && proverb.fr) ? proverb.fr : proverb.en) : '';
-
-  const topLeaders = [...(leaderboard || [])]
-    .sort((a, b) => (b.xp || b.total_xp || 0) - (a.xp || a.total_xp || 0))
-    .slice(0, 5);
-  const initialsOf = (name = '') => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '?';
-
-  const milestoneTarget = 7;
-  const milestoneValue = Math.min(streak || 0, milestoneTarget);
-  const milestonePct = Math.round((milestoneValue / milestoneTarget) * 100);
-
-  const shareProverb = async () => {
-    if (!proverb) return;
-    const text = `"${proverb.rw}" — ${proverb.en}`;
-    try {
-      if (navigator.share) await navigator.share({ title: t('home.quoteOfDay'), text });
-      else { await navigator.clipboard.writeText(text); alert(t('dashboard.linkCopied')); }
-    } catch { /* user cancelled */ }
-  };
-
-  const highlightImage = audioHighlight ? (audioHighlight.thumbnail_url || highlightSrc) : highlightSrc;
-  const highlightHeading = audioHighlight ? extractText(audioHighlight.title, highlightTitle) : highlightTitle;
-  const highlightBody = audioHighlight ? extractText(audioHighlight.description, highlightDesc) : highlightDesc;
-
   return (
     <>
       {showPicker && <ExplorerPickerModal onSave={handlePickerSave} />}
@@ -501,176 +469,181 @@ export default function Home() {
         <DashboardStoryView
           story={activeStory}
           onClose={() => setActiveStory(null)}
-          onComplete={() => {}}
+          onComplete={() => console.log('Story completed')}
         />
       ) : (
-        <Layout searchPlaceholder={t('ui.searchArchive')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
-          <div className="dash">
-            <div className="dash-main">
-              {/* Stat cards */}
-              <div className="dash-stats">
-                <button type="button" className="dash-stat dash-stat--brand" onClick={() => navigate('/profile')}>
-                  <span className="dash-stat-head">
-                    <span>{t('home.archivalRank')}</span>
-                    <span className="dash-stat-arrow"><ArrowUpRight size={14} /></span>
-                  </span>
-                  <strong className="dash-stat-level">{t('gamification.level')} {level || 1}</strong>
-                  <span className="dash-rank-bar" aria-label={`${xpPct}%`}>
-                    {Array.from({ length: rankSegments }).map((_, i) => (
-                      <i key={i} className={i < filledSegments ? 'on' : ''} />
-                    ))}
-                  </span>
-                </button>
+       <Layout searchPlaceholder={t('search.placeholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
+       <div className="home-shell">
+      <div className="home-header">
+        <h1>
+          {welcomeHeading}
+          {activeExplorer && (
+            <ExplorerTypeImage
+              type={activeExplorer.id}
+              label={activeExplorerLabel}
+              size={34}
+              style={{ marginLeft: 10, verticalAlign: 'middle' }}
+            />
+          )}
+        </h1>
+        <p>{welcomeSub}</p>
+      </div>
 
-                <button type="button" className="dash-stat" onClick={() => navigate('/history')}>
-                  <span className="dash-stat-head">
-                    <span>{t('dashboard.dailyStreak')}</span>
-                    <span className="dash-stat-arrow"><ArrowUpRight size={14} /></span>
-                  </span>
-                  <strong className="dash-stat-value">{streak || 0}</strong>
-                  <span className="dash-stat-sub">{t('home.bestStreak', { days: bestStreak || 0 })}</span>
-                </button>
-
-                <button type="button" className="dash-stat" onClick={() => navigate('/explore')}>
-                  <span className="dash-stat-head">
-                    <span>{t('home.activeQuests')}</span>
-                    <span className="dash-stat-arrow"><ArrowUpRight size={14} /></span>
-                  </span>
-                  <strong className="dash-stat-value">{ALL_STORIES.length}</strong>
-                  <span className="dash-stat-sub">{t('home.storiesReady')}</span>
-                </button>
-              </div>
-
-              {/* Highlights */}
-              <div className="dash-section-head">
-                <span>{t('home.highlights')}</span>
-                <button type="button" onClick={handleViewAllStories}>{t('home.viewArchive')} <ArrowRight size={12} /></button>
-              </div>
-              <article className="dash-highlight">
-                <div className="dash-highlight-media">
-                  <img src={highlightImage} alt={highlightHeading} />
-                  <span className="dash-tag dash-tag--dark">{t('home.oralHeritage')}</span>
+          <div className="dashboard-quest-strip" aria-label={t('dashboard.questOverview')}>
+            {questTiles.map((tile) => (
+              <div key={tile.label} className="dashboard-quest-tile">
+                <UmucoGlyph type={tile.icon} size={34} />
+                <div>
+                  <span>{tile.label}</span>
+                  <strong>{tile.value}</strong>
                 </div>
-                <div className="dash-highlight-body">
-                  <span className="dash-kicker">{t('home.storyOfDay')}</span>
-                  <h2>{highlightHeading}</h2>
-                  <p>{highlightBody}</p>
-                  {audioHighlight?.audio_url && (
-                    <audio controls className="dash-highlight-audio">
-                      <source src={audioHighlight.audio_url} />
-                    </audio>
-                  )}
-                  <div className="dash-highlight-actions">
-                    <button type="button" className="dash-btn" onClick={handleExploreNow}>
-                      {t('home.listenCta')} <Play size={11} fill="currentColor" />
-                    </button>
-                    <button type="button" className="dash-icon-btn" onClick={handleShare} aria-label={t('home.share')}>
-                      <Share2 size={14} />
-                    </button>
-                  </div>
-                </div>
-                <div className="dash-diamonds" aria-hidden="true" />
-              </article>
-
-              {/* Discovery */}
-              <div className="dash-section-head"><span>{t('home.discovery')}</span></div>
-              <div className="dash-discovery">
-                <article className="dash-compass">
-                  <div className="dash-compass-bars" aria-hidden="true"><i /><i /><i /><i /></div>
-                  <span className="dash-tag dash-tag--glass">{t('home.culturalCompass')}</span>
-                  <h3>{t('home.knowRwandanCulture')}</h3>
-                  <p>{t('home.compassDesc')}</p>
-                  <div className="dash-compass-foot">
-                    <span>{t('home.curatedJourneys')}</span>
-                    <button type="button" className="dash-btn dash-btn--light" onClick={() => navigate('/explore')}>
-                      {t('sidebar.explore')} <ArrowRight size={12} />
-                    </button>
-                  </div>
-                </article>
-
-                <article className="dash-quote">
-                  <span className="dash-quote-mark" aria-hidden="true">99</span>
-                  <span className="dash-kicker"><Quote size={11} /> {t('home.quoteOfDay')}</span>
-                  {proverb ? (
-                    <>
-                      <h3>&ldquo;{proverb.rw}&rdquo;</h3>
-                      <p>{proverbTranslation}{proverb.meaning ? ` ${proverb.meaning}` : ''}</p>
-                    </>
-                  ) : (
-                    <h3>{t('home.quoteText')}</h3>
-                  )}
-                  <div className="dash-quote-foot">
-                    <span>{t('home.kinyarwandaProverb')}</span>
-                    <button type="button" onClick={shareProverb}><Share2 size={12} /> {t('home.share')}</button>
-                  </div>
-                </article>
               </div>
+            ))}
+          </div>
 
-              {/* Actions */}
-              <div className="dash-section-head"><span>{t('home.actions')}</span></div>
-              <div className="dash-actions">
-                <button type="button" className="dash-action" onClick={() => navigate('/contribute')}>
-                  <span className="dash-action-icon dash-action-icon--pink"><Plus size={16} /></span>
-                  <span>
-                    <strong>{t('sidebar.contribute')} <ArrowRight size={12} /></strong>
-                    <small>{t('home.contributeDesc')}</small>
-                  </span>
+          <div className="highlight-card">
+            <span className="highlight-badge">{t('home.todayHighlight')}</span>
+            <div className="highlight-image">
+              <img
+                src={audioHighlight ? (audioHighlight.thumbnail_url || highlightSrc) : highlightSrc}
+                alt={audioHighlight ? extractText(audioHighlight.title, '') : highlightTitle}
+                className="highlight-img"
+                onError={e => { e.target.src = nyanzeImage; }}
+              />
+            </div>
+            <div className="highlight-content">
+              <div>
+                <h2>{audioHighlight ? extractText(audioHighlight.title, highlightTitle) : highlightTitle}</h2>
+                <p style={{ color: 'var(--text-secondary)' }}>
+                  {audioHighlight ? extractText(audioHighlight.description, highlightDesc) : highlightDesc}
+                </p>
+                {audioHighlight?.audio_url && (
+                  <audio
+                    controls
+                    style={{ width: '100%', marginTop: 12, borderRadius: 8 }}
+                    aria-label={`Play ${extractText(audioHighlight.title, '')}`}
+                  >
+                    <source src={audioHighlight.audio_url} />
+                    Your browser does not support audio playback.
+                  </audio>
+                )}
+              </div>
+              <div className="highlight-actions">
+                <button className="btn-primary" onClick={() => navigate('/explore')}>
+                  {t('home.exploreNow')}
                 </button>
-                <button type="button" className="dash-action" onClick={() => navigate('/library')}>
-                  <span className="dash-action-icon dash-action-icon--green"><BookOpen size={16} /></span>
-                  <span>
-                    <strong>{t('ui.library')} <ArrowRight size={12} /></strong>
-                    <small>{t('home.libraryDesc')}</small>
-                  </span>
+                <button className="btn-outline" onClick={handleShare}>
+                  <Share2 size={14} />
+                  {t('home.share')}
                 </button>
               </div>
             </div>
-
-            {/* Right rail */}
-            <aside className="dash-rail">
-              <section className="dash-card dash-xp">
-                <span className="dash-xp-title">{t('home.xpProgress')}</span>
-                <div className="dash-xp-count"><strong>{xp || 0}</strong> / {nextLevelXP} XP</div>
-                <div className="dash-xp-track"><span style={{ width: `${xpPct}%` }} /></div>
-                <p>{t('home.xpToNext', { xp: xpToNext, name: nextLevel?.name || `${t('gamification.level')} ${(level || 1) + 1}` })}</p>
-              </section>
-
-              <div className="dash-section-head dash-section-head--rail">
-                <span>{t('gamification.leaderboard')}</span>
-                <small>{t('home.thisWeek')}</small>
-              </div>
-              <section className="dash-card dash-leaders">
-                {topLeaders.length === 0 && <p className="dash-empty">{t('gamification.noLeaderboard')}</p>}
-                {topLeaders.map((entry, i) => {
-                  const name = entry.name || entry.username || t('gamification.explorer');
-                  const isMe = [entry.userId, entry.id, entry.user_id].includes(user?.id);
-                  return (
-                    <div key={entry.userId || entry.id || entry.user_id || i} className={`dash-leader ${i === 0 ? 'is-top' : ''} ${isMe ? 'is-me' : ''}`}>
-                      <span className={`dash-leader-rank rank-${i + 1}`}>{i + 1}</span>
-                      <span className={`dash-leader-avatar tone-${i % 5}`}>{initialsOf(name)}</span>
-                      <span className="dash-leader-name">{name}</span>
-                      <span className="dash-leader-xp">{entry.xp || entry.total_xp || 0} XP</span>
-                    </div>
-                  );
-                })}
-              </section>
-
-              <div className="dash-section-head dash-section-head--rail"><span>{t('home.progress')}</span></div>
-              <section className="dash-card dash-milestone">
-                <div className="dash-milestone-head">
-                  <span className="dash-milestone-icon"><Award size={16} /></span>
-                  <div>
-                    <strong>{t('home.weeklyMilestone')}</strong>
-                    <small>{t('home.milestoneTask', { days: milestoneTarget })}</small>
-                  </div>
-                  <span className="dash-milestone-count">{milestoneValue}/{milestoneTarget}</span>
-                </div>
-                <div className="dash-xp-track"><span style={{ width: `${milestonePct}%` }} /></div>
-                <p>{t('home.milestoneReward')}</p>
-              </section>
-            </aside>
           </div>
-        </Layout>
+
+          <div className="section-header">
+            <span className="section-title">{t('home.continueExploring')}</span>
+            <button type="button" className="section-link link-button" onClick={handleViewAllStories}>{t('home.viewAll')}</button>
+          </div>
+
+          <div className="explore-cards">
+            {filteredSortedExploreItems.map((item) => (
+              <div key={item.title} className="explore-thumb" role="button" tabIndex={0}
+                onClick={() => openDashboardStory({ ...item, title: item.title }, 'continue')}
+                onKeyDown={(e) => { if (e.key === 'Enter') openDashboardStory({ ...item, title: item.title }, 'continue'); }}>
+                <div className="explore-thumb-img">
+                  <img src={item.image} alt={item.title} />
+                </div>
+                <div className="explore-thumb-top">
+                  <span className="explore-thumb-category">{item.category}</span>
+                  <span className="explore-thumb-xp">+{item.xp} XP</span>
+                </div>
+                <div className="explore-thumb-label">{item.title}</div>
+                <div className="explore-thumb-meta">{item.meta}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginBottom: 4 }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              {t('home.popularTopics')}
+            </span>
+          </div>
+          <div className="topics-wrap">
+            {[t('dashboard.topic.ubwiru'), t('dashboard.topic.history'), t('dashboard.topic.drum'), t('dashboard.topic.kings'), t('dashboard.topic.values'), t('dashboard.topic.uburego')].map((topic, i) => (
+              <button
+                type="button"
+                key={topic}
+                className="topic-chip"
+                onClick={() => openDashboardStory({ ...topicStoryForIndex(i), title: topicStoryForIndex(i).title }, `topic:${topic}`)}
+              >
+                {topic}
+              </button>
+            ))}
+          </div>
+
+          <div className="bottom-row">
+            <div className="kwibuka-card">
+              <div>
+                <h3>{t('home.kwibuka.title')}</h3>
+                <p style={{ fontSize: 10, marginTop: 3 }}>{t('home.kwibuka.desc')}</p>
+              </div>
+              <div>
+                <div className="kwibuka-countdown">
+                  <span className="days-num">31</span>
+                  <span className="days-label">{t('home.daysToGo')}</span>
+                </div>
+                <button className="kwibuka-btn" onClick={handleExploreKwibuka}>{t('home.exploreKwibuka')}</button>
+              </div>
+            </div>
+
+            <div className="recent-list">
+              <div className="section-header" style={{ marginTop: 0 }}>
+                <span className="section-title">{t('home.recentlyAdded')}</span>
+                <button type="button" className="section-link link-button" onClick={handleViewAllRecent}>{t('home.viewAll')}</button>
+              </div>
+              {recentItems.map((item, i) => (
+                <div key={i} className="recent-item" role="button" tabIndex={0}
+                  onClick={() => openDashboardStory({ ...item, route: routeForRecentItem(item.type) }, 'recent')}
+                  onKeyDown={(e) => { if (e.key === 'Enter') openDashboardStory({ ...item, route: routeForRecentItem(item.type) }, 'recent'); }}>
+                  <div className={`recent-icon ${item.type}`}>{item.icon}</div>
+                  <div className="recent-info">
+                    <h4>{item.title}</h4>
+                    <p>{item.date}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="activity-list">
+              <div className="section-header" style={{ marginTop: 0 }}>
+                <span className="section-title">{t('home.yourActivity')}</span>
+              </div>
+              {activityItems.map((item, i) => (
+                <button
+                  type="button"
+                  key={i}
+                  className="activity-item"
+                  onClick={() => openDashboardStory({ ...item, title: item.label, category: 'Activity' }, 'activity')}
+                >
+                  <div className="activity-dot" />
+                  <div className="activity-info">
+                    <h4>{item.label}</h4>
+                    <p>{item.time}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+        <div className="home-footer">
+          <div className="home-footer-quote">
+            <p className="home-footer-quote-text">{t('home.quoteText')}</p>
+            <p className="home-footer-quote-sub">{t('home.quoteSub')}</p>
+          </div>
+        </div>
+      </div>
+
+    </Layout>
       )}
     </>
   );

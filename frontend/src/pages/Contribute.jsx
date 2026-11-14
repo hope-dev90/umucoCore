@@ -12,7 +12,6 @@ import {
   Music,
   HeartHandshake,
   X,
-  ArrowRight,
 } from 'lucide-react';
 import './Contribute.css';
 import insightWeaving from '../assets/explore/weaving_agaseke.jpg';
@@ -72,8 +71,7 @@ const insights = [
 
 export default function Contribute() {
   const { t, language } = useLanguage();
-  const { getToken, user } = useAuth();
-  const firstName = user?.name?.split(' ')[0] || t('contribute.champion');
+  const { getToken } = useAuth();
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [topbarSearch, setTopbarSearch] = useState("");
@@ -181,35 +179,42 @@ export default function Contribute() {
 
   return (
     <Layout searchPlaceholder={t('contribute.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
-      <div className="ds-page contribute-page contribute-ds">
-        <section className="ds-hero">
-          <div className="ds-hero-glow" aria-hidden="true" />
-          <span className="ds-pill">{t('contribute.activePreserver')}</span>
-          <h1>{t('contribute.greeting', { name: firstName })}</h1>
+      <div className="contribute-page">
+        <div className="contribute-hero">
+          <h1>{t('contribute.heroTitle')}</h1>
           <p>{t('contribute.heroSub')}</p>
-        </section>
+        </div>
 
         {/* Stats */}
-        <div className="ds-stats">
-          {stats.map(({ value, labelKey }, i) => (
-            <div key={labelKey} className={`ds-stat ${i === 0 ? 'ds-stat--brand' : ''}`}>
-              <span>{t(labelKey)}</span>
-              <strong>{value}</strong>
+        <div className="stats-row">
+          {stats.map(({ Icon, value, labelKey }, i) => (
+            <div key={i} className="stat-card">
+              <div className="stat-icon-badge">
+                <Icon size={20} strokeWidth={2} />
+              </div>
+              <span className="stat-value">{value}</span>
+              <span className="stat-label">{t(labelKey)}</span>
             </div>
           ))}
         </div>
 
         {/* Action cards */}
-        <span className="ds-section-label contribute-actions-label">{t('home.actions')}</span>
-        <div className="ds-actions">
-          {actions.map(({ cls, Icon, titleKey, descKey }) => (
-            <button key={cls} type="button" className="ds-action" onClick={() => handleAction(cls)}>
-              <span className="ds-action-icon"><Icon size={15} strokeWidth={2} /></span>
-              <span>
-                <strong>{t(titleKey)} <ArrowRight size={12} /></strong>
-                <small>{t(descKey)}</small>
+        <div className="action-cards">
+          {actions.map(({ cls, Icon, titleKey, descKey }, i) => (
+            <div
+              key={i}
+              className={`action-card ${cls}`}
+              role="button"
+              tabIndex={0}
+              onClick={() => handleAction(cls)}
+              onKeyDown={(e) => handleActionKeyDown(e, cls)}
+            >
+              <span className="action-card-icon-badge">
+                <Icon size={22} strokeWidth={2} />
               </span>
-            </button>
+              <div className="action-card-title">{t(titleKey)}</div>
+              <div className="action-card-desc">{t(descKey)}</div>
+            </div>
           ))}
         </div>
 
@@ -310,8 +315,58 @@ export default function Contribute() {
           </div>
         )}
 
+        {/* Bottom */}
+        <div className="contribute-bottom">
+          <div className="pipeline-card">
+            <div className="pipeline-header">
+              <span className="pipeline-title">{t('contribute.pipelineTitle')}</span>
+              <span className="pipeline-badge">3 {language === 'rw' ? 'Ibyo' : 'Tasks'} {language === 'rw' ? 'Biri' : 'Active'}</span>
+            </div>
+            {filteredPipelineItems.map((p, i) => (
+              <div key={i} className="pipeline-item">
+                <div className="pipeline-item-title">{getLocalizedText(p.title, language)}</div>
+                <div className="pipeline-item-sub">{getLocalizedText(p.sub, language)}</div>
+                <div className="progress-bar-wrap">
+                  <div className="pipeline-progress">
+                    <div className={`pipeline-progress-fill ${p.cls}`} style={{ width: `${p.pct}%` }} />
+                  </div>
+                  <span className="pipeline-pct">{p.pct}% {language === 'rw' ? 'Byasohotse' : 'Complete'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="insights-card">
+            <div className="insights-title">{t('contribute.insightsTitle')}</div>
+            {filteredInsights.map((ins, i) => (
+              <div key={i} className="insight-item">
+                <div className="insight-thumb">
+                  <img
+                    src={ins.img}
+                    alt={getLocalizedText(ins.title, language)}
+                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                  />
+                  <div className="insight-thumb-placeholder" style={{ display: 'none' }}>
+                    <Music size={18} strokeWidth={2} color="#fff" />
+                  </div>
+                </div>
+                <div className="insight-info">
+                  <h4>{getLocalizedText(ins.title, language)}</h4>
+                  <p>{getLocalizedText(ins.desc, language)}</p>
+                </div>
+              </div>
+            ))}
+            <button type="button" className="view-hub-link" onClick={handleViewResourceHub}>
+              {t('contribute.viewResourceHubLink')}
+            </button>
+          </div>
+        </div>
+
         {message && <div className="contribute-toast">{message}</div>}
 
+        <div className="contribute-footer">
+          {t('contribute.footer')}
+        </div>
       </div>
     </Layout>
   );
