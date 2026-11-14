@@ -14,6 +14,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { apiUrl, apiFetch } from '../config/api';
 import FlagControl from '../components/FlagControl';
 import './Listen.css';
+import './ListenDs.css';
+import { Bookmark, Clock, EllipsisVertical, Languages, Pause, Play, RotateCcw, Share2, SkipBack, SkipForward } from 'lucide-react';
 import RuganzuImg from '../assets/listen/ruganzu.png';
 import craneImg from '../assets/listen/crane-story.jpg';
 import moonImg from '../assets/listen/moon-story.jpg';
@@ -203,7 +205,7 @@ export default function Listen() {
   const { user } = useAuth();
   const [fables, setFables] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('fables'); // 'fables' | 'music'
+  const [oralFilter, setOralFilter] = useState('all'); // all | fables | music | poetry | inanga
   const [currentTrack, setCurrentTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -740,8 +742,95 @@ export default function Listen() {
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+  // ── Doomshield layout data ─────────────────────────────────────────────────
+  const ORAL_FILTERS = [
+    { id: 'all',    label: t('listen.allOralWorks') },
+    { id: 'fables', label: t('listen.fablesAndMyths') },
+    { id: 'music',  label: t('listen.traditionalMusic') },
+    { id: 'poetry', label: t('listen.royalPoetry') },
+    { id: 'inanga', label: t('listen.fluteInanga') },
+  ];
+
+  const oralRows = useMemo(() => {
+    const fableRows = fables.map((fable, i) => ({
+      key: `fable-${fable.id ?? i}`,
+      kind: 'fable',
+      title: fable.title,
+      tag: fable.genre,
+      desc: fable.narrator,
+      duration: fable.duration,
+      fable,
+      isCurrent: currentTrack && (currentTrack.id === fable.id || currentTrack.title === fable.title),
+    }));
+    const songRows = TRADITIONAL_SONGS.map((song) => ({
+      key: `song-${song.id}`,
+      kind: 'song',
+      title: song.title,
+      tag: t(`listen.musicGenre.${song.genre}`) || song.genre,
+      genre: song.genre,
+      desc: song.description,
+      duration: song.duration,
+      song,
+      href: `https://www.youtube.com/results?search_query=${song.youtubeSearch}`,
+    }));
+    const text = (r) => `${r.title} ${r.tag} ${r.desc} ${r.genre || ''}`.toLowerCase();
+    switch (oralFilter) {
+      case 'fables': return fableRows;
+      case 'music':  return songRows;
+      case 'poetry': return [...fableRows, ...songRows].filter((r) => /poet|ibyivugo|royal|ubwami|praise|king|umwami/.test(text(r)));
+      case 'inanga': return [...fableRows, ...songRows].filter((r) => /inanga|flute|umwirongi|zither/.test(text(r)));
+      default:       return [...fableRows, ...songRows];
+    }
+  }, [fables, oralFilter, currentTrack, t]);
+
+  const PROVERB_FILTERS = [
+    { id: 'all',    label: t('listen.filterAll') || 'All' },
+    { id: 'unread', label: t('listen.filterUnread') || 'Unread' },
+    { id: 'read',   label: t('listen.filterRead') || 'Read' },
+  ];
+
+  // Transcript: paragraphs of the current story; the active one follows playback progress.
+  const transcriptLines = useMemo(() => {
+    const track = currentTrack;
+    let story = track ? STORY_CONTENT_MAP[track.storyId] : ruganzuStory;
+    if (!story && track?.id) {
+      const sid = DB_ID_TO_STORY_ID[Number(track.id)];
+      if (sid) story = STORY_CONTENT_MAP[sid];
+    }
+    if (!story?.content) return [];
+    let text = story.content;
+    if (typeof text === 'object' && !Array.isArray(text)) text = text[language] || text.en || Object.values(text)[0];
+    if (Array.isArray(text)) text = text.join('\n\n');
+    return String(text).split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  }, [currentTrack, language]);
+
+  const activeLine = transcriptLines.length && duration > 0
+    ? Math.min(transcriptLines.length - 1, Math.floor((currentTime / duration) * transcriptLines.length))
+    : -1;
+
+  const featuredTitle = currentTrack ? currentTrack.title : t('listen.ruganzuTitle');
+  const featuredDesc = currentTrack ? currentTrack.narrator : t('listen.ruganzuDesc');
+  const playerImage = currentTrack ? (currentTrack.image || RuganzuImg) : RuganzuImg;
+  const canSaveCurrent = currentTrack && Number.isFinite(Number(currentTrack.id)) && Number(currentTrack.id) > 0;
+
+  const shareFeatured = async () => {
+    const text = `${featuredTitle} — Umuco-core`;
+    try {
+      if (navigator.share) await navigator.share({ title: featuredTitle, text, url: window.location.href });
+      else { await navigator.clipboard.writeText(window.location.href); setReportMessage(t('dashboard.linkCopied')); setTimeout(() => setReportMessage(''), 2500); }
+    } catch { /* cancelled */ }
+  };
+
+  const seekBy = (secs) => {
+    if (playbackMode === 'audio' && audioRef.current) {
+      audioRef.current.currentTime = Math.max(0, Math.min(duration || 0, currentTime + secs));
+    }
+  };
+
+  const PlayIcon = ({ playing, size = 14 }) => (playing ? <Pause size={size} fill="currentColor" /> : <Play size={size} fill="currentColor" />);
+
   return (
-    <Layout searchPlaceholder={t('search.placeholder')}>
+    <Layout searchPlaceholder={t('ui.searchArchive')}>
       <audio
         ref={audioRef}
         onTimeUpdate={handleTimeUpdate}
@@ -749,401 +838,231 @@ export default function Listen() {
         onEnded={handleEnded}
         preload="metadata"
       />
-      <div className="listen-page">
-        <div>
-          <div className="featured-epic">
-            <div className="featured-epic-meta">
-              <span className="featured-badge">{t('listen.featured')}</span>
-              <span className="featured-duration">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-                {currentTrack ? formatTime(duration) : "45 min"}
+      <div className="lsn">
+        <div className="lsn-main">
+          {/* Featured */}
+          <section className="lsn-hero">
+            <div className="lsn-hero-wave" aria-hidden="true">
+              {[38, 64, 30, 96, 72, 120, 58, 88, 46, 104, 66, 40].map((h, i) => <i key={i} style={{ height: h }} />)}
+            </div>
+            <div className="lsn-hero-top">
+              <span className="ds-pill">{t('listen.featured')}</span>
+              <span className="ds-pill ds-pill--muted"><Clock size={11} /> {currentTrack ? formatTime(duration) : '45 min'}</span>
+              <span className="lsn-hero-icons">
+                {canSaveCurrent && (
+                  <button type="button" className="ds-icon-btn" onClick={() => handleAddToLibrary(currentTrack)} aria-label={t('listen.addToLibrary')} disabled={savingTrackId === currentTrack?.id}>
+                    <Bookmark size={15} fill={savingTrackId === currentTrack?.id ? 'currentColor' : 'none'} />
+                  </button>
+                )}
+                <button type="button" className="ds-icon-btn" onClick={shareFeatured} aria-label={t('home.share')}>
+                  <Share2 size={15} />
+                </button>
+                {currentTrack && (
+                  <FlagControl
+                    type="audio"
+                    itemId={currentTrack.id}
+                    title={currentTrack.title}
+                    onToast={(text) => { setReportMessage(text); setTimeout(() => setReportMessage(''), 3000); }}
+                  />
+                )}
               </span>
             </div>
-            <h1>{currentTrack ? currentTrack.title : t('listen.ruganzuTitle')}</h1>
-            <p>{currentTrack ? currentTrack.narrator : t('listen.ruganzuDesc')}</p>
-            <div className="featured-actions">
-              <button className="play-btn" onClick={togglePlayPause}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  {isPlaying
-                    ? <>
-                        <rect x="6" y="4" width="4" height="16" />
-                        <rect x="14" y="4" width="4" height="16" />
-                      </>
-                    : <polygon points="5 3 19 12 5 21 5 3" />
-                  }
-                </svg>
-                {isPlaying ? t('listen.pause') : (currentTrack ? t('listen.listenNow') : t('listen.listenNow'))}
-              </button>
-              {currentTrack && Number.isFinite(Number(currentTrack.id)) && Number(currentTrack.id) > 0 && (
-              <button
-                className="library-btn"
-                onClick={() => handleAddToLibrary(currentTrack)}
-                disabled={savingTrackId === currentTrack?.id}
-              >
-                {savingTrackId === currentTrack?.id ? 'Saved ✓' : t('listen.addToLibrary')}
-              </button>
-              )}
-              {currentTrack && (
-                <FlagControl
-                  type="audio"
-                  itemId={currentTrack.id}
-                  title={currentTrack.title}
-                  onToast={(text) => { setReportMessage(text); setTimeout(() => setReportMessage(''), 3000); }}
-                />
-              )}
+            <span className="lsn-hero-kicker">{currentTrack ? currentTrack.genre : t('listen.featuredKicker')}</span>
+            <h1>{featuredTitle}</h1>
+            <p>{featuredDesc}</p>
+            <button type="button" className="ds-btn lsn-hero-play" onClick={togglePlayPause}>
+              <PlayIcon playing={isPlaying} size={11} />
+              {isPlaying ? t('listen.pause') : t('listen.listenNow')}
+            </button>
+          </section>
+
+          {/* Orals */}
+          <div className="ds-section">
+            <span className="ds-section-label">{t('listen.orals')}</span>
+            <div className="ds-chips">
+              {ORAL_FILTERS.map((f) => (
+                <button key={f.id} type="button" className={`ds-chip ${oralFilter === f.id ? 'active' : ''}`} onClick={() => setOralFilter(f.id)}>
+                  {f.label}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="listen-section">
-            {/* ── TAB NAVIGATION ── */}
-            <div className="listen-tabs" role="tablist" aria-label={t('listen.fablesAndMyths')}>
-              <button
-                role="tab"
-                aria-selected={activeTab === 'fables'}
-                className={`listen-tab-btn${activeTab === 'fables' ? ' active' : ''}`}
-                onClick={() => setActiveTab('fables')}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                  <path d="M2 17l10 5 10-5"/>
-                  <path d="M2 12l10 5 10-5"/>
-                </svg>
-                {t('listen.tabFables')}
-              </button>
-              <button
-                role="tab"
-                aria-selected={activeTab === 'music'}
-                className={`listen-tab-btn${activeTab === 'music' ? ' active' : ''}`}
-                onClick={() => setActiveTab('music')}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 18V5l12-2v13"/>
-                  <circle cx="6" cy="18" r="3"/>
-                  <circle cx="18" cy="16" r="3"/>
-                </svg>
-                {t('listen.tabMusic')}
-              </button>
-            </div>
-
-            {/* ── FABLES TAB ── */}
-            {activeTab === 'fables' && (
-              <>
-                <div className="listen-section-header">
-                  <span className="listen-section-title">{t('listen.fablesAndMyths')}</span>
-                  <span className="listen-view-all">{t('listen.viewAll')}</span>
-                </div>
-                <div className="fable-cards">
-                  {loading
-                    ? Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="fable-card fable-card-skeleton" aria-hidden="true">
-                          <div className="fable-thumb fable-skeleton-thumb" />
-                          <div className="fable-info">
-                            <div className="fable-skeleton-line fable-skeleton-line--short" />
-                            <div className="fable-skeleton-line fable-skeleton-line--long" />
-                            <div className="fable-skeleton-line fable-skeleton-line--mid" />
-                          </div>
-                        </div>
-                      ))
-                    : fables.map((fable, i) => (
-                        <div key={i} className="fable-card" onClick={() => handleFableClick(fable)} style={{ cursor: 'pointer' }}>
-                          <div className="fable-thumb">
-                            <img src={fable.image} alt={fable.title} />
-                          </div>
-                          <div className="fable-info">
-                            <div className="fable-genre">{fable.genre}</div>
-                            <div className="fable-title">{fable.title}</div>
-                            <div className="fable-narrator">{fable.narrator}</div>
-                            <div className="fable-duration">+ {fable.duration}</div>
-                          </div>
-                        </div>
-                      ))
-                  }
-                </div>
-              </>
-            )}
-
-            {/* ── MUSIC TAB ── */}
-            {activeTab === 'music' && (
-              <>
-                <div className="listen-section-header">
-                  <span className="listen-section-title">{t('listen.traditionalMusic')}</span>
-                </div>
-                <p className="music-section-desc">{t('listen.musicSectionDesc')}</p>
-                <div className="music-cards-grid">
-                  {TRADITIONAL_SONGS.map((song) => {
-                    const genreLabel = t(`listen.musicGenre.${song.genre}`) || song.genre;
-                    const thumbImg = IMAGE_KEY_MAP[song.imageKey] || ALL_AUDIO_IMAGES[0];
-                    const ytSearchUrl = `https://www.youtube.com/results?search_query=${song.youtubeSearch}`;
-                    return (
-                      <div key={song.id} className="music-card">
-                        {/* Thumbnail with play overlay — opens YouTube search */}
-                        <a
-                          className="music-card-thumb"
-                          href={ytSearchUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`${t('listen.playMusic')} ${song.title} on YouTube`}
-                          onClick={() => awardXP(10, `Opened traditional song: ${song.title}`)}
-                        >
-                          <img src={thumbImg} alt={song.title} />
-                          <div className="music-card-overlay">
-                            <div className="music-play-circle">
-                              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                                <polygon points="5 3 19 12 5 21 5 3" />
-                              </svg>
-                            </div>
-                            <span className="music-play-label">{t('listen.playMusic')}</span>
-                          </div>
-                        </a>
-
-                        {/* Card info */}
-                        <div className="music-card-info">
-                          <div className="music-card-genre">{genreLabel}</div>
-                          <div className="music-card-title">{song.title}</div>
-                          <div className="music-card-artist">{song.artist}</div>
-                          <p className="music-card-desc">{song.description}</p>
-                          <div className="music-card-footer">
-                            <span className="music-card-duration">
-                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10"/>
-                                <polyline points="12 6 12 12 16 14"/>
-                              </svg>
-                              {song.duration}
-                            </span>
-                            <a
-                              className="music-yt-link"
-                              href={ytSearchUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label={`${t('listen.watchOnYoutube')}: ${song.title}`}
-                            >
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
-                              </svg>
-                              {t('listen.watchOnYoutube')}
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="listen-divider" />
-
-          <div className="listen-section">
-            <div className="listen-section-header">
-              <span className="listen-section-title">{t('listen.dailyProverbs')}</span>
-            </div>
-            <div className="proverb-controls">
-              <div className="proverb-filter-group">
-                <button
-                  className={`proverb-filter-btn${proverbFilter === 'all' ? ' active' : ''}`}
-                  onClick={() => setProverbFilter('all')}
-                >{t('listen.filterAll') || 'All'}</button>
-                <button
-                  className={`proverb-filter-btn${proverbFilter === 'unread' ? ' active' : ''}`}
-                  onClick={() => setProverbFilter('unread')}
-                >{t('listen.filterUnread') || 'Unread'}</button>
-                <button
-                  className={`proverb-filter-btn${proverbFilter === 'read' ? ' active' : ''}`}
-                  onClick={() => setProverbFilter('read')}
-                >{t('listen.filterRead') || 'Read'} {flippedCards.size > 0 && <span className="proverb-read-count">{flippedCards.size}</span>}</button>
+          <div className="lsn-list">
+            {loading && (oralFilter === 'all' || oralFilter === 'fables') && Array.from({ length: 3 }).map((_, i) => (
+              <div key={`sk-${i}`} className="lsn-row lsn-row--skeleton" aria-hidden="true">
+                <span className="lsn-row-play" />
+                <span className="lsn-row-text"><i /><i /></span>
               </div>
-              <select
-                className="proverb-sort-select"
-                value={proverbSort}
-                onChange={e => setProverbSort(e.target.value)}
-              >
+            ))}
+            {!loading && oralRows.length === 0 && <p className="ds-empty">{t('listen.noOrals')}</p>}
+            {oralRows.map((row) => {
+              const playing = row.isCurrent && isPlaying;
+              const onPlay = () => {
+                if (row.kind === 'fable') {
+                  if (row.isCurrent) togglePlayPause(); else handleFableClick(row.fable);
+                } else {
+                  awardXP(10, `Opened traditional song: ${row.title}`);
+                  window.open(row.href, '_blank', 'noopener,noreferrer');
+                }
+              };
+              return (
+                <div key={row.key} className={`lsn-row ${row.isCurrent ? 'is-current' : ''}`}>
+                  <button type="button" className="lsn-row-play" onClick={onPlay} aria-label={`${playing ? t('listen.pause') : t('listen.listenNow')}: ${row.title}`}>
+                    <PlayIcon playing={playing} size={12} />
+                  </button>
+                  <button type="button" className="lsn-row-text" onClick={onPlay}>
+                    <span className="lsn-row-title">
+                      {row.title}
+                      {row.tag && <span className="ds-pill ds-pill--muted">{row.tag}</span>}
+                    </span>
+                    <span className="lsn-row-desc">{row.desc}</span>
+                  </button>
+                  <span className="lsn-row-duration">
+                    {row.kind === 'song' ? t('listen.onYoutube') : row.duration}
+                  </span>
+                  {row.kind === 'fable' && Number(row.fable?.id) > 0 ? (
+                    <button type="button" className="ds-icon-btn" onClick={() => handleAddToLibrary(row.fable)} aria-label={t('listen.addToLibrary')}>
+                      {savingTrackId === row.fable.id ? <Bookmark size={14} fill="currentColor" /> : <EllipsisVertical size={15} />}
+                    </button>
+                  ) : <span className="lsn-row-spacer" />}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Proverbs */}
+          <div className="ds-section">
+            <span className="ds-section-label">{t('listen.proverbs')}</span>
+            <div className="lsn-proverb-tools">
+              <div className="ds-chips">
+                {PROVERB_FILTERS.map((f) => (
+                  <button key={f.id} type="button" className={`ds-chip ${proverbFilter === f.id ? 'active' : ''}`} onClick={() => setProverbFilter(f.id)}>
+                    {f.label}{f.id === 'read' && flippedCards.size > 0 ? ` · ${flippedCards.size}` : ''}
+                  </button>
+                ))}
+              </div>
+              <select className="lsn-sort" value={proverbSort} onChange={(e) => setProverbSort(e.target.value)} aria-label={t('listen.sortDefault')}>
                 <option value="default">{t('listen.sortDefault') || 'Default'}</option>
                 <option value="unread-first">{t('listen.sortUnreadFirst') || 'Unread first'}</option>
                 <option value="read-first">{t('listen.sortReadFirst') || 'Read first'}</option>
                 <option value="alphabetical">{t('listen.sortAlpha') || 'A–Z'}</option>
               </select>
             </div>
-            <div className="proverb-cards-grid">
-              {visibleProverbs.map((proverb) => {
-                const isFlipped = flippedCards.has(proverb.id);
-                let frontText, backText;
-                if (language === 'rw') {
-                  frontText = proverb.rw;
-                  backText  = proverb.en;
-                } else if (language === 'fr') {
-                  frontText = proverb.fr ?? proverb.en;
-                  backText  = proverb.rw;
-                } else {
-                  frontText = proverb.en;
-                  backText  = proverb.rw;
-                }
-                return (
-                  <div
-                    key={proverb.id}
-                    className={`proverb-flip-card${isFlipped ? ' flipped' : ''}`}
-                    onClick={() => handleFlipCard(proverb.id)}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={isFlipped ? backText : t('listen.tapToReveal')}
-                    onKeyDown={e => e.key === 'Enter' && handleFlipCard(proverb.id)}
-                  >
-                    <div className="proverb-flip-inner">
-                      {/* Front */}
-                      <div className="proverb-flip-front">
-                        <div className="proverb-audio-controls">
-                          {['fr', 'en'].map(lang => {
-                            const cfg = PROVERB_LANG_CONFIG[lang];
-                            const isActive =
-                              proverbAudioState.id === proverb.id &&
-                              proverbAudioState.lang === lang &&
-                              proverbAudioState.playing;
-                            return (
-                              <button
-                                key={lang}
-                                type="button"
-                                className={`proverb-lang-btn${isActive ? ' active' : ''}`}
-                                onClick={(e) => { e.stopPropagation(); speakProverb(proverb, lang); }}
-                                aria-label={`${isActive ? 'Stop' : 'Play'} proverb in ${cfg.label}`}
-                                title={`${isActive ? 'Stop' : 'Play'} in ${cfg.label}`}
-                              >
-                                {isActive
-                                  ? <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-                                  : <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                                }
-                                {cfg.label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        <div className="proverb-card-label">{t('listen.proverbOf')}</div>
-                        <p className="proverb-card-rw">"{frontText}"</p>
-                        <span className="proverb-card-hint">{t('listen.tapToReveal')}</span>
-                        <FlagControl
-                          type="proverb"
-                          itemId={proverb.id}
-                          title={frontText}
-                          onToast={(text) => { setReportMessage(text); setTimeout(() => setReportMessage(''), 3000); }}
-                        />
+          </div>
+
+          <div className="proverb-cards-grid lsn-proverbs">
+            {visibleProverbs.map((proverb) => {
+              const isFlipped = flippedCards.has(proverb.id);
+              let frontText, backText;
+              if (language === 'rw') { frontText = proverb.rw; backText = proverb.en; }
+              else if (language === 'fr') { frontText = proverb.fr ?? proverb.en; backText = proverb.rw; }
+              else { frontText = proverb.en; backText = proverb.rw; }
+              return (
+                <div
+                  key={proverb.id}
+                  className={`proverb-flip-card${isFlipped ? ' flipped' : ''}`}
+                  onClick={() => handleFlipCard(proverb.id)}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={isFlipped ? backText : t('listen.tapToReveal')}
+                  onKeyDown={(e) => e.key === 'Enter' && handleFlipCard(proverb.id)}
+                >
+                  <div className="proverb-flip-inner">
+                    <div className="proverb-flip-front">
+                      <div className="proverb-audio-controls">
+                        {['en', 'fr'].map((lang) => {
+                          const cfg = PROVERB_LANG_CONFIG[lang];
+                          const isActive = proverbAudioState.id === proverb.id && proverbAudioState.lang === lang && proverbAudioState.playing;
+                          return (
+                            <button
+                              key={lang}
+                              type="button"
+                              className={`proverb-lang-btn${isActive ? ' active' : ''}`}
+                              onClick={(e) => { e.stopPropagation(); speakProverb(proverb, lang); }}
+                              aria-label={`${isActive ? 'Stop' : 'Play'} proverb in ${cfg.label}`}
+                            >
+                              {isActive ? <Pause size={8} fill="currentColor" /> : <Play size={8} fill="currentColor" />}
+                              {cfg.label}
+                            </button>
+                          );
+                        })}
                       </div>
-                      {/* Back: translation + meaning */}
-                      <div className="proverb-flip-back">
-                        {isFlipped && <span className="proverb-read-badge">✓</span>}
-                        <div className="proverb-card-label">{t('listen.meaning')}</div>
-                        <p className="proverb-card-en">"{backText}"</p>
-                        <p className="proverb-card-meaning">{getProverbMeaning(proverb)}</p>
-                        <span className="proverb-card-xp">{t('listen.xpEarned')}</span>
-                      </div>
+                      <div className="proverb-card-label">{t('listen.proverbLabel')}</div>
+                      <p className="proverb-card-rw">&lsquo;{frontText}&rsquo;</p>
+                      <span className="proverb-card-hint">{t('listen.tapToReveal')}</span>
+                      <FlagControl
+                        type="proverb"
+                        itemId={proverb.id}
+                        title={frontText}
+                        onToast={(text) => { setReportMessage(text); setTimeout(() => setReportMessage(''), 3000); }}
+                      />
+                    </div>
+                    <div className="proverb-flip-back">
+                      {isFlipped && <span className="proverb-read-badge">✓</span>}
+                      <div className="proverb-card-label">{t('listen.meaning')}</div>
+                      <p className="proverb-card-en">&ldquo;{backText}&rdquo;</p>
+                      <p className="proverb-card-meaning">{getProverbMeaning(proverb)}</p>
+                      <span className="proverb-card-xp">{t('listen.xpEarned')}</span>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-            {visibleProverbs.length === 0 && (
-              <p className="proverb-empty-state">{t('listen.noProverbsMatch') || 'No proverbs match this filter.'}</p>
-            )}
-            {visibleProverbs.length < filteredProverbCount && (
-              <button
-                className="proverb-load-more"
-                onClick={() => setProverbPage(p => p + 1)}
-              >
-                {t('listen.loadMore')}
-              </button>
-            )}
+                </div>
+              );
+            })}
           </div>
+          {visibleProverbs.length === 0 && (
+            <p className="ds-empty">{t('listen.noProverbsMatch') || 'No proverbs match this filter.'}</p>
+          )}
+          {visibleProverbs.length < filteredProverbCount && (
+            <button type="button" className="ds-btn ds-btn--soft lsn-more" onClick={() => setProverbPage((p) => p + 1)}>
+              {t('listen.loadMore')}
+            </button>
+          )}
         </div>
 
-        <div className="audio-panel">
-          <div className="player-thumb">
-            <img src={currentTrack ? (currentTrack.image || RuganzuImg) : RuganzuImg} alt={currentTrack ? currentTrack.title : "Ruganzu II"} />
+        {/* Playback panel */}
+        <aside className="lsn-panel">
+          <div className="lsn-panel-head">
+            <span>{t('listen.playback')}</span>
+            <i className={isPlaying ? 'live' : ''} aria-hidden="true" />
           </div>
-          <div className="player-info">
-            <div className="player-title">{currentTrack ? currentTrack.title : t('listen.ruganzuTitle')}</div>
-            <div className="player-narrator">{currentTrack ? (currentTrack.narrator || currentTrack.genre) : "Mzee Silas • Oral Tradition"}</div>
-          </div>
-          <div className="player-controls">
-            <div className="player-progress">
-              <div className="player-time">
-                <span>{formatTime(currentTime)}</span>
-                <span>{formatTime(duration)}</span>
-              </div>
-              <div className="progress-bar">
-                <div className="progress-fill" style={{ width: `${progressPercent}%` }} />
-              </div>
-            </div>
-            <div className="player-btns">
-              <button className="player-btn" onClick={() => { if (playbackMode === 'audio' && audioRef.current) audioRef.current.currentTime = Math.max(0, currentTime - 10); }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polygon points="19 20 9 12 19 4 19 20" />
-                  <line x1="5" y1="19" x2="5" y2="5" />
-                </svg>
-              </button>
-              <button className="player-btn play-pause" onClick={togglePlayPause}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                  {isPlaying
-                    ? <>
-                        <rect x="6" y="4" width="4" height="16" />
-                        <rect x="14" y="4" width="4" height="16" />
-                      </>
-                    : <polygon points="5 3 19 12 5 21 5 3" />
-                  }
-                </svg>
-              </button>
-              <button className="player-btn" onClick={() => { if (playbackMode === 'audio' && audioRef.current) audioRef.current.currentTime = Math.min(duration, currentTime + 10); }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polygon points="5 4 15 12 5 20 5 4" />
-                  <line x1="19" y1="5" x2="19" y2="19" />
-                </svg>
-              </button>
+          <div className="lsn-cover">
+            <img src={playerImage} alt="" />
+            <div className="lsn-cover-text">
+              <strong>{featuredTitle}</strong>
+              <small>{currentTrack ? (currentTrack.genre || t('listen.oralArchive')) : t('listen.oralArchive')}</small>
             </div>
           </div>
-          <div className="player-extra">
-            <span className="player-speed">{playbackMode === 'speech-synthesis' ? 'AI voice' : '1.0x'}</span>
-            <div className="player-extra-icons">
-              <button className="player-icon-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                  <path d="M15.54 8.46a5 5 0 010 7.07" />
-                  <path d="M19.07 4.93a10 10 0 010 14.14" />
-                </svg>
-              </button>
-              <button className="player-icon-btn">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="18" cy="5" r="3" />
-                  <circle cx="6" cy="12" r="3" />
-                  <circle cx="18" cy="19" r="3" />
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-                </svg>
-              </button>
-            </div>
+          <div className="lsn-progress" role="progressbar" aria-valuenow={Math.round(progressPercent)} aria-valuemin={0} aria-valuemax={100}>
+            <span style={{ width: `${progressPercent}%` }} />
           </div>
-          <div className="transcript-panel">
-            <div className="transcript-header">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-              </svg>
-              {t('listen.transcriptHighlighting')}
-            </div>
-            <p className="transcript-text">
-              ...kuko rero Ruganzu amaze kugera mu mazi ya Nyabarongo, yari adi ko abami bamutegeeje...
-            </p>
-            <div className="transcript-highlight">
-              "Nuko aherako ariterimbira abari aho, ijwi rye riragomira mu..."
-            </div>
-            <div className="transcript-tags">
-              <span className="transcript-tag">{t('listen.transcriptTag1')}</span>
-              <span className="transcript-tag">{t('listen.transcriptTag2')}</span>
-              <span className="transcript-tag">{t('listen.transcriptTag3')}</span>
-            </div>
+          <div className="lsn-times">
+            <span>{formatTime(currentTime)}</span>
+            <span>{playbackMode === 'speech-synthesis' ? t('listen.aiVoice') : formatTime(duration)}</span>
           </div>
-        </div>
+          <div className="lsn-controls">
+            <button type="button" className="ds-icon-btn" onClick={() => seekBy(-10)} aria-label={t('listen.back10')}><RotateCcw size={16} /></button>
+            <button type="button" className="ds-icon-btn" onClick={() => seekBy(-30)} aria-label={t('listen.back30')}><SkipBack size={16} /></button>
+            <button type="button" className="lsn-play" onClick={togglePlayPause} aria-label={isPlaying ? t('listen.pause') : t('listen.listenNow')}>
+              <PlayIcon playing={isPlaying} size={18} />
+            </button>
+            <button type="button" className="ds-icon-btn" onClick={() => seekBy(30)} aria-label={t('listen.forward30')}><SkipForward size={16} /></button>
+            <button type="button" className="ds-icon-btn" onClick={shareFeatured} aria-label={t('home.share')}><Share2 size={15} /></button>
+          </div>
+
+          <div className="lsn-transcript-head">
+            <span>{t('listen.transcript')}</span>
+            <span className="lsn-transcript-lang"><Languages size={12} /> {language === 'rw' ? 'Kinyarwanda' : language === 'fr' ? 'Français' : 'English'}</span>
+          </div>
+          <div className="lsn-transcript">
+            {transcriptLines.length === 0 && <p className="lsn-transcript-empty">{t('listen.noTranscript')}</p>}
+            {transcriptLines.map((line, i) => (
+              <p key={i} className={i === activeLine ? 'active' : ''}>
+                {duration > 0 && <span>[{formatTime((duration / transcriptLines.length) * i)}]</span>} {line}
+              </p>
+            ))}
+          </div>
+        </aside>
       </div>
       {reportMessage && <div className="contribute-toast">{reportMessage}</div>}
     </Layout>

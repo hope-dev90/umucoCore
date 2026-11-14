@@ -30,6 +30,7 @@ import Saved       from './pages/Saved';
 import Settings    from './pages/Settings';
 import Profile     from './pages/Profile';
 import History     from './pages/History';
+import Library     from './pages/Library';
 import Admin       from './pages/admin/Admin';
 
 // Redirect logged-in users away from public-only routes - NO LOADING SCREEN
@@ -125,6 +126,7 @@ export default function App() {
                 <Route path="/contribute"  element={<PrivateRoute><Contribute /></PrivateRoute>} />
                 <Route path="/saved"       element={<PrivateRoute><Saved /></PrivateRoute>} />
                 <Route path="/history"     element={<PrivateRoute><History /></PrivateRoute>} />
+                <Route path="/library"     element={<PrivateRoute><Library /></PrivateRoute>} />
                 <Route path="/settings"    element={<PrivateRoute><Settings /></PrivateRoute>} />
                 <Route path="/profile"     element={<PrivateRoute><Profile /></PrivateRoute>} />
                 <Route path="/admin"       element={<AdminRoute><Admin /></AdminRoute>} />

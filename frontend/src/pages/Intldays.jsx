@@ -1,12 +1,13 @@
 import React, { useMemo, useState } from 'react';
 import Layout from '../components/Layout';
 import './Intldays.css';
+import './IntldaysDs.css';
 import themeImg from '../assets/international/imigongo.jpg';
 import spotlightImg from '../assets/international/nyanza.jpg';
 import harvestImg from '../assets/international/umuganura.jpg';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getLocalizedText } from '../utils/i18n';
-import { CalendarDays, ChevronLeft, ChevronRight, Filter, Flag, Leaf, Search } from 'lucide-react';
+import { CalendarDays, Filter, Flag, Leaf, ListFilter, Search } from 'lucide-react';
 
 const IMG = {
   theme: themeImg,
@@ -221,8 +222,10 @@ const monthLabel = (index, language, length = 'long') => (MONTH_LABELS[language]
 export default function Intldays() {
   const { t, language } = useLanguage();
   const [activeType, setActiveType] = useState('all');
-  const [activeMonth, setActiveMonth] = useState(6);
+  const [activeMonth, setActiveMonth] = useState(() => new Date().getMonth());
   const [topbarSearch, setTopbarSearch] = useState('');
+  const [sortAsc, setSortAsc] = useState(true);
+  const [selectedKey, setSelectedKey] = useState(null);
 
   const filteredEvents = useMemo(() => {
     const q = topbarSearch.trim().toLowerCase();
@@ -234,137 +237,131 @@ export default function Intldays() {
     });
   }, [activeType, language, topbarSearch]);
 
-  const activeMonthEvents = filteredEvents.filter(event => getMonthIndex(event.date) === activeMonth);
-  const featuredEvent = activeMonthEvents[0] || filteredEvents[0] || NATIONAL_EVENTS_2026[0];
-  const spotlightEvents = filteredEvents.filter(event => event.type !== 'community').slice(0, 5);
+  const eventKey = (event) => `${event.date}-${getLocalizedText(event.title, 'en')}`;
 
-  const monthCards = MONTHS.map((month, index) => ({
-    month,
-    index,
-    events: filteredEvents.filter(event => getMonthIndex(event.date) === index),
-  }));
+  const activeMonthEvents = filteredEvents
+    .filter((event) => getMonthIndex(event.date) === activeMonth)
+    .sort((a, b) => (sortAsc ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date)));
 
-  const changeMonth = (step) => {
-    setActiveMonth((current) => (current + step + 12) % 12);
+  const selectedEvent = activeMonthEvents.find((e) => eventKey(e) === selectedKey) || activeMonthEvents[0] || null;
+
+  // "Today" card: today's event, or the next one coming up.
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayEvent = NATIONAL_EVENTS_2026.find((e) => e.date === todayIso);
+  const nextEvent = todayEvent || NATIONAL_EVENTS_2026.find((e) => e.date > todayIso) || NATIONAL_EVENTS_2026[0];
+
+  const monthCounts = MONTHS.map((_, index) => filteredEvents.filter((event) => getMonthIndex(event.date) === index).length);
+
+  const locale = language === 'fr' ? 'fr-FR' : 'en-GB';
+  const weekday = (iso) => new Date(`${iso}T12:00:00`).toLocaleDateString(locale, { weekday: 'long' });
+  const imageFor = (event) => (event?.type === 'culture' ? IMG.harvest : event?.type === 'civic' ? IMG.spotlight : IMG.theme);
+
+  const selectMonth = (index) => {
+    setActiveMonth(index);
+    setSelectedKey(null);
   };
 
   return (
-    <Layout searchPlaceholder={t("national.searchPlaceholder")} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
-      <div className="national-page">
-        <section className="national-hero">
-          <div className="national-hero-copy">
-            <span className="national-kicker">{t('national.kicker')}</span>
+    <Layout searchPlaceholder={t('national.searchPlaceholder')} searchQuery={topbarSearch} onSearchChange={setTopbarSearch}>
+      <div className="ds-page nd">
+        <div className="ds-hero-row">
+          <section className="ds-hero">
+            <span className="ds-pill">{t('national.pill')}</span>
             <h1>{t('national.title')}</h1>
             <p>{t('national.subtitle')}</p>
-            <div className="national-filter-chips">
-              {Object.entries(TYPE_META).map(([type, meta]) => {
-                const Icon = meta.icon;
-                return (
-                  <button
-                    key={type}
-                    type="button"
-                    className={`national-chip ${type} ${activeType === type ? 'active' : ''}`}
-                    onClick={() => setActiveType(type)}
-                  >
-                    <Icon size={14} />
-                    {t(meta.labelKey)}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <div className="national-theme-card">
-            <img src={IMG.theme} alt="" aria-hidden="true" />
+            <div className="ds-diamonds" aria-hidden="true" />
+          </section>
+          <button type="button" className="ds-promo" onClick={() => { selectMonth(getMonthIndex(nextEvent.date)); setSelectedKey(eventKey(nextEvent)); }}>
+            <img className="ds-promo-bg" src={imageFor(nextEvent)} alt="" />
+            <span className="ds-pill">{todayEvent ? t('national.today') : t('national.nextUp')}</span>
+            <small>{getLocalizedText(nextEvent.title, language)}</small>
+            <strong>{formatDay(nextEvent.date)} {monthLabel(getMonthIndex(nextEvent.date), language)}</strong>
+            <span className="ds-promo-link">{t('national.learnMore')}</span>
+          </button>
+        </div>
+
+        <section className="ds-card nd-calendar">
+          <div className="nd-calendar-head">
             <div>
-              <span>{t('national.yearLabel')}</span>
-              <strong>2026</strong>
-              <p>{filteredEvents.length} {t('national.eventsFound')}</p>
+              <h2>{t('national.calendarTitle')}</h2>
+              <p>{t('national.calendarSub')}</p>
             </div>
-          </div>
-        </section>
-
-        <section className="national-layout">
-          <div className="national-calendar-panel">
-            <div className="national-calendar-toolbar">
-              <div>
-                <span>{t('national.calendarLabel')}</span>
-                <strong>{monthLabel(activeMonth, language)} 2026</strong>
-              </div>
-              <div className="national-month-controls">
-                <button type="button" onClick={() => changeMonth(-1)} aria-label="Previous month">
-                  <ChevronLeft size={16} />
-                </button>
-                <button type="button" onClick={() => changeMonth(1)} aria-label="Next month">
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-
-            <div className="national-month-grid">
-              {monthCards.map((month) => (
-                <button
-                  key={month.month}
-                  type="button"
-                  className={`national-month-card ${month.index === activeMonth ? 'active' : ''}`}
-                  onClick={() => setActiveMonth(month.index)}
-                >
-                  <span>{monthLabel(month.index, language, 'short')}</span>
-                  <strong>{month.events.length}</strong>
-                  <small>{t('national.eventsShort')}</small>
+            <div className="ds-chips nd-types">
+              {Object.entries(TYPE_META).map(([type, meta]) => (
+                <button key={type} type="button" className={`ds-chip ${activeType === type ? 'active' : ''}`} onClick={() => setActiveType(type)}>
+                  {t(meta.labelKey)}
                 </button>
               ))}
             </div>
-
-            <div className="national-events-list">
-              {activeMonthEvents.length ? activeMonthEvents.map((event) => (
-                <article key={`${event.date}-${getLocalizedText(event.title, 'en')}`} className={`national-event-card ${event.type}`}>
-                  <div className="national-event-date">
-                    <span>{formatDay(event.date)}</span>
-                    <small>{monthLabel(getMonthIndex(event.date), language, 'short')}</small>
-                  </div>
-                  <div>
-                    <div className="national-event-type">{t(TYPE_META[event.type]?.labelKey || 'national.filterAll')}</div>
-                    <h3>{getLocalizedText(event.title, language)}</h3>
-                    <p>{getLocalizedText(event.desc, language)}</p>
-                  </div>
-                </article>
-              )) : (
-                <div className="national-empty">
-                  <Search size={18} />
-                  {t('national.noEvents')}
-                </div>
-              )}
-            </div>
           </div>
-
-          <aside className="national-side-panel">
-            <div className="national-feature-card">
-              <img src={featuredEvent.type === 'culture' ? IMG.harvest : IMG.spotlight} alt="" aria-hidden="true" />
-              <span>{t('national.featured')}</span>
-              <h2>{getLocalizedText(featuredEvent.title, language)}</h2>
-              <p>{getLocalizedText(featuredEvent.desc, language)}</p>
-            </div>
-
-            <div className="national-agenda-card">
-              <span>{t('national.yearAgenda')}</span>
-              {spotlightEvents.map((event) => (
-                <button
-                  key={`agenda-${event.date}-${getLocalizedText(event.title, 'en')}`}
-                  type="button"
-                  className="national-agenda-item"
-                  onClick={() => setActiveMonth(getMonthIndex(event.date))}
-                >
-                  <strong>{formatDay(event.date)} {monthLabel(getMonthIndex(event.date), language, 'short')}</strong>
-                  <span>{getLocalizedText(event.title, language)}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="national-note">
-              {t('national.note')}
-            </div>
-          </aside>
+          <div className="nd-months">
+            {MONTHS.map((month, index) => (
+              <button
+                key={month}
+                type="button"
+                className={`nd-month ${index === activeMonth ? 'active' : ''}`}
+                onClick={() => selectMonth(index)}
+                aria-pressed={index === activeMonth}
+              >
+                <span>{monthLabel(index, language, 'short')}</span>
+                <small>{monthCounts[index]}</small>
+              </button>
+            ))}
+          </div>
         </section>
+
+        <div className="nd-body">
+          <section className="ds-card nd-schedule">
+            <div className="nd-schedule-head">
+              <h2>{t('national.scheduleIn', { month: monthLabel(activeMonth, language) })}</h2>
+              <button type="button" onClick={() => setSortAsc((v) => !v)}>
+                <ListFilter size={13} /> {sortAsc ? t('national.sortChrono') : t('national.sortReverse')}
+              </button>
+            </div>
+            {activeMonthEvents.length === 0 ? (
+              <div className="ds-empty"><Search size={16} /> {t('national.noEvents')}</div>
+            ) : (
+              <div className="nd-events">
+                {activeMonthEvents.map((event) => {
+                  const key = eventKey(event);
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`nd-event ${selectedEvent && eventKey(selectedEvent) === key ? 'is-selected' : ''}`}
+                      onClick={() => setSelectedKey(key)}
+                    >
+                      <span className="nd-event-date">
+                        <small>{monthLabel(getMonthIndex(event.date), language, 'short')}</small>
+                        <strong>{String(formatDay(event.date)).padStart(2, '0')}</strong>
+                      </span>
+                      <span className="nd-event-text">
+                        <strong>
+                          {getLocalizedText(event.title, language)}
+                          <span className="ds-pill ds-pill--muted">{t(TYPE_META[event.type]?.labelKey || 'national.filterAll')}</span>
+                        </strong>
+                        <small>{t(`national.kind.${event.type}`)} · {t('national.nationwide')}</small>
+                      </span>
+                      <span className="nd-event-day">{weekday(event.date)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            <p className="nd-note">{t('national.note')}</p>
+          </section>
+
+          {selectedEvent && (
+            <aside className="ds-card nd-detail">
+              <img src={imageFor(selectedEvent)} alt="" />
+              <div className="nd-detail-body">
+                <span className="ds-pill ds-pill--muted">{weekday(selectedEvent.date)}, {formatDay(selectedEvent.date)} {monthLabel(getMonthIndex(selectedEvent.date), language)}</span>
+                <h3>{getLocalizedText(selectedEvent.title, language)}</h3>
+                <p>{getLocalizedText(selectedEvent.desc, language)}</p>
+              </div>
+            </aside>
+          )}
+        </div>
       </div>
     </Layout>
   );

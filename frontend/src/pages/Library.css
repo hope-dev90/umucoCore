@@ -1,0 +1,155 @@
+/* Library page — Doomshield layout */
+.lib-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 12px;
+  align-items: start;
+}
+
+.lib-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.lib-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 12px;
+}
+
+.lib-book {
+  background: #fff;
+  border-radius: var(--radius-card);
+  padding: 10px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.lib-book:hover { box-shadow: var(--shadow-sm); }
+.lib-book.is-selected { box-shadow: 0 0 0 2px var(--primary-soft); }
+
+.lib-book-cover {
+  height: 150px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--bg-soft);
+}
+
+.lib-book-cover img { width: 100%; height: 100%; object-fit: cover; }
+
+.lib-book h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 14px;
+  color: var(--text-primary);
+}
+
+.lib-book p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.lib-book-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 18px;
+  background: var(--bg-soft);
+  border-radius: 6px;
+  padding: 6px 6px;
+}
+
+.lib-book-actions button {
+  background: none;
+  font-size: 12px;
+  color: var(--text-primary);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.lib-book-actions button:hover { background: #fff; }
+
+/* Preview */
+.lib-preview {
+  position: sticky;
+  top: var(--layout-gap);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lib-preview .ds-section-label { margin: 4px 2px 0; }
+
+.lib-preview-card {
+  background: #fff;
+  border-radius: var(--radius-card);
+  padding: 16px;
+}
+
+.lib-preview-card h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.lib-preview-card small {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.lib-excerpt {
+  margin-top: 12px;
+  background: var(--bg-soft);
+  border-radius: 8px;
+  padding: 12px;
+  max-height: 220px;
+  overflow: hidden;
+  position: relative;
+}
+
+.lib-excerpt::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40px;
+  background: linear-gradient(transparent, var(--bg-soft));
+}
+
+.lib-excerpt p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.lib-excerpt p + p { margin-top: 4px; }
+
+.lib-excerpt p:first-child::first-letter {
+  float: left;
+  font-size: 34px;
+  line-height: 0.9;
+  font-weight: 500;
+  margin: 2px 6px 0 0;
+}
+
+.lib-meta {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.lib-meta span { display: inline-flex; align-items: center; gap: 4px; }
+
+.lib-read { width: 100%; margin-top: 12px; }
+
+@media (max-width: 1100px) {
+  .lib-body { grid-template-columns: minmax(0, 1fr); }
+  .lib-preview { position: static; }
+}
