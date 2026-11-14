@@ -176,7 +176,7 @@ export default function RiddlePopup() {
 
   // ── Labels ──
   const L = {
-    badge:       i18n(language, 'Riddle', 'Devinette', 'Igissakuzo'),
+    badge:       i18n(language, 'Riddle', 'Devinette', 'Igisakuzo'),
     askTitle:    i18n(language, 'Riddles await you!', 'Des devinettes vous attendent !', 'Ibisakuzo biraguteye !'),
     askSub:      i18n(language, 'Are you in the mood for some Rwandan riddles?', 'Êtes-vous prêt pour des devinettes rwandaises ?', 'Urashaka gukina ibisakuzo byo mu Rwanda?'),
     yes:         i18n(language, "Yes, let's go!", 'Oui, allons-y !', 'Yego, twagiye!'),
