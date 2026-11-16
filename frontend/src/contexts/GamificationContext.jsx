@@ -135,7 +135,8 @@ export function GamificationProvider({ children }) {
     if (!user) { setLoading(false); return; }
     setStreak(user.currentStreak || 0);
     setBestStreak(user.bestStreak || 0);
-    refresh().then(() => runDailyLogin());
+    // Admins are not learners: no streak/XP toast, and they stay off the leaderboard.
+    refresh().then(() => { if (user.role !== 'admin') runDailyLogin(); });
   }, [user?.id]); // eslint-disable-line
 
   // ── Award XP ─────────────────────────────────────────────────────────────

@@ -13,8 +13,16 @@ const CHAT_STRINGS = {
     dialogLabel: "Chat with Umuco",
     sendLabel: "Send message",
     typingLabel: "Typing...",
-    errorMsg: "Sorry, we couldn't get a response right now. / Ihangane, ntibishoboka kubona igisubizo ubu.",
+    errorMsg: "Sorry, we couldn't get a response right now. Please try again.",
     widgetLabel: "Umuco chat assistant",
+    errors: {
+      limit: "You've reached today's question limit. Please come back tomorrow.",
+      disabled: "The AI assistant has been paused by the administrators.",
+      not_configured: "The AI assistant isn't set up yet. Please try again later.",
+      rate_limited: "Too many questions at once. Please wait a moment.",
+      auth: "Please sign in to use the AI assistant.",
+      network: "No connection. Check your network and try again.",
+    },
   },
   rw: {
     greeting: "Muraho! Ndagufasha gute uyu munsi ku byerekeye umuco w'u Rwanda?",
@@ -24,8 +32,35 @@ const CHAT_STRINGS = {
     dialogLabel: "Ikiganiro na Umuco",
     sendLabel: "Ohereza ubutumwa",
     typingLabel: "Birategerejwe...",
-    errorMsg: "Ihangane, ntibishoboka kubona igisubizo ubu. / Sorry, we couldn't get a response right now.",
+    errorMsg: "Ihangane, ntibishoboka kubona igisubizo ubu. Ongera ugerageze.",
     widgetLabel: "Umuco chat assistant",
+    errors: {
+      limit: "Wageze ku mubare w'ibibazo wemerewe uyu munsi. Ongera ugerageze ejo.",
+      disabled: "Umufasha wa AI wahagaritswe by'agateganyo n'abayobozi.",
+      not_configured: "Umufasha wa AI ntarategurwa neza. Ongera ugerageze nyuma.",
+      rate_limited: "Ibibazo byinshi icyarimwe. Tegereza gato.",
+      auth: "Injira kugira ngo ukoreshe umufasha wa AI.",
+      network: "Nta interineti. Reba aho uhuza ugerageze nanone.",
+    },
+  },
+  fr: {
+    greeting: "Bonjour ! Comment puis-je vous aider aujourd'hui sur la culture et le patrimoine rwandais ?",
+    placeholder: "Écrivez ici...",
+    closeLabel: "Fermer la discussion",
+    openLabel: "Discuter avec Umuco",
+    dialogLabel: "Discussion avec Umuco",
+    sendLabel: "Envoyer le message",
+    typingLabel: "En train d'écrire...",
+    errorMsg: "Désolé, nous n'avons pas pu obtenir de réponse. Réessayez.",
+    widgetLabel: "Assistant Umuco",
+    errors: {
+      limit: "Vous avez atteint la limite de questions pour aujourd'hui. Réessayez demain.",
+      disabled: "L'assistant IA est temporairement désactivé par les administrateurs.",
+      not_configured: "L'assistant IA n'est pas encore configuré. Réessayez plus tard.",
+      rate_limited: "Trop de questions d'un coup. Patientez un instant.",
+      auth: "Connectez-vous pour utiliser l'assistant IA.",
+      network: "Pas de connexion. Vérifiez votre réseau et réessayez.",
+    },
   },
 };
 
@@ -65,15 +100,18 @@ export default function ChatWidget() {
     setLoading(true);
 
     try {
-      // Exclude the greeting from history sent to the API
-      const history = messages.filter((m) => m.role !== 'model' || messages.indexOf(m) > 0);
+      // Send the real conversation only: no greeting, no error bubbles, and no
+      // question whose answer failed (keeps user/model turns alternating).
+      const history = messages
+        .slice(1)
+        .filter((m, i, list) => !m.isError && !(m.role === 'user' && list[i + 1]?.isError));
       const reply = await sendMessage(history, text, language);
       setMessages((prev) => [...prev, { role: 'model', parts: reply }]);
     } catch (err) {
       console.error('ChatWidget send error:', err);
       setMessages((prev) => [
         ...prev,
-        { role: 'model', parts: strings.errorMsg, isError: true },
+        { role: 'model', parts: strings.errors?.[err.code] || strings.errorMsg, isError: true },
       ]);
     } finally {
       setLoading(false);
