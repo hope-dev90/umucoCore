@@ -67,6 +67,188 @@
   text-align: center;
 }
 
+/* ── Month calendar ── */
+.nd-cal {
+  --t-civic: #8D493A;
+  --t-remembrance: #6B4E8A;
+  --t-culture: #C0802F;
+  --t-community: #3F6E7A;
+  --t-faith: #4E5D94;
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  background: #fff;
+}
+
+.nd-cal .type-civic { --tc: var(--t-civic); }
+.nd-cal .type-remembrance { --tc: var(--t-remembrance); }
+.nd-cal .type-culture { --tc: var(--t-culture); }
+.nd-cal .type-community { --tc: var(--t-community); }
+.nd-cal .type-faith { --tc: var(--t-faith); }
+
+.nd-cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.nd-cal-head h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.nd-cal-nav {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nd-cal-nav:not(:disabled):hover { background: var(--primary); color: #fff; }
+.nd-cal-nav:disabled { opacity: 0.35; cursor: default; }
+
+.nd-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.nd-cal-weekday {
+  padding: 4px 0 6px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.nd-cal-weekday.is-weekend { color: var(--primary); }
+
+.nd-cal-day {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 78px;
+  padding: 7px 7px 8px;
+  border-radius: 10px;
+  background: var(--bg-soft);
+  border: 1.5px solid transparent;
+  text-align: left;
+  color: var(--text-primary);
+  overflow: hidden;
+  cursor: default;
+  transition: transform 0.12s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.nd-cal-day.is-weekend { background: #F3EDE6; }
+.nd-cal-day.is-outside { background: transparent; color: #C4BBB3; }
+
+.nd-cal-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Important days: tinted cell, solid date circle and a label in the type's color. */
+.nd-cal-day.has-event {
+  background: color-mix(in srgb, var(--tc) 12%, #fff);
+  border-color: color-mix(in srgb, var(--tc) 30%, transparent);
+  cursor: pointer;
+}
+
+.nd-cal-day.has-event .nd-cal-num {
+  background: var(--tc);
+  color: #fff;
+  font-weight: 600;
+}
+
+.nd-cal-day.has-event.is-outside { opacity: 0.55; }
+
+.nd-cal-day.has-event:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px -12px var(--tc);
+}
+
+.nd-cal-day.is-selected {
+  border-color: var(--tc);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--tc) 25%, transparent);
+}
+
+.nd-cal-tag {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 600;
+  color: var(--tc);
+}
+
+.nd-cal-day.is-today .nd-cal-num {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--text-primary);
+}
+
+.nd-cal-day.is-today:not(.has-event) .nd-cal-num {
+  background: var(--text-primary);
+  color: #fff;
+}
+
+.nd-cal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.nd-cal-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nd-cal-legend-item i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--tc);
+}
+
+.nd-cal-legend-item.is-today-key i {
+  background: #fff;
+  box-shadow: 0 0 0 2px var(--text-primary);
+}
+
+@media (max-width: 720px) {
+  .nd-cal { padding: 10px; }
+  .nd-cal-grid { gap: 4px; }
+  .nd-cal-day {
+    min-height: 46px;
+    align-items: center;
+    padding: 5px 2px;
+  }
+  .nd-cal-tag { display: none; }
+  .nd-cal-num { min-width: 24px; height: 24px; font-size: 12px; }
+}
+
 .nd-body {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 280px;
@@ -169,7 +351,7 @@
 
 .nd-detail {
   position: sticky;
-  top: var(--layout-gap);
+  top: calc(var(--topbar-height) + var(--layout-gap) * 2);
   overflow: hidden;
 }
 

@@ -1,12 +1,14 @@
 :root {
-  --primary: #5B2A1E;
-  --primary-dark: #3D1E15;
-  --primary-soft: #F8E1D8;
+  --primary: #8D493A;
+  --primary-dark: #74392D;
+  --primary-soft: #F6E3DB;
+  --choco-mint-bg: #DCEEE3;
+  --choco-mint-ink: #8D493A;
   --accent-gold: var(--primary);
   --accent-olive: var(--primary);
   --bg-main: #F4F0EA;
   --bg-soft: #F7F3EE;
-  --brand-gradient: linear-gradient(150deg, #9A5442 0%, #6E3427 55%, #4E2219 100%);
+  --brand-gradient: linear-gradient(150deg, #A35D4B 0%, #8D493A 55%, #7A3D30 100%);
   --bg-card: #FFFFFF;
   --bg-sidebar: #FFFFFF;
   --bg-dark: var(--primary-dark);

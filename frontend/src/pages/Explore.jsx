@@ -11,7 +11,7 @@ import { mapHeritageApiItem } from '../utils/heritageMapping';
 import { localizeItem } from '../utils/contentLocale';
 import { getLocalizedText } from '../utils/i18n';
 import commonsImagesCached from '../data/commonsImageCache.json';
-import { ArrowRight, CheckCircle2, ChevronDown, Headphones, History, Landmark, MapPin, MapPinned, Play, RefreshCw } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Headphones, History, Landmark, MapPin, MapPinned, Play, RefreshCw } from 'lucide-react';
 import { apiUrl } from '../config/api';
 import nyanzaImg from '../assets/explore/nyanza.jpg';
 import buhangaImg from '../assets/explore/buhanga.jpg';
@@ -26,6 +26,7 @@ import ruganzuImg from '../assets/listen/ruganzu.png';
 import notFoundImg from '../assets/explore/notfound.png';
 import { trackView } from '../utils/trackView';
 import ReportButton from '../components/ReportButton';
+import FilterSelect from '../components/FilterSelect';
 import exploreStories from '../data/explore-stories.json';
 
 const fallbackImages = [nyanzaImg, buhangaImg, intoreImg, weavingImg, imigongoImg, artifactImg];
@@ -519,40 +520,38 @@ export default function Explore() {
           <h1>{t('explore.heroTitle')}</h1>
           <p>{t('explore.heroDesc')}</p>
           <div className="explore-filters">
-            <label className="explore-select">
-              <MapPin size={13} aria-hidden="true" />
-              <select value={activeRegion} onChange={(e) => handleRegionChange(e.target.value)} aria-label={t('explore.regions')}>
-                {regions.map((region) => <option key={region} value={region}>{region}</option>)}
-              </select>
-              <ChevronDown size={12} aria-hidden="true" />
-            </label>
-            <label className="explore-select">
-              <MapPinned size={13} aria-hidden="true" />
-              <select value={activePlace} onChange={(e) => setActivePlace(e.target.value)} aria-label={t('explore.places')}>
-                {visiblePlaces.map((place) => <option key={place.value} value={place.value}>{place.label}</option>)}
-              </select>
-              <ChevronDown size={12} aria-hidden="true" />
-            </label>
-            <label className="explore-select">
-              <History size={13} aria-hidden="true" />
-              <select
-                value={activeEras[0] || ''}
-                onChange={(e) => setActiveEras(e.target.value ? [e.target.value] : [])}
-                aria-label={t('explore.eras')}
-              >
-                <option value="">{t('explore.historicalPeriod')}</option>
-                {eras.map((era) => <option key={era} value={era}>{era}</option>)}
-              </select>
-              <ChevronDown size={12} aria-hidden="true" />
-            </label>
-            <label className="explore-select">
-              <Landmark size={13} aria-hidden="true" />
-              <select value={activeCategory} onChange={(e) => setActiveCategory(e.target.value)} aria-label={t('explore.topicCategory')}>
-                <option value="all">{t('explore.topicCategory')}</option>
-                {categoryOptions.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
-              </select>
-              <ChevronDown size={12} aria-hidden="true" />
-            </label>
+            <FilterSelect
+              icon={MapPin}
+              label={t('explore.regions')}
+              value={activeRegion}
+              defaultValue={t('explore.allRegions')}
+              options={regions.map((region) => ({ value: region, label: region }))}
+              onChange={handleRegionChange}
+            />
+            <FilterSelect
+              icon={MapPinned}
+              label={t('explore.places')}
+              value={activePlace}
+              defaultValue="all"
+              options={visiblePlaces}
+              onChange={setActivePlace}
+            />
+            <FilterSelect
+              icon={History}
+              label={t('explore.eras')}
+              value={activeEras[0] || ''}
+              defaultValue=""
+              options={[{ value: '', label: t('explore.historicalPeriod') }, ...eras.map((era) => ({ value: era, label: era }))]}
+              onChange={(era) => setActiveEras(era ? [era] : [])}
+            />
+            <FilterSelect
+              icon={Landmark}
+              label={t('explore.topicCategory')}
+              value={activeCategory}
+              defaultValue="all"
+              options={[{ value: 'all', label: t('explore.topicCategory') }, ...categoryOptions]}
+              onChange={setActiveCategory}
+            />
             <button type="button" className="explore-reset" onClick={clearAllFilters} disabled={!hasActiveFilters}>
               {t('explore.reset')}
             </button>
