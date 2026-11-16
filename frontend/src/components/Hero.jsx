@@ -139,8 +139,14 @@ function Hero({ onNavigate }) {
             </h1>
 
             <p className="text-xs sm:text-sm md:text-base text-[#6F5B55] max-w-xl leading-relaxed mb-6 sm:mb-8 font-semibold">
-            {t('hero.description')}
-          </p>
+              {t('hero.description').split('\n').map((line, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && ' '}
+                  {i > 0 && <br className="hidden sm:inline" />}
+                  {line}
+                </React.Fragment>
+              ))}
+            </p>
 
             <div className="hero-rise flex flex-wrap items-center gap-3 sm:gap-4" style={{ '--i': 3 }}>
               <button

@@ -296,7 +296,7 @@ export const translations = {
     "hero.title1": "The Sanctuary of",
     "hero.title2": "Our Heritage.",
     "hero.description":
-      "Sustaining the nation's pulse by keeping our roots, carrying the spoken wisdom of our ancestors, for our shared pact.",
+      "Sustaining the nation's pulse by keeping our roots, carrying the \nspoken wisdom of our ancestors, for our shared pact.",
     "hero.getInvolved": "Get Involved",
     "hero.exploreMore": "Explore More",
     "hero.stats.oralStories": "ORAL STORIES",
