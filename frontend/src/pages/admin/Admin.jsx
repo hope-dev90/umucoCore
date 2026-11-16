@@ -1,23 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
-  AlertTriangle,
+  Activity,
   Archive,
   BarChart2,
-  BookOpen,
   Download,
   Flag,
-  Image,
-  Mic,
   Plus,
   RefreshCw,
-  Save,
-  Search,
-  Settings,
-  SlidersHorizontal,
   Sparkles,
   Upload,
-  User,
   UserPlus,
   Users,
 } from 'lucide-react';
@@ -32,10 +24,27 @@ import TrilingualField, {
   localizedPreview,
   normalizeLocalizedText,
 } from '../../components/admin/TrilingualField';
+import {
+  AdminI18nContext,
+  AiSection,
+  AnalyticsSection,
+  CommunitySection,
+  ContributorsSection,
+  EngagementStrip,
+  LiveTable,
+  RecentActivity,
+  RecordsSection,
+  SettingsPanel,
+  StatTile,
+  TopLearners,
+  formatNumber,
+  timeAgo,
+  useAdminText,
+} from './AdminLive';
 import './Admin.css';
+import './AdminDs.css';
 
 const REFRESH_MS = 30000;
-const AdminI18nContext = React.createContext((text) => text);
 
 const sections = [
   'metrics',
@@ -57,19 +66,19 @@ const sections = [
 
 const titles = {
   metrics: ['Dashboard', 'Platform overview - last updated just now'],
-  archive: ['Archive', 'Live archive records are managed from Content Registry'],
-  stories: ['Stories & Legends', 'Story records are managed from Content Registry'],
+  archive: ['Archive', 'Every record in the archive, from the database'],
+  stories: ['Stories & Legends', 'Stories in the app and imigani in the database'],
   collections: ['Collections', 'Curated groupings displayed in the Archive and Explore pages'],
-  national: ['National Collection', 'National records are managed from Heritage items'],
+  national: ['National Collection', 'Heritage records with region, era and location'],
   review: ['Review Queue', 'Submissions and flags waiting for admin sign-off'],
   content: ['Content Registry', 'Videos, audio, and heritage asset intake'],
   news: ['News Desk', 'Publication control and public updates'],
   users: ['Users', 'Registered accounts - manage roles and access'],
-  contributors: ['Contributors', 'Contributor access is controlled from user roles'],
+  contributors: ['Contributors', 'People who submit content and reports'],
   map: ['Cultural Map', 'Mapped sites come from live heritage coordinates'],
-  community: ['Community Moderation', 'Moderation requires live community records'],
-  ai: ['AI Assistant', 'AI controls require a connected AI backend'],
-  analytics: ['Analytics', 'Live analytics require backend event tracking'],
+  community: ['Community', 'Everything the community has sent: submissions and reports'],
+  ai: ['AI Assistant', 'How people use the Umuco AI assistant'],
+  analytics: ['Analytics', 'Sign-ups, logins, views and learning progress'],
   settings: ['Settings', 'Platform configuration and system controls'],
 };
 
@@ -92,7 +101,6 @@ const contentConfig = {
   exercise: { label: 'Exercises', endpoint: '/api/admin/exercises', listKey: 'exercises' },
 };
 
-const formatNumber = (value) => new Intl.NumberFormat('en').format(Number(value || 0));
 const cleanData = (data = []) => data.map((item) => ({ label: item.label || 'Unspecified', value: Number(item.value || 0) }));
 const tabFromHash = (hash) => sections.includes((hash || '#metrics').replace('#', '')) ? (hash || '#metrics').replace('#', '') : 'metrics';
 const textKeysByType = {
@@ -234,6 +242,34 @@ const ADMIN_COPY = {
     'French or Kinyarwanda can be completed later.': 'Le francais ou le kinyarwanda peuvent etre completes plus tard.',
     'PDF report opened. Choose Save as PDF in the print dialog.': 'Rapport PDF ouvert. Choisissez Enregistrer en PDF dans la fenetre d impression.',
     'Please allow popups to download the PDF report.': 'Autorisez les fenetres popup pour telecharger le rapport PDF.',
+    'Admin portal': 'Portail admin',
+    'Active this week': 'Actifs cette semaine',
+    'AI questions': 'Questions IA',
+    'XP earned': 'XP gagnes',
+    'On a streak': 'En serie',
+    'Content views': 'Vues de contenu',
+    'Saved items': 'Elements enregistres',
+    'Badges earned': 'Badges obtenus',
+    'Recent Activity': 'Activite recente',
+    'Top Learners': 'Meilleurs apprenants',
+    'Questions asked': 'Questions posees',
+    'People using AI': 'Utilisateurs de l IA',
+    'Answer rate': 'Taux de reponse',
+    'Avg response': 'Reponse moyenne',
+    'Sensitive flags': 'Signalements sensibles',
+    'Questions per day': 'Questions par jour',
+    'Assistant status': 'Etat de l assistant',
+    'Recent questions': 'Questions recentes',
+    'Daily logins': 'Connexions quotidiennes',
+    'New sign-ups': 'Nouvelles inscriptions',
+    'Most viewed content': 'Contenus les plus vus',
+    'Users by level': 'Utilisateurs par niveau',
+    'Community activity': 'Activite de la communaute',
+    'Waiting for review': 'En attente de revue',
+    'AI Assistant settings': 'Parametres de l assistant IA',
+    'Settings saved.': 'Parametres enregistres.',
+    'Showing': 'Affichage',
+    'Show more': 'Afficher plus',
   },
   rw: {
     'Dashboard': 'Imbonerahamwe',
@@ -346,11 +382,38 @@ const ADMIN_COPY = {
     'French or Kinyarwanda can be completed later.': 'Igifaransa cyangwa Ikinyarwanda byuzuzwa nyuma.',
     'PDF report opened. Choose Save as PDF in the print dialog.': 'Raporo ya PDF yafunguwe. Hitamo kubika nka PDF.',
     'Please allow popups to download the PDF report.': 'Emera popup kugira ngo ukuremo raporo ya PDF.',
+    'Admin portal': 'Urubuga rw ubuyobozi',
+    'Active this week': 'Abakoze iki cyumweru',
+    'AI questions': 'Ibibazo bya AI',
+    'XP earned': 'XP zabonetse',
+    'On a streak': 'Bari ku murongo',
+    'Content views': 'Ibyarebwe',
+    'Saved items': 'Ibyabitswe',
+    'Badges earned': 'Imidari yabonetse',
+    'Recent Activity': 'Ibikorwa biheruka',
+    'Top Learners': 'Abiga cyane',
+    'Questions asked': 'Ibibazo byabajijwe',
+    'People using AI': 'Abakoresha AI',
+    'Answer rate': 'Igipimo cy ibisubizo',
+    'Avg response': 'Igihe cy igisubizo',
+    'Sensitive flags': 'Ibibazo byihariye',
+    'Questions per day': 'Ibibazo ku munsi',
+    'Assistant status': 'Imiterere y umufasha',
+    'Recent questions': 'Ibibazo biheruka',
+    'Daily logins': 'Kwinjira buri munsi',
+    'New sign-ups': 'Abiyandikishije bashya',
+    'Most viewed content': 'Ibyarebwe cyane',
+    'Users by level': 'Abakoresha ku rwego',
+    'Community activity': 'Ibikorwa by umuryango',
+    'Waiting for review': 'Bitegereje gusuzumwa',
+    'AI Assistant settings': 'Igenamiterere ry umufasha wa AI',
+    'Settings saved.': 'Igenamiterere ryabitswe.',
+    'Showing': 'Byerekanwa',
+    'Show more': 'Erekana ibindi',
   },
 };
 
 const adminTranslate = (text, language) => ADMIN_COPY[language]?.[text] || text;
-const useAdminText = () => React.useContext(AdminI18nContext);
 
 function openAdminPdfReport({ stats, analytics, users, content, reviewQueue, refreshedAt, language }) {
   const win = window.open('', '_blank');
@@ -393,7 +456,7 @@ function openAdminPdfReport({ stats, analytics, users, content, reviewQueue, ref
           h2 { color: #8D493A; font-size: 15px; margin: 24px 0 10px; }
           p, td, th { font-size: 11px; line-height: 1.45; }
           .meta { color: #6F5B55; margin: 0; }
-          .kpis { display: grid; gap: 10px; grid-template-columns: repeat(4, 1fr); margin: 18px 0; }
+          .kpis { display: grid; gap: 10px; grid-template-columns: repeat(5, 1fr); margin: 18px 0; }
           .kpi { border: 1px solid #EADBC8; border-radius: 8px; padding: 12px; }
           .kpi span { color: #6F5B55; display: block; font-size: 10px; text-transform: uppercase; }
           .kpi strong { display: block; font-size: 20px; margin-top: 6px; }
@@ -416,6 +479,7 @@ function openAdminPdfReport({ stats, analytics, users, content, reviewQueue, ref
           <div class="kpi"><span>${adminTranslate('Content records', language)}</span><strong>${formatNumber(stats.contentTotal)}</strong></div>
           <div class="kpi"><span>${adminTranslate('Contributors', language)}</span><strong>${formatNumber(stats.contributions)}</strong></div>
           <div class="kpi"><span>${adminTranslate('Review Queue', language)}</span><strong>${formatNumber(reviewRows.length)}</strong></div>
+          <div class="kpi"><span>${adminTranslate('AI questions', language)}</span><strong>${formatNumber(stats.aiQueries)}</strong></div>
         </section>
         <h2>Content Registry</h2>
         <table><thead><tr><th>Type</th><th>Total</th><th>Recent sample</th></tr></thead><tbody>${contentSummary}</tbody></table>
@@ -448,18 +512,6 @@ function openAdminPdfReport({ stats, analytics, users, content, reviewQueue, ref
   return true;
 }
 
-function KpiCard({ label, value, note, icon: Icon, tone = 'primary', trend = 'up' }) {
-  const ta = useAdminText();
-  return (
-    <div className={`admin-kpi admin-kpi-${tone}`}>
-      <div className="admin-kpi-icon">{Icon && <Icon size={18} />}</div>
-      <span>{ta(label)}</span>
-      <strong>{value}</strong>
-      <small><b className={trend}>{trend === 'down' ? 'down' : 'up'}</b> {note}</small>
-    </div>
-  );
-}
-
 function Field({ label, children }) {
   const ta = useAdminText();
   return <label className="admin-field"><span>{ta(label)}</span>{children}</label>;
@@ -473,53 +525,30 @@ function PageHeader({ activeTab, refreshedLabel, goTab, showToast, loadAdminData
   const ta = useAdminText();
   const [title, sub] = titles[activeTab] || titles.metrics;
   const subtitle = activeTab === 'metrics' ? `${ta('Platform overview - last updated just now')} ${refreshedLabel}` : ta(sub);
+  const showPrimary = !['settings', 'content', 'users', 'ai', 'review'].includes(activeTab);
   return (
-    <header className="admin-command-header">
-      <div>
+    <header className="admin-command-header ds-hero">
+      <div className="ds-hero-glow" aria-hidden="true" />
+      <div className="ds-diamonds" aria-hidden="true" />
+      <div className="admin-hero-text">
+        <span className="ds-pill">{ta('Admin portal')}</span>
         <h1>{ta(title)}</h1>
         <p>{subtitle}</p>
       </div>
       <div className="admin-header-actions">
-        <button type="button" className="admin-btn admin-btn-ghost" onClick={() => loadAdminData(true, true)}>
+        <button type="button" className="admin-btn admin-btn-hero" onClick={() => loadAdminData(true, true)}>
           <RefreshCw size={13} /> {ta('Refresh Data')}
         </button>
-        <button type="button" className="admin-btn admin-btn-ghost" onClick={onDownloadReport}>
+        <button type="button" className="admin-btn admin-btn-hero" onClick={onDownloadReport}>
           <Download size={13} /> {ta('Download PDF')}
         </button>
-        <button type="button" className="admin-btn admin-btn-primary" onClick={() => activeTab === 'settings' ? showToast('Settings saved') : goTab(activeTab === 'users' ? 'users' : 'content')}>
-          {activeTab === 'settings' ? <Save size={13} /> : <Plus size={13} />} {activeTab === 'settings' ? ta('Save Changes') : activeTab === 'users' ? ta('Manage Users') : ta('Manage Records')}
-        </button>
+        {showPrimary && (
+          <button type="button" className="admin-btn admin-btn-light" onClick={() => goTab('content')}>
+            <Plus size={13} /> {ta('Manage Records')}
+          </button>
+        )}
       </div>
     </header>
-  );
-}
-
-function TableCard({ title, search, filters = [], headers, rows, renderRow, footer }) {
-  const [activeFilter, setActiveFilter] = useState(filters[0] || 'All');
-  return (
-    <div className="admin-table-card">
-      <div className="admin-table-toolbar">
-        {title && <div className="admin-table-title">{title}</div>}
-        {search && <div className="admin-table-search"><Search size={13} /><input placeholder={search} /></div>}
-        {filters.length > 0 && (
-          <div className="admin-filter-chips">
-            {filters.map((filter) => (
-              <button key={filter} type="button" className={activeFilter === filter ? 'active' : ''} onClick={() => setActiveFilter(filter)}>
-                {filter}
-              </button>
-            ))}
-          </div>
-        )}
-        {search && <button type="button" className="admin-btn admin-btn-ghost"><SlidersHorizontal size={13} /> Filters</button>}
-      </div>
-      <div className="admin-native-table-wrap">
-        <table className="admin-native-table">
-          <thead><tr>{headers.map((head) => <th key={head}>{head}</th>)}</tr></thead>
-          <tbody>{rows.map((row, index) => renderRow(row, index))}</tbody>
-        </table>
-      </div>
-      {footer && <div className="admin-table-pagination">{footer}<div><button type="button">1</button><button type="button">2</button><button type="button">3</button><button type="button">...</button></div></div>}
-    </div>
   );
 }
 
@@ -533,25 +562,13 @@ function ProgressRow({ label, value, max = 100, tone = '' }) {
   );
 }
 
-function ActivityItem({ icon: Icon = Archive, tone = '', title, desc, time, actions }) {
-  return (
-    <div className="admin-activity-item">
-      <span className={`admin-activity-icon ${tone}`}><Icon size={14} /></span>
-      <div>
-        <div className="admin-activity-title"><strong>{title}</strong>{time && <small>{time}</small>}</div>
-        {desc && <p>{desc}</p>}
-        {actions && <div className="admin-mod-actions">{actions}</div>}
-      </div>
-    </div>
-  );
-}
-
 function ActivityChart({ title, data }) {
+  const ta = useAdminText();
   const rows = data?.length ? data : [];
   const max = Math.max(1, ...rows.map((row) => row.value));
   return (
     <div className="admin-chart-card">
-      <div className="admin-section-title">{title}<span>Last 12 months</span></div>
+      <div className="admin-section-title">{ta(title)}<span>{ta('Last 6 months')}</span></div>
       {rows.length ? (
         <>
           <div className="admin-activity-chart">
@@ -573,54 +590,9 @@ function ActivityChart({ title, data }) {
   );
 }
 
-function UsageProofGraph({ stats, analytics }) {
-  const usageRows = [
-    { label: 'Users', value: Number(stats.users || 0), tone: '' },
-    { label: 'Verified', value: Number(stats.verifiedUsers || stats.verified || 0), tone: 'green' },
-    { label: 'Content', value: Number(stats.contentTotal || 0), tone: 'gold' },
-    { label: 'Contributors', value: Number(stats.contributions || 0), tone: 'blue' },
-    { label: 'AI / Events', value: Number(stats.aiQueries || stats.events || stats.views || 0), tone: 'muted' },
-  ].filter((row) => row.value > 0);
-  const monthly = cleanData(analytics.monthlyUsage || analytics.monthlyViews || analytics.monthlyContent);
-  const chartRows = monthly.length ? monthly : usageRows;
-  const max = Math.max(1, ...chartRows.map((row) => row.value));
-
-  return (
-    <div className="admin-chart-card admin-usage-proof">
-      <div className="admin-section-title">App Usage Proof<span>{monthly.length ? 'Monthly activity' : 'Live platform totals'}</span></div>
-      {chartRows.length ? (
-        <>
-          <div className="admin-usage-bars">
-            {chartRows.map((row, index) => (
-              <div className="admin-usage-bar-item" key={`${row.label}-${index}`}>
-                <div className="admin-usage-bar-track">
-                  <span
-                    className={row.tone || (index % 3 === 1 ? 'green' : index % 3 === 2 ? 'gold' : '')}
-                    style={{ height: `${Math.max(10, (row.value / max) * 100)}%` }}
-                  />
-                </div>
-                <strong>{formatNumber(row.value)}</strong>
-                <small>{row.label}</small>
-              </div>
-            ))}
-          </div>
-          <p className="admin-usage-note">Generated from the admin API response, so it reflects the records currently in the backend.</p>
-        </>
-      ) : (
-        <EmptyAdminState title="No usage records yet" body="Users, content records, views, or activity events will appear here after the app is used." />
-      )}
-    </div>
-  );
-}
-
 function QuickAction({ icon: Icon, label, onClick }) {
   const ta = useAdminText();
   return <button type="button" className="admin-quick-action" onClick={onClick}><span><Icon size={16} /></span>{ta(label)}</button>;
-}
-
-function Toggle({ defaultOn = true }) {
-  const [on, setOn] = useState(defaultOn);
-  return <button type="button" className={`admin-toggle ${on ? '' : 'off'}`} onClick={() => setOn((value) => !value)} aria-pressed={on} />;
 }
 
 export default function Admin() {
@@ -636,6 +608,10 @@ export default function Admin() {
   const [content, setContent] = useState({ videos: [], audio: [], heritage: [], collections: [], news: [], proverbs: [], exercises: [] });
   const [forms, setForms] = useState(emptyForms);
   const [editingContent, setEditingContent] = useState(null);
+  const [engagement, setEngagement] = useState(null);
+  const [aiUsage, setAiUsage] = useState(null);
+  const [aiError, setAiError] = useState('');
+  const [contributions, setContributions] = useState([]);
   const [reviewQueue, setReviewQueue] = useState({ pending: [], flagged: [] });
   const [reviewLoading, setReviewLoading] = useState(false);
   const [reviewError, setReviewError] = useState('');
@@ -686,6 +662,12 @@ export default function Admin() {
       setUsers(userData.users || []);
       setContent(contentData || {});
       loadReviewQueue();
+      // Secondary panels load independently so one failure never blanks the dashboard.
+      request('/api/admin/engagement').then(setEngagement).catch(() => {});
+      request('/api/admin/contributions').then((data) => setContributions(data.contributions || [])).catch(() => {});
+      request('/api/admin/ai-usage')
+        .then((data) => { setAiUsage(data); setAiError(''); })
+        .catch((err) => setAiError(err.message || 'AI usage could not be loaded.'));
       if (silent && notify) showToast('Administrative data refreshed.');
     } catch (err) {
       setMessage(err.message || 'Failed to load admin data.');
@@ -888,6 +870,17 @@ export default function Admin() {
     showToast(adminTranslate(opened ? 'PDF report opened. Choose Save as PDF in the print dialog.' : 'Please allow popups to download the PDF report.', language));
   };
 
+  const exportData = () => {
+    const payload = { exportedAt: new Date().toISOString(), stats, analytics, engagement, aiUsage, users, content, contributions, reviewQueue };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `umuco-admin-export-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast(adminTranslate('Export downloaded.', language));
+  };
+
   const currentItems = content[contentConfig[activeContent]?.listKey] || [];
   const refreshedLabel = refreshedAt ? new Date(refreshedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Pending';
   const contentMix = cleanData(analytics.contentMix);
@@ -899,7 +892,8 @@ export default function Admin() {
     const newsCount = count('news');
     const userCount = users.length || Number(stats.users || 0);
     const contentTotal = Number(stats.contentTotal || 0);
-    const contributorCount = Number(stats.contributions || 0);
+    const contributorCount = (engagement?.contributors || []).length;
+    const aiCount = Number(aiUsage?.summary?.total ?? stats.aiQueries ?? 0);
     const reviewCount = (reviewQueue.pending || []).length + (reviewQueue.flagged || []).length;
     const mapCount = (content.heritage || []).filter((item) => item.lat && item.lng).length;
 
@@ -933,13 +927,13 @@ export default function Admin() {
         items: [
           { label: `${tr('Map')} (${formatNumber(mapCount)})`, path: '/admin#map', icon: 'map' },
           { label: tr('Community'), path: '/admin#community', icon: 'community' },
-          { label: tr('AI Assistant'), path: '/admin#ai', icon: 'sparkles' },
+          { label: `${tr('AI Assistant')} (${formatNumber(aiCount)})`, path: '/admin#ai', icon: 'sparkles' },
           { label: tr('Analytics'), path: '/admin#analytics', icon: 'chart' },
           { label: tr('Settings'), path: '/admin#settings', icon: 'settings' },
         ],
       },
     ];
-  }, [content, language, reviewQueue, stats.contentTotal, stats.contributions, stats.users, users.length]);
+  }, [aiUsage, content, engagement, language, reviewQueue, stats.aiQueries, stats.contentTotal, stats.users, users.length]);
 
   return (
     <AdminI18nContext.Provider value={(text) => adminTranslate(text, language)}>
@@ -953,53 +947,45 @@ export default function Admin() {
         <div className="admin-main-pane">
           {activeTab === 'metrics' && (
             <>
-              <section className="admin-kpi-grid">
-                <KpiCard label="Total users" value={formatNumber(stats.users)} note={`${stats.verificationRate || 0}% verified`} icon={Users} />
-                <KpiCard label="Cultural items" value={formatNumber(stats.contentTotal)} note="live records" icon={Archive} tone="green" />
-                <KpiCard label="Active contributors" value={formatNumber(stats.contributions)} note="live roles" icon={UserPlus} tone="gold" />
-                <KpiCard label="AI queries" value={formatNumber(stats.aiQueries)} note="event tracking" icon={Sparkles} tone="blue" trend="down" />
+              <section className="adm-tiles">
+                <StatTile icon={Users} label="Total users" value={formatNumber(stats.users)} note={`${formatNumber(engagement?.totals?.new7)} new this week · ${stats.verificationRate || 0}% verified`} tone="brand" />
+                <StatTile icon={Activity} label="Active this week" value={formatNumber(engagement?.totals?.active7)} note={`${formatNumber(engagement?.totals?.active30)} in the last 30 days`} />
+                <StatTile icon={Archive} label="Cultural items" value={formatNumber(stats.contentTotal)} note="Live records in the archive" />
+                <StatTile icon={Sparkles} label="AI questions" value={formatNumber(aiUsage?.summary?.total ?? stats.aiQueries)} note={`${formatNumber(aiUsage?.summary?.today)} today · ${formatNumber(aiUsage?.summary?.users)} people`} />
               </section>
+              <EngagementStrip engagement={engagement} />
               <section className="admin-quick-actions">
                 <QuickAction icon={Upload} label="Open Registry" onClick={() => goTab('content')} />
                 <QuickAction icon={UserPlus} label="User Roles" onClick={() => goTab('users')} />
                 <QuickAction icon={Flag} label="Review Queue" onClick={() => goTab('review')} />
+                <QuickAction icon={Sparkles} label="AI Assistant" onClick={() => goTab('ai')} />
                 <QuickAction icon={BarChart2} label="Analytics" onClick={() => goTab('analytics')} />
               </section>
               <section className="admin-overview-grid">
                 <div className="admin-overview-left">
-                  <UsageProofGraph stats={stats} analytics={analytics} />
+                  <RecentActivity items={engagement?.recentActivity || []} />
                   <ActivityChart title="Content Upload Activity" data={analytics.monthlyContent} />
-                  <div className="admin-chart-card">
-                    <div className="admin-section-title">Recent Activity<span>Audit log</span></div>
-                    <ActivityItem icon={BookOpen} title="New story published: Ruganzu II Ndori" desc="Submitted by Contributor Aline M. - approved by you" time="2h ago" />
-                    <ActivityItem icon={UserPlus} tone="gold" title="3 new users registered" desc="Jean-Paul K., Solange U., Emmanuel N. joined as Explorers" time="5h ago" />
-                    <ActivityItem icon={Flag} tone="red" title="Community discussion flagged" desc="Topic Colonial interpretations of Ubuhake - 2 reports pending review" time="Yesterday" />
-                    <ActivityItem icon={Mic} title="Field recording digitised: Inanga, Butare 1971" desc="Added to Archive - Music & Performance collection" time="2 days ago" />
-                  </div>
                 </div>
                 <aside className="admin-overview-side">
+                  <SystemHealth stats={stats} aiUsage={aiUsage} loadError={!!message && !stats.users} goTab={goTab} />
+                  <TopLearners rows={engagement?.topLearners || []} />
                   <div className="admin-chart-card admin-card-sm">
-                    <div className="admin-section-title">Content Breakdown</div>
+                    <div className="admin-section-title">{adminTranslate('Content Breakdown', language)}</div>
                     {contentMix.length ? contentMix.map((row, index) => <ProgressRow key={row.label} label={row.label} value={row.value} max={maxContentValue} tone={index === 1 ? 'gold' : index > 2 ? 'muted' : ''} />) : <EmptyAdminState title="No content metrics yet" body="Add records in Content Registry to populate this breakdown." />}
                   </div>
-                  <SystemHealth stats={stats} loadError={!!message && !stats.users} />
                   <RecentlyJoined users={users} />
                 </aside>
               </section>
             </>
           )}
 
-          {activeTab === 'archive' && <RegistryNotice title="Archive is live-data only" body="Use Content Registry to add, edit, remove, and search videos, audio, heritage, collections, imigani, and exercises." goTab={goTab} />}
-          {activeTab === 'stories' && <RegistryNotice title="Story demo rows removed" body="Publish story-like records through Heritage or Imigani so the public dashboard reads from the backend." goTab={goTab} />}
-          {activeTab === 'collections' && <RegistryNotice title="Collections are backend controlled" body="Use Content Registry > Collections to add, edit, remove, and publish collection records." goTab={goTab} />}
-          {activeTab === 'national' && <RegistryNotice title="National records are heritage records" body="Add them in Content Registry with region, era, and coordinates. They will appear from the backend only." goTab={goTab} />}
+          {['archive', 'stories', 'collections', 'national', 'map'].includes(activeTab) && <RecordsSection kind={activeTab} content={content} goTab={goTab} />}
           {activeTab === 'review' && <ReviewQueueSection queue={reviewQueue} loading={reviewLoading} error={reviewError} reload={loadReviewQueue} approveReviewItem={approveReviewItem} rejectReviewItem={rejectReviewItem} reviewEditing={reviewEditing} setReviewEditing={setReviewEditing} />}
-          {activeTab === 'map' && <RegistryNotice title="Map markers use heritage coordinates" body="Add latitude and longitude on Heritage records in Content Registry to control the map." goTab={goTab} />}
-          {activeTab === 'contributors' && <RegistryNotice title="Contributor controls use user roles" body="Use the Users section to search accounts, change roles, or remove duplicate users." goTab={goTab} target="users" action="Open Users" />}
-          {activeTab === 'community' && <RegistryNotice title="No fake moderation queue" body="A moderation backend can be connected here when community posts are stored in the database." goTab={goTab} />}
-          {activeTab === 'ai' && <RegistryNotice title="No fake AI analytics" body="Connect AI query logging before showing query counts, flagged prompts, or model health." goTab={goTab} />}
-          {activeTab === 'analytics' && <RegistryNotice title="No fake traffic analytics" body="Connect backend event tracking before showing traffic charts and top pages." goTab={goTab} />}
-          {activeTab === 'settings' && <SettingsSection showToast={showToast} />}
+          {activeTab === 'contributors' && <ContributorsSection engagement={engagement} />}
+          {activeTab === 'community' && <CommunitySection contributions={contributions} goTab={goTab} />}
+          {activeTab === 'ai' && <AiSection data={aiUsage} error={aiError} reload={() => loadAdminData(true, true)} goTab={goTab} />}
+          {activeTab === 'analytics' && <AnalyticsSection stats={stats} analytics={analytics} engagement={engagement} aiUsage={aiUsage} />}
+          {activeTab === 'settings' && <SettingsPanel showToast={showToast} onExport={exportData} onSaved={() => loadAdminData(true)} />}
           {activeTab === 'users' && <UsersSection users={users} user={user} updateUserRole={updateUserRole} deleteUser={deleteUser} />}
           {activeTab === 'content' && <ContentRegistry activeContent={activeContent} setActiveContent={setActiveContent} forms={forms} setFormValue={setFormValue} saveContent={saveContent} deleteContent={deleteContent} editContent={editContent} resetContentForm={resetContentForm} editingContent={editingContent} currentItems={currentItems} stats={stats} />}
           {activeTab === 'news' && <NewsSection content={content} forms={forms} setFormValue={setFormValue} createNews={createNews} deleteNews={deleteNews} />}
@@ -1039,22 +1025,6 @@ function AdminSearchResults({ results, query, goTab }) {
   );
 }
 
-function RegistryNotice({ title, body, goTab, target = 'content', action = 'Open Content Registry' }) {
-  const ta = useAdminText();
-  return (
-    <section className="admin-chart-card">
-      <div className="admin-section-heading">
-        <h2>{ta(title)}</h2>
-        <span>{ta('Backend controlled')}</span>
-      </div>
-      <p>{ta(body)}</p>
-      <button type="button" className="admin-btn admin-btn-primary" onClick={() => goTab(target)}>
-        <SlidersHorizontal size={13} /> {ta(action)}
-      </button>
-    </section>
-  );
-}
-
 function EmptyAdminState({ title, body }) {
   const ta = useAdminText();
   return (
@@ -1065,57 +1035,47 @@ function EmptyAdminState({ title, body }) {
   );
 }
 
-function SystemHealth({ stats, loadError }) {
+function SystemHealth({ stats, aiUsage, loadError, goTab }) {
+  const ta = useAdminText();
+  const ai = aiUsage?.config;
+  const aiState = !ai ? ['', 'Checking...'] : !ai.configured ? ['red', 'Key missing'] : !ai.enabled ? ['gold', 'Switched off'] : ['green', 'Operational'];
   return (
     <div className="admin-chart-card admin-card-sm">
-      <div className="admin-section-title">System Health</div>
+      <div className="admin-section-title">{ta('System Health')}</div>
       <div className="admin-stat-row">
         <span>Admin API</span>
-        <strong className={loadError ? 'red' : 'green'}><i />{loadError ? 'Unreachable' : 'Operational'}</strong>
+        <strong className={loadError ? 'red' : 'green'}><i />{ta(loadError ? 'Unreachable' : 'Operational')}</strong>
       </div>
-      <div className="admin-stat-row"><span>Registered users</span><strong>{formatNumber(stats.users)}</strong></div>
-      <div className="admin-stat-row"><span>Verification rate</span><strong>{stats.verificationRate || 0}%</strong></div>
-      <div className="admin-stat-row"><span>Live content records</span><strong>{formatNumber(stats.contentTotal)}</strong></div>
-      <div className="admin-stat-row"><span>Pending moderation</span><strong className={stats.contributions ? 'red' : ''}>{formatNumber(stats.contributions)} items</strong></div>
-      <p className="admin-health-note">Storage, uptime, and AI model monitoring require a connected monitoring integration.</p>
+      <div className="admin-stat-row">
+        <span>{ta('AI assistant')}</span>
+        <strong className={aiState[0]}>{aiState[0] && <i />}{ta(aiState[1])}</strong>
+      </div>
+      <div className="admin-stat-row"><span>{ta('Verification rate')}</span><strong>{stats.verificationRate || 0}%</strong></div>
+      <div className="admin-stat-row"><span>{ta('Live content records')}</span><strong>{formatNumber(stats.contentTotal)}</strong></div>
+      <div className="admin-stat-row">
+        <span>{ta('Waiting for review')}</span>
+        <strong className={stats.pendingReview ? 'red' : ''}><button type="button" className="adm-link" onClick={() => goTab('review')}>{formatNumber(stats.pendingReview)} {ta('items')}</button></strong>
+      </div>
     </div>
   );
 }
 
 function RecentlyJoined({ users }) {
-  const recent = (users || []).slice(-3).reverse();
+  const ta = useAdminText();
+  const recent = [...(users || [])]
+    .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+    .slice(0, 4);
   return (
     <div className="admin-chart-card admin-card-sm">
-      <div className="admin-section-title">Recently Joined</div>
+      <div className="admin-section-title">{ta('Recently Joined')}</div>
       {recent.length ? recent.map((item) => (
         <div className="admin-person-row" key={item.id}>
           <span>{(item.name || item.email || 'U').split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase()}</span>
-          <div><strong>{item.name || item.email}</strong><small>{item.role || 'user'}</small></div>
-          <Badge tone={item.is_verified ? 'green' : 'gold'}>{item.is_verified ? 'Verified' : 'Unverified'}</Badge>
+          <div><strong>{item.name || item.email}</strong><small>{timeAgo(item.created_at) || item.role || 'user'}</small></div>
+          <Badge tone={item.is_verified ? 'green' : 'gold'}>{ta(item.is_verified ? 'Verified' : 'Unverified')}</Badge>
         </div>
       )) : <EmptyAdminState title="No users yet" body="Registered accounts will appear here as people sign up." />}
     </div>
-  );
-}
-
-function SettingsSection({ showToast }) {
-  const groups = [
-    ['Platform', [['Maintenance Mode', 'Take the platform offline for maintenance', false], ['User Registration', 'Allow new users to sign up', true], ['Google OAuth Login', 'Allow sign-in with Google', true], ['Apple OAuth Login', 'Allow sign-in with Apple', true], ['Content Comments', 'Allow community discussion on items', true]]],
-    ['AI Assistant', [['AI Assistant Enabled', 'Enable the cultural heritage AI chatbot', true], ['Sensitive Query Filter', 'Flag queries about genocide and conflict', true], ['AI Suggestions on Explore', 'Show AI-recommended content on Explore page', true], ['Query Logging', 'Log all AI queries for review', true]]],
-    ['Moderation', [['Auto-flag Threshold', 'Flag after 2+ community reports', true], ['Guardian Auto-Publish', 'Guardians bypass review queue', true], ['Email on New Flag', 'Notify admin by email when content is flagged', true]]],
-  ];
-  return (
-    <section className="admin-settings-grid">
-      {groups.map(([group, rows]) => (
-        <div className="admin-chart-card" key={group}><div className="admin-settings-title">{group}</div>{rows.map(([label, desc, on]) => <div className="admin-setting-row" key={label}><div><strong>{label}</strong><span>{desc}</span></div><Toggle defaultOn={on} /></div>)}</div>
-      ))}
-      <div className="admin-chart-card">
-        <div className="admin-settings-title">Danger Zone</div>
-        <div className="admin-setting-row"><div><strong>Clear Cache</strong><span>Flush cached content</span></div><button type="button" className="admin-btn admin-btn-ghost" onClick={() => showToast('Cache cleared')}><RefreshCw size={13} /> Clear Now</button></div>
-        <div className="admin-setting-row"><div><strong>Export All Data</strong><span>Download platform backup</span></div><button type="button" className="admin-btn admin-btn-ghost" onClick={() => showToast('Export queued')}><Download size={13} /> Export</button></div>
-        <div className="admin-setting-row"><div><strong className="danger">Reset Platform</strong><span>Wipe all content and users - irreversible</span></div><button className="admin-btn admin-danger" onClick={() => showToast('Confirmation required - action blocked')}><AlertTriangle size={13} /> Reset</button></div>
-      </div>
-    </section>
   );
 }
 
@@ -1123,28 +1083,32 @@ function UsersSection({ users, user, updateUserRole, deleteUser }) {
   const ta = useAdminText();
   const [confirming, setConfirming] = useState(null);
   return (
-    <TableCard
-      title={ta('User Registry and Role Controls')}
-      headers={[ta('User'), ta('Email'), ta('Role'), ta('Status'), ta('Action')]}
+    <LiveTable
+      title="User Registry and Role Controls"
+      aside={`${formatNumber(users.length)} ${ta('accounts')}`}
       rows={users}
-      renderRow={(item) => (
-        <tr key={item.id}>
-          <td><div className="admin-td-main">{item.name}</div></td>
-          <td>{item.email}</td>
-          <td><select value={item.role || 'user'} onChange={(e) => updateUserRole(item.id, e.target.value)}><option value="user">User</option><option value="government">Government</option><option value="admin">Admin</option></select></td>
-          <td><Badge tone={item.is_verified ? 'green' : 'gold'}>{item.is_verified ? 'Verified' : 'Unverified'}</Badge></td>
-          <td>
-            {confirming === item.id ? (
-              <span className="admin-inline-confirm">
-                <button type="button" className="admin-danger" onClick={() => { deleteUser(item.id); setConfirming(null); }} disabled={item.id === user?.id}>{ta('Delete')}</button>
-                <button type="button" className="admin-btn admin-btn-ghost" onClick={() => setConfirming(null)}>{ta('Cancel')}</button>
-              </span>
-            ) : (
-              <button type="button" className="admin-danger" onClick={() => setConfirming(item.id)} disabled={item.id === user?.id}>{ta('Delete')}</button>
-            )}
-          </td>
-        </tr>
-      )}
+      searchKeys={['name', 'email', 'role', 'explorer_type']}
+      searchPlaceholder="Search name, email or role"
+      columns={[
+        { label: 'User', render: (item) => <><div className="adm-strong">{item.name || '-'}</div><div className="adm-sub">{item.email}</div></> },
+        { label: 'Role', render: (item) => <select className="adm-select" value={item.role || 'user'} onChange={(e) => updateUserRole(item.id, e.target.value)} aria-label={ta('Role')}><option value="user">User</option><option value="government">Government</option><option value="admin">Admin</option></select> },
+        { label: 'Progress', render: (item) => <><div className="adm-strong">{formatNumber(item.xp)} XP</div><div className="adm-sub">{ta('Level')} {item.level || 1} · {item.current_streak || 0}{ta('-day streak')}</div></> },
+        { label: 'Activity', render: (item) => <span className="adm-nowrap">{formatNumber(item.views)} {ta('views')} · {formatNumber(item.saves)} {ta('saved')} · {formatNumber(item.ai_queries)} AI</span> },
+        { label: 'Last seen', render: (item) => <span className="adm-nowrap">{item.last_login_date ? new Date(item.last_login_date).toLocaleDateString() : ta('Never')}</span> },
+        { label: 'Joined', render: (item) => <span className="adm-nowrap">{item.created_at ? new Date(item.created_at).toLocaleDateString() : '-'}</span> },
+        { label: 'Status', render: (item) => <Badge tone={item.is_verified ? 'green' : 'gold'}>{ta(item.is_verified ? 'Verified' : 'Unverified')}</Badge> },
+        {
+          label: 'Action',
+          render: (item) => (confirming === item.id ? (
+            <span className="admin-inline-confirm">
+              <button type="button" className="admin-danger" onClick={() => { deleteUser(item.id); setConfirming(null); }} disabled={item.id === user?.id}>{ta('Delete')}</button>
+              <button type="button" className="admin-btn admin-btn-ghost" onClick={() => setConfirming(null)}>{ta('Cancel')}</button>
+            </span>
+          ) : (
+            <button type="button" className="admin-danger" onClick={() => setConfirming(item.id)} disabled={item.id === user?.id}>{ta('Delete')}</button>
+          )),
+        },
+      ]}
     />
   );
 }

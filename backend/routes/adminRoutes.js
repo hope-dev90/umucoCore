@@ -8,6 +8,8 @@ import {
   deleteNews,
   deleteProverb,
   getAdminContent,
+  getAdminContributions,
+  getAdminEngagement,
   getAdminOverview,
   getAdminUsers,
   getReviewQueue,
@@ -19,6 +21,7 @@ import {
   updateNews,
   updateProverb,
 } from "../controller/adminController.js";
+import { getAiUsage, getSettings, updateSettings } from "../controller/aiController.js";
 import { adminOnly, authMiddleware } from "../middleware/authMiddleWare.js";
 
 const router = Router();
@@ -31,6 +34,11 @@ router.get("/users", getAdminUsers);
 router.patch("/users/:id", updateAdminUser);
 router.delete("/users/:id", deleteAdminUser);
 router.get("/content", getAdminContent);
+router.get("/engagement", getAdminEngagement);
+router.get("/contributions", getAdminContributions);
+router.get("/ai-usage", getAiUsage);
+router.get("/settings", getSettings);
+router.put("/settings", updateSettings);
 
 // Review queue
 router.get("/review-queue", getReviewQueue);

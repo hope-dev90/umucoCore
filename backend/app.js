@@ -21,6 +21,7 @@ import exerciseRouter from "./routes/exerciseRoutes.js";
 import locationsRouter from "./routes/locationsRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
 import newsRouter from "./routes/newsRoutes.js";
+import aiRouter from "./routes/aiRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -96,6 +97,7 @@ app.use("/api/news", newsRouter);
 app.use("/api/gamification", gamificationRouter);
 app.use("/api/search", searchRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/ai", aiRouter);
 app.use("/api", searchRouter); // For /api/dashboard
 
 // Health check

@@ -63,6 +63,8 @@ const ensureAuthSchema = async (client) => {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS best_streak INTEGER DEFAULT 0;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS total_days INTEGER DEFAULT 0;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_date DATE;
+    -- Used by getAllUsers(); previously only added by config/migration.sql
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS is_anonymous BOOLEAN DEFAULT false;
 
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_users_google_id ON users(google_id);

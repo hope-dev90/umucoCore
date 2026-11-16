@@ -535,36 +535,7 @@
   background: #F4F0EA;
 }
 
-.admin-layout .sidebar {
-  background: #1E120D;
-}
-
-.admin-layout .sidebar-logo-text span:first-child {
-  color: #FDFBF7;
-}
-
-.admin-layout .sidebar-logo-text span:last-child,
-.admin-layout .sidebar-section-label {
-  color: rgba(252, 223, 211, 0.55);
-}
-
-.admin-layout .sidebar-collapse {
-  color: rgba(253, 251, 247, 0.6);
-}
-
-.admin-layout .sidebar-link {
-  color: rgba(253, 251, 247, 0.7);
-}
-
-.admin-layout .sidebar-link:hover {
-  background: rgba(141, 73, 58, 0.25);
-  color: #FDFBF7;
-}
-
-.admin-layout .sidebar-link.active {
-  background: #8D493A;
-  color: #FDFBF7;
-}
+/* The admin sidebar uses the same light card as the user app. */
 
 .admin-topbar-title {
   color: var(--text-primary);
