@@ -131,7 +131,7 @@ function Hero({ onNavigate }) {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center relative z-10">
           <div className="col-span-1 lg:col-span-6 flex flex-col items-start text-left px-2 sm:px-6">
             <h1
-              className="hero-rise font-poppins text-[2.1rem] sm:text-5xl lg:text-[3.6rem] font-extrabold tracking-tight text-[#2C1A14] leading-[1.12] mb-5 sm:mb-7"
+              className="hero-rise font-sans text-[2.1rem] sm:text-5xl lg:text-[3.6rem] font-extrabold tracking-tight text-[#2C1A14] leading-[1.12] mb-5 sm:mb-7"
               style={{ '--i': 1 }}
             >
               {t('hero.title1')} <br className="hidden sm:inline" />
