@@ -283,7 +283,7 @@
   flex-direction: column;
   align-items: flex-start;
   color: #fff;
-  background: linear-gradient(160deg, #5C3427 0%, #3E2219 100%);
+  background: var(--brand-gradient);
 }
 
 .dash-compass-bars {
@@ -427,8 +427,8 @@
   color: var(--text-primary);
 }
 
-.dash-action-icon--pink { background: #F6A9E8; }
-.dash-action-icon--green { background: #A9EFB8; }
+.dash-action-icon--pink,
+.dash-action-icon--green { background: var(--choco-mint-bg); color: var(--choco-mint-ink); }
 
 /* Right rail */
 .dash-rail { min-width: 0; }

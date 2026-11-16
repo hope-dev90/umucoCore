@@ -26,4 +26,4 @@ export default defineConfig(({ mode }) => {
       'API': JSON.stringify(API_BASE),
     },
   }
-})
+});
