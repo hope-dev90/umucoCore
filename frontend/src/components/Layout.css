@@ -108,7 +108,7 @@
 }
 
 .sidebar-link.active {
-  background: var(--primary-dark);
+  background: var(--primary);
   color: #fff;
 }
 
@@ -191,7 +191,7 @@
   width: 100%;
   min-height: 34px;
   border-radius: 6px;
-  background: var(--primary-dark);
+  background: var(--primary);
   color: #fff;
   font-size: 13px;
   font-weight: 500;
@@ -249,8 +249,12 @@
   gap: 16px;
   padding: 0 20px;
   margin-bottom: var(--layout-gap);
-  position: relative;
+  /* Stays at the top while the page scrolls underneath. The cream shadow
+     fills the gap above it so content never peeks through. */
+  position: sticky;
+  top: var(--layout-gap);
   z-index: 90;
+  box-shadow: 0 calc(var(--layout-gap) * -1) 0 var(--layout-gap) var(--bg-main), 0 6px 18px -14px rgba(44, 26, 20, 0.35);
 }
 
 .topbar-search {
@@ -532,7 +536,17 @@
 /* ── ADMIN SHELL ── */
 .admin-layout {
   --sidebar-width: 244px;
+  /* The admin portal keeps its original deeper brown. */
+  --primary: #5B2A1E;
+  --primary-dark: #3D1E15;
+  --primary-soft: #F8E1D8;
+  --brand-gradient: linear-gradient(150deg, #9A5442 0%, #6E3427 55%, #4E2219 100%);
   background: #F4F0EA;
+}
+
+.admin-layout .sidebar-link.active,
+.admin-layout .sidebar-download-btn {
+  background: var(--primary-dark);
 }
 
 /* The admin sidebar uses the same light card as the user app. */
