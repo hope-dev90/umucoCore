@@ -323,8 +323,8 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #F6A9E8;
-  color: var(--text-primary);
+  background: var(--choco-mint-bg);
+  color: var(--choco-mint-ink);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -332,6 +332,10 @@
 }
 
 .contribute-ds .contribute-actions-label { margin: 4px 2px -4px; }
+
+/* Contribute: no pink. Warm cream glow and a chocolate-mint pill. */
+.contribute-ds .ds-hero-glow { background: radial-gradient(closest-side, rgba(220, 238, 227, 0.75), transparent); }
+.contribute-ds .ds-hero .ds-pill { background: var(--choco-mint-bg); color: var(--choco-mint-ink); }
 
 .ds-empty {
   padding: 28px;

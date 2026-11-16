@@ -241,7 +241,7 @@
 /* Playback panel */
 .lsn-panel {
   position: sticky;
-  top: var(--layout-gap);
+  top: calc(var(--topbar-height) + var(--layout-gap) * 2);
   background: #fff;
   border-radius: var(--radius-card);
   padding: 14px;

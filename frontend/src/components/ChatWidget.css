@@ -17,7 +17,7 @@
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: #6B4226;
+  background: #8D493A;
   color: #F5EBE0;
   border: none;
   display: flex;
@@ -65,7 +65,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 16px;
-  background: #6B4226;
+  background: #8D493A;
   color: #F5EBE0;
 }
 
@@ -139,7 +139,7 @@
 
 .chat-bubble--user {
   align-self: flex-end;
-  background: #6B4226;
+  background: #8D493A;
   color: #F5EBE0;
   border-bottom-right-radius: 4px;
 }
@@ -212,13 +212,13 @@
 
 .chat-input::placeholder { color: #8A7B73; }
 
-.chat-input:focus { border-color: #6B4226; }
+.chat-input:focus { border-color: #8D493A; }
 
 .chat-send-btn {
   width: 38px;
   height: 38px;
   border-radius: 10px;
-  background: #6B4226;
+  background: #8D493A;
   color: #F5EBE0;
   border: none;
   display: flex;

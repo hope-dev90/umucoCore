@@ -7,7 +7,7 @@ import spotlightImg from '../assets/international/nyanza.jpg';
 import harvestImg from '../assets/international/umuganura.jpg';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getLocalizedText } from '../utils/i18n';
-import { CalendarDays, Filter, Flag, Leaf, ListFilter, Search } from 'lucide-react';
+import { CalendarDays, ChevronLeft, ChevronRight, Filter, Flag, Leaf, ListFilter, Search } from 'lucide-react';
 
 const IMG = {
   theme: themeImg,
@@ -215,6 +215,33 @@ const TYPE_META = {
   faith: { labelKey: 'national.filterFaith', icon: CalendarDays },
 };
 
+// Weekday headers, Monday first.
+const WEEKDAYS = {
+  en: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  fr: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+  rw: ['Mbe', 'Kab', 'Gat', 'Kan', 'Gtn', 'Gtd', 'Cyu'],
+};
+
+const CALENDAR_YEAR = 2026;
+const pad2 = (n) => String(n).padStart(2, '0');
+
+// The 6x7 grid of dates shown for a month, including the trailing/leading days of the
+// neighbouring months so every row is full.
+function monthGrid(year, month) {
+  const first = new Date(year, month, 1);
+  const offset = (first.getDay() + 6) % 7; // Monday = 0
+  const start = new Date(year, month, 1 - offset);
+  return Array.from({ length: 42 }, (_, i) => {
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    return {
+      iso: `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`,
+      day: d.getDate(),
+      inMonth: d.getMonth() === month,
+      weekend: i % 7 >= 5,
+    };
+  });
+}
+
 const formatDay = (iso) => new Date(`${iso}T12:00:00`).getDate();
 const getMonthIndex = (iso) => new Date(`${iso}T12:00:00`).getMonth();
 const monthLabel = (index, language, length = 'long') => (MONTH_LABELS[language] || MONTH_LABELS.en)[length][index];
@@ -249,6 +276,23 @@ export default function Intldays() {
   const todayIso = new Date().toISOString().slice(0, 10);
   const todayEvent = NATIONAL_EVENTS_2026.find((e) => e.date === todayIso);
   const nextEvent = todayEvent || NATIONAL_EVENTS_2026.find((e) => e.date > todayIso) || NATIONAL_EVENTS_2026[0];
+
+  const localTodayIso = (() => { const d = new Date(); return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; })();
+  const eventsByDate = useMemo(() => {
+    const map = {};
+    filteredEvents.forEach((event) => { (map[event.date] ||= []).push(event); });
+    return map;
+  }, [filteredEvents]);
+  const gridDays = useMemo(() => monthGrid(CALENDAR_YEAR, activeMonth), [activeMonth]);
+  const weekdays = WEEKDAYS[language] || WEEKDAYS.en;
+  const usedTypes = [...new Set(filteredEvents.map((e) => e.type))];
+
+  const pickDay = (cell) => {
+    const dayEvents = eventsByDate[cell.iso];
+    if (!dayEvents?.length) return;
+    if (!cell.inMonth) setActiveMonth(getMonthIndex(cell.iso));
+    setSelectedKey(eventKey(dayEvents[0]));
+  };
 
   const monthCounts = MONTHS.map((_, index) => filteredEvents.filter((event) => getMonthIndex(event.date) === index).length);
 
@@ -307,6 +351,66 @@ export default function Intldays() {
                 <small>{monthCounts[index]}</small>
               </button>
             ))}
+          </div>
+
+          <div className="nd-cal">
+            <div className="nd-cal-head">
+              <button type="button" className="nd-cal-nav" onClick={() => selectMonth(activeMonth - 1)} disabled={activeMonth === 0} aria-label={activeMonth > 0 ? monthLabel(activeMonth - 1, language) : undefined}>
+                <ChevronLeft size={16} />
+              </button>
+              <h3>{monthLabel(activeMonth, language)} {CALENDAR_YEAR}</h3>
+              <button type="button" className="nd-cal-nav" onClick={() => selectMonth(activeMonth + 1)} disabled={activeMonth === 11} aria-label={activeMonth < 11 ? monthLabel(activeMonth + 1, language) : undefined}>
+                <ChevronRight size={16} />
+              </button>
+            </div>
+            <div className="nd-cal-grid" role="grid" aria-label={`${monthLabel(activeMonth, language)} ${CALENDAR_YEAR}`}>
+              {weekdays.map((w, i) => (
+                <div key={w} className={`nd-cal-weekday ${i >= 5 ? 'is-weekend' : ''}`} role="columnheader">{w}</div>
+              ))}
+              {gridDays.map((cell) => {
+                const dayEvents = eventsByDate[cell.iso] || [];
+                const main = dayEvents[0];
+                const isSelected = selectedEvent && dayEvents.some((e) => eventKey(e) === eventKey(selectedEvent));
+                const classes = [
+                  'nd-cal-day',
+                  cell.inMonth ? '' : 'is-outside',
+                  cell.weekend ? 'is-weekend' : '',
+                  main ? `has-event type-${main.type}` : '',
+                  cell.iso === localTodayIso ? 'is-today' : '',
+                  isSelected ? 'is-selected' : '',
+                ].filter(Boolean).join(' ');
+                const titles = dayEvents.map((e) => getLocalizedText(e.title, language)).join(' · ');
+                return (
+                  <button
+                    key={cell.iso}
+                    type="button"
+                    role="gridcell"
+                    className={classes}
+                    onClick={() => pickDay(cell)}
+                    disabled={!main}
+                    title={titles || undefined}
+                    aria-label={titles ? `${cell.day} ${monthLabel(getMonthIndex(cell.iso), language)}: ${titles}` : undefined}
+                    aria-selected={isSelected || undefined}
+                  >
+                    <span className="nd-cal-num">{cell.day}</span>
+                    {main && (
+                      <span className="nd-cal-tag">
+                        {getLocalizedText(main.title, language)}
+                        {dayEvents.length > 1 ? ` +${dayEvents.length - 1}` : ''}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="nd-cal-legend">
+              {usedTypes.map((type) => (
+                <span key={type} className={`nd-cal-legend-item type-${type}`}>
+                  <i aria-hidden="true" /> {t(TYPE_META[type]?.labelKey || 'national.filterAll')}
+                </span>
+              ))}
+              <span className="nd-cal-legend-item is-today-key"><i aria-hidden="true" /> {t('national.today')}</span>
+            </div>
           </div>
         </section>
 

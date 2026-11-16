@@ -1,6 +1,11 @@
 /* Explore page — Doomshield layout */
 .explore-hero { padding-bottom: 22px; }
 
+/* Let the filter dropdowns open past the hero card's edge. */
+.explore-hero.ds-hero { overflow: visible; }
+.explore-hero .ds-diamonds { border-radius: 0 var(--radius-card) var(--radius-card) 0; overflow: hidden; }
+.explore-hero .explore-filters { z-index: 5; }
+
 .explore-hero h1 { font-size: 30px; }
 
 .explore-filters {
@@ -10,36 +15,6 @@
   gap: 8px;
   margin-top: 18px;
 }
-
-.explore-select {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 30px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: var(--bg-main);
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.explore-select select {
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  border: 0;
-  outline: none;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  padding-right: 2px;
-  max-width: 170px;
-}
-
-.explore-select:focus-within { box-shadow: 0 0 0 2px var(--primary-soft); }
 
 .explore-reset {
   background: none;
@@ -219,5 +194,4 @@
 
 @media (max-width: 640px) {
   .explore-rail { grid-auto-columns: 82%; }
-  .explore-select select { max-width: 120px; }
 }

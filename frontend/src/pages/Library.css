@@ -76,7 +76,7 @@
 /* Preview */
 .lib-preview {
   position: sticky;
-  top: var(--layout-gap);
+  top: calc(var(--topbar-height) + var(--layout-gap) * 2);
   display: flex;
   flex-direction: column;
   gap: 10px;
