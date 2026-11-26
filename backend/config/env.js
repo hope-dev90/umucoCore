@@ -6,6 +6,7 @@ const requiredEnvVars = [
   'PORT',
   'JWT_SECRET',
 ];
+// DB_HOST + DB_PASSWORD are required unless DATABASE_URL is set — checked below after dotenv loads.
 
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
@@ -35,12 +36,16 @@ if (process.env.DATABASE_URL) {
     password: url.password,
   };
   } else {
+    if (!process.env.DB_HOST || !process.env.DB_PASSWORD) {
+      console.error('Missing required DB environment variables: DB_HOST and DB_PASSWORD must be set when DATABASE_URL is not provided.');
+      process.exit(1);
+    }
     dbConfig = {
-      host: process.env.DB_HOST || 'db.bkecbauzqmmpuflqgxej.supabase.co',
+      host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT, 10) || 5432,
       database: process.env.DB_NAME || 'postgres',
       user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'h1o2p3e4%402010',
+      password: process.env.DB_PASSWORD,
     };
   }
 

@@ -5,6 +5,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import ContributionsModel from '../models/contributionModel.js';
 import { sendEmail } from '../utils/email.js';
+import { authMiddleware, adminOnly } from '../middleware/authMiddleWare.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -94,7 +95,7 @@ const saveContribution = async (req, res, type) => {
 };
 
 // ─── GET /api/contributions ──────────────────────────────────────────────────
-router.get('/', async (req, res) => {
+router.get('/', authMiddleware, adminOnly, async (req, res) => {
   try {
     const items = await ContributionsModel.getAll();
     const stats = await ContributionsModel.getStats();
@@ -105,7 +106,7 @@ router.get('/', async (req, res) => {
 });
 
 // ─── GET /api/contributions/my-stats ─────────────────────────────────────────
-router.get('/my-stats', async (req, res) => {
+router.get('/my-stats', authMiddleware, async (req, res) => {
   try {
     const stats = await ContributionsModel.getStats();
     res.json({
@@ -121,16 +122,16 @@ router.get('/my-stats', async (req, res) => {
 });
 
 // ─── POST /api/contributions/upload-audio ────────────────────────────────────
-router.post('/upload-audio', upload.single('file'), (req, res) => saveContribution(req, res, 'audio'));
+router.post('/upload-audio', authMiddleware, upload.single('file'), (req, res) => saveContribution(req, res, 'audio'));
 
 // ─── POST /api/contributions/upload-video ────────────────────────────────────
-router.post('/upload-video', upload.single('file'), (req, res) => saveContribution(req, res, 'video'));
+router.post('/upload-video', authMiddleware, upload.single('file'), (req, res) => saveContribution(req, res, 'video'));
 
 // ─── POST /api/contributions/capture-photo ────────────────────────────────────
-router.post('/capture-photo', upload.single('file'), (req, res) => saveContribution(req, res, 'photo'));
+router.post('/capture-photo', authMiddleware, upload.single('file'), (req, res) => saveContribution(req, res, 'photo'));
 
 // ─── POST /api/contributions/oral-history ────────────────────────────────────
-router.post('/oral-history', upload.single('file'), (req, res) => saveContribution(req, res, 'oral_history'));
+router.post('/oral-history', authMiddleware, upload.single('file'), (req, res) => saveContribution(req, res, 'oral_history'));
 
 // ─── POST /api/contributions/subscribe ───────────────────────────────────────
 router.post('/subscribe', async (req, res) => {
@@ -301,7 +302,7 @@ router.post('/report', async (req, res) => {
 });
 
 // ─── DELETE /api/contributions/:id ───────────────────────────────────────────
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const contribution = await ContributionsModel.getById(req.params.id);
     if (!contribution) {
